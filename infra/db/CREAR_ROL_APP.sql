@@ -1,0 +1,12 @@
+-- PLANTILLA PARA ADMINISTRADOR DE BASE DE DATOS, NO PARA EJECUCION AUTOMATICA.
+-- Sustituye los marcadores por valores secretos de cada ambiente.
+-- Es recomendable crear este rol DESPUES de aplicar las migraciones como postgres/migrator.
+-- El password nunca debe confirmarse en un commit de Git.
+-- CREATE ROLE atlas_app LOGIN PASSWORD '<SECRETO_ALEATORIO>'';
+-- GRANT CONNECT ON DATABASE postgres TO atlas_app;
+-- GRANT USAGE ON SCHEMA public TO atlas_app;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO atlas_app;
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO atlas_app;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO atlas_app;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT USAGE,SELECT ON SEQUENCES TO atlas_app;
+-- NOTA: ajustar nombre de la base de datos / roles migradores al proyecto real.

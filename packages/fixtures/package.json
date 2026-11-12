@@ -1,0 +1,13 @@
+{
+  "name": "@atlas/fixtures",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/demo.ts"
+  },
+  "types": "./src/demo.ts",
+  "dependencies": {
+    "@atlas/contracts": "*"
+  }
+}

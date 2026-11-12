@@ -1,0 +1,38 @@
+name: ATLAS CI
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_ci_only
+          POSTGRES_DB: atlas_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      NODE_ENV: test
+      AUTH_MODE: demo
+      DATABASE_URL: postgresql://atlas:atlas_ci_only@127.0.0.1:5432/atlas_ci
+      DB_SSL: 'false'
+      ATLAS_ALLOW_DB_TESTS: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm install --no-audit
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run db:migrate
+      - run: npm run test:integration
+      - run: npm run build

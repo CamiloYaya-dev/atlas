@@ -1,114 +1,77 @@
-# ATLAS V3 — SaaS base
+# ATLAS V4.2.1 — Desarrollo con npm (sin archivos BAT)
 
-ATLAS conecta arquitectura **C4**, diagramas de procesos, secuencias, datos y trazabilidad entre requerimientos, APIs, componentes y casos de uso.
+Frontend React/Vite, API Fastify, PostgreSQL 16 en Docker local, acceso cerrado, control de roles y permisos granulares.
 
-Esta entrega es **código fuente V3**, con **modo demo local** automático y **modo Supabase real** cuando se configura el proyecto. No es un servicio desplegado ni una integración con Jira/Azure DevOps.
+## Requisitos
 
-## Funcionalidades
+- Node.js 22+ y npm.
+- Docker Desktop encendido.
+- Puertos `5173`, `3001`, `5432` disponibles (y `5433` para pruebas integrales).
+- Trabajar desde una terminal PowerShell, Windows Terminal o VS Code abierta **en la raíz del monorepo**.
 
-- React 19 + TypeScript + Vite + React Flow.
-- Navegación entre diagramas C1/C2/C3/C4, procesos, secuencia, datos, trazabilidad y vistas nuevas.
-- Editor: crear diagramas, crear y reutilizar elementos, conectar cajas, arrastrar, quitar y renombrar relaciones.
-- Perspectivas funcional, mixta y técnica; filtro de procesos y dependencias.
-- Catálogo compartido de elementos; doble clic para profundizar, y selección para inspeccionar relaciones.
-- Ficha por elemento: resumen, descripción, implementación técnica, autor, responsable, estado, fechas y links (Jira, DevOps, diagramas externos, etc.).
-- Campos personalizados específicos por tipo de elemento.
-- Varias organizaciones (`workspaces`), proyectos y roles `owner/admin/editor/viewer`.
-- Login/registro por Supabase Auth, aislamiento de proyectos por RLS.
-- Guardado automático del documento con **versionado optimista por proyecto**, exportación e importación JSON.
-- Invitaciones con enlace de un solo uso, válidas por siete días, cuando hay Supabase.
+## Primera ejecución (Windows)
 
-## A. Probar en modo DEMO (sin claves)
-
-1. Instala Node.js 22 o superior.
-2. Abre terminal en la carpeta del proyecto.
-3. Ejecuta:
-
-```bash
+```powershell
 npm install
-npm run dev
+npm run dev:all
 ```
 
-4. Abre `http://localhost:5173`. Sin variables de entorno, la app entra en **Demo local**.
-5. La cuenta de muestra **no es un usuario autenticado**: toda la información está en `localStorage`, por dispositivo y navegador.
-6. Para compartir o respaldar los diagramas de la demo, usa **Exportar JSON**.
+`dev:all` crea los `.env` que falten, inicia PostgreSQL, ejecuta migraciones y seeds, solicita el administrador inicial si no existe, ejecuta `typecheck` y arranca WEB + API. La contraseña del administrador se ingresa en la terminal con caracteres ocultos. No hay usuario predeterminado ni registro público.
 
-La carpeta adicional `ATLAS_V3_Demo_Local.html` (fuera de este proyecto ZIP) permite explorar el flujo visual anterior de V2 con dos espacios locales; no sustituye la aplicación React V3 ni autentica usuarios reales.
+- App: http://localhost:5173
+- API: http://localhost:3001/api/v1
+- Salud: http://localhost:3001/api/v1/health
+- Preparación: http://localhost:3001/api/v1/ready
 
-## B. Activar cuentas reales y nube con Supabase
+## Uso cotidiano y depuración
 
-1. Crea un proyecto en https://supabase.com/ .
-2. En **SQL Editor**, ejecuta el contenido de `supabase/001_atlas.sql` una sola vez.
-3. En **Authentication → Providers**, habilita correo y contraseña. Configura la URL del sitio y confirmación de emails según el entorno.
-4. Copia `.env.example` a `.env.local` y completa:
-
-```env
-VITE_SUPABASE_URL=https://TU-PROYECTO.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
+```powershell
+npm run dev:all       # Todo en un comando; incluye preparación y typecheck
+npm run dev           # Solo frontend + backend (BD ya inicializada)
+npm run dev:web       # Solo web; error visible en terminal del frontend
+npm run dev:api       # Solo API; error visible en terminal del backend
+npm run db:up         # Levanta solo PostgreSQL
+npm run db:status     # Estado de BD
+npm run db:logs       # Logs de PostgreSQL
+npm run db:stop       # Detiene BD SIN borrar datos
+npm run db:migrate    # Migraciones (no ejecuta seeds)
+npm run db:seed       # Datos de prueba, sin eliminar los existentes
+npm run admin:status  # Verifica si hay administrador
+npm run admin:setup   # Solo crea el primer administrador
+npm run typecheck     # Errores TypeScript
+npm run test:policy   # Pruebas de política de permisos
+npm run test          # Pruebas del backend
+npm run check         # Tipos + políticas + pruebas + build
+npm run db:test       # Base QA local aislada (5433) + tests de integración
+npm run smoke         # Comprueba health/ready/frontend con servicios arriba
+npm run db:backup     # Copia local PostgreSQL (backups/)
 ```
 
-5. Reinicia `npm run dev`, crea cuenta y verifica el correo si está activada la confirmación.
-6. Crea un espacio, un proyecto, un diagrama y prueba el guardado.
-7. Para invitar a otra cuenta, entra como Propietario o Administrador, haz clic en **Invitar** y comparte el enlace.
+### Flujo recomendado para diagnosticar un error
 
-**Seguridad:** introduce solo la clave pública/publishable en `VITE_`. **Nunca** pongas la clave `service_role` o secret en variables `VITE_` ni en el código fuente. La seguridad de los datos depende de las políticas SQL, no de ocultar acciones en el frontend.
+1. Si el error es de compilación, ejecuta `npm run typecheck`.
+2. Si es un HTTP 500, ejecuta `npm run dev:api` y revisa la traza.
+3. Si es del lienzo / React, ejecuta `npm run dev:web`, abre F12 y revisa consola y Network.
+4. Si la API no conecta a la BD, ejecuta `npm run db:status`, `npm run db:logs`, `npm run smoke`.
+5. Si sospechas una ruptura de permisos, ejecuta `npm run test:policy` y `npm run db:test`.
 
-## C. Publicar en Cloudflare Pages
+En Windows, usa `Ctrl+C` para detener Vite y Fastify. PostgreSQL permanece en Docker hasta ejecutar `npm run db:stop`. **No ejecutes `docker compose down -v`**: destruiría el volumen de datos.
 
-1. Sube el código a un repositorio GitHub o GitLab privado.
-2. En Cloudflare, crea un proyecto Pages e importa el repositorio.
-3. Configura `Build command` = `npm run build`, `Output directory` = `dist`.
-4. Añade las dos variables `VITE_SUPABASE_*` en la configuración de producción y de Preview si corresponde.
-5. Publica y registra la URL pública dentro de **Supabase → Authentication → URL Configuration**, junto con las URLs de retorno autorizadas.
-6. Crea entornos de Supabase separados para desarrollo y producción antes de publicar con datos reales.
+## Orden y capas
 
-La interfaz está diseñada como SPA estática. Para el despliegue cloud no necesitas mantener un servidor Node.js funcionando permanentemente: Node se utiliza para compilar el frontend.
+- `apps/web`: interfaz y editor con React Flow.
+- `apps/api`: controladores/rutas, aplicación/casos de uso, dominio y persistencia con `pg`.
+- `packages/contracts`: contratos TS entre frontend y backend.
+- `packages/fixtures`: datos ficticios.
+- `apps/api/migrations`: migraciones SQL numeradas.
+- `scripts/`: solo utilidades Node, invocadas desde `package.json`.
 
-## Estructura
+## Ambientes y producción
 
-```
-src/
-  App.tsx           Interfaz y editor React Flow
-  demo.ts           Datos ficticios y diagramas iniciales
-  lib.ts            Cliente Supabase y adaptador local
-  types.ts          Modelo de elementos, diagramas y campos
-  styles.css        Estilos
-  main.tsx          Punto de entrada
-supabase/
-  001_atlas.sql     Workspaces, miembros, proyectos, documentos, RLS e invitaciones
-.github/workflows/
-  build.yml         Verificación de compilación en GitHub Actions
-```
+Docker PostgreSQL es **solo para desarrollo**. Mantener Web/API/BD separados por ambiente y sin compartir instancias entre DEV y PROD. No exponer PostgreSQL públicamente. Para el despliegue usa las guías existentes en `docs/`, con secretos configurados fuera de Git.
 
-## Modelo de persistencia
+## Seguridad y limitaciones
 
-Los elementos están almacenados **una sola vez por proyecto** en el campo `document.elements`. Cada diagrama tiene su propia lista de nodos, posiciones y conexiones y apunta a esos mismos elementos mediante `elementId`. Un elemento puede aparecer en varios diagramas sin duplicar su ficha.
+El modo `AUTH_MODE=local` permite crear el admin inicial por CLI y luego iniciar sesión. No ejecutar bootstrap en producción sin un proceso formal de aprovisionamiento. `db:seed` es solo para desarrollo. Las capacidades, permisos y autenticación mantienen la implementación de ATLAS V4.2; esta actualización cambia exclusivamente la experiencia de ejecución y mantenimiento.
 
-El documento completo se guarda como `JSONB` en `project_documents`, con `version` monotónica. La función `atlas_save_document` realiza un `UPDATE ... WHERE version = expected` y rechaza una escritura desactualizada con `ATLAS_VERSION_CONFLICT`.
-
-Para simplificar V3 se guarda el documento entero; esto funciona bien para proyectos pequeños y medianos. **Para colaboración simultánea a gran escala**, convendrá evolucionar hacia cambios parciales/CRDT, audit log y límites de tamaño.
-
-## Límites actuales y siguientes hitos
-
-- **Sin pagos ni cuotas comerciales**, no hay aún Stripe/Paddle/Mercado Pago.
-- **Sin colaboración en vivo**; el conflicto de versión se detecta y evita una sobrescritura, pero no ofrece fusión automática.
-- **Sin edición BPMN/UML formal**; las vistas de procesos y secuencias son nodos/relaciones conceptuales. Para conformidad BPMN 2.0 incorporar `bpmn-js`.
-- **Sin sincronización automática Jira/Azure DevOps**, por ahora links configurables.
-- Sin permisos por diagrama individual: los roles rigen a nivel de espacio de trabajo.
-- No incluye adjuntos binarios; se gestionan enlaces externos y JSON.
-- Las fechas/autor se pueden editar como metadatos; para auditoría legal real se requiere un registro inmutable del backend.
-- No se han implementado límites de tarifas, protección contra abuso por volumen, rate limits, observabilidad, backups operativos ni pruebas E2E en despliegue real.
-- El frontend y la lógica se han preparado para funcionar con Supabase, pero **las rutas de autenticación y SQL deben probarse en tu instancia real** después de configurarla.
-
-## Checklist antes de abrir registro público
-
-- [ ] Ejecutar migraciones SQL en staging, probar RLS con dos usuarios de espacios distintos.
-- [ ] Revisar privilegios, funciones SECURITY DEFINER, tokens de invitación y expiración.
-- [ ] Habilitar SMTP transaccional con rate limits, verificación de email, protección anti-bots y alertas.
-- [ ] Establecer backups, retención, política de privacidad, términos y límites de uso.
-- [ ] Hacer pruebas de carga, monitoreo, presupuestos y cuotas desde backend.
-- [ ] Ensayar registros, accesos, concurrencia y restauración de datos.
-
-## Licencias y atribuciones
-
-React Flow / `@xyflow/react` se distribuye bajo MIT; la aplicación conserva la atribución de React Flow en el lienzo. Revisa las licencias de dependencias antes de distribuir comercialmente.
+No se ha ejecutado aquí un arranque completo con Docker y las dependencias npm. Los comandos están verificados a nivel de JSON y sintaxis JavaScript; los flujos de BD/API se deben validar en Windows.

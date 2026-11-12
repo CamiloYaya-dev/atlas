@@ -1,0 +1,18 @@
+<!doctype html><html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#121d30"/><meta name="description" content="ATLAS — arquitectura, procesos y requerimientos conectados"/><title>ATLAS V3 — Arquitectura conectada</title></head><body><div id="root"></div><script>
+// Mostrar errores de carga antes de que React consiga montarse.
+(function(){
+ var installed=false;
+ function show(message){
+  if(installed)return; installed=true;
+  console.error('[ATLAS] Error de inicio:',message);
+  setTimeout(function(){
+   var root=document.getElementById('root');if(!root || root.childElementCount>0)return;
+   root.innerHTML='<main style="padding:35px;max-width:900px;margin:auto;font:16px system-ui;color:#253451"><h1>ATLAS no pudo iniciar</h1><p>Hay un error de JavaScript o de carga de módulos. Abre DevTools (F12), pestaña Consola, y copia el primer error rojo.</p><pre id="atlasStartupError" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#15213a;color:white;padding:18px;border-radius:12px"></pre></main>';
+   var box=document.getElementById('atlasStartupError');if(box)box.textContent=message;
+  },150);
+ }
+ window.addEventListener('error',function(e){show(e.message+(e.filename?'\n'+e.filename+':'+e.lineno:''))});
+ window.addEventListener('unhandledrejection',function(e){show(String(e.reason && (e.reason.stack||e.reason.message)||e.reason))});
+})();
+</script>
+<script type="module" src="/src/main.tsx"></script></body></html>

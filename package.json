@@ -1,27 +1,43 @@
 {
-  "name": "atlas-architecture-saas",
+  "name": "atlas-monorepo",
   "private": true,
-  "version": "3.0.0",
-  "type": "module",
+  "version": "4.2.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.81.0",
-    "@xyflow/react": "^12.9.3",
-    "lucide-react": "^0.468.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "env:init": "node scripts/init-env.mjs",
+    "setup": "npm run env:init && npm run db:up && npm run db:migrate && npm run db:seed",
+    "dev:all": "npm run setup && npm run admin:ensure && npm run typecheck && npm run dev",
+    "dev": "concurrently -k -n API,WEB -c cyan,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm run dev -w @atlas/api",
+    "dev:web": "npm run dev -w @atlas/web",
+    "db:up": "docker compose up -d --wait db",
+    "db:stop": "docker compose stop db",
+    "db:status": "docker compose ps db",
+    "db:logs": "docker compose logs -f --tail=100 db",
+    "db:migrate": "npm run db:migrate -w @atlas/api",
+    "db:seed": "npm run db:seed -w @atlas/api",
+    "db:backup": "node scripts/backup-db.mjs",
+    "db:test": "node scripts/integration-local.mjs",
+    "admin:ensure": "node scripts/ensure-admin.mjs",
+    "admin:setup": "node scripts/bootstrap-admin.mjs",
+    "admin:create": "npm run admin:create -w @atlas/api",
+    "admin:status": "npm run admin:status -w @atlas/api",
+    "typecheck": "npm run typecheck -w @atlas/api && npm run typecheck -w @atlas/web",
+    "build": "npm run typecheck && npm run build:api && npm run build:web",
+    "build:api": "npm run build -w @atlas/api",
+    "build:web": "npm run build -w @atlas/web",
+    "start:api": "npm run start -w @atlas/api",
+    "test": "npm run test -w @atlas/api",
+    "test:policy": "npm run test:policy -w @atlas/api",
+    "test:integration": "npm run test:integration -w @atlas/api",
+    "check": "npm run typecheck && npm run test:policy && npm run test && npm run build",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.1.0",
-    "typescript": "~5.9.3",
-    "vite": "^7.2.0"
+    "concurrently": "^9.2.0",
+    "typescript": "~5.9.3"
   }
 }
