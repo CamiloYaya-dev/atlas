@@ -10,7 +10,8 @@ const env={...process.env,
  E2E_ADMIN_EMAIL:'qa-admin@atlas.test',E2E_ADMIN_PASSWORD:randomBytes(20).toString('base64url')+'!A',
  E2E_VIEWER_EMAIL:'qa-viewer@atlas.test',E2E_VIEWER_PASSWORD:randomBytes(20).toString('base64url')+'!B',
  E2E_EDITOR_EMAIL:'qa-editor@atlas.test',E2E_EDITOR_PASSWORD:randomBytes(20).toString('base64url')+'!C',
- ATLAS_E2E_AUTOSTART:'true', E2E_BASE_URL:'http://127.0.0.1:5173'
+ ATLAS_E2E_AUTOSTART:'true', E2E_BASE_URL:'http://127.0.0.1:5175',
+ ATLAS_DEV_API_PORT:'3003',ATLAS_DEV_WEB_PORT:'5175'
 }
 function exec(label,cmd,args){
  console.log(`\n[ATLAS QA] ${label}`)

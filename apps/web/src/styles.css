@@ -57,3 +57,8 @@
 .audit-panel{max-height:73vh;overflow:auto}.audit-list{list-style:none;padding:0;display:grid;gap:8px}
 .audit-row{display:flex;flex-direction:column;gap:4px;padding:12px;background:#f7faff;border:1px solid #e0e8f4;border-radius:10px}
 .audit-row strong{color:#244464;font-size:13px}.audit-row small{color:#61748d;font-size:11px;overflow-wrap:anywhere}
+/* ATLAS 4.7.2: confirmaciones destructivas sin diálogos nativos del navegador. */
+.delete-confirmation .delete-warning{border:1px solid #f3c1be;background:#fff4f3;color:#9a2d2b;padding:13px 15px;border-radius:10px;font-size:13px;line-height:1.55}
+.delete-confirmation .delete-ack{display:flex;gap:10px;align-items:flex-start;line-height:1.45;color:#5d3c35;font-size:13px;padding:12px;border:1px solid #ead4ce;border-radius:9px;cursor:pointer}
+.delete-confirmation .delete-ack input{margin-top:2px;accent-color:#ae3737;flex:none}
+.delete-confirmation .form-field input{width:100%}

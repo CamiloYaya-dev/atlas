@@ -22,14 +22,21 @@ export class WorkspacesRepository {
    await c.query('COMMIT');return rows[0]
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  }
- async delete(workspaceId:string,userId:string){
+ async delete(workspaceId:string,userId:string,options?:unknown){
   const c=await pool.connect()
   try{await c.query('BEGIN')
-   const locked=await c.query('SELECT id FROM workspaces WHERE id=$1 FOR UPDATE',[workspaceId]);if(!locked.rows[0])throw notFound()
-   requirePermission(await access(workspaceId,userId,c),'workspace.delete')
-   const projects=await c.query('SELECT id FROM projects WHERE workspace_id=$1 LIMIT 1',[workspaceId]);if(projects.rows[0])throw new DomainError('El espacio tiene proyectos: elimínalos antes para evitar pérdida de información',409)
-   await c.query('DELETE FROM workspaces WHERE id=$1',[workspaceId])
-   await c.query('COMMIT');return {ok:true}
+   const locked=await c.query<{name:string}>('SELECT name FROM workspaces WHERE id=$1 FOR UPDATE',[workspaceId]);if(!locked.rows[0])throw notFound()
+   const membership=await access(workspaceId,userId,c)
+   requirePermission(membership,'workspace.delete')
+   const count=await c.query<{total:string}>('SELECT count(*)::text AS total FROM projects WHERE workspace_id=$1',[workspaceId])
+   const deletedProjects=Number(count.rows[0]?.total||0)
+   if(deletedProjects>0){
+    const b=options&&typeof options==='object'&&!Array.isArray(options)?options as Record<string,unknown>:{}
+    if(b.deleteProjects!==true||b.confirmName!==locked.rows[0].name||membership.roleKey!=='owner')
+     throw new DomainError('Este espacio contiene proyectos. Para eliminarlos debes confirmar el borrado completo como propietario.',409)
+   }
+   await c.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]) // FKs ON DELETE CASCADE. Solo tras confirmación exacta.
+   await c.query('COMMIT');return {ok:true,deletedProjects}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  }
  async create(name:string,userId:string):Promise<string>{

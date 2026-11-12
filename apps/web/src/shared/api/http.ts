@@ -5,7 +5,9 @@ export const setCsrf=(value:string)=>{csrfToken=value}
 export const cloudEnabled=true // closed multi-user API; no unauthenticated demo mode
 export async function request<T>(path:string,options:RequestInit={}):Promise<T>{
  const method=String(options.method||'GET').toUpperCase()
- const headers:Record<string,string>={'Content-Type':'application/json',...(options.headers as Record<string,string>||{})}
+ const hasJsonBody=typeof options.body==='string'&&options.body.trim().length>0
+ const headers:Record<string,string>={...(hasJsonBody?{'Content-Type':'application/json'}:{}),...(options.headers as Record<string,string>||{})}
+ if(!hasJsonBody&&method==='DELETE'){delete headers['Content-Type'];delete headers['content-type']}
  if(!['GET','HEAD','OPTIONS'].includes(method)&&csrfToken)headers['X-CSRF-Token']=csrfToken
  const endpoint=`${apiRoot}/api/v1${path}`
  let response:Response

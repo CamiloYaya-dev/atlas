@@ -69,9 +69,23 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal(result.status,200);member=result.user
    assert.equal((await send('PATCH',`/admin/users/${adminId}`,admin,{active:false})).status,409)
   })
-  await t.test('Usuario normal no administra otros usuarios ni crea espacios',async()=>{
+  await t.test('Cuentas activas crean espacios propios, sin convertirse en administradores globales',async()=>{
    assert.equal((await send('GET','/admin/users',member)).status,403)
-   assert.equal((await send('POST','/workspaces',member,{name:'No autorizado'})).status,403)
+   const created=await send('POST','/workspaces',member,{name:'Espacio independiente '+suffix})
+   assert.equal(created.status,201,JSON.stringify(created.data))
+   const ownId=created.data.id
+   try{
+    const own=await send('GET','/workspaces',member)
+    assert.equal(own.status,200)
+    assert.ok(own.data.some((x:{id:string})=>x.id===ownId))
+    assert.equal((await send('GET',`/workspaces/${ownId}/projects`,admin)).status,403)
+    assert.equal((await send('POST',`/workspaces/${ownId}/projects`,admin,{name:'Sin acceso',document:emptyDoc()})).status,403)
+    const p=await send('POST',`/workspaces/${ownId}/projects`,member,{name:'Proyecto personal',document:emptyDoc()})
+    assert.equal(p.status,201,JSON.stringify(p.data))
+    assert.equal((await send('DELETE',`/workspaces/${ownId}`,member)).status,409)
+    assert.equal((await send('DELETE',`/projects/${p.data.id}`,member)).status,200)
+    assert.equal((await send('DELETE',`/workspaces/${ownId}`,member)).status,200)
+   }finally{await pool.query('DELETE FROM workspaces WHERE id=$1',[ownId])}
   })
   await t.test('Administrador crea workspace y proyecto; proyecto inicial vacío',async()=>{
    const w=await send('POST','/workspaces',admin,{name:'Espacio QA '+suffix})
@@ -135,13 +149,38 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await send('DELETE',`/projects/${p2.data.id}`,admin)).status,200)
    assert.equal((await send('GET',`/projects/${p2.data.id}/document`,admin)).status,404)
    assert.equal((await send('GET',`/projects/${p3.data.id}/document`,guest)).status,200)
+   // Revoke only this project; the account and workspace membership must remain intact.
+   assert.equal((await send('DELETE',`/projects/${p3.data.id}/members/${extraId}`,admin)).status,200)
+   assert.equal((await send('GET',`/projects/${p3.data.id}/document`,guest)).status,404)
+   assert.equal((await send('GET',`/workspaces/${workspaceId}/projects`,guest)).status,200)
+   assert.equal((await send('PUT',`/projects/${p3.data.id}/members/${extraId}`,admin,{roleId:readerRole.id})).status,200)
+   assert.equal((await send('GET',`/projects/${p3.data.id}/document`,guest)).status,200)
+   assert.equal((await send('DELETE',`/projects/${p3.data.id}/members/${adminId}`,admin)).status,404)
    // No cascading project deletion when attempting to delete an occupied workspace.
    assert.equal((await send('DELETE',`/workspaces/${workspaceId}`,admin)).status,409)
    assert.equal((await send('PATCH',`/workspaces/${workspaceId}`,guest,{name:'Acceso ilegal'})).status,403)
    assert.equal((await send('PATCH',`/workspaces/${workspaceId}`,admin,{name:'Espacio QA actualizado'})).status,200)
    const empty=await send('POST','/workspaces',admin,{name:'Vacío de QA'})
    assert.equal(empty.status,201)
-   assert.equal((await send('DELETE',`/workspaces/${empty.data.id}`,admin)).status,200)
+   // Frontends antiguos enviaban Content-Type JSON sin cuerpo: Fastify no debe rechazar antes de verificar CSRF y permisos.
+   const legacy=await app.inject({method:'DELETE',url:`/api/v1/workspaces/${empty.data.id}`,headers:{cookie:admin!.cookie,'x-csrf-token':admin!.csrf,'content-type':'application/json'}})
+   assert.equal(legacy.statusCode,200,legacy.body)
+  })
+  await t.test('Solo el propietario borra en cascada un espacio ocupado, mediante confirmación exacta',async()=>{
+   const created=await send('POST','/workspaces',admin,{name:'Espacio temporal '+suffix})
+   assert.equal(created.status,201)
+   const ownId=created.data.id
+   try{
+    const project=await send('POST',`/workspaces/${ownId}/projects`,admin,{name:'Proyecto con contenido',document:emptyDoc()})
+    assert.equal(project.status,201)
+    assert.equal((await send('DELETE',`/workspaces/${ownId}`,admin)).status,409)
+    assert.equal((await send('DELETE',`/workspaces/${ownId}`,admin,{deleteProjects:true,confirmName:'Incorrecto'})).status,409)
+    assert.equal((await send('DELETE',`/workspaces/${ownId}`,member,{deleteProjects:true,confirmName:'Espacio temporal '+suffix})).status,403)
+    const removed=await send('DELETE',`/workspaces/${ownId}`,admin,{deleteProjects:true,confirmName:'Espacio temporal '+suffix})
+    assert.equal(removed.status,200,JSON.stringify(removed.data))
+    assert.equal(removed.data.deletedProjects,1)
+    assert.equal((await send('GET',`/projects/${project.data.id}/document`,admin)).status,404)
+   }finally{await pool.query('DELETE FROM workspaces WHERE id=$1',[ownId])}
   })
   await t.test('Guardar C1+C2 y filtrar C2 de usuarios sin permiso',async()=>{
    const doc=emptyDoc(),a=createElement('Acceder','activity'),b=createElement('API privada','endpoint')
