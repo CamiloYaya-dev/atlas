@@ -7,8 +7,10 @@ if (code !== 0) {
 }
 const testEnv = {
   DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
+  MIGRATIONS_DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
   NODE_ENV:'test',
-  AUTH_MODE:'demo',
+  AUTH_MODE:'local',
+  ATLAS_CSRF_SECRET:'qa-local-secret-key-atlas-integration-2026-not-production',
   ATLAS_ALLOW_DB_TESTS:'true',
 };
 console.log('Migrando EXCLUSIVAMENTE la base de prueba local en puerto 5433...');

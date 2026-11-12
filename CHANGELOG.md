@@ -1,3 +1,21 @@
+# Historial ATLAS
+
+## V4.3.0 — Calidad automatizada
+
+- Suite unitaria para editor, diagramas C1-C4, relaciones, fichas, campos, permisos, contraseñas y HTTP.
+- Matriz automática por 9 tipos de diagrama, 14 tipos de elemento y 3 tipos de relación.
+- Corrección de referencias mutables en documentos filtrados por roles.
+- Rechazo de relaciones duplicadas por par origen/destino y de autoconexiones al guardar.
+- Extractores puros `document-commands.ts` y `graph-selection.ts` utilizados por el editor React.
+- Construcción Fastify separada en `app.ts` para pruebas de API por inyección.
+- Pruebas de integración con PostgreSQL QA exclusivo (no BD de desarrollo).
+- Playwright para recorridos de login, navegación, edición, políticas y lector.
+- Scripts de npm `test:unit`, `test:db`, `test:e2e:local`, `test:full`.
+- CI GitHub Actions con dos trabajos: API/BD + navegador.
+
+**Validación:** 84 pruebas unitarias aprobadas localmente con transpilador de evaluación; suite Docker/Chromium no ejecutada todavía. No se declara 100% de cobertura.
+
+---
 # Historial de entregas
 
 ## Hotfix — typecheck de Fastify (11/11/2026)
@@ -22,3 +40,18 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Ejecución/depuración centralizadas en npm scripts y utilidades Node multiplataforma.
 - Eliminados BAT del paquete; arranque con `npm run dev:all`.
 - Bootstrap interactivo con contraseña oculta y sin credenciales por defecto.
+
+## V4.2.2 — Corrección de crypto.scrypt
+
+- Corrige TS2554 en `apps/api/src/security/password.ts`, sin alterar formato ni parámetros de hashes existentes.
+- La promesa utiliza la API callback de Node.js con opciones explícitas.
+
+
+## 4.3.1 — Reparación de integración y coverage verificable
+
+- Regresión 403 en primer guardado: proyección completa de campos para rol con `field.configure`.
+- Test de integración actualizado al esquema de roles con `role_id`.
+- Playwright Windows: evita ejecutar `node.exe` mediante cmd.exe.
+- c8, reporte agregado HTML/LCOV/JSON y umbral 95 % por archivo en cuatro métricas.
+- CI ejecuta la verificación de coverage y conserva los informes.
+- No se declara cobertura 95 % alcanzada; requiere ejecutar y ampliar pruebas.

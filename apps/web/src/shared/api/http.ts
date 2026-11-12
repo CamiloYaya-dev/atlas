@@ -1,4 +1,4 @@
-const apiRoot=(import.meta.env.VITE_API_BASE_URL||'').trim().replace(/\/$/,'')
+const apiRoot=(import.meta.env?.VITE_API_BASE_URL||'').trim().replace(/\/$/,'')
 let csrfToken=''
 export const setCsrf=(value:string)=>{csrfToken=value}
 export const cloudEnabled=true // closed multi-user API; no unauthenticated demo mode

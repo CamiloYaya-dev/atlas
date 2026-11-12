@@ -22,7 +22,7 @@ export function projectVisible(document:ProjectDocument,a:Access):ProjectDocumen
   const nodes=d.nodes.filter(n=>!!elements[n.elementId]), ids=new Set(nodes.map(n=>n.id))
   return {...d,nodes,edges:d.edges.filter(e=>ids.has(e.source)&&ids.has(e.target))}
  })
- return {schema:1,elements,diagrams:redacted,fieldDefinitions:document.fieldDefinitions.filter(f=>f.forType==='all'||Object.values(elements).some(e=>e.type===f.forType))}
+ return structuredClone({schema:1,elements,diagrams:redacted,fieldDefinitions:document.fieldDefinitions.filter(f=>allowed(a,'field.configure')||f.forType==='all'||Object.values(elements).some(e=>e.type===f.forType))})
 }
 function edgeKind(edge:DiagramEdge,diagram:Diagram,doc:ProjectDocument){
  const source=diagram.nodes.find(n=>n.id===edge.source),target=diagram.nodes.find(n=>n.id===edge.target)
@@ -34,14 +34,15 @@ function ensureUniqueIds(doc:ProjectDocument){
  for(const d of doc.diagrams){
   if(usedDiagrams.has(d.id))throw new DomainError('IDs de diagrama duplicados',400)
   usedDiagrams.add(d.id)
-  const nodes=new Set<string>(),edges=new Set<string>()
+  const nodes=new Set<string>(),edges=new Set<string>(),pairs=new Set<string>()
   for(const n of d.nodes){
    if(nodes.has(n.id)||!doc.elements[n.elementId])throw new DomainError('Nodo duplicado o sin elemento',400)
    nodes.add(n.id)
   }
   for(const e of d.edges){
-   if(edges.has(e.id)||!nodes.has(e.source)||!nodes.has(e.target))throw new DomainError('Relación duplicada o inválida',400)
-   edges.add(e.id)
+   if(edges.has(e.id)||!nodes.has(e.source)||!nodes.has(e.target)||e.source===e.target)throw new DomainError('Relación duplicada o inválida',400)
+   const pair=JSON.stringify([e.source,e.target]);if(pairs.has(pair))throw new DomainError('Relación duplicada',400)
+   pairs.add(pair);edges.add(e.id)
   }
  }
  for(const e of Object.values(doc.elements))if(e.childDiagramId&&!usedDiagrams.has(e.childDiagramId))throw new DomainError('Vista vinculada inexistente',400)

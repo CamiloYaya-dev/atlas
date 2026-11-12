@@ -1,3 +1,48 @@
+# ATLAS V4.3 — QA automatizada por comportamiento
+
+ATLAS es un monorepo React + TypeScript + Fastify + PostgreSQL. Esta actualización conserva el login cerrado, el editor y los permisos de V4.2.2, e integra pruebas por capas y una base QA aislada.
+
+## Inicio rápido Windows
+
+```powershell
+npm install
+npm run dev:all
+```
+
+Abrir `http://127.0.0.1:5173`. Requiere Docker Desktop. La base de desarrollo local se ejecuta en 5432.
+
+## Calidad (scripts npm; sin .bat)
+
+```powershell
+npm run test:unit     # Sin Docker ni base de datos
+npm run test:db       # API + PostgreSQL QA (5433, independiente)
+npx playwright install chromium   # Una sola vez
+npm run test:e2e:local # Navegador real con DB QA y cuentas temporales
+npm run test:full     # Tipo, unitarias, integración, build y E2E
+```
+
+Ver `QA_EJECUCION_WINDOWS.md` y `QA_COBERTURA.md` antes de declarar una versión apta para release.
+
+**Evidencia disponible:** 84 pruebas unitarias ejecutadas exitosamente sobre los módulos de negocio en el entorno de preparación. Integración HTTP/DB, Chromium y compilación integral no han sido certificados aquí; requieren ejecución con npm/Docker y revisión de logs.
+
+## Arquitectura
+
+- `apps/web`: frontend React, editor y operaciones de modelo reutilizables.
+- `apps/api`: API Fastify, autorización, servicios y repositorios PostgreSQL.
+- `packages/contracts`: entidades, tipos y catálogo de capacidades.
+- `packages/fixtures`: datos ficticios.
+- `apps/api/src/app.ts`: composición Fastify testeable sin escuchar puertos.
+- `tests/e2e`: flujos visuales de navegador.
+- `.github/workflows/ci.yml`: unitarias, integración, build y E2E.
+
+## Restricción de seguridad
+
+No se ejecutan pruebas destructivas en la BD de desarrollo ni en producción. `test:db` y `test:e2e:local` usan exclusivamente `127.0.0.1:5433/atlas_test` y verifican `NODE_ENV=test`. Las cuentas E2E son temporales.
+
+---
+
+## Documentación histórica V4.2
+
 # ATLAS V4.2.1 — Desarrollo con npm (sin archivos BAT)
 
 Frontend React/Vite, API Fastify, PostgreSQL 16 en Docker local, acceso cerrado, control de roles y permisos granulares.
@@ -75,3 +120,17 @@ Docker PostgreSQL es **solo para desarrollo**. Mantener Web/API/BD separados por
 El modo `AUTH_MODE=local` permite crear el admin inicial por CLI y luego iniciar sesión. No ejecutar bootstrap en producción sin un proceso formal de aprovisionamiento. `db:seed` es solo para desarrollo. Las capacidades, permisos y autenticación mantienen la implementación de ATLAS V4.2; esta actualización cambia exclusivamente la experiencia de ejecución y mantenimiento.
 
 No se ha ejecutado aquí un arranque completo con Docker y las dependencias npm. Los comandos están verificados a nivel de JSON y sintaxis JavaScript; los flujos de BD/API se deben validar en Windows.
+
+
+## Cobertura y QA (V4.3.1)
+
+La meta obligatoria es **>=95 % de líneas, sentencias, funciones y ramas por archivo**, además de pruebas de integración y E2E correctas. **Este objetivo aún no está certificado.**
+
+- `npm run test:coverage:unit`: informe agregado inicial (sin PostgreSQL).
+- `npm run test:coverage`: cobertura agregada unitarias + integración con PostgreSQL QA (Docker 5433).
+- `npm run coverage:summary`: muestra cobertura medida global y por API/WEB/paquetes.
+- `npm run coverage:check`: falla si los porcentajes no llegan a 95 %.
+- `npm run test:coverage:gate`: cobertura + comprobación de umbral, usada en CI.
+- `npm run test:full`: typecheck + gate de cobertura + build + E2E.
+
+Guía y diagnóstico: `QA_COVERAGE_95.md`. Los porcentajes no se infieren del número de pruebas aprobadas.

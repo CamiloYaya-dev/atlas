@@ -1,38 +1,62 @@
-name: ATLAS CI
+name: ATLAS - QA automatizada
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
 jobs:
-  verify:
+  unit-and-integration:
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16-alpine
         env:
           POSTGRES_USER: atlas
-          POSTGRES_PASSWORD: atlas_ci_only
-          POSTGRES_DB: atlas_ci
-        ports: ['5432:5432']
+          POSTGRES_PASSWORD: atlas_test_only
+          POSTGRES_DB: atlas_test
+        ports: ['5433:5432']
         options: >-
-          --health-cmd "pg_isready -U atlas -d atlas_ci"
+          --health-cmd "pg_isready -U atlas -d atlas_test"
           --health-interval 5s --health-timeout 5s --health-retries 15
     env:
       NODE_ENV: test
-      AUTH_MODE: demo
-      DATABASE_URL: postgresql://atlas:atlas_ci_only@127.0.0.1:5432/atlas_ci
+      AUTH_MODE: local
+      DATABASE_URL: postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test
       DB_SSL: 'false'
       ATLAS_ALLOW_DB_TESTS: 'true'
+      ATLAS_CSRF_SECRET: atlas-qa-only-secret-not-for-production-2026
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - run: npm install --no-audit
       - run: npm run typecheck
-      - run: npm run test
+      - run: npm run test:unit
       - run: npm run db:migrate
       - run: npm run test:integration
+      - run: npm run test:coverage:gate
+        env:
+          ATLAS_COVERAGE_USE_EXISTING_DB: 'true'
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-coverage-html-lcov
+          path: coverage/
+          if-no-files-found: ignore
       - run: npm run build
+  browser-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:local
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-e2e-artifacts
+          path: test-results/

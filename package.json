@@ -1,7 +1,7 @@
 {
   "name": "atlas-monorepo",
   "private": true,
-  "version": "4.2.1",
+  "version": "4.3.1",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -30,14 +30,27 @@
     "build:api": "npm run build -w @atlas/api",
     "build:web": "npm run build -w @atlas/web",
     "start:api": "npm run start -w @atlas/api",
-    "test": "npm run test -w @atlas/api",
+    "test": "npm run test:unit",
     "test:policy": "npm run test:policy -w @atlas/api",
-    "test:integration": "npm run test:integration -w @atlas/api",
-    "check": "npm run typecheck && npm run test:policy && npm run test && npm run build",
-    "smoke": "node scripts/smoke.mjs"
+    "test:integration": "node scripts/run-tests.mjs integration",
+    "check": "npm run typecheck && npm run test:unit && npm run build",
+    "smoke": "node scripts/smoke.mjs",
+    "test:unit": "node scripts/run-tests.mjs unit",
+    "test:coverage": "node scripts/coverage-local.mjs full",
+    "test:db": "node scripts/integration-local.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "node scripts/e2e-local.mjs",
+    "test:all": "npm run typecheck && npm run test:unit && npm run test:db && npm run build",
+    "test:full": "npm run typecheck && npm run test:coverage:gate && npm run build && npm run test:e2e:local",
+    "test:coverage:unit": "node scripts/coverage-local.mjs unit",
+    "coverage:check": "node scripts/coverage-gate.mjs",
+    "test:coverage:gate": "npm run test:coverage && npm run coverage:check",
+    "coverage:summary": "node scripts/coverage-summary.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "@playwright/test": "^1.56.0",
+    "c8": "^12.0.0"
   }
 }
