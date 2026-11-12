@@ -14,9 +14,20 @@ if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!/1
 }
 type User={cookie:string;csrf:string;id:string}
 test('API real: autenticación, administración, roles, diagramas y aislamiento',async t=>{
- const app=await buildApp()
- // Ruta exclusiva del test de inyección; no forma parte de la API publicada.
- app.get('/api/v1/_qa_unhandled_error',async()=>{throw new Error('Detalle interno secreto QA')})
+ // La suite usa varias aplicaciones Fastify aisladas para no consumir el límite
+ // global 100/min entre bloques independientes. El limitador real permanece activo,
+ // incluyendo el tope estricto de 6/min del login en CADA instancia.
+ let app=await buildApp()
+ const registerQaErrorRoute=(server:Awaited<ReturnType<typeof buildApp>>)=>{
+  // Ruta exclusiva de inyección; no existe en la API publicada.
+  server.get('/api/v1/_qa_unhandled_error',async()=>{throw new Error('Detalle interno secreto QA')})
+ }
+ registerQaErrorRoute(app)
+ const resetQaRateLimitWindow=async()=>{
+  await app.close()
+  app=await buildApp()
+  registerQaErrorRoute(app)
+ }
  const suffix=randomUUID().slice(0,8)
  const adminEmail=`qa-admin-${suffix}@example.test`,memberEmail=`qa-member-${suffix}@example.test`
  const pass='ContraseñaSegura!2026',invalidPass='ClaveIncorrecta!2026'
@@ -243,6 +254,10 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
     assert.equal((await send('GET',`/projects/${p.data.id}/versions/1`,member)).status,404)
    }finally{await pool.query('DELETE FROM workspaces WHERE id=$1',[second.data.id])}
   })
+  // Reiniciar el contenedor Fastify SOLO del test tras el bloque de aislamiento.
+  // Conservamos usuarios, sesiones, proyectos y DB QA; no alteramos seguridad
+  // ni límites del backend. Evita HTTP 429 accidental en subpruebas posteriores.
+  await resetQaRateLimitWindow()
   await t.test('API real: roles inválidos y duplicados no se almacenan',async()=>{
    const path=`/workspaces/${workspaceId}/roles`
    assert.equal((await send('POST',path,admin,{name:'Q',roleKey:'x',permissions:[]})).status,400)
@@ -406,6 +421,9 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,admin,{clientId:id,diagramId:'c1',elementId:null})).status,200)
   })
   }finally{await liveApp.close()}
+  // La suite de historial/ramas vuelve a empezar con la ventana de rate-limit
+  // limpia; sus respuestas 400/403/409/200 se validan sin 429 de otras pruebas.
+  await resetQaRateLimitWindow()
   await t.test('V1 funcional: renombrar proyecto y consultar auditoría requieren permisos del workspace',async()=>{
    const url=`/projects/${projectId}`
    assert.equal((await send('PATCH',url,member,{name:'Intruso'})).status,403)
@@ -451,6 +469,47 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const audit=await send('GET',`/workspaces/${workspaceId}/audit`,admin)
    assert.equal(audit.status,200)
    assert.ok(audit.data.items.some((x:{event_type:string;detail:{sourceVersion?:number}})=>x.event_type==='project.document_restore'&&x.detail.sourceVersion===1))
+  })
+  await t.test('ramas: acceso owner, propuesta sin mutación, fusión y protección ante cambios concurrentes',async()=>{
+   const branchUrl=`/projects/${projectId}/restore-branches`,docUrl=`/projects/${projectId}/document`
+   const before=await send('GET',docUrl,admin)
+   assert.equal(before.status,200)
+   const initialVersion=before.data.version as number
+   assert.equal((await send('POST',branchUrl,member,{sourceVersion:1})).status,403)
+   const proposal=await send('POST',branchUrl,admin,{sourceVersion:1})
+   assert.equal(proposal.status,200,JSON.stringify(proposal.data))
+   const branchId=String(proposal.data.id)
+   assert.equal((await send('GET',branchUrl,admin)).status,200)
+   assert.equal((await send('GET',`${branchUrl}/${branchId}/preview`,member)).status,403)
+   const plan=await send('GET',`${branchUrl}/${branchId}/preview`,admin)
+   assert.equal(plan.status,200,JSON.stringify(plan.data))
+   assert.equal(plan.data.currentVersion,initialVersion)
+   const unchanged=await send('GET',docUrl,admin)
+   assert.equal(unchanged.data.version,initialVersion,'Crear una rama no modifica el documento principal')
+   assert.equal((await send('POST',`${branchUrl}/${branchId}/apply`,admin,{expectedVersion:initialVersion-1,mode:'merge',resolutions:{}})).status,409)
+   const result=await send('POST',`${branchUrl}/${branchId}/apply`,admin,{expectedVersion:initialVersion,mode:'merge',resolutions:{}})
+   assert.equal(result.status,200,JSON.stringify(result.data))
+   assert.equal(result.data.version,initialVersion+1)
+   assert.equal((await send('POST',`${branchUrl}/${branchId}/apply`,admin,{expectedVersion:initialVersion+1,mode:'merge',resolutions:{}})).status,409)
+  })
+  await t.test('restauración del propietario conserva también elementos históricos huérfanos',async()=>{
+   const url=`/projects/${projectId}/document`
+   const before=await send('GET',url,admin)
+   assert.equal(before.status,200)
+   const doc:ProjectDocument=before.data.document
+   const orphan=createElement('Elemento sin vista','component')
+   doc.elements[orphan.id]=orphan
+   const added=await send('PUT',url,admin,{document:doc,expectedVersion:before.data.version})
+   assert.equal(added.status,200,JSON.stringify(added.data))
+   const snapshotVersion=added.data.version as number
+   const after=await send('GET',url,admin)
+   assert.equal(after.status,200)
+   const another=await send('PUT',url,admin,{document:after.data.document,expectedVersion:snapshotVersion})
+   assert.equal(another.status,200,JSON.stringify(another.data))
+   const restored=await send('POST',`/projects/${projectId}/restore`,admin,{sourceVersion:snapshotVersion,expectedVersion:another.data.version})
+   assert.equal(restored.status,200,JSON.stringify(restored.data))
+   const full=await pool.query<{document:ProjectDocument}>('SELECT document FROM project_documents WHERE project_id=$1',[projectId])
+   assert.ok(full.rows[0].document.elements[orphan.id],'La restauración completa no descarta elementos fuera de vistas')
   })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)

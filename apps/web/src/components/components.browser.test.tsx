@@ -58,7 +58,7 @@ describe('Átomos, moléculas y caja gráfica',()=>{
   const element=demoDocument().elements['platform']
   render(<AtlasNode {...{id:'node-platform',type:'atlas',selected:true,data:{element,mode:'mixed',graphType:'trace'}} as unknown as NodeProps}/>)
   expect(screen.getByText('Plataforma Zercano')).toBeTruthy()
-  expect(screen.getByText('Trazabilidad')).toBeTruthy()
+  expect(screen.getByText('Matriz de trazabilidad')).toBeTruthy()
   expect(screen.getByText(element.technical!)).toBeTruthy()
   expect(document.querySelector('.atlas-node.selected')).not.toBeNull()
   expect(document.querySelector('.node-drill')).not.toBeNull()

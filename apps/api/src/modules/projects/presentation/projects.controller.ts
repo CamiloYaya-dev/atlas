@@ -65,10 +65,17 @@ export async function registerProjectController(app:FastifyInstance){
  app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore',async req=>{
   assertUUID(req.params.projectId)
   const actor=await identity(req),b=object(req.body)
+  if(projectEvents.hasOtherParticipants(req.params.projectId,actor.id))throw new DomainError('Hay otra persona conectada. Prepara una rama y revisa los cambios antes de restaurar.',409)
   const restored=await service.restoreVersion(req.params.projectId,b.sourceVersion,b.expectedVersion,actor.id)
   projectEvents.publishVersion(req.params.projectId,restored.version)
   return restored
  })
+ // Reviewable restoration branches: immutable historical source + expected-version CAS.
+ app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore-branches',async req=>{assertUUID(req.params.projectId);return service.listRestoreBranches(req.params.projectId,(await identity(req)).id)})
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore-branches',async req=>{assertUUID(req.params.projectId);return service.createRestoreBranch(req.params.projectId,object(req.body).sourceVersion,(await identity(req)).id)})
+ app.get<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId/preview',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);return service.previewRestoreBranch(req.params.projectId,req.params.branchId,(await identity(req)).id)})
+ app.post<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId/apply',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);const actor=await identity(req),body=object(req.body);if(body.mode==='replace'&&projectEvents.hasOtherParticipants(req.params.projectId,actor.id))throw new DomainError('No puedes reemplazar todo mientras otra persona está conectada. Usa fusión.',409);const restored=await service.applyRestoreBranch(req.params.projectId,req.params.branchId,actor.id,body);projectEvents.publishVersion(req.params.projectId,restored.version);return restored})
+ app.delete<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);return service.discardRestoreBranch(req.params.projectId,req.params.branchId,(await identity(req)).id)})
  app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/export',async req=>{assertUUID(req.params.projectId);return service.exportDocument(req.params.projectId,(await identity(req)).id)})
  app.put<{Params:{projectId:string}}>('/api/v1/projects/:projectId/document',async req=>{
   assertUUID(req.params.projectId)

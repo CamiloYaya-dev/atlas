@@ -16,6 +16,8 @@ export default function ProjectSettings({project,access,canEditNow,onClose,onRen
  useEffect(()=>setName(project.name),[project.id,project.name])
  async function reload(){if(!can('project.members.manage'))return
   const [m,c]=await Promise.all([projectMembers(project.id),projectCandidates(project.id)])
+  if(!Array.isArray(m)||!c||!Array.isArray(c.users)||!Array.isArray(c.roles))
+   throw new Error('El servidor devolvió una lista de miembros o roles incompleta. Intenta recargar el proyecto.')
   setMembers(m);setCandidates(c.users);setRoles(c.roles)
  }
  useEffect(()=>{void reload().catch(e=>setError(String((e as Error).message)))},[project.id,access?.roleId])

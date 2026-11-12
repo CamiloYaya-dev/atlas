@@ -43,7 +43,7 @@ vi.mock('@xyflow/react',async()=>{
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))
-vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
+vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
 vi.mock('../audit/api',()=>({listAuditEvents:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
@@ -54,6 +54,8 @@ const user={id:'u-qa',email:'qa@atlas.test',name:'QA',platformAdmin:true}
 
 afterEach(()=>{vi.restoreAllMocks()})
 beforeEach(()=>{
+ localStorage.removeItem('atlas.navigation.collapsed')
+ localStorage.removeItem('atlas.minimap.visible')
  vi.resetAllMocks()
  vi.mocked(auth.session).mockResolvedValue(user)
  vi.mocked(auth.workspaceAccess).mockResolvedValue(owner)
@@ -64,7 +66,10 @@ beforeEach(()=>{
  vi.mocked(projects.loadDocument).mockResolvedValue({document:demoDocument(),version:1})
  vi.mocked(projects.saveDocument).mockResolvedValue(2)
  vi.mocked(projects.listDocumentVersions).mockResolvedValue([])
+ vi.mocked(projects.listRestoreBranches).mockResolvedValue([])
  vi.mocked(projects.renameProject).mockResolvedValue(project)
+ vi.mocked(projects.projectMembers).mockResolvedValue([])
+ vi.mocked(projects.projectCandidates).mockResolvedValue({users:[],roles:[]})
  vi.mocked(audit.listAuditEvents).mockResolvedValue({items:[],nextCursor:null})
 })
 async function openEditor(){
@@ -73,12 +78,108 @@ async function openEditor(){
 }
 
 describe('Editor conectado a API — recorridos de comportamiento',()=>{
+ it('ocultar y mostrar menú lateral preserva el lienzo y el proyecto abierto',async()=>{
+  await openEditor()
+  const graph=screen.getByTestId('graph-renderer')
+  const layout=document.querySelector('.layout')!
+  expect(layout.classList.contains('expanded')).toBe(false)
+  fireEvent.click(screen.getByRole('button',{name:'Ocultar menú lateral'}))
+  expect(layout.classList.contains('expanded')).toBe(true)
+  expect(screen.getByRole('button',{name:'Mostrar menú lateral'}).getAttribute('aria-expanded')).toBe('false')
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
+  expect(localStorage.getItem('atlas.navigation.collapsed')).toBe('1')
+  fireEvent.click(screen.getByRole('button',{name:'Mostrar menú lateral'}))
+  expect(layout.classList.contains('expanded')).toBe(false)
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  expect(localStorage.getItem('atlas.navigation.collapsed')).toBe('0')
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('ampliar área de trabajo y restaurar distribución conservan el editor',async()=>{
+  await openEditor()
+  const graph=screen.getByTestId('graph-renderer')
+  const layout=document.querySelector('.layout')!
+  fireEvent.click(screen.getByRole('button',{name:'Ampliar área de trabajo'}))
+  expect(layout.classList.contains('expanded')).toBe(true)
+  expect(screen.getByRole('button',{name:'Restaurar distribución'}).getAttribute('aria-pressed')).toBe('true')
+  expect(screen.getByRole('button',{name:'Mostrar menú lateral'})).toBeTruthy()
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  fireEvent.click(screen.getByRole('button',{name:'Restaurar distribución'}))
+  expect(layout.classList.contains('expanded')).toBe(false)
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  expect(screen.getByRole('button',{name:'Ocultar menú lateral'})).toBeTruthy()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('si el área está ampliada, mostrar menú lateral recupera la distribución normal',async()=>{
+  await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:'Ampliar área de trabajo'}))
+  fireEvent.click(screen.getByRole('button',{name:'Mostrar menú lateral'}))
+  expect(document.querySelector('.layout')?.classList.contains('expanded')).toBe(false)
+  expect(screen.getByRole('button',{name:'Ocultar menú lateral'})).toBeTruthy()
+  expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
+ })
+ it('ampliar el área oculta título y filtros, deja una restauración accesible en el lienzo',async()=>{
+  await openEditor()
+  const layout=document.querySelector('.layout')!
+  const frame=document.querySelector('.canvas-frame')!
+  const graph=screen.getByTestId('graph-renderer')
+  const intro=document.querySelector('.page-intro')!
+  const filters=document.querySelector('.filters-bar')!
+  fireEvent.click(screen.getByRole('button',{name:'Ampliar área de trabajo'}))
+  expect(layout.classList.contains('workspace-expanded')).toBe(true)
+  expect(layout.contains(intro)).toBe(true) // CSS oculta sin desmontar ni destruir estado
+  expect(layout.contains(filters)).toBe(true)
+  expect(within(frame as HTMLElement).getByRole('button',{name:'Restaurar distribución'})).toBeTruthy()
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  fireEvent.click(within(frame as HTMLElement).getByRole('button',{name:'Restaurar distribución'}))
+  expect(layout.classList.contains('workspace-expanded')).toBe(false)
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('agregar caja está junto a pantalla completa y disponible en la alternativa fullscreen',async()=>{
+  await openEditor()
+  const frame=document.querySelector('.canvas-frame') as HTMLElement
+  const actions=within(frame).getByLabelText('Acciones del diagrama')
+  expect(within(actions).getByRole('button',{name:'Agregar caja'})).toBeTruthy()
+  expect(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'})).toBeTruthy()
+  expect(screen.getAllByRole('button',{name:'Agregar caja'})).toHaveLength(1)
+  fireEvent.click(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'}))
+  await waitFor(()=>expect(frame.className).toContain('atlas-fullscreen-fallback'))
+  fireEvent.click(within(actions).getByRole('button',{name:'Agregar caja'}))
+  expect(within(frame).getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
+  fireEvent.click(within(frame).getByRole('button',{name:'Cancelar'}))
+  expect(frame.querySelector('[role="dialog"]')).toBeNull()
+  fireEvent.click(within(actions).getByRole('button',{name:'Salir de pantalla completa'}))
+  await waitFor(()=>expect(frame.className).not.toContain('atlas-fullscreen-fallback'))
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('agregar caja muestra su diálogo dentro del elemento fullscreen nativo',async()=>{
+  await openEditor()
+  const frame=document.querySelector('.canvas-frame') as HTMLElement
+  Object.defineProperty(frame,'requestFullscreen',{configurable:true,value:async()=>{
+   Object.defineProperty(document,'fullscreenElement',{configurable:true,value:frame})
+   document.dispatchEvent(new Event('fullscreenchange'))
+  }})
+  try{
+   fireEvent.click(within(frame).getByRole('button',{name:'Pantalla completa del diagrama'}))
+   await waitFor(()=>expect(within(frame).getByRole('button',{name:'Salir de pantalla completa'})).toBeTruthy())
+   fireEvent.click(within(frame).getByRole('button',{name:'Agregar caja'}))
+   expect(within(frame).getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
+   expect(projects.saveDocument).not.toHaveBeenCalled()
+  }finally{
+   Reflect.deleteProperty(document,'fullscreenElement')
+  }
+ })
  it('propietario renombra el proyecto sin modificar el documento ni reiniciar el editor',async()=>{
-  vi.spyOn(window,'prompt').mockReturnValue('Proyecto renombrado QA')
+  const nativePrompt=vi.spyOn(window,'prompt')
   vi.mocked(projects.renameProject).mockResolvedValue({...project,name:'Proyecto renombrado QA'})
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Renombrar'}))
+  const panel=await screen.findByRole('dialog',{name:'Administrar proyecto: Proyecto QA'})
+  fireEvent.change(within(panel).getByLabelText('Nombre del proyecto'),{target:{value:'Proyecto renombrado QA'}})
+  fireEvent.click(within(panel).getByRole('button',{name:'Guardar nombre'}))
   await waitFor(()=>expect(projects.renameProject).toHaveBeenCalledWith('p-qa','Proyecto renombrado QA'))
+  expect(nativePrompt).not.toHaveBeenCalled()
   await waitFor(()=>expect(screen.getByRole('button',{name:'Proyecto renombrado QA'})).toBeTruthy())
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
@@ -86,8 +187,10 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   vi.mocked(audit.listAuditEvents).mockResolvedValue({items:[{id:'1',event_type:'project.renamed',actor_name:'QA',actor_email:null,resource_id:'p-qa',resource_name:'Proyecto QA',detail:{name:'Proyecto QA'},created_at:'2026-11-12T12:00:00Z'}],nextCursor:null})
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Actividad'}))
-  expect(await screen.findByRole('dialog',{name:'Actividad y auditoría'})).toBeTruthy()
-  expect(await screen.findByText('Proyecto renombrado')).toBeTruthy()
+  const activityDialog=await screen.findByRole('dialog',{name:'Actividad y auditoría'})
+  // El mismo nombre también aparece en el filtro <option>; comprobar la celda
+  // de auditoría, no un texto ambiguo en dos elementos del DOM.
+  expect(await within(activityDialog).findByRole('cell',{name:'Proyecto renombrado'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('propietario conserva edición aunque el catálogo de permisos en sesión venga vacío',async()=>{
@@ -133,11 +236,14 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  it('permiso para editar una relación no exige permiso para mover cajas',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleKey:'relation-editor',roleName:'Editor de relaciones',permissions:[...reader.permissions,'relation.edit.mixed']})
   vi.mocked(projects.projectAccess).mockResolvedValue({...reader,roleKey:'relation-editor',roleName:'Editor de relaciones',permissions:[...reader.permissions,'relation.edit.mixed']})
-  const prompt=vi.spyOn(window,'prompt').mockReturnValue('Etiqueta actualizada')
+  const nativePrompt=vi.spyOn(window,'prompt')
   await openEditor()
   await waitFor(()=>expect(screen.getByRole('button',{name:'Editar relación QA'})).toBeTruthy())
   fireEvent.click(screen.getByRole('button',{name:'Editar relación QA'}))
-  expect(prompt).toHaveBeenCalled()
+  const relationDialog=await screen.findByRole('dialog',{name:'Editar relación'})
+  fireEvent.change(within(relationDialog).getByLabelText('Nombre o protocolo de la relación'),{target:{value:'Etiqueta actualizada'}})
+  fireEvent.click(within(relationDialog).getByRole('button',{name:'Guardar relación'}))
+  expect(nativePrompt).not.toHaveBeenCalled()
   await waitFor(()=>{
    const calls=vi.mocked(projects.saveDocument).mock.calls
    expect(calls.length).toBeGreaterThan(0)
@@ -362,17 +468,43 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   fireEvent.click(screen.getByTitle('Mostrar / ocultar inspector'))
   expect(screen.getByRole('heading',{name:'Detalles del diagrama'})).toBeTruthy()
   const app=document.querySelector('.layout')!
-  fireEvent.click(screen.getByTitle('Ampliar lienzo'))
+  fireEvent.click(screen.getByTitle('Ampliar área de trabajo'))
   expect(app.className).toContain('expanded')
-  fireEvent.click(screen.getByTitle('Ampliar lienzo'))
+  fireEvent.click(screen.getByTitle('Restaurar distribución'))
   expect(app.className).not.toContain('expanded')
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
+ it('pantalla completa usa alternativa local si el navegador bloquea la API',async()=>{
+  await openEditor()
+  const frame=document.querySelector('.canvas-frame')!
+  fireEvent.click(screen.getAllByRole('button',{name:'Pantalla completa del diagrama'})[0])
+  await waitFor(()=>expect(frame.className).toContain('atlas-fullscreen-fallback'))
+  fireEvent.click(screen.getByRole('button',{name:'Salir de pantalla completa'}))
+  await waitFor(()=>expect(frame.className).not.toContain('atlas-fullscreen-fallback'))
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('colapsa navegación y alterna minimapa sin guardar cambios',async()=>{
+  await openEditor()
+  const shell=document.querySelector('.layout')!
+  fireEvent.click(screen.getByRole('button',{name:'Ocultar menú lateral'}))
+  expect(shell.className).toContain('expanded')
+  fireEvent.click(screen.getByRole('button',{name:'Mostrar menú lateral'}))
+  expect(shell.className).not.toContain('expanded')
+  fireEvent.click(screen.getByRole('button',{name:'Ocultar minimapa'}))
+  expect(screen.getByRole('button',{name:'Mostrar minimapa'})).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:'Mostrar minimapa'}))
+  expect(screen.getByRole('button',{name:'Ocultar minimapa'})).toBeTruthy()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
  it('confirma el borrado de un diagrama sin borrar sus elementos reutilizables',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(true)
+  const nativeConfirm=vi.spyOn(window,'confirm')
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Eliminar diagrama'}))
-  expect(screen.getByRole('heading',{name:'C2 · Contenedores'})).toBeTruthy()
+  const confirmation=await screen.findByRole('dialog',{name:'Eliminar diagrama'})
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Eliminar diagrama'}))
+  expect(nativeConfirm).not.toHaveBeenCalled()
+  expect(await screen.findByRole('heading',{name:'C2 · Contenedores'})).toBeTruthy()
   await waitFor(()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
@@ -382,20 +514,29 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   },{timeout:4500})
  })
  it('cancelar borrado de un diagrama y de una caja preserva datos',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(false)
+  const nativeConfirm=vi.spyOn(window,'confirm')
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Eliminar diagrama'}))
+  let confirmation=await screen.findByRole('dialog',{name:'Eliminar diagrama'})
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Cancelar'}))
+  expect(screen.queryByRole('dialog',{name:'Eliminar diagrama'})).toBeNull()
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   fireEvent.click(screen.getByRole('button',{name:'Quitar caja de esta vista'}))
+  confirmation=await screen.findByRole('dialog',{name:'Quitar caja de la vista'})
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Cancelar'}))
   expect(screen.getByRole('button',{name:'Plataforma Zercano'})).toBeTruthy()
+  expect(nativeConfirm).not.toHaveBeenCalled()
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('quitar una caja de la vista no elimina el elemento del catálogo global',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(true)
+  const nativeConfirm=vi.spyOn(window,'confirm')
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   fireEvent.click(screen.getByRole('button',{name:'Quitar caja de esta vista'}))
+  const confirmation=await screen.findByRole('dialog',{name:'Quitar caja de la vista'})
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Quitar caja'}))
+  expect(nativeConfirm).not.toHaveBeenCalled()
   await waitFor(()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
@@ -421,10 +562,13 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   },{timeout:4500})
  })
  it('agrega un enlace HTTPS validado a un elemento y permite retirarlo',async()=>{
-  vi.spyOn(window,'prompt').mockReturnValueOnce('Documento de arquitectura').mockReturnValueOnce('https://example.com/arquitectura')
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   fireEvent.click(screen.getByRole('button',{name:/^Agregar$/}))
+  const modal=screen.getByRole('dialog',{name:'Agregar enlace externo'})
+  fireEvent.change(within(modal).getByLabelText('Etiqueta del enlace'),{target:{value:'Documento de arquitectura'}})
+  fireEvent.change(within(modal).getByLabelText('URL HTTPS'),{target:{value:'https://example.com/arquitectura'}})
+  fireEvent.click(within(modal).getByRole('button',{name:'Agregar enlace'}))
   expect(screen.getByText('Documento de arquitectura')).toBeTruthy()
   fireEvent.click(screen.getByTitle('Quitar enlace'))
   await waitFor(()=>{
@@ -434,11 +578,13 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   },{timeout:4500})
  })
  it('rechaza enlaces JavaScript para evitar ejecución en ventanas externas',async()=>{
-  vi.spyOn(window,'prompt').mockReturnValueOnce('Enlace inseguro').mockReturnValueOnce('javascript:alert(1)')
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   fireEvent.click(screen.getByRole('button',{name:/^Agregar$/}))
-  expect(screen.getByText(/URL inválida/)).toBeTruthy()
+  const modal=screen.getByRole('dialog',{name:'Agregar enlace externo'})
+  fireEvent.change(within(modal).getByLabelText('Etiqueta del enlace'),{target:{value:'Enlace inseguro'}})
+  fireEvent.change(within(modal).getByLabelText('URL HTTPS'),{target:{value:'javascript:alert(1)'}})
+  expect(within(modal).getByRole('button',{name:'Agregar enlace'})).toHaveProperty('disabled',true)
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('conserva campos y valores de lista al editar un requerimiento compartido',async()=>{
@@ -473,12 +619,16 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   },{timeout:4500})
  })
  it('elimina una definición de campo solo tras confirmación, sin borrar fichas',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(true)
+  const nativeConfirm=vi.spyOn(window,'confirm')
   await openEditor()
   fireEvent.click(screen.getByTitle('Configuración de campos'))
   const modal=screen.getByRole('dialog',{name:'Campos personalizados por tipo de elemento'})
   const oldCount=demoDocument().fieldDefinitions.length
   fireEvent.click(within(modal).getAllByTitle('Eliminar campo')[0])
+  const confirmation=await screen.findByRole('dialog',{name:'Eliminar campo personalizado'})
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Eliminar campo'}))
+  expect(nativeConfirm).not.toHaveBeenCalled()
   await waitFor(()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
@@ -649,33 +799,38 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   },{timeout:4500})
  })
  it('cancelar la eliminación de un campo no altera las definiciones del proyecto',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(false)
+  const nativeConfirm=vi.spyOn(window,'confirm')
   await openEditor()
   fireEvent.click(screen.getByTitle('Configuración de campos'))
   const modal=screen.getByRole('dialog',{name:'Campos personalizados por tipo de elemento'})
   fireEvent.click(within(modal).getAllByTitle('Eliminar campo')[0])
+  const confirmation=await screen.findByRole('dialog',{name:'Eliminar campo personalizado'})
+  fireEvent.click(within(confirmation).getByRole('button',{name:'Cancelar'}))
+  expect(screen.queryByRole('dialog',{name:'Eliminar campo personalizado'})).toBeNull()
   expect(within(modal).getAllByTitle('Eliminar campo')).toHaveLength(demoDocument().fieldDefinitions.length)
   expect(projects.saveDocument).not.toHaveBeenCalled()
+  expect(nativeConfirm).not.toHaveBeenCalled()
  })
  it('la importación validada usa la versión actual y recarga el documento autorizado',async()=>{
   const fixture=demoDocument()
   vi.mocked(projects.importProject).mockResolvedValue(5)
-  vi.spyOn(window,'confirm').mockReturnValue(true)
   await openEditor()
   const file=new File([JSON.stringify({document:fixture})],'modelo-atlas.json',{type:'application/json'})
   Object.defineProperty(file,'text',{value:async()=>JSON.stringify({document:fixture})})
   fireEvent.change(document.querySelector<HTMLInputElement>('input[type="file"]')!,{target:{files:[file]}})
+  const modal=await screen.findByRole('dialog',{name:'Confirmar importación'})
+  fireEvent.click(within(modal).getByRole('button',{name:'Importar documento'}))
   await waitFor(()=>expect(projects.importProject).toHaveBeenCalledWith('p-qa',expect.objectContaining({schema:1}),1))
   await waitFor(()=>expect(screen.getByText(/Importación validada y guardada/)).toBeTruthy())
   expect(projects.loadDocument).toHaveBeenCalledTimes(2)
  })
  it('cancelar una importación autorizada evita escribir sobre el documento',async()=>{
-  vi.spyOn(window,'confirm').mockReturnValue(false)
   await openEditor()
   const file=new File([JSON.stringify(demoDocument())],'modelo.json',{type:'application/json'})
   Object.defineProperty(file,'text',{value:async()=>JSON.stringify(demoDocument())})
   fireEvent.change(document.querySelector<HTMLInputElement>('input[type="file"]')!,{target:{files:[file]}})
-  await waitFor(()=>expect(window.confirm).toHaveBeenCalled())
+  const modal=await screen.findByRole('dialog',{name:'Confirmar importación'})
+  fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}))
   expect(projects.importProject).not.toHaveBeenCalled()
  })
  it('bloquea el cambio de espacio cuando hay cambios locales sin guardar',async()=>{

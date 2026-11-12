@@ -19,7 +19,7 @@ const equal=(a:JsonValue,b:JsonValue):boolean=>{
 }
 const keyed=(items:unknown[]):boolean=>items.every(item=>object(item)&&typeof item.id==='string')&&new Set(items.map(item=>(item as {id:string}).id)).size===items.length
 const child=(v:Record<string,unknown>,key:string):JsonValue=>Object.hasOwn(v,key)?v[key]:MISSING
-function reconcile(base:JsonValue,local:JsonValue,remote:JsonValue,path:string):JsonValue{
+function reconcile(base:JsonValue,local:JsonValue,remote:JsonValue,path:string,choices?:Readonly<Record<string,'current'|'historical'>>,unresolved?:string[]):JsonValue{
  if(equal(local,base))return remote
  if(equal(remote,base))return local
  if(equal(local,remote))return local
@@ -27,7 +27,7 @@ function reconcile(base:JsonValue,local:JsonValue,remote:JsonValue,path:string):
   const old=object(base)?base:{}
   const result:Record<string,unknown>={}
   for(const key of new Set([...Object.keys(old),...Object.keys(local),...Object.keys(remote)])){
-   const value=reconcile(child(old,key),child(local,key),child(remote,key),`${path}.${key}`)
+   const value=reconcile(child(old,key),child(local,key),child(remote,key),`${path}.${key}`,choices,unresolved)
    if(value!==MISSING)Object.defineProperty(result,key,{value,writable:true,enumerable:true,configurable:true})
   }
   return result
@@ -42,16 +42,26 @@ function reconcile(base:JsonValue,local:JsonValue,remote:JsonValue,path:string):
    const order=[...theirs.keys(),...ours.keys()].filter((id,i,all)=>all.indexOf(id)===i)
    const combined:unknown[]=[]
    for(const id of order){
-    const result=reconcile(before.has(id)?before.get(id):MISSING,ours.has(id)?ours.get(id):MISSING,theirs.has(id)?theirs.get(id):MISSING,`${path}[${id}]`)
+    const result=reconcile(before.has(id)?before.get(id):MISSING,ours.has(id)?ours.get(id):MISSING,theirs.has(id)?theirs.get(id):MISSING,`${path}[${id}]`,choices,unresolved)
     if(result!==MISSING)combined.push(result)
    }
    return combined
   }
  }
  // A removed object versus a modified one, or competing scalar/array writes.
+ if(choices?.[path]==='current')return remote
+ if(choices?.[path]==='historical')return local
+ if(unresolved){unresolved.push(path);return remote}
  throw new MergeConflict(path)
 }
 export function mergeProjectDocuments(base:ProjectDocument,local:ProjectDocument,remote:ProjectDocument):ProjectDocument{
  if(base.schema!==1||local.schema!==1||remote.schema!==1)throw new MergeConflict('schema')
  return structuredClone(reconcile(base,local,remote,'document')) as ProjectDocument
+}
+
+/** Preview every conflicting property; never save the preview as a document. */
+export function previewProjectMerge(base:ProjectDocument,historical:ProjectDocument,current:ProjectDocument,choices:Readonly<Record<string,'current'|'historical'>>={}):{document:ProjectDocument;conflicts:string[]}{
+ const unresolved:string[]=[]
+ const document=structuredClone(reconcile(base,historical,current,'document',choices,unresolved)) as ProjectDocument
+ return {document,conflicts:unresolved}
 }

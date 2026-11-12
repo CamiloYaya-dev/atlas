@@ -52,3 +52,31 @@ test('presencia no revela identificadores de diagramas o elementos sin permiso a
  assert.match(viewer.content(),/e-public/)
  hub.closeAll()
 })
+
+test('presencia real: varias pestañas de una persona cuentan una sola vez y se retiran al cerrar',()=>{
+ const hub=new ProjectEvents(),a=new FakeResponse(),b=new FakeResponse(),c=new FakeResponse()
+ hub.subscribe('p','aaaaaaaa-0000-0000-0000-000000000001','u-1','Persona Uno',asResponse(a),1,async()=>{})
+ hub.subscribe('p','bbbbbbbb-0000-0000-0000-000000000002','u-1','Persona Uno',asResponse(b),1,async()=>{})
+ hub.subscribe('p','cccccccc-0000-0000-0000-000000000003','u-2','Persona Dos',asResponse(c),1,async()=>{})
+ const frames=c.content().split('event: presence\ndata: ').filter(Boolean)
+ const last=JSON.parse(frames[frames.length-1].split('\n')[0]) as {participants:{userId:string}[]}
+ assert.deepEqual(last.participants.map(p=>p.userId).sort(),['u-1','u-2'])
+ b.end();c.end()
+ const after=a.content().split('event: presence\ndata: ').filter(Boolean)
+ const current=JSON.parse(after[after.length-1].split('\n')[0]) as {participants:{userId:string}[]}
+ assert.deepEqual(current.participants.map(p=>p.userId),['u-1'])
+ hub.closeAll()
+})
+
+test('restauración: detecta otros usuarios conectados pero no otras pestañas del propietario',()=>{
+ const hub=new ProjectEvents(),owner=new FakeResponse(),tab=new FakeResponse(),other=new FakeResponse()
+ hub.subscribe('p','aaaaaaaa-0000-0000-0000-000000000001','owner','Propietario',asResponse(owner),1,async()=>{})
+ assert.equal(hub.hasOtherParticipants('p','owner'),false)
+ hub.subscribe('p','bbbbbbbb-0000-0000-0000-000000000002','owner','Otra pestaña',asResponse(tab),1,async()=>{})
+ assert.equal(hub.hasOtherParticipants('p','owner'),false)
+ hub.subscribe('p','cccccccc-0000-0000-0000-000000000003','collaborator','Colaborador',asResponse(other),1,async()=>{})
+ assert.equal(hub.hasOtherParticipants('p','owner'),true)
+ other.end()
+ assert.equal(hub.hasOtherParticipants('p','owner'),false)
+ hub.closeAll()
+})

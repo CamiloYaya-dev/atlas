@@ -1,3 +1,39 @@
+## V4.8.1 — Ajustes de área de trabajo y creación en fullscreen (2026-11-12)
+
+- «Ampliar área de trabajo» oculta la cabecera completa (título, descripción, exportar/importar) y la barra de filtros; conserva la barra global del proyecto.
+- «Restaurar distribución» aparece dentro del lienzo cuando está ampliado, para que nunca quede oculto el control para volver.
+- «Agregar caja» pasa a estar dentro del lienzo, junto al control de pantalla completa, con los mismos permisos de edición.
+- El diálogo de creación se muestra dentro del elemento fullscreen mediante React Portal, tanto en pantalla completa nativa como en alternativa CSS.
+- Pruebas React y Playwright agregadas; TypeScript API/web y 5 pruebas Chromium de distribución aprobaron. Falta ejecutar la suite React/Vitest completa en Windows: el runner no inicia aquí por un módulo nativo Linux de Rollup ausente.
+- Sin cambios de API, migraciones, base de datos ni modelo de permisos.
+
+## V4.8.1 — Hotfix del layout del editor (2026-11-12)
+
+- Reparado CSS Grid al ocultar sidebar: el `main` pasaba a columna de 0px y se mostraba pantalla gris.
+- Botones de menú y ampliación con restauración coherente y estados accesibles.
+- Nuevas pruebas React y 3 pruebas Chromium de layout desktop/móvil; el CSS original falló y el corregido pasó en Chromium.
+- Sin migraciones, sin cambios de API ni de permisos. TypeScript verificado; QA completa en Windows pendiente.
+
+## 4.8.1 — Restauración revisable, presencia y ergonomía del lienzo
+
+- Restauración íntegra para propietario; ramas de recuperación con resolución de conflictos por campo.
+- Protecciones contra restauraciones destructivas con colaboradores conectados.
+- Sidebar/minimapa configurables, pantalla completa nativa con fallback.
+- Protección contra traducción automática del DOM React y mejoras en diagnóstico.
+- Migración aditiva 005_restore_branches.sql; sin dependencias nuevas.
+
+## ATLAS V4.8.0 — Hallazgos de la prueba funcional (12/11/2026)
+
+- Presencia por usuario único, no por pestaña/conexión; caducidad de sesiones SSE.
+- Restauración de versiones con modal propio y confirmación explícita, sin ventanas nativas.
+- Actividad y auditoría en tabla con filtros parametrizados y paginación por cursor.
+- Tipos de visualización con nombres y explicaciones de uso.
+- Categorías dinámicas por diagrama para combinar varios contextos en C1/C2/C3/C4 y procesos.
+- Compatibilidad de lectura con diagramas anteriores, sin nuevas migraciones.
+- Ver [GUIA_V4_8_PRESENCIA_FILTROS_HISTORIAL.md](GUIA_V4_8_PRESENCIA_FILTROS_HISTORIAL.md).
+
+---
+
 # Historial ATLAS
 
 ## V4.3.0 — Calidad automatizada

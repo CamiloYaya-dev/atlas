@@ -10,7 +10,7 @@ export async function saveDocument(projectId:string,document:ProjectDocument,exp
  if(r.document)onCommitted?.(r.document,r.version)
  return r.version
 }
-export interface LiveParticipant {clientId:string;name:string;diagramId:string|null;elementId:string|null}
+export interface LiveParticipant {clientId:string;userId:string;name:string;diagramId:string|null;elementId:string|null}
 export interface LivePresence {participants:LiveParticipant[]}
 export const sendPresence=(projectId:string,clientId:string,diagramId:string|null,elementId:string|null)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(projectId)}/presence`,{method:'POST',body:JSON.stringify({clientId,diagramId,elementId})})
 
@@ -34,3 +34,12 @@ export const projectMembers=(id:string)=>request<ProjectMember[]>(`/projects/${e
 export const projectCandidates=(id:string)=>request<{users:ProjectCandidate[];roles:ProjectRole[]}>(`/projects/${encodeURIComponent(id)}/candidates`)
 export const assignProjectMember=(id:string,userId:string,roleId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'PUT',body:JSON.stringify({roleId})})
 export const removeProjectMember=(id:string,userId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'DELETE'})
+
+/** Staged restoration: create proposal first; review merges and resolve fields before applying. */
+export type RestoreBranch={id:string;source_version:number;base_version:number;created_at:string;status:'open'|'applied'|'discarded';creator_name:string|null}
+export type RestoreBranchPreview={id:string;sourceVersion:number;baseVersion:number;currentVersion:number;status:'open'|'applied'|'discarded';conflicts:string[];historicalDiagrams:number;currentDiagrams:number}
+export const listRestoreBranches=(projectId:string)=>request<RestoreBranch[]>(`/projects/${encodeURIComponent(projectId)}/restore-branches`)
+export const createRestoreBranch=(projectId:string,sourceVersion:number)=>request<RestoreBranch>(`/projects/${encodeURIComponent(projectId)}/restore-branches`,{method:'POST',body:JSON.stringify({sourceVersion})})
+export const previewRestoreBranch=(projectId:string,branchId:string)=>request<RestoreBranchPreview>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}/preview`)
+export const applyRestoreBranch=(projectId:string,branchId:string,expectedVersion:number,mode:'merge'|'replace',resolutions:Record<string,'current'|'historical'>)=>request<{version:number;restoredFrom:number}>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}/apply`,{method:'POST',body:JSON.stringify({expectedVersion,mode,resolutions})})
+export const discardRestoreBranch=(projectId:string,branchId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}`,{method:'DELETE'})

@@ -77,4 +77,17 @@ export class ProjectsService {
   if(!result)throw new DomainError('Versión base no disponible. Conserva tu copia local y recarga el proyecto.',409)
   return result
  }
+ async listRestoreBranches(projectId:string,userId:string){await this.assertReadable(projectId,userId);return this.repo.listRestoreBranches(projectId,userId)}
+ async createRestoreBranch(projectId:string,sourceVersion:unknown,userId:string){await this.assertReadable(projectId,userId);if(typeof sourceVersion!=='number'||!Number.isSafeInteger(sourceVersion)||sourceVersion<1)throw new DomainError('Versión histórica inválida',400);return this.repo.createRestoreBranch(projectId,sourceVersion,userId)}
+ async previewRestoreBranch(projectId:string,branchId:string,userId:string){await this.assertReadable(projectId,userId);return this.repo.previewRestoreBranch(projectId,branchId,userId)}
+ async applyRestoreBranch(projectId:string,branchId:string,userId:string,body:Record<string,unknown>){
+  await this.assertReadable(projectId,userId)
+  const version=body.expectedVersion,mode=body.mode,resolutions=body.resolutions??{}
+  if(typeof version!=='number'||!Number.isSafeInteger(version)||version<1)throw new DomainError('Versión esperada inválida',400)
+  if(mode!=='merge'&&mode!=='replace')throw new DomainError('Modo de restauración inválido',400)
+  if(!resolutions||typeof resolutions!=='object'||Array.isArray(resolutions)||Object.keys(resolutions).length>500||Object.entries(resolutions).some(([k,v])=>!k.startsWith('document.')||k.length>500||(v!=='current'&&v!=='historical')))throw new DomainError('Resoluciones de conflicto inválidas',400)
+  return this.repo.applyRestoreBranch(projectId,branchId,userId,version,resolutions as Record<string,'current'|'historical'>,mode)
+ }
+ async discardRestoreBranch(projectId:string,branchId:string,userId:string){await this.assertReadable(projectId,userId);return this.repo.discardRestoreBranch(projectId,branchId,userId)}
+
 }

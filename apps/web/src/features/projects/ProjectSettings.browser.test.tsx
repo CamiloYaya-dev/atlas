@@ -15,6 +15,12 @@ beforeEach(()=>{
  vi.mocked(api.deleteProject).mockResolvedValue({ok:true})
 })
 describe('Administración privada de proyectos',()=>{
+ it('una respuesta de membresías incompleta no rompe la aplicación',async()=>{
+  vi.mocked(api.projectCandidates).mockResolvedValue(undefined as never)
+  render(<ProjectSettings project={project} access={owner} canEditNow onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+  expect((await screen.findByRole('alert')).textContent).toContain('lista de miembros o roles incompleta')
+  expect(screen.getByRole('dialog',{name:'Administrar proyecto: Proyecto protegido'})).toBeTruthy()
+ })
  it('muestra miembros del proyecto, no todos los proyectos del espacio',async()=>{
   render(<ProjectSettings project={project} access={owner} canEditNow onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
   expect(await screen.findByText('owner@test.local · Propietario')).toBeTruthy()

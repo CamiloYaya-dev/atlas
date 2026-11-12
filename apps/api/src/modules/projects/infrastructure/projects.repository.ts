@@ -1,9 +1,9 @@
 import {pool} from '../../../db/pool'
 import type {Project,ProjectDocument} from '@atlas/contracts'
 import {projectAccess,requirePermission} from '../../../security/roles'
-import {applyAuthorizedChange} from '../application/document-policy'
+import {applyAuthorizedChange,ensureUniqueIds} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
-import {mergeProjectDocuments,MergeConflict} from '@atlas/contracts'
+import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument} from '@atlas/contracts'
 import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string,userId:string):Promise<Project[]>{const {rows}=await pool.query<Project>(`SELECT DISTINCT p.id,p.workspace_id,p.name,p.description FROM projects p
@@ -106,13 +106,82 @@ export class ProjectsRepository {
       projectVisible(storedBase.rows[0].document,ac),incoming,projectVisible(document,ac))
     }catch(e){if(e instanceof MergeConflict)throw new DomainError(e.message,409);throw e}
    }
-   const merged=applyAuthorizedChange(document,submitted,ac)
+   // Restore is an owner-authorized, immutable FULL snapshot. The normal projection
+   // omits orphaned elements; passing a historical full snapshot through it
+   // wrongly raises 'Intento de modificar un elemento oculto'.
+   const merged=operation==='restore' ? structuredClone(submitted) : applyAuthorizedChange(document,submitted,ac)
+   if(operation==='restore'){if(!isProjectDocument(merged))throw new DomainError('Instantánea histórica inválida',400);ensureUniqueIds(merged)}
    const updated=await c.query<{version:number}>(`UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version`,[JSON.stringify(merged),userId,projectId])
    const next=updated.rows[0].version
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES ($1,$2,$3::jsonb,$4)',[projectId,next,JSON.stringify(merged),userId])
    await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey,collaborative,...(sourceVersion?{sourceVersion}:{})})])
    await c.query('COMMIT')
    return {version:next,document:projectVisible(merged,ac)}
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
+ }
+ /** Branches reference IMMUTABLE historical revisions; they never replace the working document on creation. */
+ async listRestoreBranches(projectId:string,userId:string){
+  const ac=await projectAccess(projectId,userId);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede revisar ramas de restauración',403)
+  const {rows}=await pool.query<{id:string;source_version:number;base_version:number;created_at:string;status:string;creator_name:string|null}>(`SELECT b.id,b.source_version,b.base_version,b.created_at,b.status,u.display_name AS creator_name
+   FROM project_restore_branches b LEFT JOIN atlas_users u ON u.id=b.created_by
+   WHERE b.project_id=$1 ORDER BY b.created_at DESC LIMIT 40`,[projectId]);return rows
+ }
+ async createRestoreBranch(projectId:string,sourceVersion:number,userId:string){
+  const c=await pool.connect();try{await c.query('BEGIN')
+   const current=await c.query<{workspace_id:string;version:number}>(`SELECT p.workspace_id,d.version FROM projects p JOIN project_documents d ON d.project_id=p.id WHERE p.id=$1 FOR UPDATE OF d`,[projectId]);if(!current.rows[0])throw notFound()
+   const ac=await projectAccess(projectId,userId,c);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede proponer restauraciones',403)
+   const exists=await c.query('SELECT 1 FROM project_document_versions WHERE project_id=$1 AND version=$2',[projectId,sourceVersion]);if(!exists.rowCount)throw notFound()
+   const {rows}=await c.query<{id:string;source_version:number;base_version:number;status:string}>(`INSERT INTO project_restore_branches(project_id,source_version,base_version,created_by)
+     VALUES($1,$2,$3,$4) RETURNING id,source_version,base_version,status`,[projectId,sourceVersion,current.rows[0].version,userId])
+   await c.query(`INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES($1,$2,'project.restore_branch_created',$3,$4::jsonb)`,[current.rows[0].workspace_id,userId,projectId,JSON.stringify({branchId:rows[0].id,sourceVersion})])
+   await c.query('COMMIT');return rows[0]
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
+ }
+ async previewRestoreBranch(projectId:string,branchId:string,userId:string){
+  const ac=await projectAccess(projectId,userId);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede revisar restauraciones',403)
+  const {rows}=await pool.query<{id:string;source_version:number;base_version:number;status:string;current_version:number;base:ProjectDocument;historical:ProjectDocument;current:ProjectDocument}>(`
+    SELECT b.id,b.source_version,b.base_version,b.status,d.version AS current_version,
+      base.document AS base,src.document AS historical,d.document AS current
+    FROM project_restore_branches b JOIN project_documents d ON d.project_id=b.project_id
+    JOIN project_document_versions base ON base.project_id=b.project_id AND base.version=b.base_version
+    JOIN project_document_versions src ON src.project_id=b.project_id AND src.version=b.source_version
+    WHERE b.id=$1 AND b.project_id=$2`,[branchId,projectId])
+  const item=rows[0];if(!item)throw notFound()
+  const plan=previewProjectMerge(item.base,item.historical,item.current)
+  return {id:item.id,sourceVersion:item.source_version,baseVersion:item.base_version,currentVersion:item.current_version,status:item.status,conflicts:plan.conflicts,
+    historicalDiagrams:item.historical.diagrams.length,currentDiagrams:item.current.diagrams.length}
+ }
+ async applyRestoreBranch(projectId:string,branchId:string,userId:string,expectedVersion:number,choices:Record<string,'current'|'historical'>,mode:'merge'|'replace'){
+  const c=await pool.connect();try{await c.query('BEGIN')
+   const result=await c.query<{workspace_id:string;version:number;document:ProjectDocument}>(`
+    SELECT p.workspace_id,d.version,d.document FROM projects p JOIN project_documents d ON d.project_id=p.id WHERE p.id=$1 FOR UPDATE OF d`,[projectId]);if(!result.rows[0])throw notFound()
+   const ac=await projectAccess(projectId,userId,c);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede aplicar restauraciones',403)
+   const row=result.rows[0]
+   if(row.version!==expectedVersion)throw new DomainError('Conflicto: el proyecto cambió durante la revisión. Actualiza la propuesta antes de aplicar.',409)
+   const branches=await c.query<{source_version:number;base_version:number;status:string}>(`SELECT source_version,base_version,status FROM project_restore_branches WHERE id=$1 AND project_id=$2 FOR UPDATE`,[branchId,projectId]);const branch=branches.rows[0]
+   if(!branch||branch.status!=='open')throw new DomainError('La rama de restauración no está disponible',409)
+   const snaps=await c.query<{version:number;document:ProjectDocument}>('SELECT version,document FROM project_document_versions WHERE project_id=$1 AND version=ANY($2::int[])',[projectId,[branch.base_version,branch.source_version]])
+   const base=snaps.rows.find(x=>x.version===branch.base_version)?.document,historical=snaps.rows.find(x=>x.version===branch.source_version)?.document
+   if(!base||!historical)throw notFound()
+   const merged=mode==='replace'?structuredClone(historical):previewProjectMerge(base,historical,row.document,choices)
+   if(mode==='merge'&&'conflicts' in merged&&merged.conflicts.length)throw new DomainError(`Conflictos sin resolver: ${merged.conflicts.slice(0,5).join(', ')}`,409)
+   const resolved=mode==='replace'?historical:(merged as {document:ProjectDocument}).document
+   if(!isProjectDocument(resolved))throw new DomainError('Documento inválido',400)
+   ensureUniqueIds(resolved)
+   if(Buffer.byteLength(JSON.stringify(resolved),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande',413)
+   const updated=await c.query<{version:number}>('UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version',[JSON.stringify(resolved),userId,projectId])
+   const version=updated.rows[0].version
+   await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES($1,$2,$3::jsonb,$4)',[projectId,version,JSON.stringify(resolved),userId])
+   await c.query("UPDATE project_restore_branches SET status='applied',resolved_at=now() WHERE project_id=$1 AND id=$2",[projectId,branchId])
+   await c.query(`INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES($1,$2,'project.restore_branch_applied',$3,$4::jsonb)`,[row.workspace_id,userId,projectId,JSON.stringify({branchId,sourceVersion:branch.source_version,mode,version})])
+   await c.query('COMMIT');return {version,restoredFrom:branch.source_version,mode}
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
+ }
+ async discardRestoreBranch(projectId:string,branchId:string,userId:string){
+  const c=await pool.connect();try{await c.query('BEGIN')
+   const ac=await projectAccess(projectId,userId,c);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede descartar ramas',403)
+   const {rows}=await c.query<{id:string}>("UPDATE project_restore_branches SET status='discarded',resolved_at=now() WHERE id=$1 AND project_id=$2 AND status='open' RETURNING id",[branchId,projectId]);if(!rows[0])throw notFound()
+   await c.query('COMMIT');return {ok:true}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  }
 }

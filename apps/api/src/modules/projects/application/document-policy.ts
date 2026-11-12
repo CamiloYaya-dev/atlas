@@ -29,14 +29,18 @@ function edgeKind(edge:DiagramEdge,diagram:Diagram,doc:ProjectDocument){
  if(!source||!target||!doc.elements[source.elementId]||!doc.elements[target.elementId])throw new DomainError('Relación con nodos inexistentes',400)
  return relationScope(doc.elements[source.elementId].type,doc.elements[target.elementId].type)
 }
-function ensureUniqueIds(doc:ProjectDocument){
+export function ensureUniqueIds(doc:ProjectDocument){
  const usedDiagrams=new Set<string>()
  for(const d of doc.diagrams){
   if(usedDiagrams.has(d.id))throw new DomainError('IDs de diagrama duplicados',400)
   usedDiagrams.add(d.id)
+  const filters=d.filters||[]
+  if(filters.length>100||new Set(filters.map(f=>f.id)).size!==filters.length||filters.some(f=>f.id.length<1||f.id.length>100||f.label.trim().length<1||f.label.length>80))throw new DomainError('Filtros de diagrama inválidos',400)
+  const filterIds=new Set(filters.map(f=>f.id))
   const nodes=new Set<string>(),edges=new Set<string>(),pairs=new Set<string>()
   for(const n of d.nodes){
    if(nodes.has(n.id)||!doc.elements[n.elementId])throw new DomainError('Nodo duplicado o sin elemento',400)
+   if(n.filterIds?.some(id=>!filterIds.has(id)))throw new DomainError('Nodo con filtro inexistente',400)
    nodes.add(n.id)
   }
   for(const e of d.edges){
@@ -105,7 +109,7 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
   }
   const stored=storedDiagrams.get(d.id)!
   if(d.type!==stored.type){requirePermission(a,`diagram.edit.${stored.type}`);requirePermission(a,`diagram.create.${d.type}`);requirePermission(a,`diagram.view.${d.type}`)}
-  if(d.name!==stored.name||d.description!==stored.description||d.type!==stored.type)requirePermission(a,`diagram.edit.${stored.type}`)
+  if(d.name!==stored.name||d.description!==stored.description||d.type!==stored.type||!equal(d.filters||[],stored.filters||[]))requirePermission(a,`diagram.edit.${stored.type}`)
   const previousNodes=new Map(old.nodes.map(x=>[x.id,x])),nextNodes=new Map(d.nodes.map(x=>[x.id,x]))
   if(!equal(old.nodes,d.nodes)){
    requirePermission(a,`diagram.layout.${stored.type}`)

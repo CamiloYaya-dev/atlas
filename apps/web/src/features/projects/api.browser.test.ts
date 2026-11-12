@@ -1,7 +1,7 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest'
 import {emptyDoc} from '@atlas/contracts'
 import {request} from '../../shared/api/http'
-import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion} from './api'
+import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch} from './api'
 vi.mock('../../shared/api/http',()=>({request:vi.fn()}))
 beforeEach(()=>vi.mocked(request).mockResolvedValue({version:4} as never))
 describe('Contratos HTTP de proyectos',()=>{
@@ -30,6 +30,18 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(saved).toBe(5)
   expect(onCommitted).toHaveBeenCalledWith(doc,5)
   expect(request).toHaveBeenCalledWith('/projects/p1/document',{method:'PUT',body:JSON.stringify({document:doc,expectedVersion:4,collaborative:true})})
+ })
+ it('contrato HTTP de ramas: creación, consulta, vista previa, resolución y descarte',async()=>{
+  await listRestoreBranches('p1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches')
+  await createRestoreBranch('p1',2)
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches',{method:'POST',body:JSON.stringify({sourceVersion:2})})
+  await previewRestoreBranch('p1','b1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1/preview')
+  await applyRestoreBranch('p1','b1',3,'merge',{'document.elements.a.name':'historical'})
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1/apply',{method:'POST',body:JSON.stringify({expectedVersion:3,mode:'merge',resolutions:{'document.elements.a.name':'historical'}})})
+  await discardRestoreBranch('p1','b1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1',{method:'DELETE'})
  })
  it('exporta, importa y consulta historial de versiones',async()=>{
   await exportProject('p1')

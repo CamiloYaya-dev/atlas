@@ -12,30 +12,38 @@ export async function registerAccessController(app:FastifyInstance){
   const a=await identity(req),ac=await access(req.params.workspaceId,a.id)
   return {roleId:ac.roleId,roleKey:ac.roleKey,roleName:ac.roleName,permissions:[...ac.permissions]}
  })
- app.get<{Params:{workspaceId:string};Querystring:{limit?:string;beforeId?:string}}>('/api/v1/workspaces/:workspaceId/audit',async req=>{
+ app.get<{Params:{workspaceId:string};Querystring:{limit?:string;beforeId?:string;eventType?:string;actor?:string;projectId?:string;from?:string;to?:string}}>('/api/v1/workspaces/:workspaceId/audit',async req=>{
   assertUUID(req.params.workspaceId)
   const actor=await identity(req),ac=await access(req.params.workspaceId,actor.id)
   requirePermission(ac,'workspace.audit.view')
-  const limit=Number(req.query.limit??30)
-  if(!Number.isSafeInteger(limit)||limit<1||limit>100)throw new DomainError('Límite de auditoría inválido (1-100)',400)
-  const before=req.query.beforeId
-  if(before!==undefined&&(!/^[1-9]\d*$/.test(before)||!Number.isSafeInteger(Number(before))))throw new DomainError('Cursor de auditoría inválido',400)
-  const params:unknown[]=[req.params.workspaceId,limit+1]
-  const filter=before===undefined?'':'AND a.id < $3::bigint'
-  if(before!==undefined)params.push(before)
-  params.push(actor.id)
-  const viewerIndex=params.length
+  const {limit:rawLimit='25',beforeId,eventType,actor:actorQuery,projectId,from,to}=req.query
+  const limit=Number(rawLimit)
+  if(!Number.isSafeInteger(limit)||limit<1||limit>100)throw new DomainError('Tamaño de página inválido (1-100)',400)
+  if(beforeId!==undefined&&(!/^[1-9]\d*$/.test(beforeId)||!Number.isSafeInteger(Number(beforeId))))throw new DomainError('Cursor de auditoría inválido',400)
+  if(eventType!==undefined&&!/^[a-z][a-z0-9._-]{0,80}$/.test(eventType))throw new DomainError('Acción inválida',400)
+  if(actorQuery!==undefined&&actorQuery.trim().length>100)throw new DomainError('Búsqueda demasiado larga',400)
+  if(projectId!==undefined)assertUUID(projectId)
+  if((from!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(from))||(to!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(to)))throw new DomainError('Fecha inválida',400)
+  if(from&&to&&from>to)throw new DomainError('La fecha inicial no puede superar la final',400)
+  const params:unknown[]=[req.params.workspaceId]
+  const bind=(value:unknown)=>{params.push(value);return `$${params.length}`}
+  const conditions=['a.workspace_id=$1']
+  if(beforeId)conditions.push(`a.id < ${bind(beforeId)}::bigint`)
+  if(eventType)conditions.push(`a.event_type=${bind(eventType)}`)
+  if(actorQuery?.trim()){const input=bind(actorQuery.trim());conditions.push(`(u.display_name ILIKE '%' || ${input} || '%' OR u.email ILIKE '%' || ${input} || '%')`)}
+  if(projectId)conditions.push(`a.resource_id=${bind(projectId)}::uuid`)
+  if(from)conditions.push(`a.created_at >= ${bind(from)}::date`)
+  if(to)conditions.push(`a.created_at < (${bind(to)}::date + INTERVAL '1 day')`)
+  if(ac.roleKey!=='owner')conditions.push(`(a.event_type NOT LIKE 'project.%' OR EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id=a.resource_id AND pm.user_id=${bind(actor.id)}))`)
+  const limitParam=bind(limit+1)
   const {rows}=await pool.query<{id:string;event_type:string;actor_name:string|null;actor_email:string|null;resource_id:string|null;resource_name:string|null;detail:Record<string,unknown>;created_at:string}>(`
    SELECT a.id::text,a.event_type,u.display_name AS actor_name,u.email AS actor_email,a.resource_id,p.name AS resource_name,a.detail,a.created_at
    FROM audit_events a LEFT JOIN atlas_users u ON u.id=a.actor_id
    LEFT JOIN projects p ON p.id=a.resource_id AND p.workspace_id=a.workspace_id
-   WHERE a.workspace_id=$1 ${filter}
-   AND (${ac.roleKey==='owner'?`$${viewerIndex}::uuid IS NOT NULL`:`a.event_type NOT LIKE 'project.%' OR EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id=a.resource_id AND pm.user_id=$${viewerIndex})`})
-   ORDER BY a.id DESC LIMIT $2`,params)
+   WHERE ${conditions.join(' AND ')} ORDER BY a.id DESC LIMIT ${limitParam}`,params)
   const page=rows.slice(0,limit).map(row=>({
    id:row.id,event_type:row.event_type,actor_name:row.actor_name||'Usuario eliminado',
    actor_email:row.actor_email||null,resource_id:row.resource_id,resource_name:row.resource_name||null,created_at:row.created_at,
-   // Explicit allowlist: audit metadata may contain internal/security fields.
    detail:Object.fromEntries(Object.entries(row.detail||{}).filter(([key])=>
     ['version','sourceVersion','roleId','roleKey','userId','collaborative','name'].includes(key)))
   }))

@@ -1,3 +1,13 @@
+> **Hotfix de interfaz (12/11/2026):** «Ampliar área de trabajo» oculta título, descripción y filtros, con restauración desde el lienzo. «Agregar caja» está junto a pantalla completa y su formulario funciona también en fullscreen. Ver [CHANGELOG](CHANGELOG.md) y [GUÍA V4.8.1](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md).
+
+> **Hotfix V4.8.1 (12/11/2026):** corregida pantalla gris al ocultar el menú lateral o ampliar el área de trabajo; pruebas CSS reales en Chromium. Ver [auditoría y contexto maestro](docs/ATLAS_CONTEXTO_Y_AUDITORIA_V4_8_1.md) y [guía de restauración/editor](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md).
+
+> **Actualización V4.8.1:** consulta [GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md) para instalación, migración 005, ramas de restauración y controles del lienzo.
+
+> **Nuevo — ATLAS V4.8.0:** mejoras del contador de colaboradores, restauración sin `alert/confirm/prompt`, auditoría filtrable y paginada, y filtros dinámicos por diagrama de cualquier tipo. Consulta la [guía de instalación y pruebas V4.8](GUIA_V4_8_PRESENCIA_FILTROS_HISTORIAL.md). Compatible con DEV y PILOTO compilado dentro de la misma carpeta.
+
+> **Corrección V4.7.2 (administración):** [guía de instalación, cambios y QA](GUIA_CORRECCION_ADMINISTRACION_4_7_2.md). La creación de espacios es posible para cualquier cuenta activa; borrado y acceso por proyecto mantienen permisos.
+
 > **ATLAS 4.7.0**: acceso granular por espacio y proyecto. Ver [GUIA_ACCESOS_V4_7.md](GUIA_ACCESOS_V4_7.md) para migración, seguridad y pruebas.
 
 ## ATLAS V4.5.0 — Colaboración en vivo (incremento de V4.4.1)

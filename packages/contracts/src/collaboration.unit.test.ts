@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,mergeProjectDocuments,MergeConflict} from './index'
+import {emptyDoc,createElement,mergeProjectDocuments,MergeConflict,previewProjectMerge} from './index'
 import type {ProjectDocument} from './index'
 
 const fixture=()=>{
@@ -80,4 +80,26 @@ test('colaboración: creación concurrente de IDs iguales y datos incompatibles 
  a.elements.c={...base.elements.a,id:'c',name:'Creado por A'}
  b.elements.c={...base.elements.a,id:'c',name:'Creado por B'}
  assert.throws(()=>mergeProjectDocuments(base,a,b),MergeConflict)
+})
+
+test('ramas: vista previa enumera conflictos y decisiones por propiedad',()=>{
+ const base=fixture(),old=clone(base),newer=clone(base)
+ old.elements.a.name='Histórico';newer.elements.a.name='Actual';newer.elements.b.summary='Trabajo paralelo'
+ const preview=previewProjectMerge(base,old,newer)
+ assert.deepEqual(preview.conflicts,['document.elements.a.name'])
+ const chosen=previewProjectMerge(base,old,newer,{'document.elements.a.name':'historical'})
+ assert.deepEqual(chosen.conflicts,[])
+ assert.equal(chosen.document.elements.a.name,'Histórico')
+ assert.equal(chosen.document.elements.b.summary,'Trabajo paralelo')
+ const kept=previewProjectMerge(base,old,newer,{'document.elements.a.name':'current'})
+ assert.equal(kept.document.elements.a.name,'Actual')
+})
+test('ramas: las modificaciones independientes se combinan sin elecciones manuales',()=>{
+ const base=fixture(),historical=clone(base),current=clone(base)
+ historical.diagrams[0].name='Contexto histórico'
+ current.diagrams[1].name='Nuevo contenedor'
+ const preview=previewProjectMerge(base,historical,current)
+ assert.deepEqual(preview.conflicts,[])
+ assert.equal(preview.document.diagrams[0].name,'Contexto histórico')
+ assert.equal(preview.document.diagrams[1].name,'Nuevo contenedor')
 })

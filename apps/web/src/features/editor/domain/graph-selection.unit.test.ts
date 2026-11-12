@@ -26,3 +26,23 @@ test('no devuelve nodos con elementos inexistentes ni relaciones huérfanas',()=
  const x=graphSelection(d,doc,['Pagos'],true)
  assert.equal(x.nodeIds.includes('nx'),false);assert.equal(x.edgeIds.includes('bx'),false)
 })
+
+test('C1 consolida contextos técnico, funcional y externo con filtros propios por diagrama',()=>{
+ const c1:Diagram={...diagram,type:'c1',filters:[{id:'tech',label:'Técnico'},{id:'biz',label:'Funcional'},{id:'ext',label:'Externo'}],nodes:[
+  {...diagram.nodes[0],filterIds:['tech','biz']},
+  {...diagram.nodes[1],filterIds:['biz']},
+  {...diagram.nodes[2],filterIds:['ext']}
+ ]}
+ assert.deepEqual(graphSelection(c1,doc,['tech'],false,false).nodeIds,['na'])
+ assert.deepEqual(graphSelection(c1,doc,['biz'],false,false).nodeIds,['na','nb'])
+ assert.deepEqual(graphSelection(c1,doc,['ext'],false,false).nodeIds,['nc'])
+ assert.deepEqual(graphSelection(c1,doc,['tech','biz','ext'],false,false).nodeIds,['na','nb','nc'])
+ const second:Diagram={...diagram,id:'second',type:'c1',filters:[{id:'other',label:'Otro'}],nodes:[{...diagram.nodes[0],filterIds:['other']}],edges:[]}
+ assert.deepEqual(graphSelection(second,doc,['other'],false,false).nodeIds,['na'])
+})
+test('un diagrama nuevo comienza sin filtros heredados y muestra todo su contenido',()=>{
+ const clean:Diagram={id:'new',name:'Nuevo',type:'process',description:'',createdAt:'2026-11-12',nodes:[],edges:[]}
+ assert.deepEqual(graphSelection(clean,doc,[],false).nodeIds,[])
+ const c1:Diagram={...clean,type:'c1',nodes:[{id:'na',elementId:'a',x:0,y:0}]}
+ assert.deepEqual(graphSelection(c1,doc,[],false).nodeIds,['na'])
+})

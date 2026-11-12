@@ -20,6 +20,7 @@ export default class ErrorBoundary extends React.Component<Props,State>{
     <strong style={{fontSize:12,letterSpacing:2,color:'#4067a9'}}>ATLAS · DIAGNÓSTICO</strong>
     <h1 style={{marginBottom:8}}>La aplicación encontró un error</h1>
     <p>El servidor puede seguir funcionando, pero React no pudo dibujar esta pantalla. Copia el mensaje de abajo para identificar el problema. <strong>No borres tus diagramas ni el almacenamiento del navegador.</strong></p>
+   {this.state.error.name==='NotFoundError'&&this.state.error.message.includes('removeChild')&&<p>Este error también puede ocurrir cuando la traducción automática o una extensión modifica el HTML de React. Prueba ATLAS sin traducción y con extensiones desactivadas; si continúa, conserva la traza de consola para investigar la causa exacta.</p>}
     <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxHeight:310,overflow:'auto',background:'#142039',color:'#e7f0ff',padding:16,borderRadius:10,fontSize:12}}>{details}</pre>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',marginTop:20}}>
      <button onClick={()=>void navigator.clipboard?.writeText(details)} style={{padding:'10px 16px',borderRadius:8,border:'1px solid #c5d3e7',background:'#eef5ff'}}>Copiar diagnóstico</button>

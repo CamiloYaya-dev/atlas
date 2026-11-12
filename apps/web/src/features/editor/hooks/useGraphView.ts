@@ -3,11 +3,11 @@ import {useMemo} from 'react'
 import {MarkerType} from '@xyflow/react'
 import type {Node,Edge} from '@xyflow/react'
 import type {Diagram,ProjectDocument,Perspective} from '@atlas/contracts'
-export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;mode:Perspective;selectedId:string|null;canEdit:boolean}){
- const {diagram,doc,groups,dependencies,mode,selectedId,canEdit}=input
+export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;includeUntagged?:boolean;mode:Perspective;selectedId:string|null;canEdit:boolean}){
+ const {diagram,doc,groups,dependencies,includeUntagged=true,mode,selectedId,canEdit}=input
  return useMemo(()=>{
   if(!diagram||!doc)return {nodes:[] as Node[],edges:[] as Edge[]}
-  const {nodeIds,edgeIds}=graphSelection(diagram,doc,groups,dependencies)
+  const {nodeIds,edgeIds}=graphSelection(diagram,doc,groups,dependencies,includeUntagged)
   const allowed=new Set(nodeIds)
   const allowedEdges=new Set(edgeIds)
   const nodes:Node[]=diagram.nodes.filter(n=>allowed.has(n.id)&&doc.elements[n.elementId]).map(n=>({
@@ -22,5 +22,5 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    markerEnd:{type:MarkerType.ArrowClosed,color:'#8e9cb0',width:16,height:16}
   }))
   return {nodes,edges}
- },[diagram,doc,groups,dependencies,mode,selectedId,canEdit])
+ },[diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,canEdit])
 }
