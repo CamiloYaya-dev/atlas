@@ -37,7 +37,7 @@ test('acceso cerrado: no hay registro público y rechaza password incorrecto',as
 })
 test('login válido, C1 y navegación entre vistas ya guardadas',async({page})=>{
  await signIn(page)
- await expect(page.getByText('DIAGRAMAS')).toBeVisible()
+ await expect(page.getByText('DIAGRAMAS', {exact:true})).toBeVisible()
  await page.getByRole('button',{name:/C1 · Contexto/}).first().click()
  await expect(page.getByRole('heading',{name:/C1 · Contexto/})).toBeVisible()
  await page.getByRole('button',{name:/C2 · Contenedores/}).first().click()
