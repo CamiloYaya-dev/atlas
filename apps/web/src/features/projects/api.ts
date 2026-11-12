@@ -20,3 +20,17 @@ export type DocumentVersion={version:number;created_at:string;updated_by:string;
 export type DocumentVersionSnapshot=DocumentVersion&{document:ProjectDocument}
 export const listDocumentVersions=(projectId:string)=>request<DocumentVersion[]>(`/projects/${encodeURIComponent(projectId)}/versions`)
 export const loadDocumentVersion=(projectId:string,version:number)=>request<DocumentVersionSnapshot>(`/projects/${encodeURIComponent(projectId)}/versions/${encodeURIComponent(version)}`)
+
+export const renameProject=(projectId:string,name:string)=>request<Project>(`/projects/${encodeURIComponent(projectId)}`,{method:'PATCH',body:JSON.stringify({name})})
+/** Restoration creates a new version and will reject an obsolete expectedVersion. */
+export const restoreDocumentVersion=(projectId:string,sourceVersion:number,expectedVersion:number)=>request<{version:number;restoredFrom:number}>(`/projects/${encodeURIComponent(projectId)}/restore`,{method:'POST',body:JSON.stringify({sourceVersion,expectedVersion})})
+
+export const projectAccess=(id:string)=>request<import('../security/types').WorkspaceAccess>(`/projects/${encodeURIComponent(id)}/access`)
+export const deleteProject=(id:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}`,{method:'DELETE'})
+export type ProjectMember={id:string;email:string;name:string;role_id:string;role_key:string;role_name:string}
+export type ProjectCandidate={id:string;email:string;name:string}
+export type ProjectRole={id:string;role_key:string;name:string;permissions:string[]}
+export const projectMembers=(id:string)=>request<ProjectMember[]>(`/projects/${encodeURIComponent(id)}/members`)
+export const projectCandidates=(id:string)=>request<{users:ProjectCandidate[];roles:ProjectRole[]}>(`/projects/${encodeURIComponent(id)}/candidates`)
+export const assignProjectMember=(id:string,userId:string,roleId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'PUT',body:JSON.stringify({roleId})})
+export const removeProjectMember=(id:string,userId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'DELETE'})

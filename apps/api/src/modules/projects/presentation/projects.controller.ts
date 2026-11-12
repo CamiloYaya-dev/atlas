@@ -3,6 +3,7 @@ import {identity} from '../../../security/identity'
 import {assertUUID,DomainError} from '../../../domain/errors'
 import {ProjectsService} from '../application/projects.service'
 import {projectEvents} from '../realtime/project-events'
+import {projectAccess} from '../../../security/roles'
 const service=new ProjectsService()
 const object=(v:unknown):Record<string,unknown>=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new DomainError('JSON requerido',400);return v as Record<string,unknown>}
 export async function registerProjectController(app:FastifyInstance){
@@ -33,7 +34,7 @@ export async function registerProjectController(app:FastifyInstance){
    'Access-Control-Allow-Credentials':'true',
   })
   reply.raw.write(': ATLAS live\n\n')
-  projectEvents.subscribe(req.params.projectId,clientId,actor.id,actor.displayName,reply.raw,snapshot.version,async()=>{await identity(req);await service.assertReadable(req.params.projectId,actor.id)})
+  projectEvents.subscribe(req.params.projectId,clientId,actor.id,actor.displayName,reply.raw,snapshot.version,async()=>{await identity(req);const current=await service.loadDocument(req.params.projectId,actor.id);if(!current)throw new DomainError('Proyecto no encontrado',404);projectEvents.updateVisibility(req.params.projectId,clientId,new Set(current.document.diagrams.map(d=>d.id)),new Set(Object.keys(current.document.elements)))},{diagrams:new Set(snapshot.document.diagrams.map(d=>d.id)),elements:new Set(Object.keys(snapshot.document.elements))})
  })
  app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/presence',async req=>{
   assertUUID(req.params.projectId)
@@ -49,6 +50,24 @@ export async function registerProjectController(app:FastifyInstance){
   if(elementId!==null&&(!diagramId||!snapshot.document.elements[elementId]||!snapshot.document.diagrams.find(d=>d.id===diagramId)?.nodes.some(n=>n.elementId===elementId)))throw new DomainError('Elemento no visible',403)
   projectEvents.updatePresence(req.params.projectId,clientId,actor.id,diagramId as string|null,elementId as string|null)
   return {ok:true}
+ })
+ app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/access',async req=>{
+  assertUUID(req.params.projectId);const a=await projectAccess(req.params.projectId,(await identity(req)).id)
+  return {roleId:a.roleId,roleKey:a.roleKey,roleName:a.roleName,permissions:[...a.permissions]}
+ })
+ app.delete<{Params:{projectId:string}}>('/api/v1/projects/:projectId',async req=>{
+  assertUUID(req.params.projectId);return service.delete(req.params.projectId,(await identity(req)).id)
+ })
+ app.patch<{Params:{projectId:string}}>('/api/v1/projects/:projectId',async req=>{
+  assertUUID(req.params.projectId)
+  return service.rename(req.params.projectId,object(req.body).name,(await identity(req)).id)
+ })
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore',async req=>{
+  assertUUID(req.params.projectId)
+  const actor=await identity(req),b=object(req.body)
+  const restored=await service.restoreVersion(req.params.projectId,b.sourceVersion,b.expectedVersion,actor.id)
+  projectEvents.publishVersion(req.params.projectId,restored.version)
+  return restored
  })
  app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/export',async req=>{assertUUID(req.params.projectId);return service.exportDocument(req.params.projectId,(await identity(req)).id)})
  app.put<{Params:{projectId:string}}>('/api/v1/projects/:projectId/document',async req=>{

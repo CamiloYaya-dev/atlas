@@ -55,3 +55,20 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - c8, reporte agregado HTML/LCOV/JSON y umbral 95 % por archivo en cuatro métricas.
 - CI ejecuta la verificación de coverage y conserva los informes.
 - No se declara cobertura 95 % alcanzada; requiere ejecutar y ampliar pruebas.
+
+## 4.6.0 — Candidato de cierre V1 funcional (2026-11-12)
+- Histórico de diagramas en SVG, diferencias de revisiones y restauración documentada como NUEVA versión con comprobación de concurrencia y permiso de propietario.
+- Consulta paginada de `audit_events` con ACL `workspace.audit.view`, interfaz Actividad y metadatos filtrados.
+- Renombrado de proyectos con permiso `project.rename` y registro de auditoría.
+- Pruebas de tres perfiles QA, sesiones independientes, colaboración SSE y control de información de presencia.
+- Restauración `pg_dump -Fc` en bases nuevas, con checksum, validación y recuperación paralela, sin tocar la base activa.
+- Control original de cobertura sin modificación; ver `CIERRE_V1_FUNCIONAL.md` para certificación pendiente.
+
+## 4.7.0 — Accesos independientes por espacio y proyecto (piloto)
+- Migración incremental `004_project_access.sql` con miembros por proyecto y conservación de accesos previos.
+- Proyectos nuevos privados por defecto, roles independientes por proyecto, revocación y ACL en todas las rutas.
+- Editar y eliminar proyectos con permisos atómicos; administrar nombre y eliminar espacios vacíos.
+- Pantallas de administración, permisos y pruebas de escenarios multiusuario con tres proyectos.
+- Endurecimiento de SSE y auditoría ante revocaciones y cambios de roles.
+
+**Candidato a validación**: no declarar QA completo hasta ejecutar `typecheck`, pruebas unitarias, React, PostgreSQL y E2E en Windows.

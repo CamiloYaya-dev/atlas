@@ -20,7 +20,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
  const suffix=randomUUID().slice(0,8)
  const adminEmail=`qa-admin-${suffix}@example.test`,memberEmail=`qa-member-${suffix}@example.test`
  const pass='ContraseñaSegura!2026',invalidPass='ClaveIncorrecta!2026'
- let adminId='',memberId='',workspaceId='',projectId=''
+ let adminId='',memberId='',extraId='',workspaceId='',projectId=''
  const send=async(method:'GET'|'POST'|'PUT'|'PATCH'|'DELETE',path:string,user?:User,payload?:object,extraHeaders:Record<string,string>={})=>{
   const r=await app.inject({method,url:`/api/v1${path}`,headers:{...(user?{cookie:user.cookie,'x-csrf-token':user.csrf}:{}),...extraHeaders},...(payload===undefined?{}:{payload})})
   return {status:r.statusCode,data:r.json() as Record<string,any>,headers:r.headers}
@@ -96,6 +96,52 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal(access.status,200);assert.ok(access.data.permissions.includes('diagram.view.c1'))
    assert.equal((await send('POST',`/workspaces/${workspaceId}/roles`,member,{roleKey:'bad',name:'Privilegios',permissions:[]})).status,403)
    assert.equal((await send('GET',`/workspaces/${workspaceId}/members`,member)).status,403)
+   // Space membership alone must NOT expose any existing project.
+   assert.equal((await send('GET',`/projects/${projectId}/document`,member)).status,404)
+   const hidden=await send('GET',`/workspaces/${workspaceId}/projects`,member)
+   assert.equal(hidden.status,200);assert.equal(hidden.data.length,0)
+   const candidates=await send('GET',`/projects/${projectId}/candidates`,admin)
+   assert.equal(candidates.status,200);assert.ok(candidates.data.users.some((u:{id:string})=>u.id===memberId))
+   assert.equal((await send('PUT',`/projects/${projectId}/members/${memberId}`,admin,{roleId:result.data.id})).status,200)
+   assert.equal((await send('GET',`/projects/${projectId}/document`,member)).status,200)
+   assert.equal((await send('GET',`/projects/${projectId}/members`,member)).status,403)
+  })
+  await t.test('Proyectos privados: U1 ve P1/P2, U2 solo P3; borrado y administración aislada',async()=>{
+   // Another real account in the SAME workspace does not automatically see projects.
+   const guestEmail=`qa-guest-${suffix}@example.test`
+   const created=await send('POST','/admin/users',admin,{email:guestEmail,name:'QA Guest',password:pass})
+   assert.equal(created.status,201);extraId=created.data.id
+   const signed=await signin(guestEmail,pass);assert.equal(signed.status,200);const guest=signed.user!
+   const roleList=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
+   const readerRole=roleList.data.find((r:{role_key:string})=>r.role_key==='qa_view')
+   assert.equal((await send('POST',`/workspaces/${workspaceId}/members`,admin,{userId:extraId,roleId:readerRole.id})).status,201)
+   const untouched=await send('GET',`/workspaces/${workspaceId}/projects`,guest)
+   assert.equal(untouched.status,200);assert.equal(untouched.data.length,0)
+   assert.equal((await send('GET',`/projects/${projectId}/document`,guest)).status,404)
+   const p2=await send('POST',`/workspaces/${workspaceId}/projects`,admin,{name:'Proyecto dos',document:emptyDoc()})
+   const p3=await send('POST',`/workspaces/${workspaceId}/projects`,admin,{name:'Proyecto tres',document:emptyDoc()})
+   assert.equal(p2.status,201);assert.equal(p3.status,201)
+   assert.equal((await send('PUT',`/projects/${p2.data.id}/members/${memberId}`,admin,{roleId:readerRole.id})).status,200)
+   assert.equal((await send('PUT',`/projects/${p3.data.id}/members/${extraId}`,admin,{roleId:readerRole.id})).status,200)
+   const memberProjects=await send('GET',`/workspaces/${workspaceId}/projects`,member)
+   assert.deepEqual(memberProjects.data.map((p:{id:string})=>p.id).sort(),[projectId,p2.data.id].sort())
+   const guestProjects=await send('GET',`/workspaces/${workspaceId}/projects`,guest)
+   assert.deepEqual(guestProjects.data.map((p:{id:string})=>p.id),[p3.data.id])
+   assert.equal((await send('GET',`/projects/${p2.data.id}/document`,guest)).status,404)
+   assert.equal((await send('GET',`/projects/${p3.data.id}/document`,member)).status,404)
+   assert.equal((await send('GET',`/projects/${p3.data.id}/members`,guest)).status,403)
+   assert.equal((await send('DELETE',`/projects/${p2.data.id}`,guest)).status,404)
+   assert.equal((await send('DELETE',`/projects/${p2.data.id}`,member)).status,403)
+   assert.equal((await send('DELETE',`/projects/${p2.data.id}`,admin)).status,200)
+   assert.equal((await send('GET',`/projects/${p2.data.id}/document`,admin)).status,404)
+   assert.equal((await send('GET',`/projects/${p3.data.id}/document`,guest)).status,200)
+   // No cascading project deletion when attempting to delete an occupied workspace.
+   assert.equal((await send('DELETE',`/workspaces/${workspaceId}`,admin)).status,409)
+   assert.equal((await send('PATCH',`/workspaces/${workspaceId}`,guest,{name:'Acceso ilegal'})).status,403)
+   assert.equal((await send('PATCH',`/workspaces/${workspaceId}`,admin,{name:'Espacio QA actualizado'})).status,200)
+   const empty=await send('POST','/workspaces',admin,{name:'Vacío de QA'})
+   assert.equal(empty.status,201)
+   assert.equal((await send('DELETE',`/workspaces/${empty.data.id}`,admin)).status,200)
   })
   await t.test('Guardar C1+C2 y filtrar C2 de usuarios sin permiso',async()=>{
    const doc=emptyDoc(),a=createElement('Acceder','activity'),b=createElement('API privada','endpoint')
@@ -194,6 +240,9 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await send('DELETE',`${endpoint}/${memberId}`,admin)).status,200)
    assert.equal((await send('DELETE',`${endpoint}/${memberId}`,admin)).status,404)
    assert.equal((await send('POST',endpoint,admin,{userId:memberId,roleId:role.id})).status,201)
+   // Removing workspace membership also revokes every project membership (FK CASCADE).
+   assert.equal((await send('GET',`/projects/${projectId}/document`,member)).status,404)
+   assert.equal((await send('PUT',`/projects/${projectId}/members/${memberId}`,admin,{roleId:role.id})).status,200)
    assert.equal((await send('GET',`/workspaces/${workspaceId}/access`,member)).status,200)
   })
   await t.test('API real: validación de identificadores y formatos',async()=>{
@@ -270,6 +319,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
     'diagram.edit.c1','diagram.edit.c2']})
    assert.equal(editorRole.status,201)
    assert.equal((await sendLive('POST',membersPath,admin,{userId:memberId,roleId:editorRole.data.id})).status,201)
+   assert.equal((await sendLive('PUT',`/projects/${projectId}/members/${memberId}`,admin,{roleId:editorRole.data.id})).status,200)
    const memberBase=await sendLive('GET',endpoint,member)
    assert.equal(memberBase.status,200)
    assert.equal(memberBase.data.version,version)
@@ -301,6 +351,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const viewer=roles.data.find((role:{role_key:string})=>role.role_key==='qa_view')
    assert.ok(viewer?.id)
    assert.equal((await sendLive('POST',membersPath,admin,{userId:memberId,roleId:viewer.id})).status,201)
+   assert.equal((await sendLive('PUT',`/projects/${projectId}/members/${memberId}`,admin,{roleId:viewer.id})).status,200)
    const limited=await sendLive('GET',endpoint,member)
    const attempted=structuredClone(limited.data.document) as ProjectDocument
    attempted.diagrams[0].name='Edición no permitida'
@@ -316,6 +367,52 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,admin,{clientId:id,diagramId:'c1',elementId:null})).status,200)
   })
   }finally{await liveApp.close()}
+  await t.test('V1 funcional: renombrar proyecto y consultar auditoría requieren permisos del workspace',async()=>{
+   const url=`/projects/${projectId}`
+   assert.equal((await send('PATCH',url,member,{name:'Intruso'})).status,403)
+   assert.equal((await send('PATCH',url,admin,{name:'A'})).status,400)
+   const renamed=await send('PATCH',url,admin,{name:'Proyecto cerrado '+suffix})
+   assert.equal(renamed.status,200,JSON.stringify(renamed.data))
+   assert.equal(renamed.data.name,'Proyecto cerrado '+suffix)
+   const projectList=await send('GET',`/workspaces/${workspaceId}/projects`,admin)
+   assert.equal(projectList.status,200)
+   assert.ok(projectList.data.some((x:{id:string;name:string})=>x.id===projectId&&x.name===renamed.data.name))
+   const endpoint=`/workspaces/${workspaceId}/audit`
+   assert.equal((await send('GET',endpoint,member)).status,403)
+   assert.equal((await send('GET',endpoint+'?beforeId=bad',admin)).status,400)
+   const audit=await send('GET',endpoint+'?limit=2',admin)
+   assert.equal(audit.status,200)
+   assert.equal(audit.data.items.length,2)
+   assert.ok(audit.data.nextCursor)
+   const older=await send('GET',endpoint+'?limit=2&beforeId='+audit.data.nextCursor,admin)
+   assert.equal(older.status,200)
+   assert.ok(older.data.items.every((x:{id:string})=>BigInt(x.id)<BigInt(audit.data.nextCursor)))
+   assert.ok(audit.data.items.some((x:{event_type:string})=>x.event_type==='project.renamed'))
+  })
+  await t.test('V1 funcional: restaurar historial crea versión nueva y evita sobrescrituras por carrera',async()=>{
+   const url=`/projects/${projectId}/document`
+   const before=await send('GET',url,admin)
+   assert.equal(before.status,200)
+   const version=before.data.version as number
+   const restorePath=`/projects/${projectId}/restore`
+   assert.equal((await send('POST',restorePath,member,{sourceVersion:1,expectedVersion:version})).status,403)
+   assert.equal((await send('POST',restorePath,admin,{sourceVersion:0,expectedVersion:version})).status,400)
+   assert.equal((await send('POST',restorePath,admin,{sourceVersion:1,expectedVersion:version-1})).status,409)
+   const unchanged=await send('GET',url,admin)
+   assert.equal(unchanged.data.version,version)
+   const result=await send('POST',restorePath,admin,{sourceVersion:1,expectedVersion:version})
+   assert.equal(result.status,200,JSON.stringify(result.data))
+   assert.equal(result.data.version,version+1)
+   const restored=await send('GET',url,admin)
+   assert.equal(restored.data.version,version+1)
+   assert.equal(restored.data.document.diagrams.length,0)
+   const old=await send('GET',`/projects/${projectId}/versions/${version}`,admin)
+   assert.equal(old.status,200)
+   assert.ok(old.data.document.diagrams.length>0)
+   const audit=await send('GET',`/workspaces/${workspaceId}/audit`,admin)
+   assert.equal(audit.status,200)
+   assert.ok(audit.data.items.some((x:{event_type:string;detail:{sourceVersion?:number}})=>x.event_type==='project.document_restore'&&x.detail.sourceVersion===1))
+  })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)
    assert.equal((await send('GET','/auth/me',member)).status,401)
@@ -323,6 +420,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
  }finally{
   if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId])
   if(memberId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[memberId])
+  if(extraId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[extraId])
   if(adminId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[adminId])
   await app.close();await pool.end()
  }

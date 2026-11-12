@@ -1,42 +1,62 @@
 import {isProjectDocument,emptyDoc} from '@atlas/contracts'
 import {ProjectsRepository} from '../infrastructure/projects.repository'
 import {DomainError,notFound,cleanName} from '../../../domain/errors'
-import {access,requirePermission} from '../../../security/roles'
+import {access,projectAccess,requirePermission} from '../../../security/roles'
 import {pool} from '../../../db/pool'
 import {projectVisible} from './document-policy'
 export class ProjectsService {
  constructor(private readonly repo=new ProjectsRepository()){}
- async list(workspaceId:string,userId:string){const a=await access(workspaceId,userId);requirePermission(a,'project.read');return this.repo.list(workspaceId)}
+ async list(workspaceId:string,userId:string){await access(workspaceId,userId);return this.repo.list(workspaceId,userId)}
  async create(workspaceId:string,name:unknown,document:unknown,userId:string){
   const a=await access(workspaceId,userId);requirePermission(a,'project.create')
   if(!isProjectDocument(document))throw new DomainError('Documento ATLAS inválido',400)
   if(Object.keys(document.elements).length||document.diagrams.length)throw new DomainError('Crea primero un proyecto vacío. Usa la importación autorizada para traer modelos.',400)
   return this.repo.create(workspaceId,cleanName(name),emptyDoc(),userId)
  }
+ async rename(projectId:string,name:unknown,userId:string){
+  const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
+  const ac=await projectAccess(projectId,userId);requirePermission(ac,'project.rename')
+  return this.repo.rename(projectId,cleanName(name),userId)
+ }
+ async delete(projectId:string,userId:string){const a=await projectAccess(projectId,userId);requirePermission(a,'project.delete');return this.repo.delete(projectId,userId)}
+ /** Only the owner can restore a full historical document. This creates a NEW version,
+  * and the expected current version prevents lost updates during collaboration. */
+ async restoreVersion(projectId:string,sourceVersion:unknown,expectedVersion:unknown,userId:string){
+  const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
+  const ac=await projectAccess(projectId,userId)
+  if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede restaurar un proyecto completo',403)
+  if(typeof sourceVersion!=='number'||!Number.isSafeInteger(sourceVersion)||sourceVersion<1)throw new DomainError('Versión de origen inválida',400)
+  if(typeof expectedVersion!=='number'||!Number.isSafeInteger(expectedVersion)||expectedVersion<1)throw new DomainError('Versión actual inválida',400)
+  const snapshot=await this.repo.loadVersion(projectId,sourceVersion)
+  if(!snapshot)throw notFound()
+  const next=await this.repo.saveAuthorized(projectId,snapshot.document,expectedVersion,userId,'restore',sourceVersion)
+  if(next===null)throw new DomainError('Conflicto: hay cambios más recientes. Actualiza el historial antes de restaurar.',409)
+  return {version:next,restoredFrom:sourceVersion}
+ }
  async assertReadable(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
-  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+  const a=await projectAccess(projectId,userId);requirePermission(a,'project.read')
  }
  async loadDocument(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
-  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+  const a=await projectAccess(projectId,userId);requirePermission(a,'project.read')
   const data=await this.repo.loadDocument(projectId)
   return data?{version:data.version,document:projectVisible(data.document,a)}:null
  }
  async listVersions(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
-  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+  const a=await projectAccess(projectId,userId);requirePermission(a,'project.read')
   return this.repo.listVersions(projectId)
  }
  async loadVersion(projectId:string,version:number,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
-  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+  const a=await projectAccess(projectId,userId);requirePermission(a,'project.read')
   const data=await this.repo.loadVersion(projectId,version);if(!data)throw notFound()
   return {...data,document:projectVisible(data.document,a)}
  }
  async exportDocument(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
-  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read');requirePermission(a,'artifact.export')
+  const a=await projectAccess(projectId,userId);requirePermission(a,'project.read');requirePermission(a,'artifact.export')
   const data=await this.repo.loadDocument(projectId)
   if(!data)throw notFound()
   return {format:'ATLAS-V4.2',exportedAt:new Date().toISOString(),document:projectVisible(data.document,a)}

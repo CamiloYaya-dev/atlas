@@ -1,3 +1,5 @@
+> **ATLAS 4.7.0**: acceso granular por espacio y proyecto. Ver [GUIA_ACCESOS_V4_7.md](GUIA_ACCESOS_V4_7.md) para migración, seguridad y pruebas.
+
 ## ATLAS V4.5.0 — Colaboración en vivo (incremento de V4.4.1)
 
 Incluye eventos SSE, participantes por proyecto/diagrama/caja y fusión transaccional de cambios independientes con conflictos 409 por propiedad. Mantiene el historial y los permisos. **No requiere nuevas migraciones ni dependencias.** Consulta [COLABORACION_TIEMPO_REAL_V4_5.md](COLABORACION_TIEMPO_REAL_V4_5.md) para detalles y pruebas de dos navegadores.
@@ -180,3 +182,7 @@ Los recolectores cuentan los módulos fuente que aún no tienen pruebas (0%); no
 ### Piloto temporal ngrok
 
 Configura `ATLAS_NGROK_HOST` en `apps/web/.env`, `ATLAS_SECURE_COOKIES=true` y `CORS_ORIGINS=https://HOST` exacto en `apps/api/.env`. Ejecuta `npm run pilot:check`, después `npm run pilot:start` y expón **solo** el puerto **4173** con `ngrok http 4173`. Usa el bundle compilado; no expongas el servidor Vite de desarrollo (5173), la API ni PostgreSQL directamente.
+
+## Cierre V1 funcional — código candidato V4.6.0
+
+Se añadieron historial visual, comparación/restauración segura de revisiones, auditoría, renombrado de proyectos, E2E multiusuario con identidades diferentes y restauración aislada de PostgreSQL. Lee **CIERRE_V1_FUNCIONAL.md** antes de probar; la certificación en Windows sigue pendiente.

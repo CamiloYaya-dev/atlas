@@ -13,5 +13,7 @@ export async function registerWorkspaceController(app:FastifyInstance){
  })
  app.get<{Params:{workspaceId:string}}>('/api/v1/workspaces/:workspaceId/projects',async req=>{assertUUID(req.params.workspaceId);return projects.list(req.params.workspaceId,(await identity(req)).id)})
  app.post<{Params:{workspaceId:string}}>('/api/v1/workspaces/:workspaceId/projects',async(req,reply)=>{assertUUID(req.params.workspaceId);const b=object(req.body);const p=await projects.create(req.params.workspaceId,b.name,b.document,(await identity(req)).id);return reply.code(201).send(p)})
+ app.patch<{Params:{workspaceId:string}}>('/api/v1/workspaces/:workspaceId',async req=>{assertUUID(req.params.workspaceId);return service.rename(req.params.workspaceId,object(req.body).name,(await identity(req)).id)})
+ app.delete<{Params:{workspaceId:string}}>('/api/v1/workspaces/:workspaceId',async req=>{assertUUID(req.params.workspaceId);return service.delete(req.params.workspaceId,(await identity(req)).id)})
  // Registro e invitaciones públicas deshabilitados en modo acceso cerrado.
 }

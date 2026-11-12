@@ -10,6 +10,7 @@ interface Connection extends LiveParticipant {
  userId:string
  response:ServerResponse
  heartbeat:ReturnType<typeof setInterval>
+ visibility?:{diagrams:Set<string>;elements:Set<string>}
 }
 
 /** In-process SSE hub for the single API instance used by the local pilot.
@@ -24,9 +25,13 @@ export class ProjectEvents {
   const clients=this.projects.get(projectId)
   if(!clients)return
   const active=[...clients.values()].map(({clientId,name,diagramId,elementId}):LiveParticipant=>({clientId,name,diagramId,elementId}))
-  for(const client of clients.values())this.send(client,'presence',{participants:active})
+  for(const client of clients.values())this.send(client,'presence',{participants:active.map(p=>{
+   const canSeeDiagram=!client.visibility||!p.diagramId||client.visibility.diagrams.has(p.diagramId)
+   const canSeeElement=canSeeDiagram&&(!client.visibility||!p.elementId||client.visibility.elements.has(p.elementId))
+   return {...p,diagramId:canSeeDiagram?p.diagramId:null,elementId:canSeeElement?p.elementId:null}
+  })})
  }
- subscribe(projectId:string,clientId:string,userId:string,name:string,response:ServerResponse,version:number,validate:()=>Promise<void>){
+ subscribe(projectId:string,clientId:string,userId:string,name:string,response:ServerResponse,version:number,validate:()=>Promise<void>,visibility?:{diagrams:Set<string>;elements:Set<string>}){
   let clients=this.projects.get(projectId)
   if(!clients){clients=new Map();this.projects.set(projectId,clients)}
   const existing=clients.get(clientId)
@@ -36,11 +41,25 @@ export class ProjectEvents {
   clients=this.projects.get(projectId)||new Map<string,Connection>()
   this.projects.set(projectId,clients)
   const heartbeat=setInterval(()=>{if(!response.destroyed)void validate().then(()=>{if(!response.destroyed)response.write(': heartbeat\n\n')}).catch(()=>response.end())},15000)
-  const connection:Connection={clientId,userId,name,diagramId:null,elementId:null,response,heartbeat}
+  const connection:Connection={clientId,userId,name,diagramId:null,elementId:null,response,heartbeat,visibility}
   clients.set(clientId,connection)
   response.on('close',()=>this.remove(projectId,clientId,response))
   this.send(connection,'version',{version})
   this.presence(projectId)
+ }
+ updateVisibility(projectId:string,clientId:string,diagrams:Set<string>,elements:Set<string>){
+  const client=this.projects.get(projectId)?.get(clientId)
+  if(!client)return
+  client.visibility={diagrams,elements}
+  if(client.diagramId&&!diagrams.has(client.diagramId)){client.diagramId=null;client.elementId=null}
+  if(client.elementId&&!elements.has(client.elementId))client.elementId=null
+  this.presence(projectId)
+ }
+ /** Revoke the SSE connection immediately when project access is removed. */
+ revokeUser(projectId:string,userId:string){
+  for(const connection of [...(this.projects.get(projectId)?.values()||[])]){
+   if(connection.userId===userId){connection.response.end();this.remove(projectId,connection.clientId,connection.response)}
+  }
  }
  updatePresence(projectId:string,clientId:string,userId:string,diagramId:string|null,elementId:string|null){
   const client=this.projects.get(projectId)?.get(clientId)

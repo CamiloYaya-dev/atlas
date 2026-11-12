@@ -45,3 +45,15 @@
 .collab-presence{display:flex;align-items:center;gap:8px;font-size:11px;color:#286858;background:#eaf9f2;padding:7px 26px;border-bottom:1px solid #cde9db;flex:none}
 @media(max-width:800px){.collab-status{padding:6px}.collab-presence{padding:6px 12px;font-size:10px}}
 @media(max-width:540px){.collab-status{font-size:0;gap:0;padding:7px}.collab-status .collab-dot{height:9px;width:9px}}
+
+/* V4.6: historical snapshots, safe revision comparison, workspace activity */
+.revision-select{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:12px;font-weight:650;flex-wrap:wrap}
+.revision-select select{padding:8px 12px;border:1px solid #b7cbe5;border-radius:8px;max-width:100%;background:white;color:#234}
+.revision-canvas{width:100%;min-height:220px;border:1px solid #cee0f5;border-radius:12px;background:#f9fbfe;position:relative;overflow:hidden}
+.revision-canvas svg{display:block;width:100%;height:clamp(220px,32vh,380px)}
+.revision-canvas p{padding:15px;color:#5b6e86}
+.revision-diff{max-height:160px;overflow:auto;border:1px solid #dce6f1;background:white;padding:12px 12px 12px 32px;border-radius:9px}
+.revision-diff li{margin:4px 0;font-size:12px}
+.audit-panel{max-height:73vh;overflow:auto}.audit-list{list-style:none;padding:0;display:grid;gap:8px}
+.audit-row{display:flex;flex-direction:column;gap:4px;padding:12px;background:#f7faff;border:1px solid #e0e8f4;border-radius:10px}
+.audit-row strong{color:#244464;font-size:13px}.audit-row small{color:#61748d;font-size:11px;overflow-wrap:anywhere}

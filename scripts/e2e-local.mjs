@@ -9,6 +9,7 @@ const env={...process.env,
  ATLAS_CSRF_SECRET:'atlas-qa-local-csrf-for-automated-tests-only-2026',
  E2E_ADMIN_EMAIL:'qa-admin@atlas.test',E2E_ADMIN_PASSWORD:randomBytes(20).toString('base64url')+'!A',
  E2E_VIEWER_EMAIL:'qa-viewer@atlas.test',E2E_VIEWER_PASSWORD:randomBytes(20).toString('base64url')+'!B',
+ E2E_EDITOR_EMAIL:'qa-editor@atlas.test',E2E_EDITOR_PASSWORD:randomBytes(20).toString('base64url')+'!C',
  ATLAS_E2E_AUTOSTART:'true', E2E_BASE_URL:'http://127.0.0.1:5173'
 }
 function exec(label,cmd,args){

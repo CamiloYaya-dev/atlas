@@ -39,3 +39,16 @@ test('colaboración en vivo: no permite suplantar la presencia con otro usuario'
  r.end()
  events.closeAll()
 })
+
+test('presencia no revela identificadores de diagramas o elementos sin permiso al receptor',()=>{
+ const hub=new ProjectEvents(),owner=new FakeResponse(),viewer=new FakeResponse()
+ hub.subscribe('workspace','aaaaaaaa-0000-0000-0000-000000000001','owner','Propietario',asResponse(owner),1,async()=>{})
+ hub.subscribe('workspace','bbbbbbbb-0000-0000-0000-000000000002','viewer','Lector',asResponse(viewer),1,async()=>{},
+  {diagrams:new Set(['d-public']),elements:new Set(['e-public'])})
+ hub.updatePresence('workspace','aaaaaaaa-0000-0000-0000-000000000001','owner','d-secret','e-secret')
+ assert.match(owner.content(),/d-secret/)
+ assert.doesNotMatch(viewer.content(),/d-secret|e-secret/)
+ hub.updatePresence('workspace','aaaaaaaa-0000-0000-0000-000000000001','owner','d-public','e-public')
+ assert.match(viewer.content(),/e-public/)
+ hub.closeAll()
+})

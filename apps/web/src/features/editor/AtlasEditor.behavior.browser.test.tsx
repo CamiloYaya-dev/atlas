@@ -7,6 +7,7 @@ import AtlasEditor from './AtlasEditor'
 import * as auth from '../security/api'
 import * as workspaces from '../workspaces/api'
 import * as projects from '../projects/api'
+import * as audit from '../audit/api'
 
 // The mock renders actual filtered graph nodes, while events reach the real
 // AtlasEditor handlers. Only XYFlow's canvas renderer is replaced by buttons.
@@ -41,8 +42,9 @@ vi.mock('@xyflow/react',async()=>{
  }
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
-vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn()}))
-vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn()}))
+vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))
+vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
+vi.mock('../audit/api',()=>({listAuditEvents:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
 const reader:WorkspaceAccess={roleId:'r-reader',roleKey:'viewer',roleName:'Lector',permissions:['project.read','diagram.view.c1','element.view.actor','element.view.system','element.view.external']}
@@ -58,9 +60,12 @@ beforeEach(()=>{
  vi.mocked(auth.logout).mockResolvedValue(undefined)
  vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace])
  vi.mocked(projects.listProjects).mockResolvedValue([project])
+ vi.mocked(projects.projectAccess).mockResolvedValue(owner)
  vi.mocked(projects.loadDocument).mockResolvedValue({document:demoDocument(),version:1})
  vi.mocked(projects.saveDocument).mockResolvedValue(2)
  vi.mocked(projects.listDocumentVersions).mockResolvedValue([])
+ vi.mocked(projects.renameProject).mockResolvedValue(project)
+ vi.mocked(audit.listAuditEvents).mockResolvedValue({items:[],nextCursor:null})
 })
 async function openEditor(){
  render(<AtlasEditor/>)
@@ -68,6 +73,23 @@ async function openEditor(){
 }
 
 describe('Editor conectado a API — recorridos de comportamiento',()=>{
+ it('propietario renombra el proyecto sin modificar el documento ni reiniciar el editor',async()=>{
+  vi.spyOn(window,'prompt').mockReturnValue('Proyecto renombrado QA')
+  vi.mocked(projects.renameProject).mockResolvedValue({...project,name:'Proyecto renombrado QA'})
+  await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:'Renombrar'}))
+  await waitFor(()=>expect(projects.renameProject).toHaveBeenCalledWith('p-qa','Proyecto renombrado QA'))
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Proyecto renombrado QA'})).toBeTruthy())
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('autorizado accede al panel de auditoría desde el editor',async()=>{
+  vi.mocked(audit.listAuditEvents).mockResolvedValue({items:[{id:'1',event_type:'project.renamed',actor_name:'QA',actor_email:null,resource_id:'p-qa',resource_name:'Proyecto QA',detail:{name:'Proyecto QA'},created_at:'2026-11-12T12:00:00Z'}],nextCursor:null})
+  await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:'Actividad'}))
+  expect(await screen.findByRole('dialog',{name:'Actividad y auditoría'})).toBeTruthy()
+  expect(await screen.findByText('Proyecto renombrado')).toBeTruthy()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
  it('propietario conserva edición aunque el catálogo de permisos en sesión venga vacío',async()=>{
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Crear diagrama'}))
@@ -99,6 +121,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('lector no obtiene controles de creación, importación o exportación',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
+  vi.mocked(projects.projectAccess).mockResolvedValue(reader)
   await openEditor()
   expect(screen.queryByRole('button',{name:'Crear diagrama'})).toBeNull()
   expect(screen.queryByRole('button',{name:'Agregar caja'})).toBeNull()
@@ -109,6 +132,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('permiso para editar una relación no exige permiso para mover cajas',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleKey:'relation-editor',roleName:'Editor de relaciones',permissions:[...reader.permissions,'relation.edit.mixed']})
+  vi.mocked(projects.projectAccess).mockResolvedValue({...reader,roleKey:'relation-editor',roleName:'Editor de relaciones',permissions:[...reader.permissions,'relation.edit.mixed']})
   const prompt=vi.spyOn(window,'prompt').mockReturnValue('Etiqueta actualizada')
   await openEditor()
   await waitFor(()=>expect(screen.getByRole('button',{name:'Editar relación QA'})).toBeTruthy())
@@ -122,6 +146,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('relaciones creables por permiso propio, sin habilitar arrastre de nodos',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleKey:'relation-creator',roleName:'Creador de relaciones',permissions:[...reader.permissions,'relation.create.mixed']})
+  vi.mocked(projects.projectAccess).mockResolvedValue({...reader,roleKey:'relation-creator',roleName:'Creador de relaciones',permissions:[...reader.permissions,'relation.create.mixed']})
   await openEditor()
   const graph=screen.getByTestId('graph-renderer')
   expect(graph.getAttribute('data-relations-enabled')).toBe('true')
@@ -245,6 +270,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('un lector no puede editar nombre, descripción ni eliminar diagramas desde el inspector',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
+  vi.mocked(projects.projectAccess).mockResolvedValue(reader)
   await openEditor()
   expect((screen.getByLabelText('Nombre del diagrama') as HTMLInputElement).disabled).toBe(true)
   expect((screen.getByLabelText('Descripción') as HTMLTextAreaElement).disabled).toBe(true)
@@ -316,6 +342,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('el lector no puede conectar cajas aunque un evento de ReactFlow sea falsificado',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
+  vi.mocked(projects.projectAccess).mockResolvedValue(reader)
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Conectar QA'}))
   expect(screen.getByText(/No tienes permiso para crear esta relación/)).toBeTruthy()
@@ -323,6 +350,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('el lector no puede mover cajas aun si se emite un evento de arrastre',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
+  vi.mocked(projects.projectAccess).mockResolvedValue(reader)
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}))
   expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -552,6 +580,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  it('oculta el campo técnico a un rol funcional, incluso si puede editar metadatos',async()=>{
   const functional:WorkspaceAccess={roleId:'r-functional',roleKey:'functional',roleName:'Funcional QA',permissions:['project.read','diagram.view.c1','element.view.system','element.edit.system','diagram.edit.c1']}
   vi.mocked(auth.workspaceAccess).mockResolvedValue(functional)
+  vi.mocked(projects.projectAccess).mockResolvedValue(functional)
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   expect(screen.queryByLabelText('Detalle técnico')).toBeNull()
@@ -561,6 +590,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  it('puede mostrar detalle técnico sin autorizar modificarlo',async()=>{
   const limited:WorkspaceAccess={roleId:'r-technical-read',roleKey:'technical-read',roleName:'Revisor técnico QA',permissions:['project.read','diagram.view.c1','element.view.system','element.edit.system','element.technical.view']}
   vi.mocked(auth.workspaceAccess).mockResolvedValue(limited)
+  vi.mocked(projects.projectAccess).mockResolvedValue(limited)
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   expect((screen.getByLabelText('Detalle técnico') as HTMLTextAreaElement).disabled).toBe(true)

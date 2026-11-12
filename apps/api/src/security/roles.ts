@@ -1,7 +1,7 @@
 import type {PoolClient} from 'pg'
 import {pool} from '../db/pool'
 import {PERMISSIONS,ROLE_PRESETS} from '@atlas/contracts'
-import {forbidden,DomainError} from '../domain/errors'
+import {forbidden,DomainError,notFound} from '../domain/errors'
 export const catalog=new Set<string>(PERMISSIONS)
 export interface Access {roleId:string;roleKey:string;roleName:string;permissions:Set<string>}
 export async function access(workspaceId:string,userId:string,db:PoolClient|typeof pool=pool):Promise<Access>{
@@ -11,6 +11,23 @@ export async function access(workspaceId:string,userId:string,db:PoolClient|type
  if(!rows[0])throw forbidden()
  const granted=await db.query<{permission:string}>('SELECT permission FROM role_permissions WHERE role_id=$1',[rows[0].id])
  return {roleId:rows[0].id,roleKey:rows[0].role_key,roleName:rows[0].name,permissions:new Set(granted.rows.map(x=>x.permission))}
+}
+/** A workspace grants organizational access, NOT access to all of its projects.
+ * Project membership selects its own role/policy. Workspace owners keep full access.
+ */
+export async function projectAccess(projectId:string,userId:string,db:PoolClient|typeof pool=pool):Promise<Access>{
+ const {rows}=await db.query<{workspace_id:string;workspace_role:string;id:string|null;role_key:string|null;name:string|null}>(`
+  SELECT p.workspace_id,wr.role_key AS workspace_role,pr.id,pr.role_key,pr.name
+  FROM projects p JOIN workspace_members wm ON wm.workspace_id=p.workspace_id AND wm.user_id=$2
+  JOIN workspace_roles wr ON wr.id=wm.role_id AND wr.workspace_id=p.workspace_id
+  LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=$2 AND pm.workspace_id=p.workspace_id
+  LEFT JOIN workspace_roles pr ON pr.id=pm.role_id AND pr.workspace_id=p.workspace_id
+  WHERE p.id=$1`,[projectId,userId])
+ const row=rows[0];if(!row)throw notFound()
+ if(row.workspace_role==='owner')return access(row.workspace_id,userId,db)
+ if(!row.id||!row.role_key||!row.name)throw notFound()
+ const granted=await db.query<{permission:string}>('SELECT permission FROM role_permissions WHERE role_id=$1',[row.id])
+ return {roleId:row.id,roleKey:row.role_key,roleName:row.name,permissions:new Set(granted.rows.map(x=>x.permission))}
 }
 export function allowed(a:Access,key:string){return a.roleKey==='owner'||a.permissions.has(key)}
 export function requirePermission(a:Access,key:string){if(!allowed(a,key))throw new DomainError(`Permiso requerido: ${key}`,403)}

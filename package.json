@@ -1,7 +1,7 @@
 {
   "name": "atlas-monorepo",
   "private": true,
-  "version": "4.5.0",
+  "version": "4.7.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -55,7 +55,10 @@
     "coverage:backlog": "node scripts/coverage-backlog.mjs",
     "test:qa-tools": "node --test scripts/coverage-backlog.test.mjs",
     "coverage:check:90": "node scripts/coverage-milestone-90.mjs",
-    "qa:milestone90": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage && npm run coverage:check:90 && npm run build"
+    "qa:milestone90": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage && npm run coverage:check:90 && npm run build",
+    "db:restore:verify": "node scripts/restore-db.mjs --mode=verify",
+    "db:restore:recover": "node scripts/restore-db.mjs --mode=recover",
+    "qa:v1:functional": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run build"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

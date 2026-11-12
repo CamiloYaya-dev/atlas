@@ -2,7 +2,7 @@ import type {DiagramType,ElementType} from './index'
 export const DIAGRAM_KINDS=['c1','c2','c3','c4','process','sequence','data','trace','custom'] as const satisfies readonly DiagramType[]
 export const ELEMENT_KINDS=['system','actor','container','component','service','endpoint','process','activity','usecase','requirement','database','external','event','document'] as const satisfies readonly ElementType[]
 export const RELATION_KINDS=['functional','technical','mixed'] as const
-export const GLOBAL_ACTIONS=['project.read','project.create','project.rename','element.technical.view','element.technical.edit','field.configure','artifact.import','artifact.export','workspace.members.manage','workspace.roles.manage','workspace.audit.view'] as const
+export const GLOBAL_ACTIONS=['project.read','project.create','project.rename','project.delete','project.members.manage','workspace.rename','workspace.delete','element.technical.view','element.technical.edit','field.configure','artifact.import','artifact.export','workspace.members.manage','workspace.roles.manage','workspace.audit.view'] as const
 export const PERMISSIONS = [
  ...GLOBAL_ACTIONS,
  ...DIAGRAM_KINDS.flatMap(t=>['view','create','edit','delete','layout'].map(a=>`diagram.${a}.${t}`)),
@@ -22,7 +22,7 @@ export function relationScope(a:ElementType,b:ElementType):PermissionScope {
 }
 export const ROLE_PRESETS:{key:string;name:string;description:string;permissions:string[]}[]=[
  {key:'owner',name:'Propietario',description:'Control completo del espacio',permissions:[...PERMISSIONS]},
- {key:'admin',name:'Administrador',description:'Gestión de usuarios, roles, diagramas y modelos',permissions:[...PERMISSIONS]},
+ {key:'admin',name:'Administrador',description:'Gestión de usuarios, roles, diagramas y modelos',permissions:PERMISSIONS.filter(p=>p!=='workspace.delete')},
  {key:'functional',name:'Analista funcional',description:'Procesos, casos de uso y requerimientos',permissions:[
   'project.read','project.create',...['c1','process','trace','sequence','custom'].map(x=>`diagram.view.${x}`),
   ...['process','trace','custom'].flatMap(x=>['create','edit','delete','layout'].map(a=>`diagram.${a}.${x}`)),
@@ -45,6 +45,8 @@ export const ROLE_PRESETS:{key:string;name:string;description:string;permissions
 export const permissionLabel=(key:string):string=>{
  const [group,action,target]=key.split('.')
  const labels:Record<string,string>={view:'Ver',create:'Crear',edit:'Editar',delete:'Eliminar',layout:'Mover cajas',read:'Consultar',rename:'Renombrar',import:'Importar',export:'Exportar',configure:'Configurar',manage:'Administrar',members:'Miembros',roles:'Roles',audit:'Auditoría'}
+ if(group==='workspace')return ({rename:'Renombrar espacio',delete:'Eliminar espacio',members:'Administrar miembros del espacio',roles:'Administrar roles del espacio',audit:'Consultar auditoría del espacio'} as Record<string,string>)[action]||key.replace(/\./g,' · ')
+ if(group==='project')return ({read:'Consultar proyecto asignado',create:'Crear proyectos en el espacio',rename:'Renombrar proyecto',delete:'Eliminar proyecto',members:'Administrar usuarios del proyecto'} as Record<string,string>)[action]||key.replace(/\./g,' · ')
  if(group==='diagram')return `${labels[action]||action} vista ${target?.toUpperCase()}`
  if(group==='element')return `${labels[action]||action} ${target}`
  if(group==='relation')return `${labels[action]||action} relaciones ${target}`
