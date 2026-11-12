@@ -2,7 +2,6 @@
   "all": true,
   "include": [
     "apps/api/src/**/*.{ts,tsx}",
-    "apps/web/src/**/*.{ts,tsx}",
     "packages/*/src/**/*.{ts,tsx}"
   ],
   "exclude": [
@@ -12,8 +11,17 @@
     "**/*.spec.ts",
     "**/*.d.ts"
   ],
-  "extension": [".js", ".ts", ".tsx"],
-  "reporter": ["text", "html", "lcov", "json-summary"],
-  "reports-dir": "coverage",
-  "temp-directory": ".coverage/tmp"
+  "extension": [
+    ".js",
+    ".ts",
+    ".tsx"
+  ],
+  "reporter": [
+    "text",
+    "html",
+    "lcov",
+    "json-summary"
+  ],
+  "reports-dir": "coverage/backend",
+  "temp-directory": ".coverage/tmp-backend"
 }

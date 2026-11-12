@@ -134,3 +134,45 @@ La meta obligatoria es **>=95 % de líneas, sentencias, funciones y ramas por ar
 - `npm run test:full`: typecheck + gate de cobertura + build + E2E.
 
 Guía y diagnóstico: `QA_COVERAGE_95.md`. Los porcentajes no se infieren del número de pruebas aprobadas.
+
+---
+
+## ATLAS V4.4 — Cierre local y pruebas reales
+
+El alcance V4 queda cerrado para desarrollo local y piloto ngrok restringido. **No es una declaración de que el producto ya esté certificado.** Lee [`docs/V4_CIERRE_LOCAL.md`](docs/V4_CIERRE_LOCAL.md) y [`docs/PILOTO_NGROK_LOCAL.md`](docs/PILOTO_NGROK_LOCAL.md).
+
+### Instalación y ejecución (Windows, PowerShell, raíz del repositorio)
+
+```powershell
+npm install
+npm run dev:all
+```
+
+### Verificación gradual
+
+```powershell
+npm run typecheck
+npm run test:unit       # Node: reglas backend, contratos y comandos de editor
+npm run test:ui         # Vitest + jsdom: componentes React y hooks
+npm run test:db         # PostgreSQL QA en Docker, puerto 5433
+npm run test:e2e:local  # Playwright, navegador Chromium y base QA
+npm run test:coverage   # Informes separados y consolidados
+npm run coverage:check  # Gate 95% global y POR ARCHIVO
+npm run build
+```
+
+**Comando único obligatorio para declarar la entrega aprobada:** `npm run qa:local`.
+Este comando incluye todas las fases y se detiene en el primer fallo. Si el reporte no llega al 95%, el gate falla; no deben marcarse como aprobadas versiones incompletas.
+
+### Reportes
+
+- `coverage/index.html`: resumen de API, web y contratos.
+- `coverage/backend/index.html`: detalle backend + contratos instrumentados por C8.
+- `coverage/frontend/index.html`: detalle de React instrumentado por Vitest/V8.
+- `coverage/lcov.info`: unificación de LCOV para SonarQube.
+
+Los recolectores cuentan los módulos fuente que aún no tienen pruebas (0%); no se falsean exclusiones para alcanzar el objetivo.
+
+### Piloto temporal ngrok
+
+Configura `ATLAS_NGROK_HOST` en `apps/web/.env`, `ATLAS_SECURE_COOKIES=true` y `CORS_ORIGINS=https://HOST` exacto en `apps/api/.env`. Ejecuta `npm run pilot:check`, después `npm run pilot:start` y expón **solo** el puerto **4173** con `ngrok http 4173`. Usa el bundle compilado; no expongas el servidor Vite de desarrollo (5173), la API ni PostgreSQL directamente.

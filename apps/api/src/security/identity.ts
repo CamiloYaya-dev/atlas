@@ -9,12 +9,13 @@ const cookieName='atlas_session'
 export function readCookie(req:FastifyRequest){
  const raw=req.headers.cookie||''
  const match=raw.split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='))
- return match?decodeURIComponent(match.slice(cookieName.length+1)):''
+ if(!match)return ''
+ try{return decodeURIComponent(match.slice(cookieName.length+1))}catch{return ''}
 }
 export function csrfFor(token:string){return createHmac('sha256',env.csrfSecret).update('atlas-csrf:'+token).digest('base64url')}
 export function secureCookie(token:string,clear=false){
  const pieces=[`${cookieName}=${clear?'':encodeURIComponent(token)}`,'HttpOnly','SameSite=Lax','Path=/api/v1',`Max-Age=${clear?0:43200}`]
- if(env.nodeEnv==='production')pieces.push('Secure')
+ if(env.secureCookies)pieces.push('Secure')
  return pieces.join('; ')
 }
 export async function identity(request:FastifyRequest):Promise<Actor>{

@@ -32,5 +32,7 @@ if(!existsSync(c8)){
 }
 exec(`Medir cobertura AGREGADA de ${mode==='full'?'unitarias + integración':'unitarias'}`,
  process.execPath,[c8,process.execPath,'scripts/coverage-suite.mjs',mode])
+exec('Medir coverage React con Vitest', 'npm', ['run','test:ui:coverage','-w','@atlas/web'])
+exec('Consolidar frontend + backend + contratos',process.execPath,['scripts/coverage-merge.mjs'])
 console.log('\n[ATLAS COVERAGE] Reportes generados en coverage/index.html, coverage/lcov.info y coverage/coverage-summary.json')
 console.log('[ATLAS COVERAGE] Para aplicar umbral por archivo de 95%: npm run coverage:check')

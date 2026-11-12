@@ -17,5 +17,5 @@ if(nodeEnv==='production'){
  if(/localhost|127\.0\.0\.1/i.test(databaseUrl))throw Error('Producción no debe usar DATABASE_URL local')
 }
 export const env={nodeEnv,port,host,databaseUrl,csrfSecret,authMode:'local' as const,allowedOrigins,
- dbSsl:bool(process.env.DB_SSL),dbPoolMax:Number(process.env.DB_POOL_MAX||5),trustProxy:bool(process.env.TRUST_PROXY)}
+ dbSsl:bool(process.env.DB_SSL),dbPoolMax:Number(process.env.DB_POOL_MAX||5),trustProxy:bool(process.env.TRUST_PROXY),secureCookies:nodeEnv==='production'||bool(process.env.ATLAS_SECURE_COOKIES)}
 if(!Number.isInteger(env.dbPoolMax)||env.dbPoolMax<1||env.dbPoolMax>40)throw Error('DB_POOL_MAX inválido')

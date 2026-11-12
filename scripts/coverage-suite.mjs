@@ -9,3 +9,12 @@ for(const kind of mode==='full'?['unit','integration']:['unit']){
  if(result.error)throw result.error
  if(result.status!==0)process.exit(result.status||1)
 }
+
+if(mode==='full'){
+ // Conserva la instrumentación V8 en procesos de configuración, scripts y servidor.
+ // Ningún caso apunta a los datos del usuario: está restringido a atlas_test.
+ console.log('\n[ATLAS COVERAGE] Entrypoints operacionales sobre base QA exclusiva')
+ const result=spawnSync(process.execPath,['scripts/coverage-operational.mjs'],{cwd:root,stdio:'inherit',env:process.env,shell:false})
+ if(result.error)throw result.error
+ if(result.status!==0)process.exit(result.status||1)
+}

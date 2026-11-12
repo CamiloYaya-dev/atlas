@@ -1,4 +1,4 @@
-import {readFileSync,existsSync} from 'node:fs'
+import {readFileSync,existsSync,readdirSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 const root=fileURLToPath(new URL('..',import.meta.url))
@@ -11,8 +11,25 @@ if(!existsSync(report)){
 }
 const summary=JSON.parse(readFileSync(report,'utf8'))
 const files=Object.entries(summary).filter(([name])=>name!=='total')
+const measuredPaths=files.map(([name])=>name.replaceAll('\\','/'))
 if(!files.length){console.error('El reporte no contiene archivos fuente. Coverage NO verificado.');process.exit(1)}
 let errors=0
+// Require every runtime source file to appear in coverage (0% counts). Checking only
+// the global percentage allows silently omitting a large feature entirely.
+function visit(directory,relative){
+ if(!existsSync(directory))return
+ for(const entry of readdirSync(directory,{withFileTypes:true})){
+  const sub=resolve(directory,entry.name),name=`${relative}/${entry.name}`
+  if(entry.isDirectory()){visit(sub,name);continue}
+  if(name.startsWith('apps/web/src/test/')||name==='apps/web/src/features/security/types.ts')continue
+  if(!/\.(ts|tsx)$/.test(entry.name)||/\.d\.ts$|\.(unit\.|integration\.|browser\.)?test\.ts(x)?$/.test(entry.name))continue
+  if(!measuredPaths.some(path=>path===name||path.endsWith('/'+name))){
+   console.error(`SIN MEDIR: ${name}`);errors++
+  }
+ }
+}
+for(const area of ['apps/api/src','apps/web/src','packages/contracts/src','packages/fixtures/src'])visit(resolve(root,area),area)
+
 for(const area of ['apps/api/src/','apps/web/src/','packages/']){
  if(!files.some(([name])=>name.replaceAll('\\','/').includes(area))){
   console.error(`FALTA cobertura instrumentada para ${area}; no se puede aprobar la puerta de calidad.`)

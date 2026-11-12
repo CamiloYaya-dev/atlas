@@ -1,7 +1,7 @@
 {
   "name": "atlas-monorepo",
   "private": true,
-  "version": "4.3.1",
+  "version": "4.4.1",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -33,19 +33,29 @@
     "test": "npm run test:unit",
     "test:policy": "npm run test:policy -w @atlas/api",
     "test:integration": "node scripts/run-tests.mjs integration",
-    "check": "npm run typecheck && npm run test:unit && npm run build",
+    "check": "npm run typecheck && npm run test:unit && npm run test:ui && npm run build",
     "smoke": "node scripts/smoke.mjs",
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:coverage": "node scripts/coverage-local.mjs full",
     "test:db": "node scripts/integration-local.mjs",
     "test:e2e": "playwright test",
     "test:e2e:local": "node scripts/e2e-local.mjs",
-    "test:all": "npm run typecheck && npm run test:unit && npm run test:db && npm run build",
-    "test:full": "npm run typecheck && npm run test:coverage:gate && npm run build && npm run test:e2e:local",
+    "test:all": "npm run qa:local",
+    "test:full": "npm run qa:local",
     "test:coverage:unit": "node scripts/coverage-local.mjs unit",
     "coverage:check": "node scripts/coverage-gate.mjs",
     "test:coverage:gate": "npm run test:coverage && npm run coverage:check",
-    "coverage:summary": "node scripts/coverage-summary.mjs"
+    "coverage:summary": "node scripts/coverage-summary.mjs",
+    "test:ui": "npm run test:ui -w @atlas/web",
+    "test:ui:coverage": "npm run test:ui:coverage -w @atlas/web",
+    "coverage:merge": "node scripts/coverage-merge.mjs",
+    "qa:local": "npm run test:qa-tools && npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage:gate && npm run build",
+    "pilot:check": "node scripts/pilot-check.mjs",
+    "pilot:start": "npm run pilot:check && npm run build && concurrently -k -n API,WEB -c cyan,green \"npm run start:api\" \"npm run preview -w @atlas/web\"",
+    "coverage:backlog": "node scripts/coverage-backlog.mjs",
+    "test:qa-tools": "node --test scripts/coverage-backlog.test.mjs",
+    "coverage:check:90": "node scripts/coverage-milestone-90.mjs",
+    "qa:milestone90": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage && npm run coverage:check:90 && npm run build"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

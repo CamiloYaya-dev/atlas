@@ -15,6 +15,8 @@ if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!/1
 type User={cookie:string;csrf:string;id:string}
 test('API real: autenticación, administración, roles, diagramas y aislamiento',async t=>{
  const app=await buildApp()
+ // Ruta exclusiva del test de inyección; no forma parte de la API publicada.
+ app.get('/api/v1/_qa_unhandled_error',async()=>{throw new Error('Detalle interno secreto QA')})
  const suffix=randomUUID().slice(0,8)
  const adminEmail=`qa-admin-${suffix}@example.test`,memberEmail=`qa-member-${suffix}@example.test`
  const pass='ContraseñaSegura!2026',invalidPass='ClaveIncorrecta!2026'
@@ -133,6 +135,84 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
     assert.equal((await send('GET',`/projects/${p.data.id}/document`,member)).status,404)
     assert.equal((await send('PUT',`/projects/${p.data.id}/document`,member,{document:emptyDoc(),expectedVersion:1})).status,404)
    }finally{await pool.query('DELETE FROM workspaces WHERE id=$1',[second.data.id])}
+  })
+  await t.test('API real: roles inválidos y duplicados no se almacenan',async()=>{
+   const path=`/workspaces/${workspaceId}/roles`
+   assert.equal((await send('POST',path,admin,{name:'Q',roleKey:'x',permissions:[]})).status,400)
+   assert.equal((await send('POST',path,admin,{name:'Rol inválido',roleKey:'clave con espacios',permissions:[]})).status,400)
+   assert.equal((await send('POST',path,admin,{name:'Permiso falso',roleKey:'qa_fake',permissions:['permission.invalid']})).status,400)
+   assert.equal((await send('POST',path,admin,{name:'QA duplicado',roleKey:'qa_view',permissions:['project.read']})).status,409)
+   assert.equal((await send('POST',path,admin,[])).status,400)
+  })
+  await t.test('API real: actualizar roles y bloquear ediciones ajenas',async()=>{
+   const roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
+   assert.equal(roles.status,200)
+   const role=roles.data.find((r:{role_key:string})=>r.role_key==='qa_view')
+   assert.ok(role?.id)
+   const endpoint=`/workspaces/${workspaceId}/roles/${role.id}`
+   assert.equal((await send('PUT',endpoint,member,{permissions:['project.read']})).status,403)
+   assert.equal((await send('PUT',endpoint,admin,{permissions:['invalid.permission']})).status,400)
+   assert.equal((await send('PUT',`/workspaces/${workspaceId}/roles/${randomUUID()}`,admin,{permissions:[]})).status,404)
+   assert.equal((await send('PUT',endpoint,admin,{permissions:['project.read','diagram.view.c1','element.view.activity']})).status,200)
+   const reloaded=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
+   assert.ok(reloaded.data.find((r:{id:string})=>r.id===role.id).permissions.includes('diagram.view.c1'))
+  })
+  await t.test('API real: altas, bajas y autorización de miembros',async()=>{
+   const endpoint=`/workspaces/${workspaceId}/members`
+   const roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
+   const role=roles.data.find((r:{role_key:string})=>r.role_key==='qa_view')
+   assert.ok(role?.id)
+   assert.equal((await send('POST',endpoint,admin,{userId:randomUUID(),roleId:role.id})).status,404)
+   assert.equal((await send('POST',endpoint,admin,{userId:memberId,roleId:randomUUID()})).status,403)
+   assert.equal((await send('POST',endpoint,admin,{userId:'no-uuid',roleId:role.id})).status,400)
+   const before=await send('GET',endpoint,admin)
+   assert.equal(before.status,200)
+   assert.ok(before.data.some((m:{id:string})=>m.id===memberId))
+   assert.equal((await send('DELETE',`${endpoint}/${memberId}`,member)).status,403)
+   assert.equal((await send('DELETE',`${endpoint}/${memberId}`,admin)).status,200)
+   assert.equal((await send('DELETE',`${endpoint}/${memberId}`,admin)).status,404)
+   assert.equal((await send('POST',endpoint,admin,{userId:memberId,roleId:role.id})).status,201)
+   assert.equal((await send('GET',`/workspaces/${workspaceId}/access`,member)).status,200)
+  })
+  await t.test('API real: validación de identificadores y formatos',async()=>{
+   assert.equal((await send('GET','/workspaces/no-uuid/roles',admin)).status,400)
+   assert.equal((await send('GET','/workspaces/no-uuid/access',admin)).status,400)
+   assert.equal((await send('GET',`/projects/${randomUUID()}/document`,admin)).status,404)
+   assert.equal((await send('GET',`/projects/${projectId}/versions`,member)).status,200)
+   assert.equal((await send('PATCH',`/admin/users/no-uuid`,admin,{active:true})).status,400)
+   assert.equal((await send('PATCH',`/admin/users/${memberId}`,admin,{})).status,400)
+   assert.equal((await send('PATCH',`/admin/users/${randomUUID()}`,admin,{active:true})).status,404)
+   assert.equal((await send('PATCH',`/admin/users/${adminId}`,admin,{password:pass})).status,409)
+  })
+  await t.test('API real: renovación de credenciales revoca contraseñas anteriores',async()=>{
+   const replacement='NuevaClaveDePrueba!2026'
+   assert.equal((await send('PATCH',`/admin/users/${memberId}`,member,{password:replacement})).status,403)
+   assert.equal((await send('PATCH',`/admin/users/${memberId}`,admin,{password:replacement})).status,200)
+   assert.equal((await signin(memberEmail,pass)).status,401)
+   const login=await signin(memberEmail,replacement)
+   assert.equal(login.status,200)
+   member=login.user
+  })
+  await t.test('API real: errores internos no exponen detalles al cliente',async()=>{
+   const response=await send('GET','/_qa_unhandled_error',admin)
+   assert.equal(response.status,500)
+   assert.equal(response.data.message,'Error interno del servidor')
+   assert.equal(JSON.stringify(response.data).includes('Detalle interno secreto QA'),false)
+   assert.equal(typeof response.data.requestId,'string')
+  })
+  await t.test('API real: el guardado bloquea documentos y versiones incorrectos antes de escribir',async()=>{
+   const endpoint=`/projects/${projectId}/document`
+   const invalid=await send('PUT',endpoint,admin,{document:{schema:0},expectedVersion:2})
+   assert.equal(invalid.status,400)
+   for(const version of [0,-1,'version inválida',1.5]){
+    assert.equal((await send('PUT',endpoint,admin,{document:emptyDoc(),expectedVersion:version})).status,400)
+   }
+   assert.equal((await send('POST',`/projects/${projectId}/import`,admin,{document:{incorrect:true},expectedVersion:2})).status,400)
+   assert.equal((await send('PUT',endpoint,member,{document:emptyDoc(),expectedVersion:2})).status,403)
+  })
+  await t.test('API real: credenciales excesivamente largas se rechazan sin crear sesión',async()=>{
+   assert.equal((await signin('x'.repeat(255)+'@example.test',pass)).status,401)
+   assert.equal((await signin(adminEmail,'x'.repeat(129))).status,401)
   })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)
