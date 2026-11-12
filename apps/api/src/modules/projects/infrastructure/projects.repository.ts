@@ -3,6 +3,8 @@ import type {Project,ProjectDocument} from '@atlas/contracts'
 import {access,requirePermission} from '../../../security/roles'
 import {applyAuthorizedChange} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
+import {mergeProjectDocuments,MergeConflict} from '@atlas/contracts'
+import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string):Promise<Project[]>{const {rows}=await pool.query<Project>('SELECT id,workspace_id,name,description FROM projects WHERE workspace_id=$1 ORDER BY created_at',[workspaceId]);return rows}
  async create(workspaceId:string,name:string,document:ProjectDocument,userId:string):Promise<Project>{
@@ -30,6 +32,13 @@ export class ProjectsRepository {
  }
  async loadDocument(projectId:string):Promise<{document:ProjectDocument,version:number}|null>{const {rows}=await pool.query<{document:ProjectDocument,version:number}>('SELECT document,version FROM project_documents WHERE project_id=$1',[projectId]);return rows[0]||null}
  async saveAuthorized(projectId:string,incoming:ProjectDocument,expectedVersion:number,userId:string,operation:'save'|'import'){
+  const saved=await this.saveInternal(projectId,incoming,expectedVersion,userId,operation,false)
+  return saved?.version??null
+ }
+ async saveCollaborative(projectId:string,incoming:ProjectDocument,baseVersion:number,userId:string){
+  return this.saveInternal(projectId,incoming,baseVersion,userId,'save',true)
+ }
+ private async saveInternal(projectId:string,incoming:ProjectDocument,baseVersion:number,userId:string,operation:'save'|'import',collaborative:boolean){
   const c=await pool.connect()
   try{
    await c.query('BEGIN')
@@ -43,13 +52,28 @@ export class ProjectsRepository {
    const ac=await access(workspaceId,userId,c)
    requirePermission(ac,'project.read')
    if(operation==='import')requirePermission(ac,'artifact.import')
-   if(version!==expectedVersion){await c.query('ROLLBACK');return null}
-   const merged=applyAuthorizedChange(document,incoming,ac)
+   if(collaborative&&ac.roleKey!=='owner'&&![...ac.permissions].some(permission=>
+    permission==='field.configure'||/^(diagram|element|relation)\.(create|edit|delete|layout)\./.test(permission)))
+    throw new DomainError('No tienes permisos de edición colaborativa',403)
+   let submitted=incoming
+   if(version!==baseVersion){
+    if(!collaborative||baseVersion>version){await c.query('ROLLBACK');return null}
+    const storedBase=await c.query<{document:ProjectDocument}>(
+     'SELECT document FROM project_document_versions WHERE project_id=$1 AND version=$2',
+     [projectId,baseVersion])
+    if(!storedBase.rows[0]){await c.query('ROLLBACK');return null}
+    try{
+     submitted=mergeProjectDocuments(
+      projectVisible(storedBase.rows[0].document,ac),incoming,projectVisible(document,ac))
+    }catch(e){if(e instanceof MergeConflict)throw new DomainError(e.message,409);throw e}
+   }
+   const merged=applyAuthorizedChange(document,submitted,ac)
    const updated=await c.query<{version:number}>(`UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version`,[JSON.stringify(merged),userId,projectId])
    const next=updated.rows[0].version
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES ($1,$2,$3::jsonb,$4)',[projectId,next,JSON.stringify(merged),userId])
-   await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey})])
-   await c.query('COMMIT');return next
+   await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey,collaborative})])
+   await c.query('COMMIT')
+   return {version:next,document:projectVisible(merged,ac)}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  }
 }

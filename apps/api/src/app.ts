@@ -4,6 +4,7 @@ import rateLimit from '@fastify/rate-limit'
 import {env} from './config/env'
 import {routes} from './http/routes'
 import {requireCsrf} from './security/identity'
+import {projectEvents} from './modules/projects/realtime/project-events'
 /** Testable Fastify composition root. Calling buildApp does not listen on a port. */
 export async function buildApp(){
  const app=Fastify({logger:{redact:['req.headers.authorization','req.headers.cookie','req.body.password']},bodyLimit:5*1024*1024,trustProxy:env.trustProxy,requestIdHeader:'x-request-id'})
@@ -28,5 +29,6 @@ export async function buildApp(){
   reply.code(status).send({message:status===500?'Error interno del servidor':error instanceof Error?error.message:'Solicitud no válida',statusCode:status,requestId:request.id})
  })
  await app.register(routes)
+ app.addHook('onClose',async()=>projectEvents.closeAll())
  return app
 }

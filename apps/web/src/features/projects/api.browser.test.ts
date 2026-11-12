@@ -20,7 +20,16 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(request).toHaveBeenCalledWith('/projects/proj%2Ftest/document')
   const saved=await saveDocument('proj/test',doc,3)
   expect(saved).toBe(4)
-  expect(request).toHaveBeenCalledWith('/projects/proj%2Ftest/document',{method:'PUT',body:JSON.stringify({document:doc,expectedVersion:3})})
+  expect(request).toHaveBeenCalledWith('/projects/proj%2Ftest/document',{method:'PUT',body:JSON.stringify({document:doc,expectedVersion:3,collaborative:true})})
+ })
+ it('entrega al editor el documento canónico cuando el servidor fusiona cambios',async()=>{
+  const doc=emptyDoc()
+  const onCommitted=vi.fn()
+  vi.mocked(request).mockResolvedValueOnce({version:5,document:doc} as never)
+  const saved=await saveDocument('p1',doc,4,onCommitted)
+  expect(saved).toBe(5)
+  expect(onCommitted).toHaveBeenCalledWith(doc,5)
+  expect(request).toHaveBeenCalledWith('/projects/p1/document',{method:'PUT',body:JSON.stringify({document:doc,expectedVersion:4,collaborative:true})})
  })
  it('exporta, importa y consulta historial de versiones',async()=>{
   await exportProject('p1')

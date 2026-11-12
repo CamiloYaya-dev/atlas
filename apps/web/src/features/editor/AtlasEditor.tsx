@@ -11,9 +11,11 @@ import {login as apiLogin,logout as apiLogout,session as apiSession,workspaceAcc
 import SecurityPanel from '../security/SecurityPanel'
 import VersionHistory from '../projects/VersionHistory'
 import type {WorkspaceAccess} from '../security/types'
-import {relationScope} from '@atlas/contracts'
+import {relationScope,mergeProjectDocuments,MergeConflict} from '@atlas/contracts'
 import {createWorkspace as apiCreateWorkspace,listWorkspaces} from '../workspaces/api'
-import {listProjects,createProject as apiCreateProject,loadDocument,saveDocument,exportProject,importProject} from '../projects/api'
+import {listProjects,createProject as apiCreateProject,loadDocument,saveDocument,exportProject,importProject,sendPresence} from '../projects/api'
+import type {LiveParticipant} from '../projects/api'
+import {projectEventsUrl} from '../../shared/api/http'
 import {createElement,diagramLabels,elementLabels,fieldLabels,emptyDoc,isProjectDocument,today,uid} from '../../types'
 import type {Diagram,DiagramEdge,DiagramType,ElementType,FieldDefinition,FieldKind,ModelElement,Perspective,Project,ProjectDocument,Workspace} from '../../types'
 
@@ -38,7 +40,10 @@ function AppInner(){
  const [sidebarOpen,setSidebarOpen]=useState(false);const [inspectorOpen,setInspectorOpen]=useState(true);const [expanded,setExpanded]=useState(false)
  const [dialog,setDialog]=useState<Dialog>(null);const [query,setQuery]=useState('');const [toast,setToast]=useState('')
  const [editSerial,setEditSerial]=useState(0);const [saveStatus,setSaveStatus]=useState<'saved'|'pending'|'saving'|'error'>('saved')
- const [saveError,setSaveError]=useState('');const [currentVersion,setCurrentVersion]=useState(1);const versionMap=useRef<Record<string,number>>({});const serialSave=useRef<Promise<void>>(Promise.resolve());const editSerialRef=useRef(0);const conflictLockedProject=useRef<string|null>(null)
+ const [saveError,setSaveError]=useState('');const [currentVersion,setCurrentVersion]=useState(1);const versionMap=useRef<Record<string,number>>({});const editSerialRef=useRef(0);const ackSerialRef=useRef(0);const saveBusyRef=useRef(false);const [saveTick,setSaveTick]=useState(0);const conflictLockedProject=useRef<string|null>(null)
+ const [liveStatus,setLiveStatus]=useState<'connecting'|'online'|'offline'>('offline');const [participants,setParticipants]=useState<LiveParticipant[]>([])
+ const liveClientRef=useRef<string|null>(null);const activeProjectRef=useRef('');activeProjectRef.current=projectId
+
  const fileInput=useRef<HTMLInputElement>(null);const [newName,setNewName]=useState('');const [newType,setNewType]=useState<DiagramType>('custom');const [newElementType,setNewElementType]=useState<ElementType>('component');const [fieldLabel,setFieldLabel]=useState('');const [fieldType,setFieldType]=useState<ElementType|'all'>('all');const [fieldKind,setFieldKind]=useState<FieldKind>('text');const [fieldOptions,setFieldOptions]=useState('');const [nodeTab,setNodeTab]=useState<'new'|'existing'>('new')
  const ws=workspaces.find(x=>x.id===wsId);const project=projects.find(x=>x.id===projectId);const can=(key:string)=>!!accessPolicy&&(accessPolicy.roleKey==='owner'||accessPolicy.permissions.includes(key));const canEdit=!!accessPolicy&&(accessPolicy.roleKey==='owner'||accessPolicy.permissions.some(x=>x.includes('.edit.')||x.includes('.layout.')||x.includes('.create.')||x.includes('.delete.')||x==='field.configure'));const canAdmin=can('workspace.roles.manage')||can('workspace.members.manage')||!!account?.platformAdmin
  const diagram=doc?.diagrams.find(d=>d.id===diagramId)||null;const selected=selectedId?doc?.elements[selectedId]:undefined
@@ -48,9 +53,95 @@ function AppInner(){
  useEffect(()=>{if(!wsId){setAccessPolicy(null);return}let mounted=true;setAccessPolicy(null);workspaceAccess(wsId).then(p=>{if(mounted)setAccessPolicy(p)}).catch(e=>{if(mounted)announce('No se pudieron cargar permisos: '+e.message)});return()=>{mounted=false}},[wsId])
  useEffect(()=>{if(!account){setWorkspaces([]);setWsId('');setProjects([]);setProjectId('');setDoc(null);return}let cancelled=false;listWorkspaces(account.id).then(items=>{if(!cancelled){setWorkspaces(items);setWsId(prev=>items.some(w=>w.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar espacios: '+e.message));return()=>{cancelled=true}},[account?.id])
  useEffect(()=>{if(!wsId){setProjects([]);setProjectId('');return}let cancelled=false;setDoc(null);listProjects(wsId).then(items=>{if(!cancelled){setProjects(items);setProjectId(prev=>items.some(p=>p.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar proyectos: '+e.message));return()=>{cancelled=true}},[wsId])
- useEffect(()=>{if(!projectId){setDoc(null);setDiagramId('');return}let cancelled=false;setDoc(null);loadDocument(projectId).then(saved=>{if(cancelled)return;const data=saved?.document||emptyDoc();versionMap.current[projectId]=saved?.version||1;setCurrentVersion(saved?.version||1);conflictLockedProject.current=null;setDoc(data);setDiagramId(data.diagrams[0]?.id||'');setSelectedId(null);setEditSerial(0);editSerialRef.current=0;setSaveStatus('saved');setSaveError('')}).catch(e=>announce('Error al cargar diagrama: '+e.message));return()=>{cancelled=true}},[projectId])
+ useEffect(()=>{if(!projectId){setDoc(null);setDiagramId('');return}let cancelled=false;setDoc(null);loadDocument(projectId).then(saved=>{if(cancelled)return;const data=saved?.document||emptyDoc();versionMap.current[projectId]=saved?.version||1;setCurrentVersion(saved?.version||1);conflictLockedProject.current=null;setDoc(data);setDiagramId(data.diagrams[0]?.id||'');setSelectedId(null);setEditSerial(0);editSerialRef.current=0;ackSerialRef.current=0;setSaveStatus('saved');setSaveError('')}).catch(e=>announce('Error al cargar diagrama: '+e.message));return()=>{cancelled=true}},[projectId])
  const patch=useCallback((fn:(original:ProjectDocument)=>ProjectDocument)=>{if(!canEdit)return;setDoc(prev=>prev?fn(prev):prev);editSerialRef.current+=1;setEditSerial(editSerialRef.current);setSaveStatus(conflictLockedProject.current===projectId?'error':'pending')},[canEdit,projectId])
- useEffect(()=>{if(!projectId||!doc||!editSerial||!canEdit||conflictLockedProject.current===projectId)return;const snapshot=doc;const pid=projectId;const rev=editSerial;const tid=window.setTimeout(()=>{serialSave.current=serialSave.current.catch(()=>{}).then(async()=>{setSaveStatus('saving');try{const nextVersion=await saveDocument(pid,snapshot,versionMap.current[pid]||1);versionMap.current[pid]=nextVersion;setCurrentVersion(nextVersion);if(editSerialRef.current===rev)setSaveStatus('saved');else setSaveStatus('pending')}catch(error){const message=error instanceof Error?error.message:String(error);if(/conflicto/i.test(message))conflictLockedProject.current=pid;setSaveStatus('error');setSaveError(message)}})},950);return()=>window.clearTimeout(tid)},[editSerial])
+ // Collaborative autosave: merge independent changes on the server; never overwrite a conflicting property.
+ useEffect(()=>{
+  if(!projectId||!doc||!canEdit||editSerial<=ackSerialRef.current||conflictLockedProject.current===projectId)return
+  const pid=projectId,rev=editSerial,snapshot=doc
+  const tid=window.setTimeout(async()=>{
+   if(saveBusyRef.current)return // the active save schedules a fresh pass once it completes
+   if(activeProjectRef.current!==pid||rev<=ackSerialRef.current||conflictLockedProject.current===pid)return
+   saveBusyRef.current=true;setSaveStatus('saving')
+   let committedSave=false
+   try{
+    const nextVersion=await saveDocument(pid,snapshot,versionMap.current[pid]||1,(committed,version)=>{
+     // Do not erase edits typed while the request was in flight.
+     if(activeProjectRef.current!==pid)return
+     setDoc(current=>{
+      if(!current)return current
+      if(editSerialRef.current===rev)return committed
+      try{return mergeProjectDocuments(snapshot,current,committed)}
+      catch(error){
+       conflictLockedProject.current=pid
+       setSaveError(error instanceof Error?error.message:'Colisión de cambios locales')
+       setSaveStatus('error')
+       return current
+      }
+     })
+     versionMap.current[pid]=version
+    })
+    if(activeProjectRef.current!==pid)return
+    versionMap.current[pid]=nextVersion;setCurrentVersion(nextVersion)
+    ackSerialRef.current=Math.max(ackSerialRef.current,rev)
+    committedSave=true
+    if(conflictLockedProject.current!==pid){setSaveError('');setSaveStatus(editSerialRef.current===rev?'saved':'pending')}
+   }catch(error){
+    if(activeProjectRef.current!==pid)return
+    const message=error instanceof Error?error.message:String(error)
+    if(/conflicto|versión base|colaboración/i.test(message)||error instanceof MergeConflict)conflictLockedProject.current=pid
+    setSaveStatus('error');setSaveError(message)
+   }finally{
+    saveBusyRef.current=false
+    if(committedSave&&activeProjectRef.current===pid&&editSerialRef.current>ackSerialRef.current&&conflictLockedProject.current!==pid)setSaveTick(x=>x+1)
+   }
+  },950)
+  return()=>window.clearTimeout(tid)
+ },[projectId,doc,editSerial,canEdit,saveTick])
+ // Live event stream: only versions/presence are pushed; documents are re-read with ACL filtering.
+ useEffect(()=>{
+  setParticipants([]);setLiveStatus('offline');liveClientRef.current=null
+  if(!projectId||!account||!doc||typeof EventSource==='undefined')return
+  const pid=projectId,clientId=crypto.randomUUID()
+  liveClientRef.current=clientId
+  const stream=new EventSource(projectEventsUrl(pid,clientId),{withCredentials:true})
+  setLiveStatus('connecting')
+  stream.onopen=()=>{if(activeProjectRef.current===pid)setLiveStatus('online')}
+  stream.onerror=()=>{if(activeProjectRef.current===pid)setLiveStatus('offline')}
+  const onPresence=(evt:Event)=>{
+   try{const payload=JSON.parse((evt as MessageEvent).data) as {participants:LiveParticipant[]};if(activeProjectRef.current===pid&&Array.isArray(payload.participants))setParticipants(payload.participants)}catch{/* corrupted stream event ignored */}
+  }
+  const onVersion=(evt:Event)=>{
+   let version:number
+   try{version=Number((JSON.parse((evt as MessageEvent).data) as {version:number}).version)}catch{return}
+   if(!Number.isSafeInteger(version)||version<=versionMap.current[pid]||activeProjectRef.current!==pid)return
+   // Never replace a local unsaved draft or a save in flight.
+   if(editSerialRef.current>ackSerialRef.current||saveBusyRef.current||conflictLockedProject.current===pid)return
+   const initialSerial=editSerialRef.current
+   void loadDocument(pid).then(saved=>{
+    if(!saved||activeProjectRef.current!==pid||saveBusyRef.current||editSerialRef.current!==initialSerial||conflictLockedProject.current===pid)return
+    if(saved.version<=versionMap.current[pid])return
+    versionMap.current[pid]=saved.version;setCurrentVersion(saved.version)
+    setDoc(saved.document)
+    setDiagramId(prev=>saved.document.diagrams.some(d=>d.id===prev)?prev:saved.document.diagrams[0]?.id||'')
+    setSelectedId(prev=>prev&&saved.document.elements[prev]?prev:null)
+   }).catch(()=>setLiveStatus('offline'))
+  }
+  stream.addEventListener('presence',onPresence)
+  stream.addEventListener('version',onVersion)
+  return()=>{stream.removeEventListener('presence',onPresence);stream.removeEventListener('version',onVersion);stream.close();if(liveClientRef.current===clientId)liveClientRef.current=null}
+ },[projectId,account?.id,Boolean(doc)])
+ // Diagram/element awareness is ephemeral; selections are never stored in PostgreSQL.
+ useEffect(()=>{
+  if(!projectId||!doc||!liveClientRef.current||liveStatus!=='online')return
+  const pid=projectId,clientId=liveClientRef.current,focusDiagram=diagramId||null
+  const focusElement=selectedId&&doc.diagrams.find(d=>d.id===diagramId)?.nodes.some(n=>n.elementId===selectedId)?selectedId:null
+  const ping=()=>void sendPresence(pid,clientId,focusDiagram,focusElement).catch(()=>{})
+  const tid=window.setTimeout(ping,150)
+  const interval=window.setInterval(ping,20000)
+  return()=>{window.clearTimeout(tid);window.clearInterval(interval)}
+ },[projectId,diagramId,selectedId,liveStatus])
+
  const filtered=useGraphView({diagram,doc,groups,dependencies,mode,selectedId,canEdit})
  const [displayNodes,setDisplayNodes,onDisplayNodesChange]=useNodesState<Node>([])
  useEffect(()=>{setDisplayNodes(filtered.nodes)},[filtered.nodes,setDisplayNodes])
@@ -73,9 +164,12 @@ function AppInner(){
  const addField=()=>{if(!emptyName(fieldLabel)||!can('field.configure'))return;const f:FieldDefinition={id:uid(),label:fieldLabel.trim(),forType:fieldType,kind:fieldKind,...(fieldKind==='select'?{options:fieldOptions.split(',').map(t=>t.trim()).filter(Boolean)}:{})};patch(old=>commandAddFieldDefinition(old,f));setFieldLabel('');setFieldOptions('')}
  const downloadLocalBackup=()=>{if(!doc||!projectId||!can('artifact.export'))return;const blob=new Blob([JSON.stringify({format:'ATLAS-LOCAL-UNSAVED',expectedVersion:versionMap.current[projectId]||1,document:doc},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`ATLAS_copia_local_${projectId}.json`;a.click();URL.revokeObjectURL(url)}
  const exportJSON=async()=>{if(!projectId||!can('artifact.export'))return;try{const exported=await exportProject(projectId);const blob=new Blob([JSON.stringify(exported,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`ATLAS_${(project?.name||'proyecto').replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`;a.click();URL.revokeObjectURL(url)}catch(e){announce('Exportación: '+(e as Error).message)}}
- const importJSON=async(e:ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());const candidate=x.document||x;if(!isProjectDocument(candidate))throw Error('Formato JSON no compatible');if(!can('artifact.import'))throw Error('Importación no permitida');if(!window.confirm('¿Importar cambios al proyecto actual? Se aplicarán los permisos por acción.'))return;const pid=projectId;const version=await importProject(pid,candidate,versionMap.current[pid]||1);versionMap.current[pid]=version;setCurrentVersion(version);const refreshed=await loadDocument(pid);setDoc(refreshed?.document||null);setDiagramId(refreshed?.document.diagrams[0]?.id||'');setEditSerial(0);editSerialRef.current=0;setSaveStatus('saved');announce('Importación validada y guardada')}catch(error){announce((error as Error).message)}finally{e.target.value=''}}
+ const importJSON=async(e:ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;try{const x=JSON.parse(await file.text());const candidate=x.document||x;if(!isProjectDocument(candidate))throw Error('Formato JSON no compatible');if(!can('artifact.import'))throw Error('Importación no permitida');if(!window.confirm('¿Importar cambios al proyecto actual? Se aplicarán los permisos por acción.'))return;const pid=projectId;const version=await importProject(pid,candidate,versionMap.current[pid]||1);versionMap.current[pid]=version;setCurrentVersion(version);const refreshed=await loadDocument(pid);setDoc(refreshed?.document||null);setDiagramId(refreshed?.document.diagrams[0]?.id||'');setEditSerial(0);editSerialRef.current=0;ackSerialRef.current=0;setSaveStatus('saved');announce('Importación validada y guardada')}catch(error){announce((error as Error).message)}finally{e.target.value=''}}
  const related=useMemo(()=>{if(!doc||!selectedId)return [];const ids=new Set<string>();for(const d of doc.diagrams){const sourceNodes=new Set(d.nodes.filter(n=>n.elementId===selectedId).map(n=>n.id));for(const edge of d.edges){if(sourceNodes.has(edge.source)){const match=d.nodes.find(n=>n.id===edge.target);if(match)ids.add(match.elementId)}if(sourceNodes.has(edge.target)){const match=d.nodes.find(n=>n.id===edge.source);if(match)ids.add(match.elementId)}}}return [...ids].map(id=>doc.elements[id]).filter(Boolean).slice(0,12)},[doc,selectedId])
  const fieldDefs=doc?.fieldDefinitions.filter(f=>f.forType==='all'||f.forType===selected?.type)||[]
+ const others=participants.filter(p=>p.clientId!==liveClientRef.current)
+ const editingHere=others.filter(p=>p.diagramId===diagramId)
+ const focusingElement=editingHere.filter(p=>selectedId&&p.elementId===selectedId)
  if(!authReady)return <div className="splash"><span className="brand-icon large">⌘</span><h1>ATLAS</h1><p>Abriendo tu espacio de trabajo...</p></div>
  if(!account)return <div className="auth-shell"><div className="auth-left"><div className="auth-brand"><span className="brand-icon">⌘</span><b>ATLAS</b></div><span className="eyebrow light">ARQUITECTURA · PROCESOS · TRAZABILIDAD</span><h1>Donde lo funcional y lo técnico se conectan.</h1><p>Un único modelo para procesos, requerimientos, arquitectura y equipos. Acceso exclusivo para cuentas autorizadas.</p><div className="auth-graphic"><div><Network size={24}/> Arquitectura navegable</div><div><Workflow size={24}/> Procesos relacionados</div><div><ShieldCheck size={24}/> Permisos configurables</div></div></div><div className="auth-right"><form className="auth-card" onSubmit={sendAuth}><span className="eyebrow">ATLAS / ACCESO PRIVADO</span><h2>Iniciar sesión</h2><p>Ingresa con la cuenta creada por el administrador.</p><Field label="Correo electrónico"><input type="email" autoComplete="username" required value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@empresa.com"/></Field><Field label="Contraseña"><input type="password" autoComplete="current-password" required value={authPass} onChange={e=>setAuthPass(e.target.value)} placeholder="Tu contraseña"/></Field>{authError&&<div className="sec-error" role="alert">{authError}</div>}<button className="primary full" type="submit" disabled={authBusy}><LogIn size={16}/>{authBusy?'Validando...':'Entrar a ATLAS'}</button><p className="sec-help">Acceso cerrado. No existe registro público. Si necesitas una cuenta, contacta al administrador.</p></form></div></div>
  return <div className={'layout '+(expanded?'expanded':'')}>
@@ -91,7 +185,8 @@ function AppInner(){
      <div className="side-bottom"><div className="demo-label"><span className="live-dot cloud"/>API · PostgreSQL · Acceso cerrado</div><button className="profile-pill" onClick={signOut}><span className="avatar"><UserRound size={15}/></span><span className="email">{account.email}</span><LogOut size={15}/></button></div>
    </aside>
    <main className="main">
-     <header className="topbar"><div className="top-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'ATLAS'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right">{projectId&&accessPolicy&&<button className="ghost" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Conflicto de guardado'}</span><span className="role-pill"><ShieldCheck size={14}/>{accessPolicy?.roleName||roleLabel[ws?.role||'viewer']||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}{canAdmin&&<button className="ghost" onClick={()=>setDialog('access')}><ShieldCheck size={15}/> Accesos</button>}</div></header>
+     <header className="topbar"><div className="top-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'ATLAS'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right">{projectId&&accessPolicy&&<button className="ghost" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}{projectId&&<span className={'collab-status '+(liveStatus==='online'?'connected':'disconnected')} role='status' title={others.map(p=>`${p.name}: ${p.diagramId?'en un diagrama':'en el proyecto'}`).join(' · ')||'Sin colaboradores en este proyecto'}><span className='collab-dot'/> {liveStatus==='online'?`${participants.length} en línea`:liveStatus==='connecting'?'Conectando...':'Sin conexión en vivo'}</span>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Sin guardar'}</span><span className="role-pill"><ShieldCheck size={14}/>{accessPolicy?.roleName||roleLabel[ws?.role||'viewer']||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}{canAdmin&&<button className="ghost" onClick={()=>setDialog('access')}><ShieldCheck size={15}/> Accesos</button>}</div></header>
+     {editingHere.length>0&&<div className='collab-presence' role='status'><span className='collab-dot'/> {editingHere.map(p=>p.name).join(', ')} {editingHere.length===1?'está':'están'} viendo este diagrama{focusingElement.length>0&&selected?` · ${focusingElement.map(p=>p.name).join(', ')} en la caja ${selected.name}`:''}</div>}
      {!project||!doc?<section className="blank-state"><div className="blank-image"><FolderPlus size={40}/></div><span className="eyebrow">ATLAS / PRIMEROS PASOS</span><h1>{!ws?'Crea tu primer espacio':'Crea tu primer proyecto'}</h1><p>{!ws?'Los espacios separan los proyectos, usuarios y permisos de cada organización.':'Dentro del proyecto podrás crear diagramas, componentes, procesos y requerimientos vinculados.'}</p><button className="primary" disabled={!(!ws?account.platformAdmin:can('project.create'))} onClick={()=>{setNewName('');setDialog(ws?'new-project':'new-workspace')}}><Plus size={17}/>{ws?'Crear proyecto':'Crear espacio'}</button></section>:
      <>
        <section className="page-intro"><div className="heading"><span className="eyebrow">ATLAS / {diagram?diagramLabels[diagram.type].toUpperCase():'EXPLORADOR'}</span><h1>{diagram?.name||'Elige un diagrama'}</h1><p>{diagram?.description||'Crea un diagrama y comienza a vincular la arquitectura con los procesos.'}</p></div><div className="page-actions">{can('artifact.export')&&<button className="ghost" onClick={exportJSON}><Download size={15}/> Exportar</button>}{can('artifact.import')&&<button className="ghost" onClick={()=>fileInput.current?.click()}><Upload size={15}/> Importar</button>}<input type="file" ref={fileInput} accept=".json,application/json" hidden onChange={importJSON}/>{(diagram?can(`diagram.layout.${diagram.type}`)&&ELEMENT_TYPES.some(t=>can(`element.create.${t}`)):DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`)))&&<button className="primary" onClick={()=>{setNewName('');setNewElementType(ELEMENT_TYPES.find(t=>can(`element.create.${t}`))||'component');setNewType(DIAGRAM_TYPES.find(t=>can(`diagram.create.${t}`))||'custom');setNodeTab('new');setDialog(diagram?'new-node':'new-diagram')}}><Plus size={16}/> {diagram?'Agregar caja':'Crear diagrama'}</button>}</div></section>
@@ -116,7 +211,7 @@ function AppInner(){
      </>}
    </main>
    {toast&&<div className="toast"><CheckCircle2 size={16}/>{toast}</div>}
-   {saveStatus==='error'&&<div className="save-error" role="alert"><strong>No se guardaron los cambios.</strong> {saveError}<p>Conservamos tus cambios en esta pestaña. No recargues sin revisarlos: otro usuario puede haber guardado una versión más reciente. ATLAS no mezcla cambios automáticamente.</p><div className="save-recovery-actions"><button onClick={()=>setDialog('history')}>Ver historial</button>{can('artifact.export')&&<button onClick={downloadLocalBackup}>Descargar mis cambios</button>}<button onClick={()=>{if(window.confirm('¿Descartar los cambios locales no guardados y recargar la versión del servidor?'))location.reload()}}>Recargar desde servidor</button></div></div>}
+   {saveStatus==='error'&&<div className="save-error" role="alert"><strong>No se guardaron los cambios.</strong> {saveError}<p>ATLAS fusiona automáticamente cambios independientes en diferentes diagramas, cajas o campos. Si dos personas cambian el mismo dato de forma incompatible, protege ambas versiones y conserva tu borrador en esta pestaña. No recargues sin revisar.</p><div className="save-recovery-actions"><button onClick={()=>setDialog('history')}>Ver historial</button>{can('artifact.export')&&<button onClick={downloadLocalBackup}>Descargar mis cambios</button>}<button onClick={()=>{if(window.confirm('¿Descartar los cambios locales no guardados y recargar la versión del servidor?'))location.reload()}}>Recargar desde servidor</button></div></div>}
    {(dialog==='new-workspace'||dialog==='new-project'||dialog==='new-diagram')&&<Overlay title={dialog==='new-workspace'?'Crear espacio de trabajo':dialog==='new-project'?'Crear proyecto':'Nuevo diagrama'} onClose={()=>setDialog(null)}><div className="modal-body"><Field label={dialog==='new-workspace'?'Nombre de la organización':dialog==='new-project'?'Nombre del proyecto':'Nombre del diagrama'}><input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder={dialog==='new-workspace'?'Ej. Mi empresa':dialog==='new-project'?'Ej. Plataforma de pagos':'Ej. Flujo de autenticación'}/></Field>{dialog==='new-diagram'&&<Field label="Tipo de visualización"><select value={newType} onChange={e=>setNewType(e.target.value as DiagramType)}>{DIAGRAM_TYPES.filter(t=>can(`diagram.create.${t}`)).map(t=><option value={t} key={t}>{diagramLabels[t]}</option>)}</select></Field>}<div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!emptyName(newName)} onClick={dialog==='new-workspace'?createWs:dialog==='new-project'?createPrj:addDiagram}><Plus size={15}/> Crear</button></div></div></Overlay>}
    {dialog==='new-node'&&<Overlay title="Agregar caja al diagrama" onClose={()=>setDialog(null)} wide><div className="modal-body"><div className="segmented node-modal-tabs"><button className={nodeTab==='new'?'active':''} onClick={()=>setNodeTab('new')}>Crear elemento</button><button className={nodeTab==='existing'?'active':''} onClick={()=>setNodeTab('existing')}>Reutilizar existente</button></div>{nodeTab==='new'?<><Field label="Nombre de la caja"><input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Ej. Motor de facturación"/></Field><Field label="Tipo de elemento"><select value={newElementType} onChange={e=>setNewElementType(e.target.value as ElementType)}>{ELEMENT_TYPES.filter(t=>can(`element.create.${t}`)).map(t=><option key={t} value={t}>{elementLabels[t]}</option>)}</select></Field><div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!emptyName(newName)} onClick={addNewNode}><Plus size={15}/> Agregar al lienzo</button></div></>:<><Field label="Buscar elemento del proyecto"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Nombre, tipo, resumen..."/></Field><div className="existing-list">{Object.values(doc?.elements||{}).filter(e=>(e.name+' '+e.type+' '+e.summary).toLowerCase().includes(query.toLowerCase())&&!diagram?.nodes.some(n=>n.elementId===e.id)).slice(0,100).map(e=><button key={e.id} onClick={()=>addNode(e.id)}><IconFor type={e.type}/><span><strong>{e.name}</strong><small>{elementLabels[e.type]} · {e.summary}</small></span><Plus size={15}/></button>)}{!Object.values(doc?.elements||{}).some(e=>!diagram?.nodes.some(n=>n.elementId===e.id))&&<p className="muted-mini">No hay más elementos disponibles.</p>}</div></>}</div></Overlay>}
    {dialog==='fields'&&<Overlay title="Campos personalizados por tipo de elemento" onClose={()=>setDialog(null)} wide><div className="modal-body"><p className="dialog-description">Configura fichas específicas para componentes, requerimientos, procesos, endpoints y otros elementos. Los campos se comparten entre las vistas del mismo proyecto.</p><div className="field-grid"><Field label="Nombre del campo"><input value={fieldLabel} onChange={e=>setFieldLabel(e.target.value)} placeholder="Ej. Enlace en Azure DevOps" disabled={!can('field.configure')}/></Field><Field label="Aplica a"><select value={fieldType} disabled={!can('field.configure')} onChange={e=>setFieldType(e.target.value as ElementType|'all')}><option value="all">Todos los tipos</option>{ELEMENT_TYPES.map(t=><option value={t} key={t}>{elementLabels[t]}</option>)}</select></Field><Field label="Tipo de dato"><select value={fieldKind} disabled={!can('field.configure')} onChange={e=>setFieldKind(e.target.value as FieldKind)}>{FIELD_TYPES.map(t=><option value={t} key={t}>{fieldLabels[t]}</option>)}</select></Field><div className="field-add"><button className="primary" disabled={!can('field.configure')||!emptyName(fieldLabel)} onClick={addField}><Plus size={14}/> Crear campo</button></div></div>{fieldKind==='select'&&<Field label="Opciones separadas por coma"><input value={fieldOptions} disabled={!can('field.configure')} onChange={e=>setFieldOptions(e.target.value)} placeholder="Ej. Pendiente, En revisión, Finalizado"/></Field>}<div className="section-head"><strong>Campos configurados</strong><span className="tiny-count">{doc?.fieldDefinitions.length||0}</span></div><div className="defs-list">{doc?.fieldDefinitions.map(f=><div className="def-row" key={f.id}><span><strong>{f.label}</strong><small>{f.forType==='all'?'Todos':elementLabels[f.forType]} · {fieldLabels[f.kind]}</small></span>{can('field.configure')&&<button title="Eliminar campo" onClick={()=>{if(window.confirm('¿Eliminar la definición de este campo?'))patch(old=>commandRemoveFieldDefinition(old,f.id))}}><Trash2 size={14}/></button>}</div>)}</div></div></Overlay>}

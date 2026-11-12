@@ -32,3 +32,5 @@ export function isProjectDocument(x: unknown): x is ProjectDocument {
 export function createElement(name: string, type: ElementType, author='Usuario'): ModelElement {
   const date = today(); return {id:uid(),name,type,summary:'',description:'',owner:'',author,status:'Borrador',createdAt:date,updatedAt:date,links:[],fields:{}}
 }
+
+export {mergeProjectDocuments,MergeConflict} from './collaboration'

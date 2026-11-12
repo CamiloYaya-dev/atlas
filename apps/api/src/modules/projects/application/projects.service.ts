@@ -13,6 +13,10 @@ export class ProjectsService {
   if(Object.keys(document.elements).length||document.diagrams.length)throw new DomainError('Crea primero un proyecto vacío. Usa la importación autorizada para traer modelos.',400)
   return this.repo.create(workspaceId,cleanName(name),emptyDoc(),userId)
  }
+ async assertReadable(projectId:string,userId:string){
+  const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
+  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+ }
  async loadDocument(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
   const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
@@ -44,5 +48,13 @@ export class ProjectsService {
   const version=await this.repo.saveAuthorized(projectId,document,expectedVersion,userId,operation)
   if(version===null)throw new DomainError('Conflicto: otro usuario guardó antes. Recarga antes de modificar.',409)
   return version
+ }
+ async saveCollaborative(projectId:string,document:unknown,baseVersion:unknown,userId:string){
+  if(!isProjectDocument(document))throw new DomainError('Documento ATLAS inválido',400)
+  if(Buffer.byteLength(JSON.stringify(document),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande (máximo 4 MB)',413)
+  if(typeof baseVersion!=='number'||!Number.isSafeInteger(baseVersion)||baseVersion<1)throw new DomainError('Versión base inválida',400)
+  const result=await this.repo.saveCollaborative(projectId,document,baseVersion,userId)
+  if(!result)throw new DomainError('Versión base no disponible. Conserva tu copia local y recarga el proyecto.',409)
+  return result
  }
 }

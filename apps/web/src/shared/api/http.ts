@@ -1,4 +1,5 @@
 const apiRoot=(import.meta.env?.VITE_API_BASE_URL||'').trim().replace(/\/$/,'')
+export const projectEventsUrl=(projectId:string,clientId:string)=>`${apiRoot}/api/v1/projects/${encodeURIComponent(projectId)}/events?clientId=${encodeURIComponent(clientId)}`
 let csrfToken=''
 export const setCsrf=(value:string)=>{csrfToken=value}
 export const cloudEnabled=true // closed multi-user API; no unauthenticated demo mode

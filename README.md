@@ -1,3 +1,7 @@
+## ATLAS V4.5.0 — Colaboración en vivo (incremento de V4.4.1)
+
+Incluye eventos SSE, participantes por proyecto/diagrama/caja y fusión transaccional de cambios independientes con conflictos 409 por propiedad. Mantiene el historial y los permisos. **No requiere nuevas migraciones ni dependencias.** Consulta [COLABORACION_TIEMPO_REAL_V4_5.md](COLABORACION_TIEMPO_REAL_V4_5.md) para detalles y pruebas de dos navegadores.
+
 # ATLAS V4.3 — QA automatizada por comportamiento
 
 ATLAS es un monorepo React + TypeScript + Fastify + PostgreSQL. Esta actualización conserva el login cerrado, el editor y los permisos de V4.2.2, e integra pruebas por capas y una base QA aislada.

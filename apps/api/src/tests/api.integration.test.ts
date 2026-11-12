@@ -249,6 +249,73 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
     assert.equal(await loginStatus('x'.repeat(255)+'@example.test',pass),429)
    }finally{await isolated.close()}
   })
+  // An independent Fastify app keeps the existing 100/min global limiter intact,
+  // without letting earlier integration requests consume these collaboration tests.
+  const liveApp=await buildApp()
+  const sendLive=async(method:'GET'|'POST'|'PUT'|'PATCH'|'DELETE',path:string,user?:User,payload?:object)=>{
+   const r=await liveApp.inject({method,url:`/api/v1${path}`,headers:user?{cookie:user.cookie,'x-csrf-token':user.csrf}:{},...(payload===undefined?{}:{payload})})
+   return {status:r.statusCode,data:r.json() as Record<string,any>}
+  }
+  try{
+  await t.test('Colaboración: ediciones distintas de C1 y C2 se guardan sin perder cambios; colisiones dan 409',async()=>{
+   const endpoint=`/projects/${projectId}/document`
+   const start=await sendLive('GET',endpoint,admin)
+   assert.equal(start.status,200)
+   const initial=start.data.document as ProjectDocument
+   const version=start.data.version as number
+   assert.ok(initial.diagrams.length>=2)
+   const rolesPath=`/workspaces/${workspaceId}/roles`,membersPath=`/workspaces/${workspaceId}/members`
+   const editorRole=await sendLive('POST',rolesPath,admin,{roleKey:'qa_collaborator',name:'Colaborador de QA',permissions:[
+    'project.read','diagram.view.c1','diagram.view.c2','element.view.activity','element.view.endpoint',
+    'diagram.edit.c1','diagram.edit.c2']})
+   assert.equal(editorRole.status,201)
+   assert.equal((await sendLive('POST',membersPath,admin,{userId:memberId,roleId:editorRole.data.id})).status,201)
+   const memberBase=await sendLive('GET',endpoint,member)
+   assert.equal(memberBase.status,200)
+   assert.equal(memberBase.data.version,version)
+   const first=structuredClone(initial),second=structuredClone(memberBase.data.document) as ProjectDocument
+   first.diagrams[0].description='Actualización de usuario A '+suffix
+   second.diagrams[1].description='Actualización independiente de usuario B '+suffix
+   const savedA=await sendLive('PUT',endpoint,admin,{document:first,expectedVersion:version,collaborative:true})
+   assert.equal(savedA.status,200,JSON.stringify(savedA.data))
+   const savedB=await sendLive('PUT',endpoint,member,{document:second,expectedVersion:version,collaborative:true})
+   assert.equal(savedB.status,200,JSON.stringify(savedB.data))
+   const persisted=await sendLive('GET',endpoint,admin)
+   assert.equal(persisted.data.version,version+2)
+   assert.equal(persisted.data.document.diagrams[0].description,first.diagrams[0].description)
+   assert.equal(persisted.data.document.diagrams[1].description,second.diagrams[1].description)
+   const overlapA=structuredClone(persisted.data.document) as ProjectDocument
+   const overlapB=structuredClone(persisted.data.document) as ProjectDocument
+   overlapA.diagrams[0].name='Nombre del usuario A'
+   overlapB.diagrams[0].name='Nombre del usuario B'
+   const commit=await sendLive('PUT',endpoint,admin,{document:overlapA,expectedVersion:persisted.data.version,collaborative:true})
+   assert.equal(commit.status,200)
+   const denied=await sendLive('PUT',endpoint,admin,{document:overlapB,expectedVersion:persisted.data.version,collaborative:true})
+   assert.equal(denied.status,409)
+   const final=await sendLive('GET',endpoint,admin)
+   assert.equal(final.data.document.diagrams[0].name,overlapA.diagrams[0].name)
+   const versionRows=await sendLive('GET',`/projects/${projectId}/versions`,admin)
+   assert.equal(versionRows.status,200)
+   assert.ok(versionRows.data.some((v:{updated_by:string})=>v.updated_by===memberId))
+   const roles=await sendLive('GET',rolesPath,admin)
+   const viewer=roles.data.find((role:{role_key:string})=>role.role_key==='qa_view')
+   assert.ok(viewer?.id)
+   assert.equal((await sendLive('POST',membersPath,admin,{userId:memberId,roleId:viewer.id})).status,201)
+   const limited=await sendLive('GET',endpoint,member)
+   const attempted=structuredClone(limited.data.document) as ProjectDocument
+   attempted.diagrams[0].name='Edición no permitida'
+   const forbidden=await sendLive('PUT',endpoint,member,{document:attempted,expectedVersion:final.data.version,collaborative:true})
+   assert.equal(forbidden.status,403)
+  })
+  await t.test('Colaboración: el canal y la presencia requieren sesión y visibilidad del modelo',async()=>{
+   const id='12345678-1234-4234-8234-123456789012'
+   assert.equal((await sendLive('GET',`/projects/${projectId}/events?clientId=${id}`)).status,401)
+   assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,undefined,{clientId:id,diagramId:'c1',elementId:null})).status,401)
+   assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,member,{clientId:id,diagramId:'c2',elementId:null})).status,403)
+   assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,member,{clientId:id,diagramId:'c1',elementId:'endpoint'})).status,403)
+   assert.equal((await sendLive('POST',`/projects/${projectId}/presence`,admin,{clientId:id,diagramId:'c1',elementId:null})).status,200)
+  })
+  }finally{await liveApp.close()}
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)
    assert.equal((await send('GET','/auth/me',member)).status,401)
