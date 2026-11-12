@@ -108,3 +108,16 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Endurecimiento de SSE y auditoría ante revocaciones y cambios de roles.
 
 **Candidato a validación**: no declarar QA completo hasta ejecutar `typecheck`, pruebas unitarias, React, PostgreSQL y E2E en Windows.
+
+### V4.8.1 — ATLAS Academy (tutorial interactivo)
+- Botón «Aprender ATLAS» en barra superior y barra lateral; guía de 18 pasos orientada a negocio y tecnología.
+- Resaltado contextual de controles reales, navegación por temario, ejercicios simulados, cierre y progreso local.
+- Tutorial no destructivo y disponible para lectores, proyectos vacíos y móviles; pausa ante modales, soporte fullscreen.
+- Pruebas de comportamiento y manual de uso: `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.
+
+### V4.8.1 — ATLAS Academy: identidad y responsive (2026-11-12)
+- Se retiran todos los ejemplos y referencias a un cliente específico de las 18 lecciones y ejercicios; ATLAS se explica mediante su propio ecosistema y casos de uso. No se renombran espacios ni proyectos persistidos.
+- Cálculo de posición del panel a partir de su altura real y del control señalado; se mantiene dentro del viewport en pantallas de escritorio.
+- Vista inferior centrada para tablet y móvil; cabecera y botones de navegación siempre visibles, y contenido/temario desplazables por separado.
+- Pruebas de regresión de identidad y posicionamiento, más verificación en nueve tamaños de Chromium.
+- Sin migraciones, sin API adicional y sin modificaciones de ACL o documentos de proyectos.

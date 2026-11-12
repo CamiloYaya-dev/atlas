@@ -196,3 +196,7 @@ Configura `ATLAS_NGROK_HOST` en `apps/web/.env`, `ATLAS_SECURE_COOKIES=true` y `
 ## Cierre V1 funcional — código candidato V4.6.0
 
 Se añadieron historial visual, comparación/restauración segura de revisiones, auditoría, renombrado de proyectos, E2E multiusuario con identidades diferentes y restauración aislada de PostgreSQL. Lee **CIERRE_V1_FUNCIONAL.md** antes de probar; la certificación en Windows sigue pendiente.
+
+## Tutorial interactivo — Aprender ATLAS
+
+Desde la barra lateral o el icono de libro de la barra superior se puede abrir **Aprender ATLAS**, un recorrido contextual y no destructivo de 18 pasos que explica organizaciones/espacios, proyectos, tipos de diagramas C1–C4, cajas, relaciones, perspectivas funcional/técnica y trazabilidad. Incluye ejercicios locales sin modificar PostgreSQL. Véase `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.

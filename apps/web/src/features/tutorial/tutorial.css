@@ -1,0 +1,83 @@
+/* ATLAS Academy: high-contrast, nonblocking contextual coachmarks. */
+.atlas-tour-root{position:fixed;inset:0;z-index:80;pointer-events:none;font-family:inherit}
+.atlas-tour-live-region{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.atlas-tour-highlight{outline:3px solid #5a9bff!important;outline-offset:4px;box-shadow:0 0 0 8px #4b8bfe26!important;position:relative;z-index:21}
+.atlas-tour-card{--tour-bg:#fff;box-sizing:border-box;position:fixed;width:min(394px,calc(100vw - 24px));max-height:calc(100dvh - 24px);min-height:0;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden;background:var(--tour-bg);border:1px solid #cbdcf3;border-radius:16px;box-shadow:0 16px 65px #0b224452,0 0 0 1px #f6f9ff;color:#1f344e;z-index:81}
+.atlas-tour-header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(100deg,#14325d,#204e99);color:white;padding:12px 16px;flex:none}
+.atlas-tour-brand{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:900;letter-spacing:1.1px}
+.atlas-tour-close{color:#e8f1ff;background:#ffffff1a;border:1px solid #ffffff33;border-radius:9px;padding:6px;display:grid;place-items:center}
+.atlas-tour-close:hover{background:#ffffff30}
+.atlas-tour-body{padding:15px 17px;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.atlas-tour-step-info{display:flex;justify-content:space-between;gap:10px;color:#6c83a0;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+.atlas-tour-progress{height:5px;background:#eaf0fb;border-radius:8px;overflow:hidden;margin:10px 0 13px}
+.atlas-tour-progress span{display:block;background:#3777e5;height:100%;border-radius:8px;transition:width .2s}
+.atlas-tour-body h2{font-size:18px;line-height:1.3;letter-spacing:-.5px;margin:0 0 8px;color:#193452}
+.atlas-tour-body p{font-size:12px;line-height:1.6;margin:0 0 10px}
+.atlas-tour-instruction{color:#384d65}
+.atlas-tour-why{background:#eef5ff;border:1px solid #d6e6ff;padding:10px 11px;border-radius:10px;margin-bottom:11px}
+.atlas-tour-why strong{display:block;font-size:11px;color:#2459a0;margin-bottom:3px}
+.atlas-tour-why p{color:#496584;margin:0}
+.atlas-tour-example{color:#637994;border-left:3px solid #91b7ea;padding-left:10px}
+.atlas-tour-example strong{color:#375b81}
+.atlas-tour-unavailable{background:#fff8ea;border:1px solid #f3dfad;border-radius:8px;padding:9px;color:#8a6631!important;font-size:11px!important}
+.atlas-tour-bottom{padding:10px 15px;border-top:1px solid #e5edf7;background:#f9fbff;display:flex;align-items:center;justify-content:space-between;gap:7px;flex:none}
+.atlas-tour-bottom button{min-height:32px}
+.atlas-tour-index-toggle{display:inline-flex;gap:5px;align-items:center;border:0;background:transparent;color:#53729d;font-size:11px;font-weight:750;padding:4px}
+.atlas-tour-actions{display:flex;gap:6px;align-items:center}
+.atlas-tour-actions .primary,.atlas-tour-actions .ghost{padding:8px 10px;font-size:11px}
+.atlas-tour-index{overflow-y:auto;min-height:0;max-height:min(180px,28dvh);background:#fff;border-top:1px solid #e6edf8;padding:7px;flex:0 1 auto;display:grid;grid-template-columns:1fr}
+.atlas-tour-index button{font-size:11px;text-align:left;border:0;border-radius:7px;background:transparent;color:#526d90;padding:7px 9px}
+.atlas-tour-index button.is-current{background:#eaf2ff;color:#265bc1;font-weight:800}
+.atlas-tour-index button:hover{background:#f3f7fe}
+.tour-exercise{border:1px dashed #aabfe0;background:#fcfdff;border-radius:10px;padding:10px;margin-top:11px}
+.tour-exercise>strong{font-size:11px;color:#365d8f}
+.tour-exercise>p{font-size:11px;color:#70839b;margin:5px 0 8px}
+.tour-exercise-tiles{display:flex;flex-wrap:wrap;gap:6px}
+.tour-exercise button,.tour-demo-tile{border:1px solid #cfdef4;border-radius:7px;background:#fff;padding:7px 9px;color:#315788;font-size:11px;font-weight:700;min-height:31px}
+.tour-exercise button.is-active{background:#e7f1ff;border-color:#548cf5;color:#2256ad}
+.tour-exercise button.is-done{background:#e7f7ee;border-color:#5ab88d;color:#146e46}
+.tour-exercise button:disabled{opacity:.56;cursor:default}
+.tour-exercise-flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.tour-exercise-flow>span[aria-hidden]{color:#4b82dd}
+.tour-demo-tile{background:#f4f7fc}
+.tour-exercise .tour-exercise-success,.tour-exercise-preview{margin-top:8px!important;padding:7px 9px;border-radius:7px;background:#eaf8f1;color:#216c4a!important;font-weight:650}
+.tour-exercise-preview{background:#f0f5ff;color:#3d5d88!important}
+.atlas-tour-lesson-done{display:flex;align-items:center;gap:6px;color:#23754c;font-size:11px;font-weight:800}
+.atlas-tutorial-launcher{display:inline-flex!important;align-items:center;gap:7px}
+.atlas-tutorial-new{font-size:9px;background:#e5edff;color:#3062ba;border-radius:6px;padding:3px 5px}
+.atlas-tour-root:focus-within{outline:none}
+/* Tablets/phones: center a bottom sheet; its controls remain visible while the lesson scrolls. */
+@media(max-width:900px){
+ .atlas-tour-card{width:min(560px,calc(100vw - 16px));left:50%!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;transform:translateX(-50%);max-height:min(74dvh,680px);border-radius:18px}
+ .atlas-tour-body{padding:12px 15px}
+ .atlas-tour-body h2{font-size:17px}
+ .atlas-tutorial-launcher span:not(.atlas-tutorial-new){display:none}
+}
+@media(max-width:520px){
+ .atlas-tour-card{width:calc(100vw - 12px);max-height:min(76dvh,640px);border-radius:15px}
+ .atlas-tour-header{padding:10px 12px}
+ .atlas-tour-body{padding:11px 12px}
+ .atlas-tour-body p{font-size:12px;line-height:1.5}
+ .atlas-tour-bottom{padding:9px 10px;gap:4px}
+ .atlas-tour-actions{gap:4px}
+ .atlas-tour-actions .primary,.atlas-tour-actions .ghost{padding:8px 9px}
+ .atlas-tour-index{max-height:25dvh}
+}
+@media(max-height:560px) and (min-width:901px){
+ .atlas-tour-card{max-height:calc(100dvh - 16px)}
+ .atlas-tour-header{padding:9px 13px}
+ .atlas-tour-body{padding:9px 13px}
+}
+@media(max-height:560px) and (max-width:900px){
+ .atlas-tour-card{max-height:calc(100dvh - 16px)}
+ .atlas-tour-header{padding:8px 12px}
+ .atlas-tour-body{padding:8px 12px}
+}
+@media(prefers-reduced-motion:reduce){.atlas-tour-progress span{transition:none}}
+
+/* The ATLAS header is intentionally dense; keep the entry compact below 1600 px.
+   The fully labelled entry remains available in the sidebar. */
+.sidebar-tutorial{display:flex;align-items:center;gap:9px;width:100%;margin:0 0 13px;padding:11px 10px;border:1px solid #355984;border-radius:10px;background:#1e385b;color:#cbe0ff;font-size:12px;font-weight:800;text-align:left}
+.sidebar-tutorial:hover{background:#284a75;color:white}
+.sidebar-tutorial span{margin-left:auto;background:#365b88;padding:3px 5px;border-radius:5px;color:#dcf0ff;font-size:9px}
+@media(max-width:1580px){.topbar .atlas-tutorial-launcher{padding:8px;min-width:36px}.topbar .atlas-tutorial-launcher span{display:none}}

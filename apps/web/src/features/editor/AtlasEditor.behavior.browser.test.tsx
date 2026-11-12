@@ -56,6 +56,7 @@ afterEach(()=>{vi.restoreAllMocks()})
 beforeEach(()=>{
  localStorage.removeItem('atlas.navigation.collapsed')
  localStorage.removeItem('atlas.minimap.visible')
+ localStorage.removeItem('atlas.tutorial.progress.v1')
  vi.resetAllMocks()
  vi.mocked(auth.session).mockResolvedValue(user)
  vi.mocked(auth.workspaceAccess).mockResolvedValue(owner)
@@ -78,6 +79,34 @@ async function openEditor(){
 }
 
 describe('Editor conectado a API — recorridos de comportamiento',()=>{
+ it('muestra el tutorial de ATLAS desde el editor sin modificar el proyecto',async()=>{
+  localStorage.removeItem('atlas.tutorial.complete.v1')
+  await openEditor()
+  const graph=screen.getByTestId('graph-renderer')
+  fireEvent.click(screen.getByRole('button',{name:'Aprender ATLAS'}))
+  expect(screen.getByRole('dialog',{name:'Bienvenido a ATLAS'})).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
+  expect(screen.getByRole('dialog',{name:'1. Organización = espacio de trabajo'})).toBeTruthy()
+  expect(screen.getByTestId('graph-renderer')).toBe(graph)
+  fireEvent.click(screen.getByRole('button',{name:'Cerrar tutorial'}))
+  expect(screen.queryByTestId('atlas-guided-tutorial')).toBeNull()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+  expect(projects.importProject).not.toHaveBeenCalled()
+ })
+ it('tutorial permanece disponible al abrir un formulario y reanuda al cerrarlo',async()=>{
+  await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:'Aprender ATLAS'}))
+  const next=()=>fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
+  for(let i=0;i<6;i++)next()
+  expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:'Agregar caja'}))
+  expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
+  expect(screen.queryByTestId('atlas-guided-tutorial')).toBeNull()
+  fireEvent.click(screen.getByRole('button',{name:'Cancelar'}))
+  expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+
  it('ocultar y mostrar menú lateral preserva el lienzo y el proyecto abierto',async()=>{
   await openEditor()
   const graph=screen.getByTestId('graph-renderer')
