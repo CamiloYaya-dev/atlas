@@ -8,4 +8,7 @@ export async function saveDocument(projectId:string,document:ProjectDocument,exp
 }
 export const exportProject=(projectId:string)=>request<{format:string;exportedAt:string;document:ProjectDocument}>(`/projects/${encodeURIComponent(projectId)}/export`)
 export async function importProject(projectId:string,document:ProjectDocument,expectedVersion:number){const r=await request<{version:number}>(`/projects/${encodeURIComponent(projectId)}/import`,{method:'POST',body:JSON.stringify({document,expectedVersion})});return r.version}
-export const listDocumentVersions=(projectId:string)=>request<{version:number;created_at:string;updated_by:string}[]>(`/projects/${encodeURIComponent(projectId)}/versions`)
+export type DocumentVersion={version:number;created_at:string;updated_by:string;editor_name:string|null}
+export type DocumentVersionSnapshot=DocumentVersion&{document:ProjectDocument}
+export const listDocumentVersions=(projectId:string)=>request<DocumentVersion[]>(`/projects/${encodeURIComponent(projectId)}/versions`)
+export const loadDocumentVersion=(projectId:string,version:number)=>request<DocumentVersionSnapshot>(`/projects/${encodeURIComponent(projectId)}/versions/${encodeURIComponent(version)}`)

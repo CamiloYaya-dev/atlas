@@ -42,7 +42,7 @@ vi.mock('@xyflow/react',async()=>{
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn()}))
-vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn()}))
+vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
 const reader:WorkspaceAccess={roleId:'r-reader',roleKey:'viewer',roleName:'Lector',permissions:['project.read','diagram.view.c1','element.view.actor','element.view.system','element.view.external']}
@@ -60,6 +60,7 @@ beforeEach(()=>{
  vi.mocked(projects.listProjects).mockResolvedValue([project])
  vi.mocked(projects.loadDocument).mockResolvedValue({document:demoDocument(),version:1})
  vi.mocked(projects.saveDocument).mockResolvedValue(2)
+ vi.mocked(projects.listDocumentVersions).mockResolvedValue([])
 })
 async function openEditor(){
  render(<AtlasEditor/>)
@@ -212,6 +213,18 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Mixta'}))
   expect(screen.getByRole('button',{name:'Mixta'}).className).toContain('active')
   expect(projects.saveDocument).not.toHaveBeenCalled()
+ })
+ it('permite ver versiones anteriores sin reemplazar el documento abierto',async()=>{
+  vi.mocked(projects.listDocumentVersions).mockResolvedValue([
+   {version:2,created_at:'2026-11-12T12:00:00.000Z',updated_by:'u-qa',editor_name:'QA'}
+  ])
+  await openEditor()
+  fireEvent.click(await screen.findByRole('button',{name:'Historial · v1'}))
+  expect(await screen.findByRole('button',{name:'Consultar v2'})).toBeTruthy()
+  expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
+  expect(projects.saveDocument).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button',{name:'Cerrar historial'}))
+  expect(screen.queryByRole('dialog',{name:'Historial de versiones'})).toBeNull()
  })
  it('detecta un error de persistencia y NO informa que el guardado finalizó',async()=>{
   vi.mocked(projects.saveDocument).mockRejectedValue(new Error('Conflicto de versión QA'))

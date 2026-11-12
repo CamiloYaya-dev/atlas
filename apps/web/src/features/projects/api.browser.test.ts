@@ -1,7 +1,7 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest'
 import {emptyDoc} from '@atlas/contracts'
 import {request} from '../../shared/api/http'
-import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions} from './api'
+import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion} from './api'
 vi.mock('../../shared/api/http',()=>({request:vi.fn()}))
 beforeEach(()=>vi.mocked(request).mockResolvedValue({version:4} as never))
 describe('Contratos HTTP de proyectos',()=>{
@@ -30,5 +30,7 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(request).toHaveBeenCalledWith('/projects/p1/import',{method:'POST',body:JSON.stringify({document:doc,expectedVersion:7})})
   await listDocumentVersions('p1')
   expect(request).toHaveBeenCalledWith('/projects/p1/versions')
+  await loadDocumentVersion('p1',2)
+  expect(request).toHaveBeenCalledWith('/projects/p1/versions/2')
  })
 })

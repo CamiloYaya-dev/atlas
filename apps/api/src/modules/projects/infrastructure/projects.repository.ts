@@ -18,8 +18,15 @@ export class ProjectsRepository {
   const {rows}=await pool.query<{workspaceId:string}>(`SELECT p.workspace_id AS "workspaceId" FROM projects p
     JOIN workspace_members m ON m.workspace_id=p.workspace_id WHERE p.id=$1 AND m.user_id=$2`,[projectId,userId]);return rows[0]||null
  }
- async listVersions(projectId:string):Promise<{version:number;created_at:string;updated_by:string}[]>{
-  const {rows}=await pool.query<{version:number;created_at:string;updated_by:string}>('SELECT version,created_at,updated_by FROM project_document_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 50',[projectId]);return rows
+ async listVersions(projectId:string):Promise<{version:number;created_at:string;updated_by:string;editor_name:string|null}[]>{
+  const {rows}=await pool.query<{version:number;created_at:string;updated_by:string;editor_name:string|null}>(`SELECT v.version,v.created_at,v.updated_by,u.display_name AS editor_name
+   FROM project_document_versions v LEFT JOIN atlas_users u ON u.id=v.updated_by
+   WHERE v.project_id=$1 ORDER BY v.version DESC LIMIT 50`,[projectId]);return rows
+ }
+ async loadVersion(projectId:string,version:number):Promise<{document:ProjectDocument;version:number;created_at:string;updated_by:string;editor_name:string|null}|null>{
+  const {rows}=await pool.query<{document:ProjectDocument;version:number;created_at:string;updated_by:string;editor_name:string|null}>(`SELECT v.document,v.version,v.created_at,v.updated_by,u.display_name AS editor_name
+   FROM project_document_versions v LEFT JOIN atlas_users u ON u.id=v.updated_by
+   WHERE v.project_id=$1 AND v.version=$2`,[projectId,version]);return rows[0]||null
  }
  async loadDocument(projectId:string):Promise<{document:ProjectDocument,version:number}|null>{const {rows}=await pool.query<{document:ProjectDocument,version:number}>('SELECT document,version FROM project_documents WHERE project_id=$1',[projectId]);return rows[0]||null}
  async saveAuthorized(projectId:string,incoming:ProjectDocument,expectedVersion:number,userId:string,operation:'save'|'import'){

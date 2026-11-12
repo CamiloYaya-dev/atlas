@@ -126,6 +126,27 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const versions=await send('GET',`/projects/${projectId}/versions`,admin)
    assert.equal(versions.status,200);assert.ok(versions.data.length>=2)
   })
+  await t.test('Historial: autor, versión anterior y proyección segura según rol',async()=>{
+   const path=`/projects/${projectId}/versions`
+   const list=await send('GET',path,admin)
+   assert.equal(list.status,200)
+   assert.equal(list.data[0].version,2)
+   assert.equal(list.data[0].editor_name,'QA Admin')
+   const previous=await send('GET',`${path}/1`,admin)
+   assert.equal(previous.status,200)
+   assert.equal(previous.data.version,1)
+   assert.equal(previous.data.document.diagrams.length,0)
+   const ownerCurrent=await send('GET',`${path}/2`,admin)
+   assert.equal(ownerCurrent.status,200)
+   assert.deepEqual(ownerCurrent.data.document.diagrams.map((d:{id:string})=>d.id),['c1','c2'])
+   const memberCurrent=await send('GET',`${path}/2`,member)
+   assert.equal(memberCurrent.status,200)
+   assert.deepEqual(memberCurrent.data.document.diagrams.map((d:{id:string})=>d.id),['c1'])
+   assert.equal(memberCurrent.data.document.elements.endpoint,undefined)
+   assert.equal((await send('GET',`${path}/0`,admin)).status,400)
+   assert.equal((await send('GET',`${path}/no-es-numero`,admin)).status,400)
+   assert.equal((await send('GET',`${path}/200000`,admin)).status,404)
+  })
   await t.test('Intento de leer otro proyecto sin membresía se rechaza',async()=>{
    const second=await send('POST','/workspaces',admin,{name:'Workspace aislado '+suffix})
    assert.equal(second.status,201)
@@ -134,6 +155,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
     assert.equal(p.status,201)
     assert.equal((await send('GET',`/projects/${p.data.id}/document`,member)).status,404)
     assert.equal((await send('PUT',`/projects/${p.data.id}/document`,member,{document:emptyDoc(),expectedVersion:1})).status,404)
+    assert.equal((await send('GET',`/projects/${p.data.id}/versions/1`,member)).status,404)
    }finally{await pool.query('DELETE FROM workspaces WHERE id=$1',[second.data.id])}
   })
   await t.test('API real: roles inválidos y duplicados no se almacenan',async()=>{
@@ -211,8 +233,21 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await send('PUT',endpoint,member,{document:emptyDoc(),expectedVersion:2})).status,403)
   })
   await t.test('API real: credenciales excesivamente largas se rechazan sin crear sesión',async()=>{
-   assert.equal((await signin('x'.repeat(255)+'@example.test',pass)).status,401)
-   assert.equal((await signin(adminEmail,'x'.repeat(129))).status,401)
+   // La suite ya consumió intentos de login en la aplicación principal. Usar
+   // otra instancia evita que el limitador (6/min) bloquee el escenario 401.
+   // No se desactiva ni modifica la protección de producción.
+   const isolated=await buildApp()
+   const loginStatus=async(email:string,password:string)=>{
+    const response=await isolated.inject({method:'POST',url:'/api/v1/auth/login',payload:{email,password}})
+    return response.statusCode
+   }
+   try{
+    assert.equal(await loginStatus('x'.repeat(255)+'@example.test',pass),401)
+    assert.equal(await loginStatus(adminEmail,'x'.repeat(129)),401)
+    // Regresión de seguridad: después de seis intentos, el séptimo da 429.
+    for(let i=0;i<4;i++)assert.equal(await loginStatus('x'.repeat(255)+'@example.test',pass),401)
+    assert.equal(await loginStatus('x'.repeat(255)+'@example.test',pass),429)
+   }finally{await isolated.close()}
   })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)

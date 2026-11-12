@@ -24,6 +24,12 @@ export class ProjectsService {
   const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
   return this.repo.listVersions(projectId)
  }
+ async loadVersion(projectId:string,version:number,userId:string){
+  const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
+  const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read')
+  const data=await this.repo.loadVersion(projectId,version);if(!data)throw notFound()
+  return {...data,document:projectVisible(data.document,a)}
+ }
  async exportDocument(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
   const a=await access(scope.workspaceId,userId);requirePermission(a,'project.read');requirePermission(a,'artifact.export')

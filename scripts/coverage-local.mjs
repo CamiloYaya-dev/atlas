@@ -1,10 +1,15 @@
-import {existsSync} from 'node:fs'
+import {existsSync,rmSync} from 'node:fs'
 import {spawnSync} from 'node:child_process'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 const root=fileURLToPath(new URL('..',import.meta.url))
 const mode=process.argv[2]||'unit'
 if(!['unit','full'].includes(mode))throw new Error('Uso: coverage-local.mjs unit|full')
+// Evita que `coverage:summary` lea un consolidado ANTIGUO cuando esta
+// ejecución falla antes de fusionar Node + Vitest. No borra las mediciones
+// backend/frontend de diagnóstico ni otros archivos del usuario.
+for(const name of ['coverage-summary.json','index.html','lcov.info'])
+ rmSync(resolve(root,'coverage',name),{force:true})
 const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
 const env={...process.env,NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
  MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',ATLAS_ALLOW_DB_TESTS:'true',
@@ -16,7 +21,10 @@ function exec(label,bin,args){
  const result=spawnSync(bin,args,{cwd:root,stdio:'inherit',env,
   shell:process.platform==='win32'&&bin!==process.execPath})
  if(result.error)throw result.error
- if(result.status!==0)process.exit(result.status||1)
+ if(result.status!==0){
+  console.error('[ATLAS COVERAGE] EJECUCIÓN INCOMPLETA: el resumen global anterior fue invalidado. Corrige el fallo y repite npm run test:coverage.')
+  process.exit(result.status||1)
+ }
 }
 if(mode==='full'){
  // CI already starts its own PostgreSQL service on port 5433; do not
