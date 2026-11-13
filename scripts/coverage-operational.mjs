@@ -11,6 +11,7 @@ import {resolve} from 'node:path'
 import {existsSync} from 'node:fs'
 import {setTimeout as delay} from 'node:timers/promises'
 import {createServer} from 'node:net'
+import {randomBytes} from 'node:crypto'
 import assert from 'node:assert/strict'
 import {fileURLToPath} from 'node:url'
 
@@ -68,7 +69,9 @@ cmd('seed de proyecto y permisos','src/db/seed.ts',{output:/Demo listo:/})
 cmd('seed idempotente','src/db/seed.ts',{output:/Demo listo:/})
 cmd('cuentas E2E aisladas','src/db/e2e-seed.ts',{env:{
  E2E_ADMIN_EMAIL:'coverage-admin@atlas.test',E2E_ADMIN_PASSWORD:'QA-Operacional-Admin-2026!',
- E2E_VIEWER_EMAIL:'coverage-viewer@atlas.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!'
+ E2E_VIEWER_EMAIL:'coverage-viewer@atlas.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!',
+ // Identidad temporal generada para esta ejecución; nunca reutilizar credenciales productivas.
+ E2E_EDITOR_EMAIL:'coverage-editor@atlas.test',E2E_EDITOR_PASSWORD:randomBytes(24).toString('base64url')+'!Qa1'
 },output:/Usuarios QA preparados/})
 cmd('administrador existente','src/db/admin-status.ts',{output:/Administrador activo: OK/})
 cmd('no duplicar administrador','src/db/create-admin.ts',{expectedStatus:1,env:{

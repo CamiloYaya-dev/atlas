@@ -1,8 +1,8 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest'
 import {emptyDoc} from '@atlas/contracts'
-import {request} from '../../shared/api/http'
-import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch} from './api'
-vi.mock('../../shared/api/http',()=>({request:vi.fn()}))
+import {request,requestFile} from '../../shared/api/http'
+import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch,workspaceLicense,exportDiagramImage} from './api'
+vi.mock('../../shared/api/http',()=>({request:vi.fn(),requestFile:vi.fn()}))
 beforeEach(()=>vi.mocked(request).mockResolvedValue({version:4} as never))
 describe('Contratos HTTP de proyectos',()=>{
  it('lista usando el workspace codificado',async()=>{
@@ -42,6 +42,12 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1/apply',{method:'POST',body:JSON.stringify({expectedVersion:3,mode:'merge',resolutions:{'document.elements.a.name':'historical'}})})
   await discardRestoreBranch('p1','b1')
   expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1',{method:'DELETE'})
+ })
+ it('consulta los derechos de licencia y solicita un binario firmado al servidor',async()=>{
+  await workspaceLicense('w/1')
+  expect(request).toHaveBeenCalledWith('/workspaces/w%2F1/license')
+  await exportDiagramImage('project/1','diagram/1','png',9,'cG5n')
+  expect(requestFile).toHaveBeenCalledWith('/projects/project%2F1/diagrams/diagram%2F1/export-image',{format:'png',expectedVersion:9,imageBase64:'cG5n'})
  })
  it('exporta, importa y consulta historial de versiones',async()=>{
   await exportProject('p1')

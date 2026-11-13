@@ -5,6 +5,8 @@ import {registerAdminController} from '../modules/admin/presentation/admin.contr
 import {registerAccessController} from '../modules/access/presentation/access.controller'
 import {registerWorkspaceController} from '../modules/workspaces/presentation/workspaces.controller'
 import {registerProjectMembersController} from '../modules/projects/presentation/project-members.controller'
+import {registerLicensingController} from '../modules/licensing/licensing.controller'
+import {registerExportsController} from '../modules/exports/exports.controller'
 import {registerProjectController} from '../modules/projects/presentation/projects.controller'
 export async function routes(app:FastifyInstance){
  app.get('/api/v1/health',async()=>({status:'ok',service:'atlas-api'}))
@@ -15,4 +17,6 @@ export async function routes(app:FastifyInstance){
  await registerWorkspaceController(app)
  await registerProjectController(app)
  await registerProjectMembersController(app)
+ await registerLicensingController(app)
+ await registerExportsController(app)
 }

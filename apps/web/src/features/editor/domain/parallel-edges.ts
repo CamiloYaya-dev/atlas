@@ -6,7 +6,8 @@
 import type {EdgePathStyle} from '@atlas/contracts'
 
 export type ParallelRoute={path:string;labelX:number;labelY:number}
-export type RouteEndpoints={sourceX:number;sourceY:number;targetX:number;targetY:number;offset:number;pathStyle:EdgePathStyle}
+export type PortSide='top'|'bottom'|'left'|'right'
+export type RouteEndpoints={sourceX:number;sourceY:number;targetX:number;targetY:number;offset:number;pathStyle:EdgePathStyle;sourcePosition?:PortSide;targetPosition?:PortSide}
 const fmt=(n:number)=>Number(n.toFixed(2))
 function roundedCorners(points:[number,number][],radius=10):string{
  const clean=points.filter((pt,i)=>i===0||Math.hypot(pt[0]-points[i-1][0],pt[1]-points[i-1][1])>.01)
@@ -23,7 +24,30 @@ function roundedCorners(points:[number,number][],radius=10):string{
  const [ex,ey]=clean[clean.length-1];path.push(`L ${fmt(ex)},${fmt(ey)}`)
  return path.join(' ')
 }
-export function parallelRoute({sourceX:sx,sourceY:sy,targetX:tx,targetY:ty,offset,pathStyle}:RouteEndpoints):ParallelRoute{
+function sideVector(position:PortSide){switch(position){case 'top':return [0,-1] as const;case 'bottom':return [0,1] as const;case 'left':return [-1,0] as const;case 'right':return [1,0] as const}}
+export function parallelRoute({sourceX:sx,sourceY:sy,targetX:tx,targetY:ty,offset,pathStyle,sourcePosition,targetPosition}:RouteEndpoints):ParallelRoute{
+ // Al entrar/salir por los lados el tramo terminal es horizontal. En puertos
+ // superiores/inferiores es siempre vertical, incluso en rutas paralelas.
+ if(sourcePosition&&targetPosition){
+  const sv=sideVector(sourcePosition),tv=sideVector(targetPosition),lead=26
+  const sx2=sx+sv[0]*lead,sy2=sy+sv[1]*lead,tx2=tx+tv[0]*lead,ty2=ty+tv[1]*lead
+  const ddx=tx2-sx2,ddy=ty2-sy2,dist=Math.hypot(ddx,ddy)||1
+  const nx=-ddy/dist,ny=ddx/dist
+  const mx=(sx2+tx2)/2+nx*offset*1.1,my=(sy2+ty2)/2+ny*offset*1.1
+  if(pathStyle==='bezier'){
+   return {path:`M ${fmt(sx)},${fmt(sy)} C ${fmt(sx2)},${fmt(sy2)} ${fmt(mx-sv[0]*15)},${fmt(my-sv[1]*15)} ${fmt(mx)},${fmt(my)} C ${fmt(mx)},${fmt(my)} ${fmt(tx2)},${fmt(ty2)} ${fmt(tx)},${fmt(ty)}`,
+    labelX:fmt(mx),labelY:fmt(my)}
+  }
+  // Trayecto central separado, conservando dos segmentos terminales normales a cada lado.
+  const points:[number,number][]=[[sx,sy],[sx2,sy2]]
+  if(pathStyle==='straight')points.push([mx,my])
+  else if(Math.abs(ddx)>=Math.abs(ddy))points.push([mx,sy2],[mx,ty2])
+  else points.push([sx2,my],[tx2,my])
+  points.push([tx2,ty2],[tx,ty])
+  return {path:pathStyle==='smoothstep'?roundedCorners(points):`M ${points.map(pt=>pt.map(fmt).join(',')).join(' L ')}`,
+   labelX:fmt(mx),labelY:fmt(my)}
+ }
+
  const dx=tx-sx,dy=ty-sy,dist=Math.hypot(dx,dy)||1
  const nx=-dy/dist,ny=dx/dist
  const midX=(sx+tx)/2,midY=(sy+ty)/2

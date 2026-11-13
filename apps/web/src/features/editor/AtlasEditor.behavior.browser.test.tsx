@@ -1,3 +1,4 @@
+vi.mock('./capture-diagram',()=>({captureDiagramPng:vi.fn().mockResolvedValue('cG5n')}))
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest'
 import {fireEvent,render,screen,waitFor,within} from '@testing-library/react'
 import type {ReactNode} from 'react'
@@ -25,7 +26,7 @@ vi.mock('@xyflow/react',async()=>{
    onConnect?:(c:{source:string|null;target:string|null;sourceHandle?:string;targetHandle?:string})=>void,
    onEdgeClick?:(e:unknown,edge:unknown)=>void,
    nodesConnectable?:boolean
-  })=><div data-testid="graph-renderer" data-relations-enabled={String(nodesConnectable)}>
+  })=><div className="react-flow" data-testid="graph-renderer" data-relations-enabled={String(nodesConnectable)}>
    {nodes.map(n=><button type="button" key={n.id} onClick={()=>onNodeClick?.({},n)}>{n.data.element?.name||n.id}</button>)}
    {edges.length>0&&<button type="button" onClick={()=>onEdgeClick?.({},edges[0])}>Editar relación QA</button>}
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-payment-provider'})}>Conectar QA</button>
@@ -37,14 +38,15 @@ vi.mock('@xyflow/react',async()=>{
    <button type="button" onClick={()=>onNodeDragStop?.({}, {id:'n-platform',position:{x:372.4,y:183.6}})}>Mover nodo QA</button>
    <button type="button" onClick={()=>onPaneClick?.()}>Deseleccionar QA</button>
   </div>,
+  useReactFlow:()=>({getNode:()=>null,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})}),
   useNodesState:(initial:unknown[])=>{const [nodes,setNodes]=React.useState(initial);return[nodes,setNodes,()=>{}]},
   Background:()=>null,Controls:()=>null,MiniMap:()=>null,Handle:()=>null,
-  Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'}
+  Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
  }
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))
-vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
+vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),workspaceLicense:vi.fn(),exportDiagramImage:vi.fn(),setWorkspaceLicense:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
 vi.mock('../audit/api',()=>({listAuditEvents:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
@@ -65,6 +67,7 @@ beforeEach(()=>{
  vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace])
  vi.mocked(projects.listProjects).mockResolvedValue([project])
  vi.mocked(projects.projectAccess).mockResolvedValue(owner)
+ vi.mocked(projects.workspaceLicense).mockResolvedValue({workspaceId:'w-qa',planCode:'free',licenseActive:false,status:'free',features:{'diagram.export.png':true,'diagram.export.jpg':true,'diagram.export.clean':false,'diagram.export.advanced':false},expiresAt:null})
  vi.mocked(projects.loadDocument).mockResolvedValue({document:demoDocument(),version:1})
  vi.mocked(projects.saveDocument).mockResolvedValue(2)
  vi.mocked(projects.listDocumentVersions).mockResolvedValue([])
@@ -204,7 +207,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   const nativePrompt=vi.spyOn(window,'prompt')
   vi.mocked(projects.renameProject).mockResolvedValue({...project,name:'Proyecto renombrado QA'})
   await openEditor()
-  fireEvent.click(screen.getByRole('button',{name:'Renombrar'}))
+  fireEvent.click(screen.getByRole('button',{name:'Administrar proyecto'}))
   const panel=await screen.findByRole('dialog',{name:'Administrar proyecto: Proyecto QA'})
   fireEvent.change(within(panel).getByLabelText('Nombre del proyecto'),{target:{value:'Proyecto renombrado QA'}})
   fireEvent.click(within(panel).getByRole('button',{name:'Guardar nombre'}))
@@ -270,7 +273,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   await openEditor()
   await waitFor(()=>expect(screen.getByRole('button',{name:'Editar relación QA'})).toBeTruthy())
   fireEvent.click(screen.getByRole('button',{name:'Editar relación QA'}))
-  const relationDialog=await screen.findByRole('dialog',{name:'Editar relación'})
+  const relationDialog=await screen.findByRole('dialog',{name:'Configurar relación'})
   fireEvent.change(within(relationDialog).getByLabelText('Nombre o protocolo de la relación'),{target:{value:'Etiqueta actualizada'}})
   fireEvent.click(within(relationDialog).getByRole('button',{name:'Guardar relación'}))
   expect(nativePrompt).not.toHaveBeenCalled()
@@ -437,7 +440,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   await screen.findByRole('button',{name:'Plataforma Zercano'})
   fireEvent.click(screen.getByRole('button',{name:'Profundizar QA'}))
   expect(screen.getByRole('heading',{name:'C2 · Contenedores'})).toBeTruthy()
-  fireEvent.click(screen.getByRole('button',{name:'C1 · Contexto de Zercano'}))
+  fireEvent.click(screen.getByRole('button',{name:'Tipo C1 C1 · Contexto de Zercano'}))
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
@@ -622,7 +625,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('conserva campos y valores de lista al editar un requerimiento compartido',async()=>{
   await openEditor()
-  fireEvent.click(screen.getByRole('button',{name:'Trazabilidad · Pago'}))
+  fireEvent.click(screen.getByRole('button',{name:'Tipo TRACE Trazabilidad · Pago'}))
   fireEvent.click(await screen.findByRole('button',{name:'HU-021 · Confirmar pago'}))
   fireEvent.change(screen.getByLabelText('Prioridad'),{target:{value:'Crítica'}})
   await waitFor(()=>{
@@ -724,10 +727,22 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(await screen.findByText(/Sin acceso para crear espacios/)).toBeTruthy()
   expect((screen.getByRole('combobox',{name:'Espacio de trabajo'}) as HTMLSelectElement).value).toBe('w-qa')
  })
+ it('permite seleccionar PNG/JPG e informa la marca de agua que decide la API',async()=>{
+  await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:'Exportar'}))
+  const modal=screen.getByRole('dialog',{name:'Exportar desde ATLAS'})
+  expect(await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/)).toBeTruthy()
+  fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'jpg'}})
+  expect(within(modal).getByRole('button',{name:'Descargar JPG'})).toBeTruthy()
+  expect(projects.exportDiagramImage).not.toHaveBeenCalled()
+ })
  it('informa un fallo de exportación sin perder el documento local',async()=>{
   vi.mocked(projects.exportProject).mockRejectedValue(new Error('Exportación bloqueada'))
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Exportar'}))
+  const modal=screen.getByRole('dialog',{name:'Exportar desde ATLAS'})
+  fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'json'}})
+  fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON'}))
   expect(await screen.findByText(/Exportación: Exportación bloqueada/)).toBeTruthy()
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
  })
@@ -802,7 +817,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('los filtros de procesos permiten ocultar y recuperar grupos sin escribir en PostgreSQL',async()=>{
   await openEditor()
-  fireEvent.click(screen.getByRole('button',{name:'Proceso · Autenticación y pagos'}))
+  fireEvent.click(screen.getByRole('button',{name:'Tipo PROCESS Proceso · Autenticación y pagos'}))
   expect(screen.getByRole('heading',{name:'Proceso · Autenticación y pagos'})).toBeTruthy()
   fireEvent.click(screen.getByLabelText('Dependencias'))
   const graph=screen.getByTestId('graph-renderer')

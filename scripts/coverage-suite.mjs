@@ -7,7 +7,10 @@ for(const kind of mode==='full'?['unit','integration']:['unit']){
  console.log(`\n[ATLAS COVERAGE] Ejecutando ${kind} bajo un mismo recolector V8`)
  const result=spawnSync(process.execPath,['scripts/run-tests.mjs',kind],{cwd:root,stdio:'inherit',env:process.env,shell:false})
  if(result.error)throw result.error
- if(result.status!==0)process.exit(result.status||1)
+ if(result.status!==0){
+  console.error(`[ATLAS COVERAGE] Fase ${kind} interrumpida. El porcentaje que c8 pueda imprimir es PARCIAL: falta medir integración y/o entrypoints operacionales. No es cobertura global ni debe compararse con el umbral de 90%.`)
+  process.exit(result.status||1)
+ }
 }
 
 if(mode==='full'){
@@ -16,5 +19,8 @@ if(mode==='full'){
  console.log('\n[ATLAS COVERAGE] Entrypoints operacionales sobre base QA exclusiva')
  const result=spawnSync(process.execPath,['scripts/coverage-operational.mjs'],{cwd:root,stdio:'inherit',env:process.env,shell:false})
  if(result.error)throw result.error
- if(result.status!==0)process.exit(result.status||1)
+ if(result.status!==0){
+  console.error('[ATLAS COVERAGE] QA operacional falló. Cualquier medición c8 anterior es parcial; no se generó una cobertura global certificable.')
+  process.exit(result.status||1)
+ }
 }

@@ -144,3 +144,32 @@
 .academy-link-highlight{border:2px solid #276df0;border-radius:10px;padding:7px;animation:atlas-link-coach-pulse 1.15s ease-in-out infinite}
 .academy-inspector-tip{font-size:11px;line-height:1.5;color:#2a559e;background:#edf4ff;padding:9px;border-radius:6px;margin:4px 0 6px}
 @keyframes atlas-link-coach-pulse{50%{box-shadow:0 0 0 5px #3880ed33}}
+
+/* ATLAS licensing: estado comercial informativo; la decisión siempre reside en API. */
+.atlas-license-notice{display:flex;gap:12px;align-items:flex-start;border:1px solid #b9cce9;background:#f2f7ff;border-radius:11px;padding:14px;color:#254b81;font-size:13px;line-height:1.55}
+.atlas-license-notice svg{flex-shrink:0;margin-top:1px}
+.atlas-export-modal .modal-actions{margin-top:18px}
+
+/* ATLAS licensing v1: controlled server-side grants, not local fake access. */
+.atlas-license-panel{display:grid;gap:13px;max-height:75vh;overflow-y:auto}
+.atlas-license-status{display:flex;gap:12px;align-items:center;border:1px solid #cddfed;border-radius:12px;background:#eef6fc;padding:16px;color:#174266}
+.atlas-license-status strong,.atlas-license-status small{display:block}.atlas-license-status small{margin-top:6px;color:#536985}
+.atlas-license-features{border:1px solid #e0e8f3;border-radius:11px;padding:12px 15px;display:grid;gap:10px;font-size:12px}
+.atlas-license-features>div{display:flex;justify-content:space-between;gap:12px}.atlas-license-features b{color:#194d80}
+.atlas-license-ok{color:#1d7657;background:#e5f7ee;padding:10px;border-radius:9px;font-size:12px}
+@media(max-width:680px){.atlas-license-panel .modal-actions{flex-wrap:wrap}.atlas-license-panel .modal-actions>button{flex:1}}
+
+/* ATLAS · exportación avanzada: lista por caja sin desbordar el modal. */
+.atlas-export-advanced-choice{display:grid;gap:12px;margin-block:12px}
+.atlas-export-fields{border:1px solid #dbe6f6;background:#f8faff;border-radius:12px;padding:12px;min-width:0}
+.atlas-export-bulk{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.atlas-export-bulk button{font-size:12px;padding:7px 10px}
+.atlas-export-field-scroller{max-height:min(48vh,410px);overflow:auto;overscroll-behavior:contain}
+.atlas-export-element{padding:12px;margin-block:10px;border-radius:10px;background:white;border:1px solid #e1eaf5;display:grid;gap:8px}
+.atlas-export-element>strong{font-size:14px}.atlas-export-element>small{font-size:11px;color:#71839d}
+.atlas-export-field-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
+.atlas-export-field-row>span{min-width:0;flex:1;display:grid;gap:3px}
+.atlas-export-field-row b{font-weight:650}
+.atlas-export-field-row small{color:#70809c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atlas-export-field-row select{max-width:155px;min-width:122px;font-size:12px;padding:6px}
+@media(max-width:560px){.atlas-export-field-row{align-items:stretch;flex-direction:column}.atlas-export-field-row select{width:100%;max-width:none}}

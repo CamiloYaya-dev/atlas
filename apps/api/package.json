@@ -24,7 +24,8 @@
     "pg": "^8.16.0",
     "dotenv": "^16.5.0",
     "@fastify/cors": "^11.2.0",
-    "@fastify/rate-limit": "^10.3.0"
+    "@fastify/rate-limit": "^10.3.0",
+    "sharp": "^0.34.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

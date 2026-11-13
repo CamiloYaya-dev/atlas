@@ -159,3 +159,31 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - La Academia explica los niveles y guía la selección de Sistema C1 → Servicio C2 → Componente C3, resaltando la configuración de vista vinculada en el Inspector.
 - Añade pruebas para conexiones múltiples, rutas y render, salvaguardando permisos y compatibilidad.
 - No altera el esquema PostgreSQL ni requiere migraciones.
+
+### 4.8.1 — Exportación de imágenes y licenciamiento (piloto de funciones comerciales)
+- Exportación por diagrama PNG/JPG desde backend con marca de agua obligatoria sin licencia comercial.
+- Entitlements por organización y catálogo de features extensible; emisión/revocación exclusiva de administración.
+- Procedencia HMAC-SHA256 embebida en metadatos y auditoría append-only; endpoint de verificación de integridad.
+- Nuevo modal Exportar mantiene JSON y añade PNG/JPG, consulta derechos y bloquea exportaciones con cambios no guardados.
+- Migración aditiva 006. Dependencia `sharp` para Windows/Linux. Véase docs/LICENCIAS_EXPORTACION_IMAGEN_V4_8_1.md.
+
+## ATLAS V4.8.1 — exportación fiel, control de licencias y corrección QA (13/11/2026)
+- Captura visual directa del viewport real de React Flow para exportar PNG/JPG; conserva conexiones y estilos visuales en vez de dibujar rutas aproximadas. El backend nunca acepta el estado de licencia desde el navegador: watermark, codificación, firma y auditoría siguen siendo tareas del servidor.
+- Pantalla «Licencia y suscripción ATLAS» por organización: FREE/PRO y operaciones administrativas de activación o revocación de prueba. Utiliza los endpoints existentes GET /workspaces/:id/license y PUT /admin/workspaces/:id/license y requiere platformAdmin para cambios.
+- Corrige 68 regresiones encadenadas de UI por mocks de React Flow sin useReactFlow, además de actualizar aserciones obsoletas sobre relaciones paralelas.
+- Añade pruebas unitarias de captura procesada PNG/JPG, exclusión de marca con licencia y rechazo de payloads; pruebas UI del panel de licencias.
+- Mantiene las puertas QA 90%+ global y por capa y 95% por archivo, sin exclusiones artificiosas. La cobertura completa debe re-medida en Windows con PostgreSQL QA aislado; no se afirma haberla alcanzado en esta entrega.
+
+### Hotfix QA: `test:ui` y `test:coverage` (2026-11-12)
+- Se añaden al mock de React Flow los símbolos `ConnectionMode` en los dos conjuntos de pruebas del editor, y `useReactFlow` en el mock de autenticación, que ya utiliza `AppInner`.
+- El test operativo de cobertura genera una credencial temporal independiente del editor de QA al poblar exclusivamente `atlas_test`, evitando el fallo «Faltan credenciales editor QA».
+- Se mantienen todas las pruebas, las métricas y el umbral >=90% sin exclusiones nuevas; el estado del umbral se debe verificar con la ejecución completa en Windows.
+
+## V4.8.1 — Parche exportación avanzada premium y conectores (13/11/2026)
+
+- Flechas de relaciones paralelas con tramo terminal perpendicular a los puertos superiores/inferiores y horizontal en laterales.
+- Eliminar duplicados «Misiones» y «Renombrar» de barra superior (se conservan accesos laterales).
+- Capacidad `diagram.export.advanced` en backend con control de licencia por organización.
+- Selección por caja y campo: imagen, diccionario o excluir. Incluye relaciones/vínculos y personalizados.
+- Exportación HTML autónoma de diccionario en ZIP junto con PNG/JPG firmados. Sin migraciones ni nuevas dependencias.
+- Nuevas pruebas unitarias, de UI y regresión independientes de binarios nativos.

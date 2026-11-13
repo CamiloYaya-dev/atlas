@@ -16,7 +16,8 @@ function load(rel,stubs={}){
 const commands=load('apps/web/src/features/editor/domain/document-commands.ts');
 const parallel=load('apps/web/src/features/editor/domain/parallel-edges.ts');
 const progress=load('apps/web/src/features/academy/progress.ts');
-const contract=load('packages/contracts/src/index.ts',{'./permissions':{},'./collaboration':{}});
+const exportFields=load('packages/contracts/src/export-fields.ts');
+const contract=load('packages/contracts/src/index.ts',{'./permissions':{},'./collaboration':{},'./export-fields':exportFields});
 const roles={allowed:()=>true,requirePermission:()=>{}};
 class DomainError extends Error{constructor(message,status){super(message);this.statusCode=status}}
 const policy=load('apps/api/src/modules/projects/application/document-policy.ts',{'@atlas/contracts':{relationScope:()=> 'mixed'},'../../../security/roles':roles,'../../../domain/errors':{DomainError}});
@@ -195,4 +196,12 @@ test('backend conserva todas las relaciones paralelas y permite borrar una sola 
  const deleted=policy.applyAuthorizedChange(saved,revised,{})
  assert.equal(deleted.diagrams[0].edges.length,3)
  assert.ok(deleted.diagrams[0].edges.some(e=>e.id==='r4'))
+})
+
+test('conectores superiores e inferiores terminan con flecha perpendicular y lateral horizontal',()=>{
+ const sample=(sourcePosition,targetPosition)=>parallel.parallelRoute({sourceX:20,sourceY:100,targetX:250,targetY:150,offset:38,pathStyle:'step',sourcePosition,targetPosition})
+ const top=sample('bottom','top');assert.match(top.path,/L 250,124 L 250,150$/)
+ const bottom=sample('top','bottom');assert.match(bottom.path,/L 250,176 L 250,150$/)
+ const left=sample('right','left');assert.match(left.path,/L 224,150 L 250,150$/)
+ const right=sample('left','right');assert.match(right.path,/L 276,150 L 250,150$/)
 })

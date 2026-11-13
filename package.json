@@ -33,7 +33,7 @@
     "test": "npm run test:unit",
     "test:policy": "npm run test:policy -w @atlas/api",
     "test:integration": "node scripts/run-tests.mjs integration",
-    "check": "npm run typecheck && npm run test:graph && npm run test:unit && npm run test:ui && npm run build",
+    "check": "npm run typecheck && npm run test:graph && npm run test:advanced-export && npm run test:unit && npm run test:ui && npm run build",
     "smoke": "node scripts/smoke.mjs",
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:coverage": "node scripts/coverage-local.mjs full",
@@ -49,7 +49,7 @@
     "test:ui": "npm run test:ui -w @atlas/web",
     "test:ui:coverage": "npm run test:ui:coverage -w @atlas/web",
     "coverage:merge": "node scripts/coverage-merge.mjs",
-    "qa:local": "npm run test:qa-tools && npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage:gate && npm run build",
+    "qa:local": "npm run test:qa-tools && npm run test:graph && npm run test:advanced-export && npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run test:coverage:gate && npm run build",
     "pilot:check": "node scripts/pilot-check.mjs",
     "pilot:start": "npm run pilot:check && node scripts/pilot-artifacts.mjs && concurrently -k -n API,WEB -c cyan,green \"npm run start:api\" \"npm run preview -w @atlas/web\"",
     "coverage:backlog": "node scripts/coverage-backlog.mjs",
@@ -60,7 +60,9 @@
     "db:restore:recover": "node scripts/restore-db.mjs --mode=recover",
     "qa:v1:functional": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run build",
     "pilot:build": "npm run pilot:check && npm run build",
-    "test:graph": "node scripts/graph-regression.cjs"
+    "test:graph": "node scripts/graph-regression.cjs",
+    "test:advanced-export": "node --test scripts/advanced-export-regression.cjs",
+    "test:export": "node node_modules/tsx/dist/cli.mjs --test apps/api/src/modules/exports/provenance.unit.test.ts apps/api/src/modules/exports/raster-export.unit.test.ts apps/api/src/modules/exports/advanced-document.unit.test.ts apps/api/src/modules/licensing/licensing.unit.test.ts"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

@@ -1,5 +1,5 @@
-import {request} from '../../shared/api/http'
-import type {ProjectDocument,Project} from '@atlas/contracts'
+import {request,requestFile} from '../../shared/api/http'
+import type {ProjectDocument,Project,AdvancedExportRequest} from '@atlas/contracts'
 export const listProjects=(workspaceId:string)=>request<Project[]>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`)
 export const createProject=(workspaceId:string,name:string,document:ProjectDocument)=>request<Project>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`,{method:'POST',body:JSON.stringify({name,document})})
 export const loadDocument=(projectId:string)=>request<{document:ProjectDocument,version:number}|null>(`/projects/${encodeURIComponent(projectId)}/document`)
@@ -43,3 +43,16 @@ export const createRestoreBranch=(projectId:string,sourceVersion:number)=>reques
 export const previewRestoreBranch=(projectId:string,branchId:string)=>request<RestoreBranchPreview>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}/preview`)
 export const applyRestoreBranch=(projectId:string,branchId:string,expectedVersion:number,mode:'merge'|'replace',resolutions:Record<string,'current'|'historical'>)=>request<{version:number;restoredFrom:number}>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}/apply`,{method:'POST',body:JSON.stringify({expectedVersion,mode,resolutions})})
 export const discardRestoreBranch=(projectId:string,branchId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(projectId)}/restore-branches/${encodeURIComponent(branchId)}`,{method:'DELETE'})
+
+export interface LicenseEntitlements {
+ workspaceId:string
+ planCode:'free'|'pro'|'enterprise'
+ licenseActive:boolean
+ status:string
+ features:Record<'diagram.export.png'|'diagram.export.jpg'|'diagram.export.clean'|'diagram.export.advanced',boolean>
+ expiresAt:string|null
+}
+export const workspaceLicense=(workspaceId:string)=>request<LicenseEntitlements>(`/workspaces/${encodeURIComponent(workspaceId)}/license`)
+export const setWorkspaceLicense=(workspaceId:string,payload:{planCode:'pro'|'free';status:'active'|'revoked';features:Record<string,boolean>})=>request<LicenseEntitlements>(`/admin/workspaces/${encodeURIComponent(workspaceId)}/license`,{method:'PUT',body:JSON.stringify(payload)})
+
+export const exportDiagramImage=(projectId:string,diagramId:string,format:'png'|'jpg',expectedVersion:number,imageBase64:string,advanced?:AdvancedExportRequest)=>requestFile(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/export-image`,{format,expectedVersion,imageBase64,advanced})

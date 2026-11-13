@@ -212,3 +212,7 @@ En **Configurar relación** (clic en una línea) puedes cambiar dirección, tipo
 ### Conexiones múltiples y navegación entre los cuatro niveles C4
 
 Una misma pareja de cajas puede tener varias relaciones independientes (por ejemplo, HTTP, evento y auditoría), conectadas por cualquier puerto y seleccionables como líneas distintas. La Academia guía la navegación C1 → C2 → C3 → C4 utilizando **Inspector → Vista vinculada (doble clic)** en el elemento de origen. Consulta [`docs/RELACIONES_MULTIPLES_Y_GUIA_C4_V4_8_1.md`](docs/RELACIONES_MULTIPLES_Y_GUIA_C4_V4_8_1.md) para pasos y pruebas.
+
+### PNG/JPG y licencias comerciales
+
+Cada diagrama puede exportarse como PNG/JPG, con firma de procedencia y auditoría del backend; sin licencia comercial se aplica marca de agua visible. Con licencia activa se suprime solo la marca visible. Para instalación, migración 006, protección de claves, endpoints y límites consulta [Licencias y exportación](docs/LICENCIAS_EXPORTACION_IMAGEN_V4_8_1.md).

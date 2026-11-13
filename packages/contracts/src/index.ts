@@ -38,3 +38,5 @@ export function createElement(name: string, type: ElementType, author='Usuario')
 }
 
 export {mergeProjectDocuments,MergeConflict,previewProjectMerge} from './collaboration'
+export {availableExportFields,validateAdvancedExport,exportFieldsFor,EXPORT_BASE_FIELDS} from './export-fields'
+export type {ExportPlacement,AdvancedExportMode,AdvancedExportRequest,ExportFieldChoices,ExportField} from './export-fields'

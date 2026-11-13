@@ -8,7 +8,8 @@ type ParallelEdgeData={parallelOffset:number;parallelPath:EdgePathStyle}
 export function AtlasParallelEdge(props:EdgeProps){
  const data=props.data as ParallelEdgeData|undefined
  const route=parallelRoute({sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,
-  offset:data?.parallelOffset||0,pathStyle:data?.parallelPath||'bezier'})
+  offset:data?.parallelOffset||0,pathStyle:data?.parallelPath||'bezier',
+  sourcePosition:props.sourcePosition,targetPosition:props.targetPosition})
  return <>
   <BaseEdge id={props.id} path={route.path} style={props.style} markerStart={props.markerStart} markerEnd={props.markerEnd} interactionWidth={26}/>
   {props.label!==undefined&&String(props.label).trim()!==''&&<EdgeLabelRenderer>

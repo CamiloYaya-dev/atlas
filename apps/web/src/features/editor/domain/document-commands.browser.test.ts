@@ -47,14 +47,15 @@ test('conectar, modificar nodos y eliminar caja conserva catálogo y elimina rel
  assert.equal(d.diagrams[0].edges.length,0)
  assert.ok(d.elements.auth,'el elemento no se borra al retirarlo de una vista')
 })
-test('conexiones no permiten duplicados, autoconexión ni extremos huérfanos',()=>{
+test('relaciones paralelas tienen identidades propias; autoconexiones y extremos huérfanos se rechazan',()=>{
  const d=fixture(),e:DiagramEdge={id:'r1',source:'n1',target:'n2'}
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'n1'}),/Autoconexión/)
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'missing'}),/inexistentes/)
  const x=connectNodes(d,'d1',e)
- assert.throws(()=>connectNodes(x,'d1',{...e,id:'r2'}),/duplicada/)
- assert.throws(()=>connectNodes(x,'d1',{...e,source:'n2',target:'n1'}),/duplicada/)
- assert.equal(x.diagrams[0].edges.length,1)
+ assert.throws(()=>connectNodes(x,'d1',e),/duplicad/)
+ const two=connectNodes(x,'d1',{...e,id:'r2',sourceHandle:'top-1',targetHandle:'bottom-3'})
+ const three=connectNodes(two,'d1',{...e,id:'r3',source:'n2',target:'n1'})
+ assert.equal(three.diagrams[0].edges.length,3)
 })
 test('validación de movimiento y eliminación de diagramas referenciados',()=>{
  let d=fixture()
