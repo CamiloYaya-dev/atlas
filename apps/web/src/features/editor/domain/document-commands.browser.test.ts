@@ -2,7 +2,7 @@ import {test} from 'vitest'
 import assert from 'node:assert/strict'
 import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels} from '@atlas/contracts'
 import type {DiagramEdge} from '@atlas/contracts'
-import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
+import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,editRelation,removeRelation,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
 function fixture(){
  const a=createElement('Iniciar sesión','activity'),b=createElement('Verificar credenciales','activity')
  a.id='auth';b.id='verify'
@@ -96,4 +96,36 @@ test('borrar una vista deja intactas las otras vistas y los elementos compartido
  assert.equal(d.diagrams.length,1)
  assert.equal(d.diagrams[0].nodes[0].elementId,'auth')
  assert.equal(Object.keys(d.elements).length,2)
+})
+
+test('relación: editar dirección, puertos y tipo de línea no cambia los extremos',()=>{
+ let d=fixture();d=connectNodes(d,'d1',{id:'link1',source:'n1',target:'n2'})
+ d=editRelation(d,'d1','link1',{direction:'both',lineStyle:'dotted',pathStyle:'straight',sourceHandle:'top-1',targetHandle:'bottom-3'})
+ const edge=d.diagrams[0].edges[0]
+ assert.equal(edge.direction,'both');assert.equal(edge.lineStyle,'dotted');assert.equal(edge.pathStyle,'straight');assert.equal(edge.sourceHandle,'top-1');assert.equal(edge.targetHandle,'bottom-3');assert.equal(edge.source,'n1');assert.equal(edge.target,'n2')
+ assert.throws(()=>editRelation(d,'d1','link1',{source:'n2'}),/extremos/)
+})
+test('eliminar solo la relación respeta nodos y conserva la ficha original',()=>{
+ let d=fixture();d=connectNodes(d,'d1',{id:'link1',source:'n1',target:'n2'})
+ d=removeRelation(d,'d1','link1')
+ assert.equal(d.diagrams[0].edges.length,0);assert.equal(d.diagrams[0].nodes.length,2)
+ assert.ok(d.elements.auth);assert.ok(d.elements.verify)
+ assert.throws(()=>removeRelation(d,'d1','link1'),/inexistente/)
+})
+test('desvincular una caja de destino conserva el diagrama general',()=>{
+ let d=fixture();d=editElement(d,'auth',{childDiagramId:'d1',childNodeId:'n2'},'2026-11-12')
+ d=removeElementNode(d,'d1','verify')
+ assert.equal(d.elements.auth.childDiagramId,'d1')
+ assert.equal(d.elements.auth.childNodeId,undefined)
+})
+
+test('dos relaciones del mismo par mantienen identidad, estilo y puerto independientes',()=>{
+ let d=fixture()
+ d=connectNodes(d,'d1',{id:'a',source:'n1',target:'n2',sourceHandle:'right',targetHandle:'left',label:'HTTPS'})
+ d=connectNodes(d,'d1',{id:'b',source:'n1',target:'n2',sourceHandle:'top-2',targetHandle:'bottom-3',label:'Evento'})
+ assert.equal(d.diagrams[0].edges.length,2)
+ d=removeRelation(d,'d1','a')
+ assert.equal(d.diagrams[0].edges.length,1)
+ assert.equal(d.diagrams[0].edges[0].sourceHandle,'top-2')
+ assert.equal(d.diagrams[0].edges[0].label,'Evento')
 })

@@ -1,3 +1,31 @@
+## ATLAS V4.8.1 — Editor de relaciones y navegación precisa (13 noviembre 2026)
+
+- Corregida validación de conexiones del laboratorio técnico C2 para reconocer relaciones correctas independientemente del sentido de dibujo.
+- Modal de relación: edición de flechas, tipos de trazo y recorrido; eliminación con confirmación, separación de permisos ACL y persistencia en historial.
+- Ocho puntos de conexión por caja, con tres superiores y tres inferiores, usando conexión flexible.
+- Profundización a una caja exacta de una vista vinculada, centrado de cámara y navegación hacia atrás.
+- Academia: indicación visual de dónde crear los campos personalizados desde el Inspector y ayuda contextual para C2.
+- Compatibilidad retroactiva con JSON existentes y 15 pruebas de regresión sin dependencias nativas, además de las pruebas browser añadidas.
+
+## V4.8.1 — Asistencia contextual de misiones e Inspector (2026-11-12)
+
+- El laboratorio orienta al alumno tras 1, 2 o 3 minutos configurables de inactividad (o desactivado, por defecto 2). La preferencia es local; no hay seguimiento en el backend.
+- Borde animado para el primer criterio pendiente; pie persistente «Sube/Baja» cuando la acción está fuera del área visible; nunca hay scroll automático por inactividad.
+- Cuatro comprobaciones acreditables adicionales: Inspector de HU, campo de lista funcional, Inspector de endpoint y campo técnico de texto. Las insignias se basan en el documento guardado.
+- Acciones contextuales para abrir formularios y fichas reales, sin creación ni guardados automáticos.
+- Pausa de ayuda durante modales, guardados, errores y actividad; soporte de movimiento reducido.
+- Sin migraciones, cambios API o dependencias nuevas. TypeScript y pruebas aisladas React/jsdom verificadas; Vitest general pendiente en Windows.
+
+## V4.8.1 — ATLAS Academy: laboratorio con insignias (2026-11-12)
+
+- Nuevo acceso «Misiones» sin eliminar el recorrido explicativo de 18 lecciones.
+- Creación explícita de workspace de formación y proyecto de práctica mediante APIs existentes; sin tocar proyectos personales o clientes.
+- 3 insignias ligadas a comprobaciones del documento guardado: funcional (C1, procesos, HU/RF y casos de uso), técnico (C2/C3/C4 y trazabilidad), e integración (la misma matriz en perspectiva mixta).
+- Seis diagramas sugeridos, cajas preconfiguradas en formularios reales, guía para relacionar y reutilizar elementos, y enlaces de profundización.
+- Interfaz responsive; soporte en pantalla completa; no utiliza ventanas nativas; mantiene permisos del backend.
+- Pruebas de lógica, jsdom y TypeScript añadidas. Sin migraciones ni dependencias nuevas. Vitest completo pendiente en entorno Windows.
+- Documentación: docs/ACADEMIA_MISIONES_PRACTICAS.md.
+
 ## V4.8.1 — Ajustes de área de trabajo y creación en fullscreen (2026-11-12)
 
 - «Ampliar área de trabajo» oculta la cabecera completa (título, descripción, exportar/importar) y la barra de filtros; conserva la barra global del proyecto.
@@ -121,3 +149,13 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Vista inferior centrada para tablet y móvil; cabecera y botones de navegación siempre visibles, y contenido/temario desplazables por separado.
 - Pruebas de regresión de identidad y posicionamiento, más verificación en nueve tamaños de Chromium.
 - Sin migraciones, sin API adicional y sin modificaciones de ACL o documentos de proyectos.
+
+## ATLAS V4.8.1 — Relaciones paralelas y guía C1–C4 (2026-11-13)
+
+- Corrige el bloqueo en frontend, comandos de dominio y backend que impedía varias relaciones entre las mismas cajas.
+- Añade representación de carriles independientes (rectos, curvos y ortogonales), sin perder dirección, flechas, etiquetas ni edición individual.
+- Habilita los ocho puertos como entrada/salida mediante ConnectionMode.Loose.
+- Identifica C1/C2/C3/C4 en la barra lateral y en las cajas que vinculan otra vista.
+- La Academia explica los niveles y guía la selección de Sistema C1 → Servicio C2 → Componente C3, resaltando la configuración de vista vinculada en el Inspector.
+- Añade pruebas para conexiones múltiples, rutas y render, salvaguardando permisos y compatibilidad.
+- No altera el esquema PostgreSQL ni requiere migraciones.

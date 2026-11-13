@@ -1,0 +1,15 @@
+{
+  "release": "ATLAS V4.8.1 Academy Missions",
+  "modified_files": {
+    "apps/web/src/features/editor/AtlasEditor.tsx": "55028c0b88d7040e9d90ec49898abe30558c85361d3511a723e307e177d2fac5",
+    "apps/web/src/features/academy/academy.css": "4a9801ac88170bd4f1d706cce496477f1e9d70f90a886d173891092fead44ce9",
+    "apps/web/src/features/academy/AcademyMissions.tsx": "c58d2d277f51dbaff04b01535769239f50f726ce3f3d91b72115ad251e24ea4b",
+    "apps/web/src/features/academy/AcademyMissions.browser.test.tsx": "8f7b47c5cf72e12e0f64b5f74a587ce574ea9a9e18f38102e78632c29d729ed5",
+    "apps/web/src/features/academy/progress.ts": "33a53442fb4ed0925b596cfe1c0a99f66bfaceb6c62b4f8bdfb8e32c41a16b71",
+    "apps/web/src/features/academy/progress.browser.test.ts": "d4251f0ad3e5bbba8aeee790c4d7ce5fd9bbf3f1be7f69bf03404848b619ff9c",
+    "docs/ACADEMIA_MISIONES_PRACTICAS.md": "1434f5b1988fb093391a93e05ed546c34932a3e02e0ea4905909cad204da41f3",
+    "README.md": "79d3b9b5c58234a44d693f29ce8aaa441e7f7b6c164d0d7c76e45fcdf66249d4",
+    "CHANGELOG.md": "9f27f72165b91992f01e455c6338d2ca64d17218b019a51deb54e0b6fa33101c",
+    "INSTRUCCIONES_ACADEMIA_MISIONES.txt": "4c11d5a99f9257598f0086076c7476938c2bc312ca225d337eda602d4dc89d51"
+  }
+}

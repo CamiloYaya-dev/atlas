@@ -1,0 +1,16 @@
+ATLAS V4.8.1 — Parche relaciones paralelas + guía C1–C4
+
+1. Haz copia de la carpeta actual y exporta tu proyecto de pruebas a JSON.
+2. Cierra el frontend/backend de ATLAS.
+3. Descomprime el ZIP PARCHE dentro de C:\Users\MSI1\Desktop\atlas, combinando carpetas y aceptando reemplazar archivos.
+4. Mantén tus archivos .env, tus datos PostgreSQL y los volúmenes de Docker. El parche no contiene migraciones.
+5. En PowerShell (comandos separados):
+   npm run typecheck
+   npm run test:graph
+   npm run test:ui
+   npm run test:unit
+   npm run build
+6. Reinicia ATLAS y revisa el documento docs/RELACIONES_MULTIPLES_Y_GUIA_C4_V4_8_1.md.
+
+NOTA: las pruebas específicas están aprobadas en el entorno de generación;
+la certificación completa de la aplicación exige ejecutar las suites en Windows.

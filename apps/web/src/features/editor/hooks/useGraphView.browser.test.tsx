@@ -34,3 +34,16 @@ describe('Adaptador de grafo para React Flow',()=>{
   expect(result.current.edges[0].markerEnd).toBeDefined()
  })
 })
+
+describe('Relaciones configurables',()=>{
+ it('renderiza doble flecha, puerto exacto y estilo persistido',()=>{
+  const diagram=structuredClone(doc.diagrams.find(d=>d.type==='c2')!)
+  const first=diagram.edges[0]
+  diagram.edges[0]={...first,direction:'both',sourceHandle:'top-2',targetHandle:'bottom-3',lineStyle:'dashed',pathStyle:'bezier'}
+  const {result}=renderHook(()=>useGraphView({doc,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+  const edge=result.current.edges.find(x=>x.id===first.id)!
+  expect(edge.markerStart).toBeDefined();expect(edge.markerEnd).toBeDefined()
+  expect(edge.sourceHandle).toBe('top-2');expect(edge.targetHandle).toBe('bottom-3')
+  expect(edge.style?.strokeDasharray).toBe('7 5');expect(edge.type).toBe('bezier')
+ })
+})

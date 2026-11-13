@@ -200,3 +200,15 @@ Se añadieron historial visual, comparación/restauración segura de revisiones,
 ## Tutorial interactivo — Aprender ATLAS
 
 Desde la barra lateral o el icono de libro de la barra superior se puede abrir **Aprender ATLAS**, un recorrido contextual y no destructivo de 18 pasos que explica organizaciones/espacios, proyectos, tipos de diagramas C1–C4, cajas, relaciones, perspectivas funcional/técnica y trazabilidad. Incluye ejercicios locales sin modificar PostgreSQL. Véase `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.
+
+## ATLAS Academy — misiones e insignias prácticas
+
+La opción **Misiones** abre un laboratorio real en una organización y un proyecto creados expresamente por el alumno. Incluye modelado funcional (C1, proceso, HU/RF/caso de uso), técnico (C2/C3/C4, API, componentes y enlaces con requisitos) e integración en vista Mixta. Las insignias se validan contra el documento del proyecto tras guardarse; no se conceden por avanzar en lecciones simuladas. El recorrido de 18 pasos «Aprender ATLAS» continúa disponible. Ver [docs/ACADEMIA_MISIONES_PRACTICAS.md](docs/ACADEMIA_MISIONES_PRACTICAS.md).
+
+## Editor de relaciones y navegación entre cajas (actualización V4.8.1)
+
+En **Configurar relación** (clic en una línea) puedes cambiar dirección, tipo de línea y recorrido, o eliminar la relación si tu rol lo permite. Las cajas tienen ahora ocho puertos (uno a cada lado, tres arriba y tres abajo). En el Inspector puedes vincular una vista completa o una **caja específica**, y el botón **Volver** recupera la vista anterior. El laboratorio técnico reconoce las parejas C2 aunque las flechas se dibujen a la inversa, y «Muéstrame dónde» resalta el botón real para configurar campos personalizados. Guía y pruebas en `docs/EDITOR_RELACIONES_NAVEGACION_ATLAS_V4_8_1.md`; ejecuta `npm run test:graph`.
+
+### Conexiones múltiples y navegación entre los cuatro niveles C4
+
+Una misma pareja de cajas puede tener varias relaciones independientes (por ejemplo, HTTP, evento y auditoría), conectadas por cualquier puerto y seleccionables como líneas distintas. La Academia guía la navegación C1 → C2 → C3 → C4 utilizando **Inspector → Vista vinculada (doble clic)** en el elemento de origen. Consulta [`docs/RELACIONES_MULTIPLES_Y_GUIA_C4_V4_8_1.md`](docs/RELACIONES_MULTIPLES_Y_GUIA_C4_V4_8_1.md) para pasos y pruebas.

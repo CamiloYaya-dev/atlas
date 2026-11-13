@@ -33,7 +33,7 @@
     "test": "npm run test:unit",
     "test:policy": "npm run test:policy -w @atlas/api",
     "test:integration": "node scripts/run-tests.mjs integration",
-    "check": "npm run typecheck && npm run test:unit && npm run test:ui && npm run build",
+    "check": "npm run typecheck && npm run test:graph && npm run test:unit && npm run test:ui && npm run build",
     "smoke": "node scripts/smoke.mjs",
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:coverage": "node scripts/coverage-local.mjs full",
@@ -59,7 +59,8 @@
     "db:restore:verify": "node scripts/restore-db.mjs --mode=verify",
     "db:restore:recover": "node scripts/restore-db.mjs --mode=recover",
     "qa:v1:functional": "npm run typecheck && npm run test:unit && npm run test:ui && npm run test:db && npm run test:e2e:local && npm run build",
-    "pilot:build": "npm run pilot:check && npm run build"
+    "pilot:build": "npm run pilot:check && npm run build",
+    "test:graph": "node scripts/graph-regression.cjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

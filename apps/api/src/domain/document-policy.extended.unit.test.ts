@@ -59,8 +59,11 @@ test('crear/editar/borrar relaciones y validar permisos por tipo',()=>{
  const removed=applyAuthorizedChange(changed,removal,role())
  assert.equal(removed.diagrams[0].edges.length,1)
  const functional=role('functional'),draft=projectVisible(fixture(),functional)
- draft.diagrams[0].edges.push({id:'bad',source:'na',target:'nb',label:'duplicada'})
- assert.throws(()=>applyAuthorizedChange(fixture(),draft,functional),/relation.create.functional|duplicad/)
+ draft.diagrams[0].edges.push({id:'extra',source:'na',target:'nb',label:'Relación adicional'})
+ assert.equal(applyAuthorizedChange(fixture(),draft,functional).diagrams[0].edges.length,2)
+ const viewer=role('viewer'),invalid=projectVisible(fixture(),viewer)
+ invalid.diagrams[0].edges.push({id:'not-allowed',source:'na',target:'nb'})
+ assert.throws(()=>applyAuthorizedChange(fixture(),invalid,viewer),/relation.create.functional/)
 })
 test('rechaza conexiones a nodos ausentes e identidades duplicadas',()=>{
  assert.throws(()=>mutate(d=>d.diagrams[0].edges.push({id:'bad',source:'na',target:'unknown'})),/Relación/)
@@ -139,4 +142,19 @@ test('un lector sin field.configure no recibe definiciones de campos de elemento
  // Existing visible activities may include their own definitions, never the
  // endpoint-specific definition if there is no visible endpoint.
  assert.equal(redacted.fieldDefinitions.some(f=>f.forType==='endpoint'),false)
+})
+
+test('múltiples relaciones sobre el mismo par se guardan con permisos propios y no borran otras',()=>{
+ const original=fixture(),actor=role(),incoming=projectVisible(original,actor)
+ incoming.diagrams.find(d=>d.id==='p')!.edges.push(
+  {id:'parallel2',source:'na',target:'nb',sourceHandle:'top-2',targetHandle:'bottom-3',label:'Auditoría'},
+  {id:'parallel3',source:'na',target:'nb',sourceHandle:'right',targetHandle:'left',label:'Evento'}
+ )
+ const saved=applyAuthorizedChange(original,incoming,actor)
+ assert.equal(saved.diagrams.find(d=>d.id==='p')?.edges.filter(e=>e.source==='na'&&e.target==='nb').length,3)
+ const changed=projectVisible(saved,actor)
+ changed.diagrams.find(d=>d.id==='p')!.edges=changed.diagrams.find(d=>d.id==='p')!.edges.filter(e=>e.id!=='parallel2')
+ const afterDelete=applyAuthorizedChange(saved,changed,actor)
+ assert.equal(afterDelete.diagrams.find(d=>d.id==='p')?.edges.length,2)
+ assert.ok(afterDelete.diagrams.find(d=>d.id==='p')?.edges.some(e=>e.id==='parallel3'))
 })

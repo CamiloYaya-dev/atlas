@@ -1,0 +1,35 @@
+{
+  "project": "ATLAS",
+  "version": "4.8.1",
+  "feature": "Relaciones bidireccionales, puertos, enlaces a cajas, Academia",
+  "based_on": "ATLAS_V4_8_1_Completo_Academia_Guia_Inspector.zip",
+  "requires_sql_migration": false,
+  "changed_files": {
+    "packages/contracts/src/index.ts": "bba1e33d66b9e9cd9b3fb91761321698038c3567f26d6de7ea43baad2f59691c",
+    "apps/web/src/features/editor/domain/document-commands.ts": "e059b36c7cf5c35fb97981464546662dcdfc217b3736afe5875137085cf1c0e4",
+    "apps/web/src/components/organisms/AtlasNode.tsx": "4928582ad63a7271284f30875440cd2d6215a065259a40ef621347ea35dfe2bc",
+    "apps/web/src/features/editor/hooks/useGraphView.ts": "56af9415580c5bc6304667a1ef5ebb3a52fe73b270f49a943e68fed150527a5c",
+    "apps/api/src/modules/projects/application/document-policy.ts": "c22eec1914ec29a9c238aa3fdd14a0c1c124ef8c0c225316eab9e07097c6c088",
+    "apps/web/src/features/academy/progress.ts": "674d1957ff105ea5787d17033bf697cd14cd724c2927a6f8f390675d110016b4",
+    "apps/web/src/features/editor/AtlasEditor.tsx": "865a7bbf74d8a65243b0fec895ac8df3eb4e070c53d5e0632e7585dd16aaee5d",
+    "apps/web/src/features/academy/AcademyMissions.tsx": "a326d0fbbebedac2a86f8278453434767a1d7cd7aaab27fe81a8832bc87266b1",
+    "apps/web/src/styles.css": "720bfe29b09d0f4c47080d42a4877ecc4d7c393752bb23222d371ff21e7cfe06",
+    "apps/web/src/features/academy/academy.css": "5694f53e2a49a6e92c0b3031880e22c36fc43e9bc3fa80f3adab268465332e29",
+    "apps/web/src/features/editor/domain/document-commands.browser.test.ts": "9fab256bd4460a4bc121b67c5c8e1c350d07b598b4113316414c9847f09168d0",
+    "apps/web/src/features/academy/progress.browser.test.ts": "d8c0ca2723731badc762fd2fd32ee1e75b3a3dc32c9562a98dc1c5b6333766cd",
+    "apps/web/src/features/editor/hooks/useGraphView.browser.test.tsx": "30f3476c2b22ca560bfe6c00acd4e20e722ba6d7f99b22a1d608f15f22eecec9",
+    "apps/web/src/features/tutorial/tutorial-content.ts": "e2d51217aa90b11b644a788ddccb96ebe56d4b47a6d77d70776ef64c484353dd",
+    "package.json": "87476b0b4674dca23021d508bfb98d719d89fda8b6f1f1b46477f430b6743237",
+    "docs/EDITOR_RELACIONES_NAVEGACION_ATLAS_V4_8_1.md": "483aeb3c16aca378905cbd7001452006ac82a0b5e2844ed785122b14e993783c",
+    "scripts/graph-regression.cjs": "384f2b61015107b60013cc1a9f136682a30b1c9417749d3047224efc170a388c",
+    "CHANGELOG.md": "8c04c8e87874bee810bef997b35e385b1ebbcfff8a748dbc956ce2ccaab7f177",
+    "README.md": "244d582d57057f6228831b9d26ffdbdac3427a3e24950584eaef8864dea08f27",
+    "INSTRUCCIONES_EDITOR_RELACIONES_NAV_ATLAS.txt": "384ae5a88a89b497931aea3faa2bcabed4688a6ed40d7f67c61e3f0718caa481"
+  },
+  "validation": {
+    "typecheck": "pass",
+    "test_graph": "15/15",
+    "test_qa_tools": "4/4",
+    "vitest_and_e2e": "pending_on_Windows"
+  }
+}

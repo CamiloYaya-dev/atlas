@@ -1,0 +1,29 @@
+{
+  "product": "ATLAS Academy",
+  "version": "4.8.1",
+  "base": "ATLAS_V4_8_1_Completo_Academia_Misiones_Insignias.zip",
+  "feature": "Guía contextual por inactividad (1/2/3 minutos) y tareas verificables de Inspector/campos personalizados",
+  "files": {
+    "apps/web/src/features/academy/AcademyMissions.tsx": "1382df2c81082ed3c36d271f91958a14124c320c3011b1ea449038d6185eaaa5",
+    "apps/web/src/features/academy/academy.css": "a3b6e10c283e08f74579e0f789a83b597a10b0da4ff5a9c26bc44435fb0e64c2",
+    "apps/web/src/features/academy/progress.ts": "024157d63c1764d3b445359ef7832c41b5fd7990b44621cbd6ca2c2b63a86cf3",
+    "apps/web/src/features/academy/progress.browser.test.ts": "57240081207a54fbdf6bf2d39902dc09a9106d95b338fbe0adc22e1e4bc1833b",
+    "apps/web/src/features/academy/AcademyMissions.browser.test.tsx": "f486550d5870877b3cc0864f00bf8dc00dd437af4ea7a387ba480be321684743",
+    "apps/web/src/features/editor/AtlasEditor.tsx": "70882d1e8d7a522c3f79d424f419ed1cb82dbeb1c37b5321fcac0db15849c89d",
+    "docs/ACADEMIA_MISIONES_PRACTICAS.md": "5bf3d2b2e09b69ec3b7fab88aadcbc0ff1ff0edfb532ee57fd8d26283f7c3f14",
+    "CHANGELOG.md": "f1e717b6ffa236abade1882850f696dec4f50319d46a491e62f2c8d1cef399c4",
+    "INSTRUCCIONES_ACADEMIA_GUIA_INACTIVIDAD.txt": "a35871b4a43ac425bae83b73b4fad871afa7f1768de8e1e4e491048755657b70",
+    "scripts/academy-guidance-smoke.cjs": "2c4f524cd7c658f518a8e9620846bcd33d405a756d2aecfbc6a6c5c0d0b67b6c",
+    "scripts/academy-layout-smoke.cjs": "a461866ef285b65171d79095829229b6e63ed1247a0e85c5de3d7e1aed38ea13",
+    "scripts/academy-field-smoke.cjs": "954063508aa48426671b4d79920ed8d30008cb5a4d109b957bdaefb1cdd66544"
+  },
+  "verification": {
+    "typescript": "passed",
+    "react_jsdom_isolated": 7,
+    "field_rules": 6,
+    "chromium_layout_sizes": 5,
+    "vitest": "not run: missing Rollup Linux native module"
+  },
+  "migrations": false,
+  "database_changes": false
+}

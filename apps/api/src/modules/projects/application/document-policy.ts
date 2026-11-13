@@ -15,7 +15,8 @@ export function projectVisible(document:ProjectDocument,a:Access):ProjectDocumen
   if(!visibleIds.has(id)||!allowed(a,`element.view.${e.type}`))continue
   const copy={...e}
   if(!allowed(a,'element.technical.view'))delete copy.technical
-  if(e.childDiagramId&&!diagrams.some(d=>d.id===e.childDiagramId))delete copy.childDiagramId
+  if(e.childDiagramId&&!diagrams.some(d=>d.id===e.childDiagramId)){delete copy.childDiagramId;delete copy.childNodeId}
+  else if(e.childNodeId&&!diagrams.find(d=>d.id===e.childDiagramId)?.nodes.some(n=>n.id===e.childNodeId&&!!document.elements[n.elementId]&&allowed(a,`element.view.${document.elements[n.elementId].type}`)))delete copy.childNodeId
   elements[id]=copy
  }
  const redacted=diagrams.map(d=>{
@@ -37,7 +38,7 @@ export function ensureUniqueIds(doc:ProjectDocument){
   const filters=d.filters||[]
   if(filters.length>100||new Set(filters.map(f=>f.id)).size!==filters.length||filters.some(f=>f.id.length<1||f.id.length>100||f.label.trim().length<1||f.label.length>80))throw new DomainError('Filtros de diagrama inválidos',400)
   const filterIds=new Set(filters.map(f=>f.id))
-  const nodes=new Set<string>(),edges=new Set<string>(),pairs=new Set<string>()
+  const nodes=new Set<string>(),edges=new Set<string>()
   for(const n of d.nodes){
    if(nodes.has(n.id)||!doc.elements[n.elementId])throw new DomainError('Nodo duplicado o sin elemento',400)
    if(n.filterIds?.some(id=>!filterIds.has(id)))throw new DomainError('Nodo con filtro inexistente',400)
@@ -45,11 +46,18 @@ export function ensureUniqueIds(doc:ProjectDocument){
   }
   for(const e of d.edges){
    if(edges.has(e.id)||!nodes.has(e.source)||!nodes.has(e.target)||e.source===e.target)throw new DomainError('Relación duplicada o inválida',400)
-   const pair=JSON.stringify([e.source,e.target]);if(pairs.has(pair))throw new DomainError('Relación duplicada',400)
-   pairs.add(pair);edges.add(e.id)
+   if(e.direction&&!['forward','reverse','both','none'].includes(e.direction))throw new DomainError('Dirección de relación inválida',400)
+   if(e.lineStyle&&!['solid','dashed','dotted'].includes(e.lineStyle))throw new DomainError('Trazo de relación inválido',400)
+   if(e.pathStyle&&!['smoothstep','straight','step','bezier'].includes(e.pathStyle))throw new DomainError('Tipo de recorrido de relación inválido',400)
+   if(e.sourceHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.sourceHandle))throw new DomainError('Puerto de salida inválido',400)
+   if(e.targetHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.targetHandle))throw new DomainError('Puerto de entrada inválido',400)
+   edges.add(e.id)
   }
  }
- for(const e of Object.values(doc.elements))if(e.childDiagramId&&!usedDiagrams.has(e.childDiagramId))throw new DomainError('Vista vinculada inexistente',400)
+ for(const e of Object.values(doc.elements)){
+  if(e.childDiagramId&&!usedDiagrams.has(e.childDiagramId))throw new DomainError('Vista vinculada inexistente',400)
+  if(e.childNodeId&&(!e.childDiagramId||!doc.diagrams.find(d=>d.id===e.childDiagramId)?.nodes.some(n=>n.id===e.childNodeId)))throw new DomainError('Caja vinculada inexistente',400)
+ }
 }
 export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectDocument,a:Access):ProjectDocument{
  // Compare only the authorized projection, merge mutations back into the FULL document.
@@ -83,10 +91,21 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
   }
   if(!equal(before,created)){
    requirePermission(a,`element.edit.${stored.type}`)
+   // A granular link must never become a pointer into an inaccessible diagram or node.
+   if((created.childDiagramId!==stored.childDiagramId||created.childNodeId!==stored.childNodeId)&&created.childDiagramId){
+    const target=incoming.diagrams.find(d=>d.id===created.childDiagramId)||original.diagrams.find(d=>d.id===created.childDiagramId)
+    if(target){
+     requirePermission(a,`diagram.view.${target.type}`)
+     if(created.childNodeId){
+      const node=target.nodes.find(n=>n.id===created.childNodeId),element=node&&(incoming.elements[node.elementId]||original.elements[node.elementId])
+      if(element)requirePermission(a,`element.view.${element.type}`)
+     }
+    }
+   }
    if(created.technical!==undefined&&created.technical!==stored.technical)requirePermission(a,'element.technical.edit')
    full.elements[id]={...stored,...created,
      ...(!allowed(a,'element.technical.edit')?{technical:stored.technical}:{}),
-     ...(!allowed(a,`diagram.view.${storedDiagrams.get(stored.childDiagramId||'')?.type}`)?{childDiagramId:stored.childDiagramId}:{}),
+     ...(!allowed(a,`diagram.view.${storedDiagrams.get(stored.childDiagramId||'')?.type}`)?{childDiagramId:stored.childDiagramId,childNodeId:stored.childNodeId}:{}),
    }
   }
  }

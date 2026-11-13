@@ -1,17 +1,22 @@
-import {createDiagram as commandCreateDiagram,editDiagram as commandEditDiagram,deleteDiagram as commandDeleteDiagram,addElementNode as commandAddElementNode,reuseElementNode as commandReuseElementNode,removeElementNode as commandRemoveElementNode,connectNodes as commandConnectNodes,moveNode as commandMoveNode,editElement as commandEditElement,addFieldDefinition as commandAddFieldDefinition,removeFieldDefinition as commandRemoveFieldDefinition} from './domain/document-commands'
+import {createDiagram as commandCreateDiagram,editDiagram as commandEditDiagram,deleteDiagram as commandDeleteDiagram,addElementNode as commandAddElementNode,reuseElementNode as commandReuseElementNode,removeElementNode as commandRemoveElementNode,connectNodes as commandConnectNodes,editRelation as commandEditRelation,removeRelation as commandRemoveRelation,moveNode as commandMoveNode,editElement as commandEditElement,addFieldDefinition as commandAddFieldDefinition,removeFieldDefinition as commandRemoveFieldDefinition} from './domain/document-commands'
 import {useGraphView} from './hooks/useGraphView'
 import GuidedTutorial from '../tutorial/GuidedTutorial'
+import AcademyMissions from '../academy/AcademyMissions'
+import {readAcademyLab,storeAcademyLab} from '../academy/progress'
+import type {AcademyLabIdentity} from '../academy/progress'
 import {TUTORIAL_STORAGE_KEY} from '../tutorial/tutorial-content'
 import '../tutorial/tutorial.css'
 import {diagramFilters,nodeFilterIds} from './domain/graph-selection'
 import {IconFor,nodeTypes} from '../../components/organisms/AtlasNode'
+import {edgeTypes} from '../../components/organisms/AtlasParallelEdge'
+import {DiagramTypeBadge} from '../../components/atoms/DiagramTypeBadge'
 import {Overlay,Field} from '../../components/molecules/Overlay'
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react'
 import type {ChangeEvent,FormEvent,ReactNode} from 'react'
 import {createPortal} from 'react-dom'
-import {ReactFlow,Background,Controls,MiniMap,ReactFlowProvider,useNodesState} from '@xyflow/react'
+import {ReactFlow,Background,Controls,MiniMap,ReactFlowProvider,useNodesState,useReactFlow,ConnectionMode} from '@xyflow/react'
 import type {Connection,Node} from '@xyflow/react'
-import {ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Download,ExternalLink,Folder,FolderPlus,Grip,Home,LogIn,LogOut,Maximize2,Minimize2,Map,PanelLeftClose,PanelLeftOpen,Menu,Network,PanelRightClose,Plus,RefreshCcw,Save,Settings2,ShieldCheck,Trash2,Upload,UserRound,Workflow,X} from 'lucide-react'
+import {ArrowRight,Award,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Download,ExternalLink,Folder,FolderPlus,Grip,Home,LogIn,LogOut,Maximize2,Minimize2,Map,PanelLeftClose,PanelLeftOpen,Menu,Network,PanelRightClose,Plus,RefreshCcw,Save,Settings2,ShieldCheck,Trash2,Upload,UserRound,Workflow,X} from 'lucide-react'
 import {login as apiLogin,logout as apiLogout,session as apiSession,workspaceAccess} from '../security/api'
 import SecurityPanel from '../security/SecurityPanel'
 import VersionHistory from '../projects/VersionHistory'
@@ -25,7 +30,7 @@ import {listProjects,createProject as apiCreateProject,projectAccess as apiProje
 import type {LiveParticipant} from '../projects/api'
 import {projectEventsUrl} from '../../shared/api/http'
 import {createElement,diagramLabels,elementLabels,fieldLabels,emptyDoc,isProjectDocument,today,uid} from '../../types'
-import type {Diagram,DiagramEdge,DiagramType,ElementType,FieldDefinition,FieldKind,ModelElement,Perspective,Project,ProjectDocument,Workspace} from '../../types'
+import type {Diagram,DiagramEdge,DiagramType,ElementType,FieldDefinition,FieldKind,ModelElement,Perspective,Project,ProjectDocument,Workspace,EdgeDirection,EdgeLineStyle,EdgePathStyle} from '../../types'
 
 type Account={id:string,email:string;name:string;platformAdmin:boolean}
 type Dialog='new-diagram'|'new-node'|'fields'|'new-workspace'|'new-project'|'access'|'history'|'audit'|'workspace-settings'|'project-settings'|'diagram-filters'|'edit-relation'|'add-link'|null
@@ -48,12 +53,17 @@ const dateOf=()=>new Date().toISOString().slice(0,10)
 const safeLink=(url:string)=>{try{const parsed=new URL(url);return ['https:','http:'].includes(parsed.protocol)?parsed.href:null}catch{return null}}
 function emptyName(name:string){return name.trim().length>=2}
 function AppInner(){
+ const flow=useReactFlow()
  const [account,setAccount]=useState<Account|null>(null)
  const [authReady,setAuthReady]=useState(false)
  const [authError,setAuthError]=useState('')
  const [authEmail,setAuthEmail]=useState('');const [authPass,setAuthPass]=useState('');const [authBusy,setAuthBusy]=useState(false)
- const [accessPolicy,setAccessPolicy]=useState<WorkspaceAccess|null>(null);const [projectPolicy,setProjectPolicy]=useState<WorkspaceAccess|null>(null);const [workspaces,setWorkspaces]=useState<Workspace[]>([]);const [wsId,setWsId]=useState('');const [projects,setProjects]=useState<Project[]>([]);const [projectId,setProjectId]=useState('')
+ const [accessPolicy,setAccessPolicy]=useState<WorkspaceAccess|null>(null);const [workspacesLoaded,setWorkspacesLoaded]=useState(false);const [projectsLoaded,setProjectsLoaded]=useState(false);const [projectPolicy,setProjectPolicy]=useState<WorkspaceAccess|null>(null);const [workspaces,setWorkspaces]=useState<Workspace[]>([]);const [wsId,setWsId]=useState('');const [projects,setProjects]=useState<Project[]>([]);const [projectId,setProjectId]=useState('')
  const [doc,setDoc]=useState<ProjectDocument|null>(null);const [diagramId,setDiagramId]=useState('');const [selectedId,setSelectedId]=useState<string|null>(null)
+ const [navigationTrail,setNavigationTrail]=useState<{diagramId:string;elementId:string|null}[]>([])
+ const [focusRequest,setFocusRequest]=useState<{diagramId:string;nodeId:string}|null>(null)
+ const [academyFieldPulse,setAcademyFieldPulse]=useState<'functional'|'technical'|null>(null)
+ const [academyLinkPulse,setAcademyLinkPulse]=useState(false)
  const [mode,setMode]=useState<Perspective>('mixed');const [selectedFilters,setSelectedFilters]=useState<Record<string,string[]>>({});const [dependencies,setDependencies]=useState(false);const [includeUntagged,setIncludeUntagged]=useState(true)
  const [sidebarOpen,setSidebarOpen]=useState(false);const [inspectorOpen,setInspectorOpen]=useState(true);const [expanded,setExpanded]=useState(false)
  const [navigationCollapsed,setNavigationCollapsed]=useState(()=>{try{return localStorage.getItem('atlas.navigation.collapsed')==='1'}catch{return false}})
@@ -76,13 +86,18 @@ function AppInner(){
   catch{setFullscreenFallback(true);setCanvasFullscreen(true)}
  }
  const [tutorialOpen,setTutorialOpen]=useState(false)
+ const [academyOpen,setAcademyOpen]=useState(false)
+ const [academyLab,setAcademyLab]=useState<AcademyLabIdentity|null>(null)
+ const [academyBusy,setAcademyBusy]=useState(false)
+ const [academyError,setAcademyError]=useState('')
+ useEffect(()=>{setAcademyLab(account?.id?readAcademyLab(account.id):null);setAcademyOpen(false);setAcademyError('')},[account?.id])
  const [tutorialCompleted,setTutorialCompleted]=useState(()=>{try{return !!window.localStorage.getItem(TUTORIAL_STORAGE_KEY)}catch{return false}})
  const [dialog,setDialog]=useState<Dialog>(null);const [query,setQuery]=useState('');const [toast,setToast]=useState('')
  const [editSerial,setEditSerial]=useState(0);const [saveStatus,setSaveStatus]=useState<'saved'|'pending'|'saving'|'error'>('saved')
  const [saveError,setSaveError]=useState('');const [currentVersion,setCurrentVersion]=useState(1);const versionMap=useRef<Record<string,number>>({});const editSerialRef=useRef(0);const ackSerialRef=useRef(0);const saveBusyRef=useRef(false);const [saveTick,setSaveTick]=useState(0);const conflictLockedProject=useRef<string|null>(null)
  const [confirmation,setConfirmation]=useState<{title:string;description:string;button:string;danger?:boolean;onAccept:()=>void}|null>(null)
  const [filterLabel,setFilterLabel]=useState('');const [filterRename,setFilterRename]=useState<Record<string,string>>({})
- const [edgeEdit,setEdgeEdit]=useState<{diagramId:string;edgeId:string;label:string}|null>(null)
+ const [edgeEdit,setEdgeEdit]=useState<{diagramId:string;edgeId:string;label:string;direction:EdgeDirection;lineStyle:EdgeLineStyle;pathStyle:EdgePathStyle}|null>(null)
  const [linkLabel,setLinkLabel]=useState('');const [linkUrl,setLinkUrl]=useState('');const [linkElementId,setLinkElementId]=useState('')
  const [pendingImport,setPendingImport]=useState<ProjectDocument|null>(null)
  const [liveStatus,setLiveStatus]=useState<'connecting'|'online'|'offline'>('offline');const [participants,setParticipants]=useState<LiveParticipant[]>([])
@@ -104,8 +119,8 @@ function AppInner(){
  useEffect(()=>{let active=true;apiSession().then(user=>{if(active)setAccount(user)}).catch(()=>{if(active)setAccount(null)}).finally(()=>{if(active)setAuthReady(true)});return()=>{active=false}},[])
  useEffect(()=>{if(!wsId){setAccessPolicy(null);return}let mounted=true;setAccessPolicy(null);workspaceAccess(wsId).then(p=>{if(mounted)setAccessPolicy(p)}).catch(e=>{if(mounted)announce('No se pudieron cargar permisos: '+e.message)});return()=>{mounted=false}},[wsId])
  useEffect(()=>{if(!projectId){setProjectPolicy(null);return}let active=true;setProjectPolicy(null);apiProjectAccess(projectId).then(p=>{if(active)setProjectPolicy(p)}).catch(e=>{if(active)announce('Acceso al proyecto: '+e.message)});return()=>{active=false}},[projectId])
- useEffect(()=>{if(!account){setWorkspaces([]);setWsId('');setProjects([]);setProjectId('');setDoc(null);return}let cancelled=false;listWorkspaces(account.id).then(items=>{if(!cancelled){setWorkspaces(items);setWsId(prev=>items.some(w=>w.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar espacios: '+e.message));return()=>{cancelled=true}},[account?.id])
- useEffect(()=>{if(!wsId){setProjects([]);setProjectId('');return}let cancelled=false;setDoc(null);listProjects(wsId).then(items=>{if(!cancelled){setProjects(items);setProjectId(prev=>items.some(p=>p.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar proyectos: '+e.message));return()=>{cancelled=true}},[wsId])
+ useEffect(()=>{setWorkspacesLoaded(false);if(!account){setWorkspaces([]);setWsId('');setProjects([]);setProjectId('');setDoc(null);setWorkspacesLoaded(true);return}let cancelled=false;listWorkspaces(account.id).then(items=>{if(!cancelled){setWorkspaces(items);setWsId(prev=>items.some(w=>w.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar espacios: '+e.message)).finally(()=>{if(!cancelled)setWorkspacesLoaded(true)});return()=>{cancelled=true}},[account?.id])
+ useEffect(()=>{setProjectsLoaded(false);if(!wsId){setProjects([]);setProjectId('');setProjectsLoaded(true);return}let cancelled=false;setDoc(null);listProjects(wsId).then(items=>{if(!cancelled){setProjects(items);setProjectId(prev=>items.some(p=>p.id===prev)?prev:items[0]?.id||'')}}).catch(e=>announce('Error al cargar proyectos: '+e.message)).finally(()=>{if(!cancelled)setProjectsLoaded(true)});return()=>{cancelled=true}},[wsId])
  useEffect(()=>{if(!projectId){setDoc(null);setDiagramId('');return}let cancelled=false;setDoc(null);loadDocument(projectId).then(saved=>{if(cancelled)return;const data=saved?.document||emptyDoc();versionMap.current[projectId]=saved?.version||1;setCurrentVersion(saved?.version||1);conflictLockedProject.current=null;setDoc(data);setDiagramId(data.diagrams[0]?.id||'');setSelectedId(null);setEditSerial(0);editSerialRef.current=0;ackSerialRef.current=0;setSaveStatus('saved');setSaveError('')}).catch(e=>announce('Error al cargar diagrama: '+e.message));return()=>{cancelled=true}},[projectId])
  const patch=useCallback((fn:(original:ProjectDocument)=>ProjectDocument)=>{if(!canEdit)return;setDoc(prev=>prev?fn(prev):prev);editSerialRef.current+=1;setEditSerial(editSerialRef.current);setSaveStatus(conflictLockedProject.current===projectId?'error':'pending')},[canEdit,projectId])
  // Collaborative autosave: merge independent changes on the server; never overwrite a conflicting property.
@@ -198,9 +213,40 @@ function AppInner(){
  const filtered=useGraphView({diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,canEdit})
  const [displayNodes,setDisplayNodes,onDisplayNodesChange]=useNodesState<Node>([])
  useEffect(()=>{setDisplayNodes(filtered.nodes)},[filtered.nodes,setDisplayNodes])
- const visitDiagram=(id:string)=>{if(!doc?.diagrams.some(d=>d.id===id))return;setDiagramId(id);setSelectedId(null);setSidebarOpen(false)}
- const navigateElement=(id:string)=>{if(!doc)return;const found=doc.diagrams.find(d=>d.id===diagramId&&d.nodes.some(n=>n.elementId===id))||doc.diagrams.find(d=>d.nodes.some(n=>n.elementId===id));if(found)setDiagramId(found.id);setSelectedId(id);setInspectorOpen(true)}
- const navigateChild=()=>{if(selected?.childDiagramId&&doc?.diagrams.some(d=>d.id===selected.childDiagramId))visitDiagram(selected.childDiagramId)}
+ const visitDiagram=(id:string)=>{if(!doc?.diagrams.some(d=>d.id===id))return;setNavigationTrail([]);setFocusRequest(null);setDiagramId(id);setSelectedId(null);setSidebarOpen(false)}
+ const navigateToNode=(target:Diagram,nodeId:string|null,rememberOrigin=false,originElementId?:string)=>{
+  if(!doc)return
+  if(rememberOrigin)setNavigationTrail(old=>[...old,{diagramId,elementId:originElementId??selectedId}].slice(-20))
+  setSelectedFilters(old=>{const next={...old};delete next[target.id];return next})
+  setIncludeUntagged(true)
+  setDiagramId(target.id);setSidebarOpen(false)
+  const node=target.nodes.find(n=>n.id===nodeId)
+  setSelectedId(node?.elementId||null);if(node){setInspectorOpen(true);setFocusRequest({diagramId:target.id,nodeId:node.id})}
+  else setFocusRequest(null)
+ }
+ const navigateElement=(id:string)=>{if(!doc)return;const found=doc.diagrams.find(d=>d.id===diagramId&&d.nodes.some(n=>n.elementId===id))||doc.diagrams.find(d=>d.nodes.some(n=>n.elementId===id));if(found){const node=found.nodes.find(n=>n.elementId===id);navigateToNode(found,node?.id||null,found.id!==diagramId)}}
+ const navigateChildOf=(element:ModelElement)=>{const target=doc?.diagrams.find(d=>d.id===element.childDiagramId);if(target)navigateToNode(target,element.childNodeId||null,true,element.id)}
+ const navigateChild=()=>{if(selected)navigateChildOf(selected)}
+ const navigateBack=()=>{const previous=navigationTrail[navigationTrail.length-1];const target=doc?.diagrams.find(d=>d.id===previous?.diagramId);if(!target)return;setNavigationTrail(old=>old.slice(0,-1));navigateToNode(target,target.nodes.find(n=>n.elementId===previous.elementId)?.id||null)}
+ useEffect(()=>{setNavigationTrail([]);setFocusRequest(null)},[projectId])
+ useEffect(()=>{
+  if(!focusRequest||focusRequest.diagramId!==diagramId)return
+  let cancelled=false,tries=0,timer=0
+  const focus=async()=>{
+   if(cancelled)return
+   const node=flow.getNode(focusRequest.nodeId)
+   if(node){
+    const completed=await flow.fitView({nodes:[{id:focusRequest.nodeId}],padding:1.0,maxZoom:1.4,duration:450})
+    if(completed){if(!cancelled)setFocusRequest(null);return}
+   }
+   if(tries++<22)timer=window.setTimeout(()=>void focus(),100)
+   else if(!cancelled)setFocusRequest(null)
+  }
+  timer=window.setTimeout(()=>void focus(),80)
+  return()=>{cancelled=true;window.clearTimeout(timer)}
+ },[diagramId,focusRequest,flow])
+ useEffect(()=>{if(!academyFieldPulse||dialog)return;const timer=window.setTimeout(()=>document.querySelector('[data-academy-field-settings]')?.scrollIntoView({block:'center',behavior:'smooth'}),120);const reset=window.setTimeout(()=>setAcademyFieldPulse(null),10000);return()=>{window.clearTimeout(timer);window.clearTimeout(reset)}},[academyFieldPulse,selectedId,dialog])
+ useEffect(()=>{if(!academyLinkPulse||dialog)return;const scroll=window.setTimeout(()=>document.querySelector('[data-academy-view-link]')?.scrollIntoView({block:'center',behavior:'smooth'}),180);const reset=window.setTimeout(()=>setAcademyLinkPulse(false),13000);return()=>{window.clearTimeout(scroll);window.clearTimeout(reset)}},[academyLinkPulse,diagramId,selectedId,dialog])
  const updateElement=(id:string,partial:Partial<ModelElement>)=>{if(!selected||!can(`element.edit.${selected.type}`))return;if('technical' in partial&&!can('element.technical.edit'))return;patch(old=>commandEditElement(old,id,partial,dateOf()))}
  const updateDiagram=(partial:Partial<Diagram>)=>{if(diagram&&((('name' in partial||'description' in partial||'type' in partial)?can(`diagram.edit.${diagram.type}`):can(`diagram.layout.${diagram.type}`))))patch(old=>commandEditDiagram(old,diagram.id,partial))}
  const addNode=(elementId:string)=>{if(!diagram||!can(`diagram.layout.${diagram.type}`)||!doc?.elements[elementId]||!can(`element.view.${doc.elements[elementId].type}`))return;const nid=uid();patch(old=>commandReuseElementNode(old,diagram.id,elementId,{id:nid,x:180+diagram.nodes.length*42,y:160+diagram.nodes.length*27}));setDialog(null);setSelectedId(elementId);setInspectorOpen(true);announce('Caja agregada al diagrama')}
@@ -210,11 +256,82 @@ function AppInner(){
   const targetDiagram=diagram.id,targetElement=selectedId
   ask('Quitar caja de la vista','La caja desaparecerá de este diagrama, pero el elemento seguirá disponible en el catálogo.',()=>{patch(old=>commandRemoveElementNode(old,targetDiagram,targetElement));setSelectedId(null)},true,'Quitar caja')
  }
- const onConnect=(edge:Connection)=>{if(!diagram||!edge.source||!edge.target||edge.source===edge.target)return;const exists=diagram.edges.some(e=>e.source===edge.source&&e.target===edge.target);if(exists)return;const s=diagram.nodes.find(n=>n.id===edge.source),t=diagram.nodes.find(n=>n.id===edge.target);if(!s||!t||!doc)return;const a=doc.elements[s.elementId],b=doc.elements[t.elementId];if(!a||!b||!can(`relation.create.${relationScope(a.type,b.type)}`)){announce('No tienes permiso para crear esta relación');return}const fresh:DiagramEdge={id:uid(),source:edge.source,target:edge.target,label:''};patch(old=>commandConnectNodes(old,diagram.id,fresh))}
+ const onConnect=(edge:Connection)=>{if(!diagram||!edge.source||!edge.target||edge.source===edge.target)return;const s=diagram.nodes.find(n=>n.id===edge.source),t=diagram.nodes.find(n=>n.id===edge.target);if(!s||!t||!doc)return;const a=doc.elements[s.elementId],b=doc.elements[t.elementId];if(!a||!b||!can(`relation.create.${relationScope(a.type,b.type)}`)){announce('No tienes permiso para crear esta relación');return}const fresh:DiagramEdge={id:uid(),source:edge.source,target:edge.target,sourceHandle:edge.sourceHandle||'right',targetHandle:edge.targetHandle||'left',label:'',direction:'forward'};patch(old=>commandConnectNodes(old,diagram.id,fresh))}
  const onNodeDragStop=(_:unknown,node:Node)=>{if(!diagram||!can(`diagram.layout.${diagram.type}`))return;patch(old=>commandMoveNode(old,diagram.id,node.id,node.position.x,node.position.y))}
  const deleteDiagram=()=>{if(!diagram||!can(`diagram.delete.${diagram.type}`))return
   const target=diagram.id,next=doc?.diagrams.find(d=>d.id!==target)?.id||''
   ask('Eliminar diagrama',`Se eliminará «${diagram.name}» y sus relaciones de esta vista. Los elementos compartidos permanecerán en el catálogo.`,()=>{patch(old=>commandDeleteDiagram(old,target));setDiagramId(next);setSelectedId(null)},true,'Eliminar diagrama')
+ }
+ const recordAcademyLab=(next:AcademyLabIdentity)=>{if(!account)return;storeAcademyLab(account.id,next);setAcademyLab(next)}
+ const createAcademyWorkspace=async(name:string)=>{
+  if(!account||academyBusy||saveStatus!=='saved')return
+  setAcademyBusy(true);setAcademyError('')
+  try{const id=await apiCreateWorkspace(name);recordAcademyLab({workspaceId:id});const fresh=await listWorkspaces(account.id);setWorkspaces(fresh);setWsId(id);setProjectId('');setDoc(null);announce('Organización de formación creada')}
+  catch(error){setAcademyError(error instanceof Error?error.message:String(error))}
+  finally{setAcademyBusy(false)}
+ }
+ const createAcademyProject=async(name:string)=>{
+  if(!account||!academyLab?.workspaceId||wsId!==academyLab.workspaceId||academyBusy||saveStatus!=='saved'||!can('project.create'))return
+  setAcademyBusy(true);setAcademyError('')
+  try{const created=await apiCreateProject(academyLab.workspaceId,name,emptyDoc());recordAcademyLab({...academyLab,projectId:created.id});setProjects(items=>[...items,created]);setProjectId(created.id);announce('Laboratorio creado: comienza a modelar')}
+  catch(error){setAcademyError(error instanceof Error?error.message:String(error))}
+  finally{setAcademyBusy(false)}
+ }
+ const returnToAcademy=()=>{
+  if(!academyLab||saveStatus!=='saved'){announce('Guarda tus cambios antes de cambiar de proyecto.');return}
+  if(wsId!==academyLab.workspaceId){setWsId(academyLab.workspaceId);setProjectId(academyLab.projectId||'');setDoc(null)}
+  else if(academyLab.projectId)setProjectId(academyLab.projectId)
+ }
+ const academyCreateDiagram=(type:DiagramType,name:string)=>{
+  if(!academyLab?.projectId||projectId!==academyLab.projectId||saveStatus!=='saved'||!can(`diagram.create.${type}`))return
+  setNewType(type);setNewName(name);setDialog('new-diagram')
+ }
+ const academyFocusLinkSource=(sourceType:DiagramType,elementType:ElementType)=>{
+  if(!doc)return
+  const target=doc.diagrams.find(d=>d.type===sourceType)
+  if(!target){announce(`Primero crea el diagrama ${diagramLabels[sourceType]}.`);return}
+  const source=target.nodes.find(n=>doc.elements[n.elementId]?.type===elementType)
+  if(!source){navigateToNode(target,null);announce(`Agrega una caja ${elementLabels[elementType]} en ${diagramLabels[sourceType]}.`);return}
+  navigateToNode(target,source.id)
+  setInspectorOpen(true)
+  setAcademyLinkPulse(true)
+  announce('Selecciona la vista destino en «Vista vinculada (doble clic)»; después guarda y prueba el doble clic.')
+ }
+ const academySelectDiagram=(type:DiagramType)=>{
+  const target=doc?.diagrams.find(d=>d.type===type);if(target)visitDiagram(target.id)
+ }
+ const academyAddNode=(type:ElementType,name:string,diagramType:DiagramType)=>{
+  const target=doc?.diagrams.find(d=>d.type===diagramType)
+  if(!target||!can(`diagram.layout.${diagramType}`)||!can(`element.create.${type}`)||saveStatus!=='saved')return
+  visitDiagram(target.id);setNewElementType(type);setNewName(name);setNodeTab('new');setDialog('new-node')
+ }
+ const academyReuse=(type:DiagramType)=>{
+  const target=doc?.diagrams.find(d=>d.type===type)
+  if(!target||!can(`diagram.layout.${type}`)||saveStatus!=='saved')return
+  visitDiagram(target.id);setNodeTab('existing');setQuery('');setDialog('new-node')
+ }
+ const academyOpenFields=(kind:'functional'|'technical')=>{
+  if(!academyLab?.projectId||projectId!==academyLab.projectId||!can('field.configure')||saveStatus!=='saved')return
+  const target=doc?.diagrams.find(d=>d.type===(kind==='functional'?'trace':'c3'))
+  const found=target?.nodes.some(n=>{const e=doc?.elements[n.elementId];return kind==='functional'?e?.type==='requirement'&&/^HU[-\s]/i.test(e.name):e?.type==='endpoint'&&/POST/i.test(e.name)})
+  if(!found){announce('Primero crea la caja indicada por la misión.');return}
+  academyInspect(kind)
+  setAcademyFieldPulse(kind)
+  announce('Busca «Campos personalizados → Configurar» en el Inspector; el botón está resaltado')
+ }
+ const academyInspect=(kind:'functional'|'technical')=>{
+  if(!academyLab?.projectId||projectId!==academyLab.projectId||saveStatus!=='saved')return
+  const diagramType=kind==='functional'?'trace':'c3'
+  const target=doc?.diagrams.find(d=>d.type===diagramType)
+  const node=target?.nodes.find(n=>{
+   const element=doc?.elements[n.elementId]
+   return kind==='functional'?element?.type==='requirement'&&/^HU[-\s]/i.test(element.name):element?.type==='endpoint'&&/POST/i.test(element.name)
+  })
+  if(!target||!node){announce('Primero crea la caja de práctica correspondiente.');return}
+  visitDiagram(target.id);setSelectedId(node.elementId);setInspectorOpen(true);setDialog(null)
+ }
+ const academyMixed=()=>{
+  const target=doc?.diagrams.find(d=>d.type==='trace');if(target){visitDiagram(target.id);setMode('mixed')}
  }
  const createWs=async()=>{if(!emptyName(newName))return;try{const id=await apiCreateWorkspace(newName.trim());const fresh=await listWorkspaces(account?.id||'');setWorkspaces(fresh);setWsId(id);setNewName('');setDialog(null);announce('Espacio creado')}catch(e){announce('Error: '+(e as Error).message)}}
  const createPrj=async()=>{if(!wsId||!emptyName(newName))return;try{const pr=await apiCreateProject(wsId,newName.trim(),emptyDoc());setProjects(prev=>[...prev,pr]);setProjectId(pr.id);setNewName('');setDialog(null);announce('Proyecto creado')}catch(e){announce('Error: '+(e as Error).message)}}
@@ -233,7 +350,7 @@ function AppInner(){
   announce(`Versión ${nextVersion} restaurada correctamente`)
  }
  const sendAuth=async(e:FormEvent)=>{e.preventDefault();setAuthBusy(true);setAuthError('');try{const user=await apiLogin(authEmail,authPass);setAccount(user);setAuthPass('');setWorkspaces([]);setWsId('')}catch(e){setAuthError(e instanceof Error?e.message:String(e))}finally{setAuthBusy(false)}}
- const signOut=async()=>{try{await apiLogout()}finally{setTutorialOpen(false);setAccount(null);setAccessPolicy(null);setDoc(null);setWorkspaces([]);setWsId('');setProjectId('')}}
+ const signOut=async()=>{try{await apiLogout()}finally{setTutorialOpen(false);setAcademyOpen(false);setAccount(null);setAccessPolicy(null);setDoc(null);setWorkspaces([]);setWsId('');setProjectId('')}}
  const addField=()=>{if(!emptyName(fieldLabel)||!can('field.configure'))return;const f:FieldDefinition={id:uid(),label:fieldLabel.trim(),forType:fieldType,kind:fieldKind,...(fieldKind==='select'?{options:fieldOptions.split(',').map(t=>t.trim()).filter(Boolean)}:{})};patch(old=>commandAddFieldDefinition(old,f));setFieldLabel('');setFieldOptions('')}
  const downloadLocalBackup=()=>{if(!doc||!projectId||!can('artifact.export'))return;const blob=new Blob([JSON.stringify({format:'ATLAS-LOCAL-UNSAVED',expectedVersion:versionMap.current[projectId]||1,document:doc},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`ATLAS_copia_local_${projectId}.json`;a.click();URL.revokeObjectURL(url)}
  const exportJSON=async()=>{if(!projectId||!can('artifact.export'))return;try{const exported=await exportProject(projectId);const blob=new Blob([JSON.stringify(exported,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`ATLAS_${(project?.name||'proyecto').replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`;a.click();URL.revokeObjectURL(url)}catch(e){announce('Exportación: '+(e as Error).message)}}
@@ -254,11 +371,27 @@ function AppInner(){
    setSaveStatus('saved');setPendingImport(null);announce('Importación validada y guardada')
   }catch(error){announce((error as Error).message)}
  }
+ const getEdgeScope=(target:typeof edgeEdit)=>{
+  if(!target||!doc)return null
+  const d=doc.diagrams.find(item=>item.id===target.diagramId),e=d?.edges.find(item=>item.id===target.edgeId)
+  const from=d?.nodes.find(n=>n.id===e?.source),to=d?.nodes.find(n=>n.id===e?.target)
+  const a=from&&doc.elements[from.elementId],b=to&&doc.elements[to.elementId]
+  return a&&b?relationScope(a.type,b.type):null
+ }
+ const edgeScope=getEdgeScope(edgeEdit)
  const saveEdgeLabel=()=>{
-  if(!edgeEdit)return
-  const {diagramId:target,edgeId,label}=edgeEdit
-  patch(old=>{const previous=old.diagrams.find(d=>d.id===target);return previous?commandEditDiagram(old,target,{edges:previous.edges.map(e=>e.id===edgeId?{...e,label}:e)}):old})
+  if(!edgeEdit||!edgeScope||!can(`relation.edit.${edgeScope}`))return
+  const {diagramId:target,edgeId,label,direction,lineStyle,pathStyle}=edgeEdit
+  patch(old=>commandEditRelation(old,target,edgeId,{label,direction,lineStyle,pathStyle}))
   setEdgeEdit(null);setDialog(null)
+ }
+ const deleteSelectedRelation=()=>{
+  if(!edgeEdit||!edgeScope||!can(`relation.delete.${edgeScope}`))return
+  const {diagramId:target,edgeId,label}=edgeEdit
+  setDialog(null);setEdgeEdit(null)
+  ask('Eliminar relación',`Se eliminará únicamente la relación «${label.trim()||'Sin nombre'}». Las cajas y las demás vistas permanecerán intactas.`,()=>{
+   patch(old=>commandRemoveRelation(old,target,edgeId));announce('Relación eliminada')
+  },true,'Eliminar relación')
  }
  const saveExternalLink=()=>{
   if(!linkElementId||!linkLabel.trim()||!safeLink(linkUrl)){announce('Ingresa un nombre y una URL http o https válida');return}
@@ -323,11 +456,11 @@ function AppInner(){
      <div className="project-nav" data-tour="project-nav">{projects.map(p=><button key={p.id} className={'project-item '+(p.id===projectId?'on':'')} onClick={()=>{if(saveStatus!=='saved'){announce('Primero espera a que se guarden los cambios.');return}setProjectId(p.id);setSidebarOpen(false)}}><Folder size={15}/><span>{p.name}</span>{p.id===projectId&&<ChevronRight size={13}/>}</button>)}{can('project.create')&&<button className="project-add" onClick={()=>{setNewName('');setDialog('new-project')}}><Plus size={14}/> Nuevo proyecto</button>}</div>
      {project&&['project.rename','project.delete','project.members.manage'].some(canProject)&&<button className="project-add" onClick={()=>setDialog('project-settings')}><Settings2 size={14}/> Administrar proyecto</button>}
      <div className="side-label">DIAGRAMAS</div>
-     <div className="diagram-nav" data-tour="diagram-nav">{doc?.diagrams.map(d=><button key={d.id} className={'diagram-item '+(d.id===diagramId?'on':'')} onClick={()=>visitDiagram(d.id)}><IconFor type={d.type==='process'?'process':d.type==='trace'?'requirement':'component'}/><span>{d.name}</span></button>)}{doc&&DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="project-add" onClick={()=>{setNewName('');setNewType(DIAGRAM_TYPES.find(t=>can(`diagram.create.${t}`))||'custom');setDialog('new-diagram')}}><Plus size={14}/> Crear diagrama</button>}</div>
-     <div className="side-bottom"><button type="button" className="sidebar-tutorial" aria-label="Abrir tutorial desde el menú lateral" onClick={()=>{setSidebarOpen(false);setTutorialOpen(true)}}><BookOpen size={16}/> Aprender ATLAS {!tutorialCompleted&&<span>Nuevo</span>}</button><div className="demo-label"><span className="live-dot cloud"/>API · PostgreSQL · Acceso cerrado</div><button className="profile-pill" onClick={signOut}><span className="avatar"><UserRound size={15}/></span><span className="email">{account.email}</span><LogOut size={15}/></button></div>
+     <div className="diagram-nav" data-tour="diagram-nav">{doc?.diagrams.map(d=><button key={d.id} className={'diagram-item '+(d.id===diagramId?'on':'')} onClick={()=>visitDiagram(d.id)}><DiagramTypeBadge type={d.type}/><span>{d.name}</span></button>)}{doc&&DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="project-add" onClick={()=>{setNewName('');setNewType(DIAGRAM_TYPES.find(t=>can(`diagram.create.${t}`))||'custom');setDialog('new-diagram')}}><Plus size={14}/> Crear diagrama</button>}</div>
+     <div className="side-bottom"><button type="button" className="sidebar-tutorial" aria-label="Abrir tutorial desde el menú lateral" onClick={()=>{setSidebarOpen(false);setTutorialOpen(true)}}><BookOpen size={16}/> Aprender ATLAS {!tutorialCompleted&&<span>Nuevo</span>}</button><button type="button" className="sidebar-tutorial" aria-label="Abrir misiones prácticas de ATLAS" onClick={()=>{setSidebarOpen(false);setTutorialOpen(false);setAcademyOpen(true)}}><Award size={16}/> Misiones e insignias</button><div className="demo-label"><span className="live-dot cloud"/>API · PostgreSQL · Acceso cerrado</div><button className="profile-pill" onClick={signOut}><span className="avatar"><UserRound size={15}/></span><span className="email">{account.email}</span><LogOut size={15}/></button></div>
    </aside>
    <main className="main">
-     <header className="topbar"><div className="top-left"><button className="icon-btn nav-collapse-toggle" title={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-label={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-expanded={!sidebarHidden} onClick={()=>{setNavigationCollapsed(sidebarHidden?false:true);setExpanded(false)}}>{sidebarHidden?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'ATLAS'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right"><button type="button" className="ghost atlas-tutorial-launcher" data-tour="tutorial-launcher" title="Iniciar tutorial interactivo de ATLAS" aria-label="Aprender ATLAS" onClick={()=>setTutorialOpen(true)}><BookOpen size={15}/><span>Aprender ATLAS</span>{!tutorialCompleted&&<span className="atlas-tutorial-new">Nuevo</span>}</button>{projectId&&accessPolicy&&<button className="ghost" data-tour="history" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}{projectId&&can('project.rename')&&<button className="ghost" title="Renombrar proyecto" onClick={()=>void renameCurrentProject()}>Renombrar</button>}{wsId&&can('workspace.audit.view')&&<button className="ghost" onClick={()=>setDialog('audit')}>Actividad</button>}{projectId&&<span className={'collab-status '+(liveStatus==='online'?'connected':'disconnected')} role='status' title={others.map(p=>`${p.name}: ${p.diagramId?'en un diagrama':'en el proyecto'}`).join(' · ')||'Sin colaboradores en este proyecto'}><span className='collab-dot'/> {liveStatus==='online'?`${participants.length} persona${participants.length===1?'':'s'} en línea`:liveStatus==='connecting'?'Conectando...':'Sin conexión en vivo'}</span>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Sin guardar'}</span><span className="role-pill"><ShieldCheck size={14}/>{projectPolicy?.roleName||accessPolicy?.roleName||(ws?roleLabel[ws.role||'viewer']:'Sin espacio')||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}{canAdmin&&<button className="ghost" data-tour="access" onClick={()=>setDialog('access')}><ShieldCheck size={15}/> Accesos</button>}</div></header>
+     <header className="topbar"><div className="top-left">{navigationTrail.length>0&&<button type="button" className="ghost atlas-back-link" onClick={navigateBack} title="Volver al diagrama anterior"><ArrowRight size={14}/> Volver</button>}<button className="icon-btn nav-collapse-toggle" title={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-label={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-expanded={!sidebarHidden} onClick={()=>{setNavigationCollapsed(sidebarHidden?false:true);setExpanded(false)}}>{sidebarHidden?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'ATLAS'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right"><button type="button" className="ghost atlas-tutorial-launcher" data-tour="tutorial-launcher" title="Iniciar tutorial interactivo de ATLAS" aria-label="Aprender ATLAS" onClick={()=>setTutorialOpen(true)}><BookOpen size={15}/><span>Aprender ATLAS</span>{!tutorialCompleted&&<span className="atlas-tutorial-new">Nuevo</span>}</button><button type="button" className="ghost atlas-academy-launcher" title="Aprende construyendo en un laboratorio separado" aria-label="Abrir misiones de ATLAS" onClick={()=>{setTutorialOpen(false);setAcademyOpen(true)}}><Award size={15}/><span>Misiones</span></button>{projectId&&accessPolicy&&<button className="ghost" data-tour="history" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}{projectId&&can('project.rename')&&<button className="ghost" title="Renombrar proyecto" onClick={()=>void renameCurrentProject()}>Renombrar</button>}{wsId&&can('workspace.audit.view')&&<button className="ghost" onClick={()=>setDialog('audit')}>Actividad</button>}{projectId&&<span className={'collab-status '+(liveStatus==='online'?'connected':'disconnected')} role='status' title={others.map(p=>`${p.name}: ${p.diagramId?'en un diagrama':'en el proyecto'}`).join(' · ')||'Sin colaboradores en este proyecto'}><span className='collab-dot'/> {liveStatus==='online'?`${participants.length} persona${participants.length===1?'':'s'} en línea`:liveStatus==='connecting'?'Conectando...':'Sin conexión en vivo'}</span>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Sin guardar'}</span><span className="role-pill"><ShieldCheck size={14}/>{projectPolicy?.roleName||accessPolicy?.roleName||(ws?roleLabel[ws.role||'viewer']:'Sin espacio')||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}{canAdmin&&<button className="ghost" data-tour="access" onClick={()=>setDialog('access')}><ShieldCheck size={15}/> Accesos</button>}</div></header>
      {editingHere.length>0&&<div className='collab-presence' role='status'><span className='collab-dot'/> {editingHere.map(p=>p.name).join(', ')} {editingHere.length===1?'está':'están'} viendo este diagrama{focusingElement.length>0&&selected?` · ${focusingElement.map(p=>p.name).join(', ')} en la caja ${selected.name}`:''}</div>}
      {!project||!doc?<section className="blank-state"><div className="blank-image"><FolderPlus size={40}/></div><span className="eyebrow">ATLAS / PRIMEROS PASOS</span><h1>{!ws?'Crea tu primer espacio':'Crea tu primer proyecto'}</h1><p>{!ws?'Los espacios separan los proyectos, usuarios y permisos de cada organización.':'Dentro del proyecto podrás crear diagramas, componentes, procesos y requerimientos vinculados.'}</p><button className="primary" disabled={!(!ws?!!account:can('project.create'))} onClick={()=>{setNewName('');setDialog(ws?'new-project':'new-workspace')}}><Plus size={17}/>{ws?'Crear proyecto':'Crear espacio'}</button></section>:
      <>
@@ -339,10 +472,11 @@ function AppInner(){
        </div>}<span className="toolbar-fill"/>{!expanded&&<button className="icon-btn" title="Ampliar área de trabajo" aria-label="Ampliar área de trabajo" aria-pressed={false} onClick={()=>setExpanded(true)}><Maximize2 size={16}/></button>}<button type="button" className="icon-btn" title={minimapVisible?'Ocultar minimapa':'Mostrar minimapa'} aria-label={minimapVisible?'Ocultar minimapa':'Mostrar minimapa'} onClick={()=>setMinimapVisible(v=>!v)}><Map size={16}/></button><button type="button" className="icon-btn" title="Pantalla completa del diagrama" aria-label="Pantalla completa del diagrama" onClick={()=>void toggleFullscreen()}><Maximize2 size={16}/></button><button className="icon-btn" title="Mostrar / ocultar inspector" onClick={()=>setInspectorOpen(!inspectorOpen)}><PanelRightClose size={16}/></button></div>
        <div className="workspace-view"><section data-tour="canvas" className={'canvas-frame '+(fullscreenFallback?'atlas-fullscreen-fallback':'')} ref={canvasFrameRef}>
         <div className="canvas-actions" role="toolbar" aria-label="Acciones del diagrama">
+         {navigationTrail.length>0&&<button type="button" className="ghost atlas-back-link atlas-canvas-back" onClick={navigateBack} title="Volver al diagrama anterior"><ArrowRight size={14}/> Volver</button>}
          {expanded&&<button type="button" className="icon-btn" title="Restaurar distribución" aria-label="Restaurar distribución" aria-pressed={true} onClick={()=>setExpanded(false)}><Minimize2 size={16}/></button>}
          {canAddBox&&<button type="button" className="primary canvas-add-node" data-tour="add-box" onClick={showNewNodeDialog}><Plus size={16}/> Agregar caja</button>}
          <button type="button" className="icon-btn" title={canvasFullscreen?'Salir de pantalla completa':'Pantalla completa del diagrama'} aria-label={canvasFullscreen?'Salir de pantalla completa':'Pantalla completa del diagrama'} onClick={()=>void toggleFullscreen()}>{canvasFullscreen?<Minimize2 size={16}/>:<Maximize2 size={16}/>}</button>
-        </div><div className="canvas-label"><div><strong>{diagram?diagramLabels[diagram.type]:'Lienzo'}</strong><small>{filtered.nodes.length} elementos · {filtered.edges.length} relaciones</small></div><span className="diagram-badge">{diagram&&can(`diagram.layout.${diagram.type}`)?'Edición estructural':'Lectura'}</span></div>{diagram?<ReactFlow key={diagram.id} nodes={displayNodes} onNodesChange={onDisplayNodesChange} edges={filtered.edges} nodeTypes={nodeTypes} nodesDraggable={!!diagram&&can(`diagram.layout.${diagram.type}`)} nodesConnectable={!!diagram&&['functional','technical','mixed'].some(scope=>can(`relation.create.${scope}`))} elementsSelectable fitView fitViewOptions={{padding:.25,minZoom:.4,maxZoom:1.1}} minZoom={.15} maxZoom={2} snapToGrid snapGrid={[15,15]} onConnect={onConnect} onNodeDragStop={onNodeDragStop} onNodeClick={(_,node)=>{setSelectedId(String(node.data.elementId));setInspectorOpen(true)}} onNodeDoubleClick={(_,node)=>{const e=doc.elements[String(node.data.elementId)];if(e?.childDiagramId)visitDiagram(e.childDiagramId)}} onPaneClick={()=>setSelectedId(null)} onEdgeClick={(_,edge)=>{if(!diagram)return;const e=diagram.edges.find(x=>x.id===edge.id),source=diagram.nodes.find(n=>n.id===e?.source),target=diagram.nodes.find(n=>n.id===e?.target);if(!source||!target)return;const a=doc.elements[source.elementId],b=doc.elements[target.elementId];if(!a||!b||!can(`relation.edit.${relationScope(a.type,b.type)}`))return;setEdgeEdit({diagramId:diagram.id,edgeId:edge.id,label:String(edge.label||'')});setDialog('edit-relation')}} deleteKeyCode={null} proOptions={{hideAttribution:false}}><Background color="#dfe7f0" gap={22} size={1}/><Controls position="bottom-left" showInteractive={false}/>{minimapVisible&&<MiniMap position="bottom-right" nodeStrokeWidth={2} pannable zoomable/>}</ReactFlow>:<div className="empty-canvas"><Network size={42}/><h3>No hay diagramas todavía</h3><p>Crea un diagrama C4, de procesos o personalizado para empezar.</p>{DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="primary" onClick={()=>setDialog('new-diagram')}><Plus size={16}/> Crear mi primer diagrama</button>}</div>}{diagram&&<div className="canvas-hint"><Grip size={13}/> Arrastra para mover · conecta los puertos · doble clic para profundizar</div>}</section>
+        </div><div className="canvas-label"><div><strong>{diagram?diagramLabels[diagram.type]:'Lienzo'}</strong><small>{filtered.nodes.length} elementos · {filtered.edges.length} relaciones</small></div><span className="diagram-badge">{diagram&&can(`diagram.layout.${diagram.type}`)?'Edición estructural':'Lectura'}</span></div>{diagram?<ReactFlow key={diagram.id} nodes={displayNodes} onNodesChange={onDisplayNodesChange} edges={filtered.edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} nodesDraggable={!!diagram&&can(`diagram.layout.${diagram.type}`)} nodesConnectable={!!diagram&&['functional','technical','mixed'].some(scope=>can(`relation.create.${scope}`))} elementsSelectable connectionMode={ConnectionMode.Loose} fitView fitViewOptions={{padding:.25,minZoom:.4,maxZoom:1.1}} minZoom={.15} maxZoom={2} snapToGrid snapGrid={[15,15]} onConnect={onConnect} onNodeDragStop={onNodeDragStop} onNodeClick={(_,node)=>{setSelectedId(String(node.data.elementId));setInspectorOpen(true)}} onNodeDoubleClick={(_,node)=>{const e=doc.elements[String(node.data.elementId)];if(e?.childDiagramId)navigateChildOf(e)}} onPaneClick={()=>setSelectedId(null)} onEdgeClick={(_,edge)=>{if(!diagram)return;const e=diagram.edges.find(x=>x.id===edge.id),source=diagram.nodes.find(n=>n.id===e?.source),target=diagram.nodes.find(n=>n.id===e?.target);if(!source||!target)return;const a=doc.elements[source.elementId],b=doc.elements[target.elementId];if(!a||!b)return;const scope=relationScope(a.type,b.type);if(!can(`relation.edit.${scope}`)&&!can(`relation.delete.${scope}`))return;setEdgeEdit({diagramId:diagram.id,edgeId:edge.id,label:e?.label||'',direction:e?.direction||'forward',lineStyle:e?.lineStyle||'solid',pathStyle:e?.pathStyle||({process:'step',sequence:'straight',trace:'straight',c4:'bezier'} as Partial<Record<DiagramType,EdgePathStyle>>)[diagram.type]||'smoothstep'});setDialog('edit-relation')}} deleteKeyCode={null} proOptions={{hideAttribution:false}}><Background color="#dfe7f0" gap={22} size={1}/><Controls position="bottom-left" showInteractive={false}/>{minimapVisible&&<MiniMap position="bottom-right" nodeStrokeWidth={2} pannable zoomable/>}</ReactFlow>:<div className="empty-canvas"><Network size={42}/><h3>No hay diagramas todavía</h3><p>Crea un diagrama C4, de procesos o personalizado para empezar.</p>{DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="primary" onClick={()=>setDialog('new-diagram')}><Plus size={16}/> Crear mi primer diagrama</button>}</div>}{diagram&&<div className="canvas-hint"><Grip size={13}/> Arrastra para mover · enlaza desde cualquiera de los 8 puertos · doble clic para navegar</div>}</section>
        {inspectorOpen&&<aside className="inspector" data-tour="inspector"><div className="inspector-heading"><div><span className="eyebrow">INSPECTOR</span><h3>{selected?'Ficha del elemento':'Detalles del diagrama'}</h3></div><button className="icon-btn small" onClick={()=>setInspectorOpen(false)}><X size={16}/></button></div><div className="inspector-scroll">{selected?<>
         <div className="selected-type"><IconFor type={selected.type}/>{elementLabels[selected.type]} <span className="status-pill">{selected.status}</span></div>
         <Field label="Nombre"><input value={selected.name} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{name:e.target.value})}/></Field>
@@ -352,8 +486,11 @@ function AppInner(){
         <div className="inspector-pair"><Field label="Responsable"><input value={selected.owner||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{owner:e.target.value})}/></Field><Field label="Estado"><select value={selected.status} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{status:e.target.value})}>{[...new Set(['Borrador','En análisis','En desarrollo','En QA','Validado','Obsoleto',selected.status])].map(x=><option key={x}>{x}</option>)}</select></Field></div>
         <Field label="Autor"><input value={selected.author||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{author:e.target.value})}/></Field>
         <div className="inspector-pair"><Field label="Creación"><input type="date" value={selected.createdAt||today()} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{createdAt:e.target.value})}/></Field><Field label="Actualización"><input type="date" value={selected.updatedAt||today()} disabled readOnly/></Field></div>
-        <Field label="Vista vinculada (doble clic)"><select disabled={!can(`element.edit.${selected.type}`)} value={selected.childDiagramId||''} onChange={e=>updateElement(selected.id,{childDiagramId:e.target.value||undefined})}><option value="">Ninguna</option>{doc.diagrams.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></Field>{selected.childDiagramId&&<button className="inspector-link" onClick={navigateChild}><Maximize2 size={14}/> Navegar dentro de esta caja <ArrowRight size={14}/></button>}
-        <div className="section-head"><strong>Campos personalizados</strong>{can('field.configure')&&<button onClick={()=>setDialog('fields')}><Settings2 size={13}/> Configurar</button>}</div>{fieldDefs.length?fieldDefs.map(f=><Field key={f.id} label={f.label}>{f.kind==='textarea'?<textarea rows={2} disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]||'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}/>:f.kind==='select'?<select disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]||'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}><option value="">Seleccionar</option>{f.options?.map(o=><option key={o}>{o}</option>)}</select>:f.kind==='boolean'?<label className="switch-field"><input type="checkbox" disabled={!can(`element.edit.${selected.type}`)} checked={selected.fields[f.id]===true} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.checked}})}/> Sí</label>:<input type={f.kind==='url'?'url':f.kind==='date'?'date':f.kind==='number'?'number':'text'} disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]??'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}/>}</Field>):<p className="muted-mini">Sin campos personalizados para este tipo.</p>}
+        <div data-academy-view-link className={academyLinkPulse?'academy-link-highlight':''}><Field label="Vista vinculada (doble clic)"><select disabled={!can(`element.edit.${selected.type}`)} value={selected.childDiagramId||''} onChange={e=>{updateElement(selected.id,{childDiagramId:e.target.value||undefined,childNodeId:undefined});setAcademyLinkPulse(false)}}><option value="">Ninguna</option>{doc.diagrams.map(d=><option key={d.id} value={d.id}>{d.type.toUpperCase()} · {d.name}</option>)}</select></Field>{academyLinkPulse&&<p className="academy-inspector-tip">Elige el siguiente nivel C4 aquí. No crees una línea entre diagramas: enlaza la vista a esta caja y luego haz doble clic sobre ella.</p>}</div>{selected.childDiagramId&&<Field label="Caja de destino (opcional)"><select value={selected.childNodeId||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{childNodeId:e.target.value||undefined})}><option value="">Abrir vista general</option>{doc.diagrams.find(d=>d.id===selected.childDiagramId)?.nodes.map(n=><option key={n.id} value={n.id}>{doc.elements[n.elementId]?.name||'Caja sin nombre'}</option>)}</select></Field>}{selected.childDiagramId&&<button className="inspector-link" onClick={navigateChild}><Maximize2 size={14}/> Navegar dentro de esta caja <ArrowRight size={14}/></button>}
+        <div className={'section-head academy-field-settings '+(academyFieldPulse?'academy-field-pulse':'')} data-academy-field-settings><strong>Campos personalizados</strong>{can('field.configure')&&<button type="button" aria-label="Configurar campos personalizados" onClick={()=>{
+         if(academyFieldPulse){setFieldLabel(academyFieldPulse==='functional'?'Canal de solicitud':'Protocolo de integración');setFieldType(academyFieldPulse==='functional'?'requirement':'endpoint');setFieldKind(academyFieldPulse==='functional'?'select':'text');setFieldOptions(academyFieldPulse==='functional'?'Web, Móvil, API':'');setAcademyFieldPulse(null)}
+         setDialog('fields')
+        }}><Settings2 size={13}/> Configurar</button>}</div>{fieldDefs.length?fieldDefs.map(f=><Field key={f.id} label={f.label}>{f.kind==='textarea'?<textarea rows={2} disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]||'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}/>:f.kind==='select'?<select disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]||'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}><option value="">Seleccionar</option>{f.options?.map(o=><option key={o}>{o}</option>)}</select>:f.kind==='boolean'?<label className="switch-field"><input type="checkbox" disabled={!can(`element.edit.${selected.type}`)} checked={selected.fields[f.id]===true} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.checked}})}/> Sí</label>:<input type={f.kind==='url'?'url':f.kind==='date'?'date':f.kind==='number'?'number':'text'} disabled={!can(`element.edit.${selected.type}`)} value={String(selected.fields[f.id]??'')} onChange={e=>updateElement(selected.id,{fields:{...selected.fields,[f.id]:e.target.value}})}/>}</Field>):<p className="muted-mini">Sin campos personalizados para este tipo.</p>}
         {diagram&&filters.length>0&&<section className="element-filters"><div className="section-head"><strong>Categorías de esta vista</strong><button onClick={()=>setDialog('diagram-filters')}>Configurar</button></div><p className="muted-mini">Una misma caja puede pertenecer a varios contextos dentro de este diagrama.</p>{filters.map(filter=><label key={filter.id} className="process-chip"><input type="checkbox" aria-label={`Asignar ${filter.label}`} disabled={!can(`diagram.layout.${diagram.type}`)} checked={diagram.nodes.some(n=>n.elementId===selected.id&&nodeFilterIds(n,diagram,doc!).includes(filter.id))} onChange={e=>toggleElementFilter(filter.id,e.target.checked)}/>{filter.label}</label>)}</section>}
         <div className="section-head"><strong>Enlaces externos</strong>{can(`element.edit.${selected.type}`)&&<button onClick={()=>{setLinkElementId(selected.id);setLinkLabel('');setLinkUrl('');setDialog('add-link')}}><Plus size={13}/> Agregar</button>}</div>{selected.links.map(l=><div key={l.id} className="external-link"><a href={safeLink(l.url)||'#'} target="_blank" rel="noopener noreferrer"><ExternalLink size={13}/><span>{l.label}</span></a>{can(`element.edit.${selected.type}`)&&<button title="Quitar enlace" onClick={()=>updateElement(selected.id,{links:selected.links.filter(x=>x.id!==l.id)})}><X size={13}/></button>}</div>)}{!selected.links.length&&<p className="muted-mini">Adjunta Jira, Azure DevOps, documentación o un caso de uso externo.</p>}
         <div className="section-head"><strong>Relaciones en el modelo</strong><span className="tiny-count">{related.length}</span></div>{related.map(e=><button className="relation-row" key={e.id} onClick={()=>navigateElement(e.id)}><IconFor type={e.type}/><span>{e.name}</span><ArrowRight size={12}/></button>)}{!related.length&&<p className="muted-mini">Conecta este elemento con otros usando el editor visual.</p>}
@@ -362,6 +499,13 @@ function AppInner(){
        </div>
      </>}
    </main>
+   {academyOpen&&inFullscreenCanvas(<AcademyMissions
+    lab={academyLab} workspaces={workspaces} projects={projects} catalogLoading={!workspacesLoaded||(Boolean(academyLab?.projectId)&&wsId===academyLab?.workspaceId&&!projectsLoaded)} activeWorkspaceId={wsId} activeProjectId={projectId}
+    doc={doc} saveStatus={saveStatus} mode={mode} diagramId={diagramId} busy={academyBusy} paused={dialog!==null||pendingImport!==null||confirmation!==null} error={academyError}
+    onClose={()=>setAcademyOpen(false)} onStartTour={()=>{setAcademyOpen(false);setTutorialOpen(true)}}
+    onCreateWorkspace={createAcademyWorkspace} onCreateProject={createAcademyProject} onGoToLab={returnToAcademy}
+    onOpenDiagram={academyCreateDiagram} onSelectDiagram={academySelectDiagram} onOpenNode={academyAddNode} onFocusLinkSource={academyFocusLinkSource}
+    onReuse={academyReuse} onMixed={academyMixed} onOpenFields={academyOpenFields} onInspectElement={academyInspect}/>)}
    {tutorialOpen&&!dialog&&!pendingImport&&!confirmation&&inFullscreenCanvas(<GuidedTutorial onClose={()=>{setTutorialOpen(false);setTutorialCompleted(()=>{try{return !!localStorage.getItem(TUTORIAL_STORAGE_KEY)}catch{return false}})}}/>)}
    {toast&&<div className="toast"><CheckCircle2 size={16}/>{toast}</div>}
    {saveStatus==='error'&&<div className="save-error" role="alert"><strong>No se guardaron los cambios.</strong> {saveError}<p>ATLAS fusiona automáticamente cambios independientes en diferentes diagramas, cajas o campos. Si dos personas cambian el mismo dato de forma incompatible, protege ambas versiones y conserva tu borrador en esta pestaña. No recargues sin revisar.</p><div className="save-recovery-actions"><button onClick={()=>setDialog('history')}>Ver historial</button>{can('artifact.export')&&<button onClick={downloadLocalBackup}>Descargar mis cambios</button>}<button onClick={()=>ask('Descartar borrador local','Perderás los cambios que no se han guardado en este navegador. Puedes descargar una copia antes de continuar si tienes permiso de exportación.',()=>location.reload(),true,'Descartar y recargar')}>Recargar desde servidor</button></div></div>}
@@ -375,7 +519,11 @@ function AppInner(){
     <div className="diagram-filter-list">{filters.map(f=><div key={f.id} className="diagram-filter-row"><input aria-label={`Nombre de filtro ${f.label}`} value={filterRename[f.id]??f.label} onChange={e=>setFilterRename(old=>({...old,[f.id]:e.target.value}))}/><button className="ghost" onClick={()=>renameFilter(f.id)}>Guardar</button><button aria-label={`Eliminar filtro ${f.label}`} className="danger outlined" onClick={()=>removeFilter(f.id)}><Trash2 size={14}/></button></div>)}</div>
     <div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cerrar filtros</button></div>
    </div></Overlay>}
-   {dialog==='edit-relation'&&edgeEdit&&<Overlay title="Editar relación" onClose={()=>setDialog(null)}><div className="modal-body"><Field label="Nombre o protocolo de la relación"><input autoFocus value={edgeEdit.label} onChange={e=>setEdgeEdit(old=>old?{...old,label:e.target.value}:old)} placeholder="Ej. HTTPS, publica evento, consulta"/></Field><div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" onClick={saveEdgeLabel}>Guardar relación</button></div></div></Overlay>}
+   {dialog==='edit-relation'&&edgeEdit&&<Overlay title="Configurar relación" onClose={()=>setDialog(null)}><div className="modal-body"><Field label="Nombre o protocolo de la relación"><input autoFocus disabled={!edgeScope||!can(`relation.edit.${edgeScope}`)} value={edgeEdit.label} onChange={e=>setEdgeEdit(old=>old?{...old,label:e.target.value}:old)} placeholder="Ej. HTTPS, publica evento, consulta"/></Field>
+    <div className="relation-settings-grid"><Field label="Dirección"><select disabled={!edgeScope||!can(`relation.edit.${edgeScope}`)} value={edgeEdit.direction} onChange={e=>setEdgeEdit(old=>old?{...old,direction:e.target.value as EdgeDirection}:old)}><option value="forward">Origen → destino</option><option value="reverse">Destino → origen</option><option value="both">Bidireccional ↔</option><option value="none">Sin flechas</option></select></Field>
+    <Field label="Trazo"><select disabled={!edgeScope||!can(`relation.edit.${edgeScope}`)} value={edgeEdit.lineStyle} onChange={e=>setEdgeEdit(old=>old?{...old,lineStyle:e.target.value as EdgeLineStyle}:old)}><option value="solid">Continua</option><option value="dashed">Discontinua</option><option value="dotted">Punteada</option></select></Field>
+    <Field label="Recorrido"><select disabled={!edgeScope||!can(`relation.edit.${edgeScope}`)} value={edgeEdit.pathStyle} onChange={e=>setEdgeEdit(old=>old?{...old,pathStyle:e.target.value as EdgePathStyle}:old)}><option value="smoothstep">Ortogonal redondeada</option><option value="step">Ortogonal</option><option value="straight">Recta</option><option value="bezier">Curva</option></select></Field></div>
+    <div className="modal-actions relation-modal-actions">{edgeScope&&can(`relation.delete.${edgeScope}`)&&<button className="danger outlined" onClick={deleteSelectedRelation}><Trash2 size={14}/> Eliminar relación</button>}<button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button>{edgeScope&&can(`relation.edit.${edgeScope}`)&&<button className="primary" onClick={saveEdgeLabel}>Guardar relación</button>}</div></div></Overlay>}
    {dialog==='add-link'&&<Overlay title="Agregar enlace externo" onClose={()=>setDialog(null)}><div className="modal-body"><Field label="Etiqueta del enlace"><input autoFocus value={linkLabel} onChange={e=>setLinkLabel(e.target.value)} placeholder="Ej. Caso de uso, Jira, Azure DevOps"/></Field><Field label="URL HTTPS"><input type="url" value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="https://..."/></Field><div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!linkLabel.trim()||!safeLink(linkUrl)} onClick={saveExternalLink}>Agregar enlace</button></div></div></Overlay>}
    {pendingImport&&<Overlay title="Confirmar importación" onClose={()=>setPendingImport(null)}><div className="modal-body"><p>Se importará el documento al proyecto actual respetando los permisos de edición y el versionado. Si hay cambios simultáneos incompatibles, el servidor bloqueará la operación.</p><p><strong>{pendingImport.diagrams.length} diagramas y {Object.keys(pendingImport.elements).length} elementos.</strong></p><div className="modal-actions"><button className="ghost" onClick={()=>setPendingImport(null)}>Cancelar</button><button className="primary" onClick={()=>void commitImport()}>Importar documento</button></div></div></Overlay>}
    {confirmation&&<Overlay title={confirmation.title} onClose={()=>setConfirmation(null)}><div className="modal-body"><p className="dialog-description">{confirmation.description}</p><div className="modal-actions"><button className="ghost" onClick={()=>setConfirmation(null)}>Cancelar</button><button className={confirmation.danger?'danger outlined':'primary'} onClick={()=>{const fn=confirmation.onAccept;setConfirmation(null);fn()}}>{confirmation.button}</button></div></div></Overlay>}

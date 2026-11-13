@@ -15,7 +15,7 @@ export function editDiagram(doc:ProjectDocument,id:string,changes:Partial<Diagra
 }
 export function deleteDiagram(doc:ProjectDocument,id:string):ProjectDocument{
  if(!doc.diagrams.some(d=>d.id===id))throw new Error('Diagrama no encontrado')
- return {...doc,diagrams:doc.diagrams.filter(d=>d.id!==id),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined}:e]))}
+ return {...doc,diagrams:doc.diagrams.filter(d=>d.id!==id),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined,childNodeId:undefined}:e]))}
 }
 export function addElementNode(doc:ProjectDocument,diagramId:string,element:ModelElement,node:{id:string;x:number;y:number}):ProjectDocument{
  if(doc.elements[element.id]&&JSON.stringify(doc.elements[element.id])!==JSON.stringify(element))throw new Error('ID de elemento duplicado')
@@ -30,17 +30,32 @@ export function reuseElementNode(doc:ProjectDocument,diagramId:string,elementId:
  })
 }
 export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId:string):ProjectDocument{
- return withDiagram(doc,diagramId,d=>{
-  const removed=new Set(d.nodes.filter(n=>n.elementId===elementId).map(n=>n.id))
-  return {...d,nodes:d.nodes.filter(n=>!removed.has(n.id)),edges:d.edges.filter(e=>!removed.has(e.source)&&!removed.has(e.target))}
- })
+ const target=doc.diagrams.find(d=>d.id===diagramId)
+ const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId).map(n=>n.id)||[])
+ const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)),edges:d.edges.filter(e=>!removed.has(e.source)&&!removed.has(e.target))}))
+ return {...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}
 }
 export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
  return withDiagram(doc,diagramId,d=>{
   if(edge.source===edge.target)throw new Error('Autoconexión no permitida')
   if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw new Error('Extremos inexistentes')
-  if(d.edges.some(e=>e.id===edge.id||e.source===edge.source&&e.target===edge.target))throw new Error('Relación duplicada')
+  // Varias relaciones semánticamente distintas pueden unir las mismas cajas, incluso desde un mismo puerto.
+  // La identidad estable de la relación es el ID, nunca el par origen/destino.
+  if(d.edges.some(e=>e.id===edge.id))throw new Error('ID de relación duplicado')
   return {...d,edges:[...d.edges,edge]}
+ })
+}
+export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,changes:Partial<DiagramEdge>):ProjectDocument{
+ return withDiagram(doc,diagramId,d=>{
+  if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
+  if('source' in changes||'target' in changes||'id' in changes)throw new Error('No se pueden cambiar los extremos de una relación')
+  return {...d,edges:d.edges.map(e=>e.id===edgeId?{...e,...changes}:e)}
+ })
+}
+export function removeRelation(doc:ProjectDocument,diagramId:string,edgeId:string):ProjectDocument{
+ return withDiagram(doc,diagramId,d=>{
+  if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
+  return {...d,edges:d.edges.filter(e=>e.id!==edgeId)}
  })
 }
 export function moveNode(doc:ProjectDocument,diagramId:string,nodeId:string,x:number,y:number):ProjectDocument{

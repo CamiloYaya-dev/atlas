@@ -22,13 +22,14 @@ vi.mock('@xyflow/react',async()=>{
    onNodeDoubleClick?:(e:unknown,n:unknown)=>void,
    onNodeDragStop?:(e:unknown,n:unknown)=>void,
    onPaneClick?:()=>void,
-   onConnect?:(c:{source:string|null;target:string|null})=>void,
+   onConnect?:(c:{source:string|null;target:string|null;sourceHandle?:string;targetHandle?:string})=>void,
    onEdgeClick?:(e:unknown,edge:unknown)=>void,
    nodesConnectable?:boolean
   })=><div data-testid="graph-renderer" data-relations-enabled={String(nodesConnectable)}>
    {nodes.map(n=><button type="button" key={n.id} onClick={()=>onNodeClick?.({},n)}>{n.data.element?.name||n.id}</button>)}
    {edges.length>0&&<button type="button" onClick={()=>onEdgeClick?.({},edges[0])}>Editar relación QA</button>}
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-payment-provider'})}>Conectar QA</button>
+   <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-payment-provider',sourceHandle:'top-1',targetHandle:'bottom-3'})}>Conectar puertos adicionales QA</button>
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-actor'})}>Autoconexión QA</button>
    <button type="button" onClick={()=>onConnect?.({source:'n-ghost',target:'n-payment-provider'})}>Conexión huérfana QA</button>
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:null})}>Conexión incompleta QA</button>
@@ -464,15 +465,18 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   for(const name of ['Autoconexión QA','Conexión huérfana QA','Conexión incompleta QA'])fireEvent.click(screen.getByRole('button',{name}))
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
- it('no duplica una relación si el usuario intenta conectar dos veces los mismos nodos',async()=>{
+ it('permite relaciones paralelas a las mismas cajas, también desde puertos superiores e inferiores',async()=>{
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Conectar QA'}))
   fireEvent.click(screen.getByRole('button',{name:'Conectar QA'}))
+  fireEvent.click(screen.getByRole('button',{name:'Conectar puertos adicionales QA'}))
   await waitFor(()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
-   const edges=saves.at(-1)![1].diagrams[0].edges
-   expect(edges.filter(e=>e.source==='n-actor'&&e.target==='n-payment-provider')).toHaveLength(1)
+   const edges=saves.at(-1)![1].diagrams[0].edges.filter(e=>e.source==='n-actor'&&e.target==='n-payment-provider')
+   expect(edges).toHaveLength(3)
+   expect(new Set(edges.map(e=>e.id)).size).toBe(3)
+   expect(edges.some(e=>e.sourceHandle==='top-1'&&e.targetHandle==='bottom-3')).toBe(true)
   },{timeout:4500})
  })
  it('el lector no puede conectar cajas aunque un evento de ReactFlow sea falsificado',async()=>{
