@@ -1,0 +1,656 @@
+{
+  "name": "CIRCUITO · QA UML Estructural",
+  "document": {
+    "schema": 1,
+    "elements": {
+      "qa-b76df2a0": {
+        "id": "qa-b76df2a0",
+        "name": "Portal de solicitudes",
+        "type": "component",
+        "summary": "Recibe solicitudes de clientes",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-6d18e97c": {
+        "id": "qa-6d18e97c",
+        "name": "API de solicitudes",
+        "type": "component",
+        "summary": "Expone el servicio de registro de solicitudes",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "childDiagramId": "diagram-ab7767f5",
+        "childNodeId": "node-d6d4ec64"
+      },
+      "qa-db415fbb": {
+        "id": "qa-db415fbb",
+        "name": "Servicio de persistencia",
+        "type": "component",
+        "summary": "Coordina la persistencia",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-64a2e640": {
+        "id": "qa-64a2e640",
+        "name": "ISolicitudes",
+        "type": "uml-interface",
+        "summary": "Contrato de creación y consulta",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-8bbfd9d4": {
+        "id": "qa-8bbfd9d4",
+        "name": "Puerto HTTP",
+        "type": "uml-port",
+        "summary": "Puerto de interacción del componente",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-b2984893": {
+        "id": "qa-b2984893",
+        "name": "SolicitudService",
+        "type": "uml-class",
+        "summary": "Clasificador estructurado con partes internas",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "childDiagramId": "diagram-475db157",
+        "childNodeId": "node-32d6ba3c"
+      },
+      "qa-4122bf63": {
+        "id": "qa-4122bf63",
+        "name": "api:SolicitudesAPI",
+        "type": "uml-part",
+        "summary": "Parte que ofrece la interfaz",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "classifier": "SolicitudesAPI"
+        }
+      },
+      "qa-e25b055d": {
+        "id": "qa-e25b055d",
+        "name": "repo:SolicitudRepository",
+        "type": "uml-part",
+        "summary": "Parte que almacena solicitudes",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "classifier": "Repositorio"
+        }
+      },
+      "qa-aca25f41": {
+        "id": "qa-aca25f41",
+        "name": "auditoria:IAuditoria",
+        "type": "uml-reference-role",
+        "summary": "Dependencia interna sin composición",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "classifier": "IAuditoria"
+        }
+      },
+      "qa-6e1dab7d": {
+        "id": "qa-6e1dab7d",
+        "name": "p:ISolicitudes",
+        "type": "uml-port",
+        "summary": "Puerto externo de solicitudes",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-0dd2aef6": {
+        "id": "qa-0dd2aef6",
+        "name": "auth:IAuth",
+        "type": "uml-port",
+        "summary": "Puerto adjunto a la parte api",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-aaa1f176": {
+        "id": "qa-aaa1f176",
+        "name": "Validación y auditoría",
+        "type": "uml-collaboration",
+        "summary": "Colaboración de los participantes",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-1ea19320": {
+        "id": "qa-1ea19320",
+        "name": "Android · dispositivo cliente",
+        "type": "uml-device",
+        "summary": "Equipo físico móvil",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "deviceIcon": "android"
+        }
+      },
+      "qa-8baad707": {
+        "id": "qa-8baad707",
+        "name": "Servidor de aplicaciones",
+        "type": "uml-device",
+        "summary": "Máquina física que ejecuta el backend",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "deviceIcon": "server"
+        },
+        "childDiagramId": "diagram-c9b733b9",
+        "childNodeId": "node-553a678d"
+      },
+      "qa-f99c77b0": {
+        "id": "qa-f99c77b0",
+        "name": "Docker · runtime",
+        "type": "uml-execution",
+        "summary": "Entorno de ejecución, no dispositivo",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "runtimeIcon": "docker"
+        }
+      },
+      "qa-dda7e7ac": {
+        "id": "qa-dda7e7ac",
+        "name": "solicitudes-api.jar",
+        "type": "uml-artifact",
+        "summary": "Paquete desplegable",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-978da09f": {
+        "id": "qa-978da09f",
+        "name": "Gateway de red",
+        "type": "uml-node",
+        "summary": "Nodo de comunicación",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-d120d993": {
+        "id": "qa-d120d993",
+        "name": "CIRCUITO · plataforma",
+        "type": "uml-package",
+        "summary": "Espacio de nombres principal",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "childDiagramId": "diagram-baf084bd",
+        "childNodeId": "node-cd7b4e13"
+      },
+      "qa-3125b095": {
+        "id": "qa-3125b095",
+        "name": "Dominio.Solicitudes",
+        "type": "uml-package",
+        "summary": "Subpaquete de dominio",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-6a3e7495": {
+        "id": "qa-6a3e7495",
+        "name": "Validaciones",
+        "type": "uml-package",
+        "summary": "Subpaquete de validaciones",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {}
+      },
+      "qa-67633a3e": {
+        "id": "qa-67633a3e",
+        "name": "Integraciones",
+        "type": "uml-package",
+        "summary": "Servicios externos de la plataforma",
+        "description": "Ejemplo técnico verificable de la plataforma CIRCUITO.",
+        "owner": "Equipo de arquitectura",
+        "author": "ATLAS QA",
+        "status": "Validado",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "links": [],
+        "fields": {},
+        "childDiagramId": "diagram-475db157",
+        "childNodeId": "node-18c8d835"
+      }
+    },
+    "diagrams": [
+      {
+        "id": "diagram-baf084bd",
+        "name": "01 · Componentes — contratos e interfaces",
+        "type": "uml-component",
+        "description": "Componentes y contratos para crear una solicitud",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "node-c86a4ff9",
+            "elementId": "qa-b76df2a0",
+            "x": 100,
+            "y": 200
+          },
+          {
+            "id": "node-cd7b4e13",
+            "elementId": "qa-6d18e97c",
+            "x": 460,
+            "y": 190
+          },
+          {
+            "id": "node-79f7aef5",
+            "elementId": "qa-db415fbb",
+            "x": 900,
+            "y": 210
+          },
+          {
+            "id": "node-7503fa8e",
+            "elementId": "qa-64a2e640",
+            "x": 460,
+            "y": 480
+          },
+          {
+            "id": "node-c25b555e",
+            "elementId": "qa-8bbfd9d4",
+            "x": 1050,
+            "y": 480
+          }
+        ],
+        "edges": [
+          {
+            "id": "relation-0a480da1",
+            "source": "node-c86a4ff9",
+            "target": "node-cd7b4e13",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "assembly",
+            "label": "Ensamblaje principal",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-a17d7e8d",
+            "source": "node-cd7b4e13",
+            "target": "node-79f7aef5",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "assembly",
+            "label": "Persistencia",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-291d9f43",
+            "source": "node-cd7b4e13",
+            "target": "node-7503fa8e",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "provided-interface",
+            "label": "API ofrece ISolicitudes",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-833c01c9",
+            "source": "node-79f7aef5",
+            "target": "node-c25b555e",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "required-interface",
+            "label": "Repositorio requiere HTTP",
+            "direction": "none",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep"
+          }
+        ]
+      },
+      {
+        "id": "diagram-ab7767f5",
+        "name": "02 · Estructura compuesta — interior del servicio",
+        "type": "uml-composite",
+        "description": "Clasificador con partes, rol, puertos encastrados y conectores",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "node-d6d4ec64",
+            "elementId": "qa-b2984893",
+            "x": 100,
+            "y": 90
+          },
+          {
+            "id": "node-cc0a0524",
+            "elementId": "qa-4122bf63",
+            "x": 150,
+            "y": 190,
+            "parentNodeId": "node-d6d4ec64"
+          },
+          {
+            "id": "node-68587eda",
+            "elementId": "qa-e25b055d",
+            "x": 470,
+            "y": 230,
+            "parentNodeId": "node-d6d4ec64"
+          },
+          {
+            "id": "node-57c1acc7",
+            "elementId": "qa-aca25f41",
+            "x": 270,
+            "y": 360,
+            "parentNodeId": "node-d6d4ec64"
+          },
+          {
+            "id": "node-1cdc86a9",
+            "elementId": "qa-6e1dab7d",
+            "x": -90,
+            "y": 180,
+            "parentNodeId": "node-d6d4ec64"
+          },
+          {
+            "id": "node-d3edfeda",
+            "elementId": "qa-0dd2aef6",
+            "x": 170,
+            "y": -41,
+            "parentNodeId": "node-cc0a0524"
+          },
+          {
+            "id": "node-84cc77ca",
+            "elementId": "qa-aaa1f176",
+            "x": 1050,
+            "y": 210
+          }
+        ],
+        "edges": [
+          {
+            "id": "relation-f74a4a03",
+            "source": "node-1cdc86a9",
+            "target": "node-d3edfeda",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "delegation",
+            "label": "Delegación exterior ↔ API",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-6d2bd237",
+            "source": "node-cc0a0524",
+            "target": "node-68587eda",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "assembly",
+            "label": "Ensamblaje de interfaces",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-0bcc95c9",
+            "source": "node-cc0a0524",
+            "target": "node-57c1acc7",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2",
+            "relationKind": "connector",
+            "label": "Conector de auditoría",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          }
+        ]
+      },
+      {
+        "id": "diagram-475db157",
+        "name": "03 · Despliegue — dispositivo, Docker y artefacto",
+        "type": "uml-deployment",
+        "description": "Entorno Docker dentro de servidor físico, artefacto dentro de Docker",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "node-187ada7f",
+            "elementId": "qa-1ea19320",
+            "x": 120,
+            "y": 520
+          },
+          {
+            "id": "node-32d6ba3c",
+            "elementId": "qa-8baad707",
+            "x": 580,
+            "y": 90
+          },
+          {
+            "id": "node-b584373c",
+            "elementId": "qa-f99c77b0",
+            "x": 95,
+            "y": 115,
+            "parentNodeId": "node-32d6ba3c"
+          },
+          {
+            "id": "node-2e2d0fb5",
+            "elementId": "qa-dda7e7ac",
+            "x": 35,
+            "y": 80,
+            "parentNodeId": "node-b584373c"
+          },
+          {
+            "id": "node-18c8d835",
+            "elementId": "qa-978da09f",
+            "x": 1380,
+            "y": 320
+          }
+        ],
+        "edges": [
+          {
+            "id": "relation-3435f9df",
+            "source": "node-187ada7f",
+            "target": "node-32d6ba3c",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "communication-path",
+            "label": "HTTPS",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-68761760",
+            "source": "node-32d6ba3c",
+            "target": "node-18c8d835",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "communication-path",
+            "label": "Red privada",
+            "direction": "none",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-d8d2656b",
+            "source": "node-2e2d0fb5",
+            "target": "node-18c8d835",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "deployment",
+            "label": "«deploy»",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep"
+          }
+        ]
+      },
+      {
+        "id": "diagram-c9b733b9",
+        "name": "04 · Paquetes — jerarquía de nombres",
+        "type": "uml-package",
+        "description": "Paquete, subpaquete y subpaquete anidado; solo un tipo UML Package",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "node-553a678d",
+            "elementId": "qa-d120d993",
+            "x": 100,
+            "y": 100
+          },
+          {
+            "id": "node-6dd4f648",
+            "elementId": "qa-3125b095",
+            "x": 60,
+            "y": 100,
+            "parentNodeId": "node-553a678d"
+          },
+          {
+            "id": "node-9e2788e9",
+            "elementId": "qa-6a3e7495",
+            "x": 40,
+            "y": 90,
+            "parentNodeId": "node-6dd4f648"
+          },
+          {
+            "id": "node-738229a0",
+            "elementId": "qa-67633a3e",
+            "x": 1050,
+            "y": 160
+          }
+        ],
+        "edges": [
+          {
+            "id": "relation-b10e5d03",
+            "source": "node-553a678d",
+            "target": "node-738229a0",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "dependency",
+            "label": "Depende de",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "relation-95646204",
+            "source": "node-6dd4f648",
+            "target": "node-738229a0",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "relationKind": "import",
+            "label": "«import»",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep"
+          }
+        ]
+      }
+    ],
+    "fieldDefinitions": []
+  }
+}

@@ -1,6 +1,7 @@
 import {isDeepStrictEqual} from 'node:util'
 import type {Diagram,DiagramNode,DiagramEdge,ModelElement,ProjectDocument,FieldDefinition} from '@atlas/contracts'
-import {relationScope} from '@atlas/contracts'
+import {isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,atlasNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@atlas/contracts'
+import {relationScope,umlElementAllowed,umlRelationAllowed,validUmlDetail} from '@atlas/contracts'
 import type {Access} from '../../../security/roles'
 import {allowed,requirePermission} from '../../../security/roles'
 import {DomainError} from '../../../domain/errors'
@@ -14,7 +15,7 @@ export function projectVisible(document:ProjectDocument,a:Access):ProjectDocumen
  for(const [id,e] of Object.entries(document.elements)){
   if(!visibleIds.has(id)||!allowed(a,`element.view.${e.type}`))continue
   const copy={...e}
-  if(!allowed(a,'element.technical.view'))delete copy.technical
+  if(!allowed(a,'element.technical.view')){delete copy.technical;delete copy.uml}
   if(e.childDiagramId&&!diagrams.some(d=>d.id===e.childDiagramId)){delete copy.childDiagramId;delete copy.childNodeId}
   else if(e.childNodeId&&!diagrams.find(d=>d.id===e.childDiagramId)?.nodes.some(n=>n.id===e.childNodeId&&!!document.elements[n.elementId]&&allowed(a,`element.view.${document.elements[n.elementId].type}`)))delete copy.childNodeId
   elements[id]=copy
@@ -42,6 +43,27 @@ export function ensureUniqueIds(doc:ProjectDocument){
   for(const n of d.nodes){
    if(nodes.has(n.id)||!doc.elements[n.elementId])throw new DomainError('Nodo duplicado o sin elemento',400)
    if(n.filterIds?.some(id=>!filterIds.has(id)))throw new DomainError('Nodo con filtro inexistente',400)
+   if(n.width!==undefined&&!validNodeDimension(n.width)||n.height!==undefined&&!validNodeDimension(n.height))throw new DomainError('Dimensiones de caja inválidas',400)
+   if(!umlElementAllowed(d.type,doc.elements[n.elementId].type))throw new DomainError('Elemento no permitido para este tipo de diagrama UML',400)
+   if(n.parentNodeId){
+    if(!umlAncestryValid(d,n,doc.elements))throw new DomainError('Contención UML inválida: jerarquía o ciclo',400)
+    const parent=d.nodes.find(p=>p.id===n.parentNodeId)!
+    const parentKind=doc.elements[parent.elementId].type
+    const size=atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id))
+    const port=doc.elements[n.elementId].type==='uml-port'
+    if(n.x<(port?-100:0)||n.y<(port?-45:0)||n.x>size.width+(port?0:-20)||n.y>size.height+(port?0:-20))throw new DomainError('Caja fuera de contenedor UML',400)
+   }
+   const element=doc.elements[n.elementId]
+   if((n.width!==undefined||n.height!==undefined)&&d.nodes.some(child=>child.parentNodeId===n.id)&&element){
+    const size=atlasNodeSize(d.type,element,n,umlNodeDepth(d,n),true)
+    for(const child of d.nodes.filter(child=>child.parentNodeId===n.id)){
+     const childElement=doc.elements[child.elementId]
+     if(!childElement||childElement.type==='uml-port')continue
+     const childSize=atlasNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
+     if(child.x+childSize.width>size.width||child.y+childSize.height>size.height)
+      throw new DomainError('El contenedor no puede cortar sus elementos internos',400)
+    }
+   }
    nodes.add(n.id)
   }
   for(const e of d.edges){
@@ -51,10 +73,13 @@ export function ensureUniqueIds(doc:ProjectDocument){
    if(e.pathStyle&&!['smoothstep','straight','step','bezier'].includes(e.pathStyle))throw new DomainError('Tipo de recorrido de relación inválido',400)
    if(e.sourceHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.sourceHandle))throw new DomainError('Puerto de salida inválido',400)
    if(e.targetHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.targetHandle))throw new DomainError('Puerto de entrada inválido',400)
+   if(e.relationKind&&!umlRelationAllowed(d.type,e.relationKind))throw new DomainError('Relación no permitida para este diagrama UML',400)
+   if(['sourceMultiplicity','targetMultiplicity','sourceRole','targetRole'].some(k=>{const v=e[k as keyof DiagramEdge];return v!==undefined&&(typeof v!=='string'||v.length>80)}))throw new DomainError('Extremos UML inválidos',400)
    edges.add(e.id)
   }
  }
  for(const e of Object.values(doc.elements)){
+  if(!validUmlDetail(e.uml))throw new DomainError('Atributos, métodos o valores UML inválidos',400)
   if(e.childDiagramId&&!usedDiagrams.has(e.childDiagramId))throw new DomainError('Vista vinculada inexistente',400)
   if(e.childNodeId&&(!e.childDiagramId||!doc.diagrams.find(d=>d.id===e.childDiagramId)?.nodes.some(n=>n.id===e.childNodeId)))throw new DomainError('Caja vinculada inexistente',400)
  }
@@ -81,7 +106,7 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
   if(!stored){
    requirePermission(a,`element.create.${created.type}`)
    requirePermission(a,`element.view.${created.type}`)
-   if(created.technical&&!allowed(a,'element.technical.edit'))fail('No puedes crear detalles técnicos')
+   if((created.technical||created.uml)&&!allowed(a,'element.technical.edit'))fail('No puedes crear detalles técnicos UML')
    full.elements[id]=created;continue
   }
   if(created.type!==stored.type){
@@ -103,8 +128,9 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     }
    }
    if(created.technical!==undefined&&created.technical!==stored.technical)requirePermission(a,'element.technical.edit')
+   if(!equal(created.uml,stored.uml)&&allowed(a,'element.technical.view'))requirePermission(a,'element.technical.edit')
    full.elements[id]={...stored,...created,
-     ...(!allowed(a,'element.technical.edit')?{technical:stored.technical}:{}),
+     ...(!allowed(a,'element.technical.edit')?{technical:stored.technical,uml:stored.uml}:{}),
      ...(!allowed(a,`diagram.view.${storedDiagrams.get(stored.childDiagramId||'')?.type}`)?{childDiagramId:stored.childDiagramId,childNodeId:stored.childNodeId}:{}),
    }
   }
@@ -123,7 +149,7 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
    requirePermission(a,`diagram.view.${d.type}`)
    // New diagram edges must be explicitly authorized too.
    for(const n of d.nodes){const e=full.elements[n.elementId];if(!e)throw new DomainError('Elemento no encontrado',400);requirePermission(a,`element.view.${e.type}`)}
-   for(const edge of d.edges)requirePermission(a,`relation.create.${edgeKind(edge,d,full)}`)
+   for(const edge of d.edges){requirePermission(a,`relation.create.${edgeKind(edge,d,full)}`);if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,edge))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)}
    full.diagrams.push(d);continue
   }
   const stored=storedDiagrams.get(d.id)!
@@ -145,10 +171,15 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
   for(const e of d.edges){
    if(!nextNodes.has(e.source)||!nextNodes.has(e.target))throw new DomainError('Relación sin sus nodos',400)
    const oldE=originalEdges.get(e.id)
-   if(!oldE)requirePermission(a,`relation.create.${edgeKind(e,d,full)}`)
+   if(!oldE){requirePermission(a,`relation.create.${edgeKind(e,d,full)}`);if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
+    if(isUmlDiagram(d.type)&&e.relationKind){
+     const s=d.nodes.find(n=>n.id===e.source),t=d.nodes.find(n=>n.id===e.target)
+     if(s&&t&&!umlRelationEndpointValid(d.type,e.relationKind,full.elements[s.elementId].type,full.elements[t.elementId].type))throw new DomainError('Extremos incompatibles con la relación UML',400)
+    }}
    else if(!equal(oldE,e)){
     if(oldE.source!==e.source||oldE.target!==e.target)fail('Para cambiar extremos, elimina y recrea la relación')
     requirePermission(a,`relation.edit.${edgeKind(oldE,old,original)}`)
+    if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
    }
   }
   for(const e of old.edges)if(!nextEdges.has(e.id))requirePermission(a,`relation.delete.${edgeKind(e,old,original)}`)

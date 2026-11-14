@@ -9,7 +9,7 @@ import type {NodeProps} from '@xyflow/react'
 
 vi.mock('@xyflow/react',()=>({
  Handle:({type}:{type:string})=><span data-testid={`handle-${type}`}/> ,
- Position:{Left:'left',Right:'right'}
+ NodeResizer:()=>null,Position:{Left:'left',Right:'right'}
 }))
 
 describe('Átomos, moléculas y caja gráfica',()=>{

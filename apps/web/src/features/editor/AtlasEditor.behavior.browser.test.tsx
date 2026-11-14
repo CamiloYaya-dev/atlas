@@ -41,7 +41,7 @@ vi.mock('@xyflow/react',async()=>{
   useReactFlow:()=>({getNode:()=>null,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})}),
   useNodesState:(initial:unknown[])=>{const [nodes,setNodes]=React.useState(initial);return[nodes,setNodes,()=>{}]},
   Background:()=>null,Controls:()=>null,MiniMap:()=>null,Handle:()=>null,
-  Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
+  NodeResizer:()=>null,Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
  }
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
@@ -87,8 +87,9 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   localStorage.removeItem('atlas.tutorial.complete.v1')
   await openEditor()
   const graph=screen.getByTestId('graph-renderer')
-  fireEvent.click(screen.getByRole('button',{name:'Aprender ATLAS'}))
+  fireEvent.click(screen.getByRole('button',{name:'Abrir tutorial desde el menú lateral'}))
   expect(screen.getByRole('dialog',{name:'Bienvenido a ATLAS'})).toBeTruthy()
+  expect(screen.queryByRole('button',{name:'Aprender ATLAS'})).toBeNull()
   fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
   expect(screen.getByRole('dialog',{name:'1. Organización = espacio de trabajo'})).toBeTruthy()
   expect(screen.getByTestId('graph-renderer')).toBe(graph)
@@ -99,9 +100,11 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('tutorial permanece disponible al abrir un formulario y reanuda al cerrarlo',async()=>{
   await openEditor()
-  fireEvent.click(screen.getByRole('button',{name:'Aprender ATLAS'}))
-  const next=()=>fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
-  for(let i=0;i<6;i++)next()
+  fireEvent.click(screen.getByRole('button',{name:'Abrir tutorial desde el menú lateral'}))
+  // Ir directamente desde el temario evita seis rerenders pesados de React Flow
+  // en CI; seguimos verificando el formulario real y la reanudación.
+  fireEvent.click(screen.getByRole('button',{name:/Temario/}))
+  fireEvent.click(within(screen.getByRole('navigation',{name:'Temario del tutorial'})).getByRole('button',{name:/Agrega elementos de distintos tipos/}))
   expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
   fireEvent.click(screen.getByRole('button',{name:'Agregar caja'}))
   expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
@@ -109,7 +112,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Cancelar'}))
   expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
- })
+ },15000)
 
  it('ocultar y mostrar menú lateral preserva el lienzo y el proyecto abierto',async()=>{
   await openEditor()

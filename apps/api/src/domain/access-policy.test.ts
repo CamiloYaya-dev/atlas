@@ -39,12 +39,25 @@ test('Analista edita actividad sin perder nodos y diagrama C3 ocultos',()=>{
  assert.equal(result.diagrams.find(x=>x.id==='p')?.edges.length,1)
 })
 test('No permite crear relaciones mixtas sin permiso, aunque se falsifique JSON',()=>{
- const original=fixture(),a=mk('functional'),incoming=projectVisible(original,a)
- // Elevate element view to reveal endpoint and test relation gate independently.
+ const original=fixture(),a=mk('functional')
+ // El preset funcional sí otorga relation.create.mixed. Retirarlo explícitamente
+ // permite probar que el backend DENIEGA la operación cuando falta el permiso,
+ // sin depender de los permisos concedidos por defecto a un rol.
  a.permissions.add('element.view.endpoint')
- const p=projectVisible(original,a)
- p.diagrams[0].edges.push({id:'edge2',source:'pa',target:'pb'})
- assert.throws(()=>applyAuthorizedChange(original,p,a),/relation.create.mixed/)
+ a.permissions.delete('relation.create.mixed')
+ const incoming=projectVisible(original,a)
+ assert.equal(incoming.diagrams[0].nodes.length,2)
+ incoming.diagrams[0].edges.push({id:'edge2',source:'pa',target:'pb'})
+ assert.throws(()=>applyAuthorizedChange(original,incoming,a),/relation.create.mixed/)
+})
+test('Autoriza una nueva relación mixta únicamente si su permiso ha sido concedido',()=>{
+ const original=fixture(),a=mk('functional')
+ a.permissions.add('element.view.endpoint')
+ a.permissions.add('relation.create.mixed')
+ const incoming=projectVisible(original,a)
+ incoming.diagrams[0].edges.push({id:'edge2',source:'pa',target:'pb'})
+ const updated=applyAuthorizedChange(original,incoming,a)
+ assert.equal(updated.diagrams.find(d=>d.id==='p')?.edges.some(e=>e.id==='edge2'),true)
 })
 test('No permite insertar o alterar un diagrama no autorizado',()=>{
  const original=fixture(),a=mk('functional'),incoming=projectVisible(original,a)

@@ -15,6 +15,7 @@ function load(rel,stubs={}){
 const fields=load('packages/contracts/src/export-fields.ts')
 const docs=load('apps/api/src/modules/exports/advanced-document.ts',{'@atlas/contracts':fields})
 const licensing=load('apps/api/src/modules/licensing/licensing-policy.ts')
+const documentFormats=load('apps/api/src/modules/exports/diagram-documents.ts',{'@atlas/contracts':fields,'./advanced-document':docs})
 const document={schema:1,elements:{
  a:{id:'a',name:'Usuario <final>',type:'actor',summary:'Solicitud & pago',description:'',owner:'Camilo',author:'ATLAS',status:'Activo',createdAt:'2026-11-13',updatedAt:'2026-11-13',links:[],fields:{channel:'Web'}},
  b:{id:'b',name:'Plataforma',type:'system',summary:'',description:'',owner:'',author:'',status:'',createdAt:'',updatedAt:'',links:[],fields:{}}
@@ -58,4 +59,27 @@ test('dos apariciones del mismo elemento mantienen selección independiente',()=
  assert.equal(fields.exportFieldsFor(duplicated,view,duplicated.elements.a,'na',req,'embed').length,1)
  assert.equal(fields.exportFieldsFor(duplicated,view,duplicated.elements.a,'nc',req,'dictionary').length,1)
  assert.equal(fields.exportFieldsFor(duplicated,view,duplicated.elements.a,'nc',req,'embed').length,0)
+})
+
+test('formatos premium PDF, Word y HTML válidos con contenido de fichas seleccionado',()=>{
+ const req=fields.validateAdvancedExport(document,diagram,{mode:'both',fields:{na:{summary:'dictionary','custom:channel':'dictionary'}},documentFormat:'pdf'})
+ assert.equal(req.documentFormat,'pdf')
+ const pdf=documentFormats.buildDiagramPdf(document,diagram,req)
+ assert.match(pdf.subarray(0,9).toString('latin1'),/^%PDF-1.4/)
+ assert.match(pdf.toString('latin1'),/Solicit/)
+ assert.match(pdf.toString('latin1'),/xref/)
+ const word=documentFormats.buildDiagramDocx(document,diagram,req)
+ const entries=[];let offset=0
+ while(word.readUInt32LE(offset)===0x04034b50){
+  const size=word.readUInt32LE(offset+18),n=word.readUInt16LE(offset+26),extr=word.readUInt16LE(offset+28)
+  const name=word.subarray(offset+30,offset+30+n).toString(),start=offset+30+n+extr
+  const raw=word.subarray(start,start+size)
+  const body=word.readUInt16LE(offset+8)===8?inflateRawSync(raw):raw
+  entries.push({name,body})
+  offset=start+size
+ }
+ assert.deepEqual(entries.map(entry=>entry.name),['[Content_Types].xml','_rels/.rels','word/document.xml','word/_rels/document.xml.rels','word/styles.xml'])
+ assert.match(entries.find(entry=>entry.name==='word/document.xml').body.toString(),/Usuario &lt;final&gt;/)
+ assert.match(entries.find(entry=>entry.name==='word/document.xml').body.toString(),/Canal: Web/)
+ for(const bad of ['exe','md','doc'])assert.throws(()=>fields.validateAdvancedExport(document,diagram,{mode:'both',fields:{},documentFormat:bad}),/Formato/)
 })

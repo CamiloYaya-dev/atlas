@@ -40,7 +40,7 @@ export default function AdvancedExportFields({doc,diagram,mode,choices,onChange}
   <div className="atlas-export-bulk">
    <button type="button" className="ghost" onClick={()=>setAll('omit')}>Omitir todos</button>
    {available&&<button type="button" className="ghost" onClick={()=>setAll('embed')}>Todos en imagen</button>}
-   {['dictionary','both'].includes(mode)&&<button type="button" className="ghost" onClick={()=>setAll('dictionary')}>Todos al diccionario</button>}
+   {['dictionary','both'].includes(mode)&&<button type="button" className="ghost" onClick={()=>setAll('dictionary')}>Todos a las fichas</button>}
   </div>
   <div className="atlas-export-field-scroller">
    {items.map(item=><div className="atlas-export-element" key={item.id}>
@@ -50,7 +50,7 @@ export default function AdvancedExportFields({doc,diagram,mode,choices,onChange}
      <select aria-label={`Exportación · ${item.element?.name} · ${field.label}`} value={choices[item.id]?.[field.key]||'omit'} onChange={event=>setField(item.id,field.key,event.target.value as ExportPlacement)}>
       <option value="omit">Omitir</option>
       {available&&<option value="embed">En imagen</option>}
-      {['dictionary','both'].includes(mode)&&<option value="dictionary">Diccionario</option>}
+      {['dictionary','both'].includes(mode)&&<option value="dictionary">En fichas</option>}
      </select>
     </label>)}
    </div>)}

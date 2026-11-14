@@ -216,3 +216,8 @@ Una misma pareja de cajas puede tener varias relaciones independientes (por ejem
 ### PNG/JPG y licencias comerciales
 
 Cada diagrama puede exportarse como PNG/JPG, con firma de procedencia y auditoría del backend; sin licencia comercial se aplica marca de agua visible. Con licencia activa se suprime solo la marca visible. Para instalación, migración 006, protección de claves, endpoints y límites consulta [Licencias y exportación](docs/LICENCIAS_EXPORTACION_IMAGEN_V4_8_1.md).
+
+
+### UML y exportación avanzada de fichas (13/11/2026)
+
+ATLAS incorpora 14 tipos de diagramas UML agrupados, paletas semánticas por vista y una vista de casos de uso conectable con trazabilidad. Las exportaciones PRO de fichas pueden generarse en PDF, Word (DOCX) o HTML y la imagen coloca las fichas al margen del grafo. Consulta [`docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md`](docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md).

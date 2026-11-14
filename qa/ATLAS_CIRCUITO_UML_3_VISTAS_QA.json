@@ -1,0 +1,1330 @@
+{
+  "format": "ATLAS-V4.2",
+  "exportedAt": "2026-11-13T00:00:00.000Z",
+  "document": {
+    "schema": 1,
+    "elements": {
+      "comp_repository": {
+        "id": "comp_repository",
+        "name": "Repositorio de solicitudes",
+        "type": "component",
+        "summary": "Persiste y consulta solicitudes",
+        "description": "Persiste y consulta solicitudes. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "RequestRepository",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        }
+      },
+      "ep_post": {
+        "id": "ep_post",
+        "name": "POST /solicitudes",
+        "type": "endpoint",
+        "summary": "Recibe formulario de nueva solicitud",
+        "description": "Recibe formulario de nueva solicitud. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "POST /api/v1/requests",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería",
+          "qa-spec": "https://spec.openapis.org/oas/latest.html"
+        }
+      },
+      "comp_controller": {
+        "id": "comp_controller",
+        "name": "RequestController",
+        "type": "component",
+        "summary": "Transforma HTTP en comandos de aplicación",
+        "description": "Transforma HTTP en comandos de aplicación. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "createRequest(req)",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "childDiagramId": "uml-component",
+        "childNodeId": "n-uml-component-comp_controller"
+      },
+      "act_register": {
+        "id": "act_register",
+        "name": "Registrar solicitud",
+        "type": "activity",
+        "summary": "Captura del formulario",
+        "description": "Captura del formulario. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        }
+      },
+      "req_hu": {
+        "id": "req_hu",
+        "name": "HU-01 · Registrar solicitud",
+        "type": "requirement",
+        "summary": "Como solicitante quiero registrar una solicitud para obtener atención",
+        "description": "Como solicitante quiero registrar una solicitud para obtener atención. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto",
+          "qa-priority": "Alta"
+        },
+        "childDiagramId": "uml-class",
+        "childNodeId": "n-uml-class-cl_request"
+      },
+      "req_rf": {
+        "id": "req_rf",
+        "name": "RF-01 · Validar datos obligatorios",
+        "type": "requirement",
+        "summary": "El registro no acepta solicitudes incompletas",
+        "description": "El registro no acepta solicitudes incompletas. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto",
+          "qa-priority": "Alta"
+        },
+        "childDiagramId": "trace",
+        "childNodeId": "n-trace-uc_register"
+      },
+      "uc_register": {
+        "id": "uc_register",
+        "name": "CU-01 · Registrar solicitud",
+        "type": "usecase",
+        "summary": "Objetivo: registrar una nueva solicitud válida",
+        "description": "Objetivo: registrar una nueva solicitud válida. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        }
+      },
+      "doc_evidence": {
+        "id": "doc_evidence",
+        "name": "Evidencia QA · Registro",
+        "type": "document",
+        "summary": "Pruebas de validaciones, errores y respuesta HTTP",
+        "description": "Pruebas de validaciones, errores y respuesta HTTP. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        }
+      },
+      "cl_request": {
+        "id": "cl_request",
+        "name": "Solicitud",
+        "type": "uml-class",
+        "summary": "Entidad principal del dominio",
+        "description": "Entidad principal del dominio. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "childDiagramId": "uml-object",
+        "childNodeId": "n-uml-object-cl_request",
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_request-attr-0",
+              "name": "id",
+              "type": "UUID",
+              "visibility": "private",
+              "multiplicity": "1"
+            },
+            {
+              "id": "cl_request-attr-1",
+              "name": "descripcion",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "1",
+              "length": 500
+            },
+            {
+              "id": "cl_request-attr-2",
+              "name": "estado",
+              "type": "EstadoSolicitud",
+              "visibility": "private",
+              "multiplicity": "1"
+            },
+            {
+              "id": "cl_request-attr-3",
+              "name": "fechaCreacion",
+              "type": "DateTime",
+              "visibility": "private",
+              "multiplicity": "1"
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_request-op-0",
+              "name": "registrar",
+              "returnType": "Boolean",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_request-param-0-0",
+                  "name": "entrada",
+                  "type": "DatosSolicitud"
+                }
+              ]
+            },
+            {
+              "id": "cl_request-op-1",
+              "name": "validar",
+              "returnType": "ResultadoValidacion",
+              "visibility": "public",
+              "parameters": []
+            },
+            {
+              "id": "cl_request-op-2",
+              "name": "cancelar",
+              "returnType": "void",
+              "visibility": "public",
+              "parameters": []
+            }
+          ]
+        }
+      },
+      "cl_person": {
+        "id": "cl_person",
+        "name": "Persona",
+        "type": "uml-class",
+        "summary": "Solicitante",
+        "description": "Solicitante. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_person-attr-0",
+              "name": "id",
+              "type": "UUID",
+              "visibility": "private",
+              "multiplicity": "1"
+            },
+            {
+              "id": "cl_person-attr-1",
+              "name": "nombre",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "1",
+              "length": 120
+            },
+            {
+              "id": "cl_person-attr-2",
+              "name": "correo",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "0..1",
+              "length": 254
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_person-op-0",
+              "name": "solicitar",
+              "returnType": "Solicitud",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_person-param-0-0",
+                  "name": "datos",
+                  "type": "DatosSolicitud"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cl_priority": {
+        "id": "cl_priority",
+        "name": "PrioridadSolicitud",
+        "type": "uml-enumeration",
+        "summary": "Baja / Media / Alta",
+        "description": "Baja / Media / Alta. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        },
+        "uml": {
+          "attributes": [],
+          "operations": []
+        }
+      },
+      "int_repo": {
+        "id": "int_repo",
+        "name": "ISolicitudRepository",
+        "type": "uml-interface",
+        "summary": "Contrato de persistencia",
+        "description": "Contrato de persistencia. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [],
+          "operations": [
+            {
+              "id": "int_repo-op-0",
+              "name": "guardar",
+              "returnType": "Boolean",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "int_repo-param-0-0",
+                  "name": "solicitud",
+                  "type": "Solicitud"
+                }
+              ]
+            },
+            {
+              "id": "int_repo-op-1",
+              "name": "buscarPorId",
+              "returnType": "Solicitud",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "int_repo-param-1-0",
+                  "name": "id",
+                  "type": "UUID"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cl_sqlrepo": {
+        "id": "cl_sqlrepo",
+        "name": "SqlSolicitudRepository",
+        "type": "uml-class",
+        "summary": "Implementación SQL",
+        "description": "Implementación SQL. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_sqlrepo-attr-0",
+              "name": "conexion",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "1",
+              "length": 240
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_sqlrepo-op-0",
+              "name": "guardar",
+              "returnType": "Boolean",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_sqlrepo-param-0-0",
+                  "name": "solicitud",
+                  "type": "Solicitud"
+                }
+              ]
+            },
+            {
+              "id": "cl_sqlrepo-op-1",
+              "name": "buscarPorId",
+              "returnType": "Solicitud",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_sqlrepo-param-1-0",
+                  "name": "id",
+                  "type": "UUID"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cl_service": {
+        "id": "cl_service",
+        "name": "SolicitudService",
+        "type": "uml-class",
+        "summary": "Orquestación de negocio",
+        "description": "Orquestación de negocio. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_service-attr-0",
+              "name": "repositorio",
+              "type": "ISolicitudRepository",
+              "visibility": "private",
+              "multiplicity": "1"
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_service-op-0",
+              "name": "crear",
+              "returnType": "Solicitud",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_service-param-0-0",
+                  "name": "datos",
+                  "type": "DatosSolicitud"
+                }
+              ]
+            },
+            {
+              "id": "cl_service-op-1",
+              "name": "consultar",
+              "returnType": "Solicitud",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_service-param-1-0",
+                  "name": "id",
+                  "type": "UUID"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cl_detail": {
+        "id": "cl_detail",
+        "name": "DetalleSolicitud",
+        "type": "uml-class",
+        "summary": "Campos del formulario",
+        "description": "Campos del formulario. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_detail-attr-0",
+              "name": "campo",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "1",
+              "length": 80
+            },
+            {
+              "id": "cl_detail-attr-1",
+              "name": "valor",
+              "type": "String",
+              "visibility": "private",
+              "multiplicity": "0..1",
+              "length": 500
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_detail-op-0",
+              "name": "validar",
+              "returnType": "Boolean",
+              "visibility": "public",
+              "parameters": []
+            }
+          ]
+        }
+      },
+      "cl_collection": {
+        "id": "cl_collection",
+        "name": "BandejaSolicitudes",
+        "type": "uml-class",
+        "summary": "Agrupa solicitudes",
+        "description": "Agrupa solicitudes. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        },
+        "uml": {
+          "attributes": [
+            {
+              "id": "cl_collection-attr-0",
+              "name": "solicitudes",
+              "type": "Solicitud",
+              "visibility": "private",
+              "multiplicity": "0..*"
+            }
+          ],
+          "operations": [
+            {
+              "id": "cl_collection-op-0",
+              "name": "filtrar",
+              "returnType": "Solicitud[]",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "id": "cl_collection-param-0-0",
+                  "name": "estado",
+                  "type": "EstadoSolicitud"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "pkg_domain": {
+        "id": "pkg_domain",
+        "name": "Dominio.Solicitudes",
+        "type": "uml-package",
+        "summary": "Paquete lógico",
+        "description": "Paquete lógico. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        }
+      },
+      "obj_req": {
+        "id": "obj_req",
+        "name": "solicitud1042:Solicitud",
+        "type": "uml-object",
+        "summary": "Instancia real simulada",
+        "description": "Instancia real simulada. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        },
+        "uml": {
+          "classifier": "Solicitud",
+          "slots": [
+            {
+              "id": "obj_req-slot-0",
+              "name": "id",
+              "type": "UUID",
+              "value": "1042"
+            },
+            {
+              "id": "obj_req-slot-1",
+              "name": "descripcion",
+              "type": "String",
+              "value": "Alta de solicitud de soporte"
+            },
+            {
+              "id": "obj_req-slot-2",
+              "name": "estado",
+              "type": "EstadoSolicitud",
+              "value": "En revisión"
+            },
+            {
+              "id": "obj_req-slot-3",
+              "name": "fechaCreacion",
+              "type": "DateTime",
+              "value": "2026-11-13T09:00"
+            }
+          ]
+        }
+      },
+      "obj_client": {
+        "id": "obj_client",
+        "name": "camila:Persona",
+        "type": "uml-object",
+        "summary": "Persona que crea la solicitud",
+        "description": "Persona que crea la solicitud. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        },
+        "uml": {
+          "classifier": "Persona",
+          "slots": [
+            {
+              "id": "obj_client-slot-0",
+              "name": "id",
+              "type": "UUID",
+              "value": "p-102"
+            },
+            {
+              "id": "obj_client-slot-1",
+              "name": "nombre",
+              "type": "String",
+              "value": "Camila"
+            },
+            {
+              "id": "obj_client-slot-2",
+              "name": "correo",
+              "type": "String",
+              "value": "camila@ejemplo.com"
+            }
+          ]
+        }
+      },
+      "port_public": {
+        "id": "port_public",
+        "name": "Puerto HTTP",
+        "type": "uml-port",
+        "summary": "Entrada de solicitudes",
+        "description": "Entrada de solicitudes. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Producto",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Producto"
+        }
+      },
+      "artifact_api": {
+        "id": "artifact_api",
+        "name": "api-solicitudes.js",
+        "type": "uml-artifact",
+        "summary": "Artefacto desplegable",
+        "description": "Artefacto desplegable. Se utiliza para validar modelos, relaciones, inspector y navegación entre vistas de ATLAS.",
+        "owner": "Equipo Ingeniería",
+        "author": "ATLAS · Laboratorio de interoperabilidad",
+        "status": "Validado para QA",
+        "createdAt": "2026-11-13",
+        "updatedAt": "2026-11-13",
+        "group": "Solicitudes",
+        "technical": "",
+        "links": [],
+        "fields": {
+          "qa-channel": "Web",
+          "qa-sla": 24,
+          "qa-approved": true,
+          "qa-target": "2026-12-15",
+          "qa-notes": "Ejemplo ficticio de QA para ATLAS; no representa datos de producción.",
+          "qa-owner": "Equipo Ingeniería"
+        }
+      }
+    },
+    "diagrams": [
+      {
+        "id": "trace",
+        "name": "08 · Trazabilidad — HU, RF, CU y código",
+        "description": "Del requisito y caso de uso hacia el flujo, endpoint, componente y evidencia.",
+        "type": "trace",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "n-trace-req_hu",
+            "elementId": "req_hu",
+            "x": 20,
+            "y": 75
+          },
+          {
+            "id": "n-trace-req_rf",
+            "elementId": "req_rf",
+            "x": 20,
+            "y": 355
+          },
+          {
+            "id": "n-trace-uc_register",
+            "elementId": "uc_register",
+            "x": 365,
+            "y": 175
+          },
+          {
+            "id": "n-trace-act_register",
+            "elementId": "act_register",
+            "x": 725,
+            "y": 175
+          },
+          {
+            "id": "n-trace-ep_post",
+            "elementId": "ep_post",
+            "x": 1065,
+            "y": 75
+          },
+          {
+            "id": "n-trace-comp_controller",
+            "elementId": "comp_controller",
+            "x": 1405,
+            "y": 75
+          },
+          {
+            "id": "n-trace-doc_evidence",
+            "elementId": "doc_evidence",
+            "x": 1065,
+            "y": 365
+          }
+        ],
+        "edges": [
+          {
+            "id": "e-trace-00",
+            "source": "n-trace-req_hu",
+            "target": "n-trace-uc_register",
+            "label": "Se realiza con",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "e-trace-01",
+            "source": "n-trace-req_rf",
+            "target": "n-trace-uc_register",
+            "label": "Restringe",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "e-trace-02",
+            "source": "n-trace-uc_register",
+            "target": "n-trace-act_register",
+            "label": "Flujo principal",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "e-trace-03",
+            "source": "n-trace-act_register",
+            "target": "n-trace-ep_post",
+            "label": "Invoca",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "e-trace-04",
+            "source": "n-trace-ep_post",
+            "target": "n-trace-comp_controller",
+            "label": "Implementa",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          },
+          {
+            "id": "e-trace-05",
+            "source": "n-trace-req_rf",
+            "target": "n-trace-doc_evidence",
+            "label": "Se comprueba mediante",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep"
+          }
+        ]
+      },
+      {
+        "id": "uml-class",
+        "name": "10 · UML · Clases — CIRCUITO",
+        "description": "Escenario de solicitudes: UML · Clases. Incluye todos los elementos permitidos y todos los tipos de relación habilitados en ATLAS.",
+        "type": "uml-class",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "n-uml-class-cl_request",
+            "elementId": "cl_request",
+            "x": 35,
+            "y": 80,
+            "parentNodeId": "n-uml-class-pkg_domain"
+          },
+          {
+            "id": "n-uml-class-cl_person",
+            "elementId": "cl_person",
+            "x": 35,
+            "y": 310,
+            "parentNodeId": "n-uml-class-pkg_domain"
+          },
+          {
+            "id": "n-uml-class-cl_priority",
+            "elementId": "cl_priority",
+            "x": 975,
+            "y": 105
+          },
+          {
+            "id": "n-uml-class-int_repo",
+            "elementId": "int_repo",
+            "x": 1340,
+            "y": 105
+          },
+          {
+            "id": "n-uml-class-cl_sqlrepo",
+            "elementId": "cl_sqlrepo",
+            "x": 975,
+            "y": 405
+          },
+          {
+            "id": "n-uml-class-cl_service",
+            "elementId": "cl_service",
+            "x": 1340,
+            "y": 405
+          },
+          {
+            "id": "n-uml-class-cl_detail",
+            "elementId": "cl_detail",
+            "x": 435,
+            "y": 80,
+            "parentNodeId": "n-uml-class-pkg_domain"
+          },
+          {
+            "id": "n-uml-class-cl_collection",
+            "elementId": "cl_collection",
+            "x": 975,
+            "y": 760
+          },
+          {
+            "id": "n-uml-class-pkg_domain",
+            "elementId": "pkg_domain",
+            "x": 50,
+            "y": 105
+          }
+        ],
+        "edges": [
+          {
+            "id": "e-uml-class-00",
+            "source": "n-uml-class-cl_person",
+            "target": "n-uml-class-cl_request",
+            "label": "registra",
+            "direction": "both",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "relationKind": "association",
+            "sourceMultiplicity": "1",
+            "targetMultiplicity": "0..*",
+            "sourceRole": "solicitante",
+            "targetRole": "solicitudes"
+          },
+          {
+            "id": "e-uml-class-01",
+            "source": "n-uml-class-cl_sqlrepo",
+            "target": "n-uml-class-int_repo",
+            "label": "utiliza contrato",
+            "direction": "forward",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2",
+            "lineStyle": "dashed",
+            "pathStyle": "bezier",
+            "relationKind": "dependency"
+          },
+          {
+            "id": "e-uml-class-02",
+            "source": "n-uml-class-cl_collection",
+            "target": "n-uml-class-cl_request",
+            "label": "contiene",
+            "direction": "forward",
+            "sourceHandle": "top-1",
+            "targetHandle": "bottom-3",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "relationKind": "aggregation",
+            "sourceMultiplicity": "1",
+            "targetMultiplicity": "0..*"
+          },
+          {
+            "id": "e-uml-class-03",
+            "source": "n-uml-class-cl_request",
+            "target": "n-uml-class-cl_detail",
+            "label": "detalles",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "top-2",
+            "lineStyle": "solid",
+            "pathStyle": "bezier",
+            "relationKind": "composition",
+            "sourceMultiplicity": "1",
+            "targetMultiplicity": "1..*"
+          },
+          {
+            "id": "e-uml-class-04",
+            "source": "n-uml-class-cl_service",
+            "target": "n-uml-class-int_repo",
+            "label": "Depende de · 5",
+            "direction": "forward",
+            "sourceHandle": "bottom-1",
+            "targetHandle": "left",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep",
+            "relationKind": "dependency"
+          },
+          {
+            "id": "e-uml-class-05",
+            "source": "n-uml-class-cl_sqlrepo",
+            "target": "n-uml-class-int_repo",
+            "label": "implementa ISolicitudRepository",
+            "direction": "forward",
+            "sourceHandle": "top-3",
+            "targetHandle": "bottom-1",
+            "lineStyle": "dashed",
+            "pathStyle": "bezier",
+            "relationKind": "realization"
+          }
+        ]
+      },
+      {
+        "id": "uml-object",
+        "name": "11 · UML · Objetos — CIRCUITO",
+        "description": "Escenario de solicitudes: UML · Objetos. Incluye todos los elementos permitidos y todos los tipos de relación habilitados en ATLAS.",
+        "type": "uml-object",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "n-uml-object-obj_req",
+            "elementId": "obj_req",
+            "x": 35,
+            "y": 90,
+            "parentNodeId": "n-uml-object-pkg_domain"
+          },
+          {
+            "id": "n-uml-object-obj_client",
+            "elementId": "obj_client",
+            "x": 435,
+            "y": 90,
+            "parentNodeId": "n-uml-object-pkg_domain"
+          },
+          {
+            "id": "n-uml-object-cl_request",
+            "elementId": "cl_request",
+            "x": 1010,
+            "y": 160
+          },
+          {
+            "id": "n-uml-object-pkg_domain",
+            "elementId": "pkg_domain",
+            "x": 35,
+            "y": 80
+          }
+        ],
+        "edges": [
+          {
+            "id": "e-uml-object-00",
+            "source": "n-uml-object-obj_client",
+            "target": "n-uml-object-obj_req",
+            "label": "solicita",
+            "direction": "none",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "relationKind": "link"
+          },
+          {
+            "id": "e-uml-object-01",
+            "source": "n-uml-object-obj_req",
+            "target": "n-uml-object-cl_request",
+            "label": "Depende de · 2",
+            "direction": "forward",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2",
+            "lineStyle": "dashed",
+            "pathStyle": "bezier",
+            "relationKind": "dependency"
+          }
+        ]
+      },
+      {
+        "id": "uml-component",
+        "name": "12 · UML · Componentes — CIRCUITO",
+        "description": "Escenario de solicitudes: UML · Componentes. Incluye todos los elementos permitidos y todos los tipos de relación habilitados en ATLAS.",
+        "type": "uml-component",
+        "createdAt": "2026-11-13",
+        "nodes": [
+          {
+            "id": "n-uml-component-comp_controller",
+            "elementId": "comp_controller",
+            "x": 30,
+            "y": 100,
+            "parentNodeId": "n-uml-component-pkg_domain"
+          },
+          {
+            "id": "n-uml-component-comp_repository",
+            "elementId": "comp_repository",
+            "x": 435,
+            "y": 100,
+            "parentNodeId": "n-uml-component-pkg_domain"
+          },
+          {
+            "id": "n-uml-component-int_repo",
+            "elementId": "int_repo",
+            "x": 1000,
+            "y": 160
+          },
+          {
+            "id": "n-uml-component-port_public",
+            "elementId": "port_public",
+            "x": 1390,
+            "y": 160
+          },
+          {
+            "id": "n-uml-component-artifact_api",
+            "elementId": "artifact_api",
+            "x": 30,
+            "y": 340,
+            "parentNodeId": "n-uml-component-pkg_domain"
+          },
+          {
+            "id": "n-uml-component-pkg_domain",
+            "elementId": "pkg_domain",
+            "x": 35,
+            "y": 95
+          }
+        ],
+        "edges": [
+          {
+            "id": "e-uml-component-00",
+            "source": "n-uml-component-comp_controller",
+            "target": "n-uml-component-comp_repository",
+            "label": "ensambla interfaces",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "relationKind": "assembly"
+          },
+          {
+            "id": "e-uml-component-01",
+            "source": "n-uml-component-comp_repository",
+            "target": "n-uml-component-int_repo",
+            "label": "provee interfaz",
+            "direction": "forward",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2",
+            "lineStyle": "solid",
+            "pathStyle": "bezier",
+            "relationKind": "provided-interface"
+          },
+          {
+            "id": "e-uml-component-02",
+            "source": "n-uml-component-comp_controller",
+            "target": "n-uml-component-port_public",
+            "label": "requiere interfaz",
+            "direction": "forward",
+            "sourceHandle": "top-1",
+            "targetHandle": "bottom-3",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "relationKind": "required-interface"
+          },
+          {
+            "id": "e-uml-component-03",
+            "source": "n-uml-component-comp_controller",
+            "target": "n-uml-component-int_repo",
+            "label": "Depende de · 4",
+            "direction": "forward",
+            "sourceHandle": "right",
+            "targetHandle": "top-2",
+            "lineStyle": "dashed",
+            "pathStyle": "bezier",
+            "relationKind": "dependency"
+          },
+          {
+            "id": "e-uml-component-04",
+            "source": "n-uml-component-artifact_api",
+            "target": "n-uml-component-comp_controller",
+            "label": "Implementa · 5",
+            "direction": "forward",
+            "sourceHandle": "bottom-1",
+            "targetHandle": "left",
+            "lineStyle": "dashed",
+            "pathStyle": "smoothstep",
+            "relationKind": "realization"
+          }
+        ]
+      }
+    ],
+    "fieldDefinitions": [
+      {
+        "id": "qa-priority",
+        "label": "Prioridad de atención",
+        "forType": "requirement",
+        "kind": "select",
+        "options": [
+          "Baja",
+          "Media",
+          "Alta",
+          "Crítica"
+        ]
+      },
+      {
+        "id": "qa-channel",
+        "label": "Canal de solicitud",
+        "forType": "all",
+        "kind": "select",
+        "options": [
+          "Web",
+          "Móvil",
+          "API",
+          "Presencial"
+        ]
+      },
+      {
+        "id": "qa-sla",
+        "label": "SLA objetivo (horas)",
+        "forType": "all",
+        "kind": "number"
+      },
+      {
+        "id": "qa-approved",
+        "label": "Aprobado por QA",
+        "forType": "all",
+        "kind": "boolean"
+      },
+      {
+        "id": "qa-target",
+        "label": "Fecha de entrega",
+        "forType": "all",
+        "kind": "date"
+      },
+      {
+        "id": "qa-notes",
+        "label": "Notas de implementación",
+        "forType": "all",
+        "kind": "textarea"
+      },
+      {
+        "id": "qa-owner",
+        "label": "Área responsable",
+        "forType": "all",
+        "kind": "text"
+      },
+      {
+        "id": "qa-spec",
+        "label": "Referencia técnica",
+        "forType": "endpoint",
+        "kind": "url"
+      }
+    ]
+  }
+}

@@ -10,7 +10,7 @@ vi.mock('@xyflow/react',()=>({
  ReactFlow:()=>null,Background:()=>null,Controls:()=>null,MiniMap:()=>null,
  useNodesState:(initial:unknown)=>[initial,vi.fn(),vi.fn()],
  useReactFlow:()=>({getNode:()=>null,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})}),
- Handle:()=>null,Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
+ Handle:()=>null,NodeResizer:()=>null,Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
 }))
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))

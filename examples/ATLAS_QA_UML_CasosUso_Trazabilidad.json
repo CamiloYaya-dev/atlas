@@ -1,0 +1,13 @@
+{
+ "schema":1,
+ "elements":{
+  "qa-actor":{"id":"qa-actor","name":"Usuario solicitante","type":"actor","summary":"Persona que crea solicitudes","description":"Actor externo al sistema","owner":"","author":"ATLAS Academy","status":"Borrador","createdAt":"2026-11-13","updatedAt":"2026-11-13","links":[],"fields":{}},
+  "qa-usecase":{"id":"qa-usecase","name":"Registrar solicitud","type":"usecase","summary":"El usuario registra y envía una solicitud","description":"Caso de uso UC-01","owner":"Producto","author":"ATLAS Academy","status":"Borrador","createdAt":"2026-11-13","updatedAt":"2026-11-13","links":[],"fields":{}},
+  "qa-requirement":{"id":"qa-requirement","name":"HU-01 · Registrar solicitud","type":"requirement","summary":"Como solicitante quiero registrar solicitudes","description":"Criterio: validar los datos obligatorios","owner":"Producto","author":"ATLAS Academy","status":"Borrador","createdAt":"2026-11-13","updatedAt":"2026-11-13","childDiagramId":"qa-uml-usecase","childNodeId":"qa-node-case","links":[],"fields":{}}
+ },
+ "diagrams":[
+  {"id":"qa-uml-usecase","name":"UML · Casos de uso — Solicitudes","description":"Actor y caso de uso vinculados","type":"uml-usecase","createdAt":"2026-11-13","nodes":[{"id":"qa-node-actor","elementId":"qa-actor","x":80,"y":210},{"id":"qa-node-case","elementId":"qa-usecase","x":430,"y":215}],"edges":[{"id":"qa-uml-association","source":"qa-node-actor","target":"qa-node-case","sourceHandle":"right","targetHandle":"left","relationKind":"association","direction":"none","lineStyle":"solid"}]},
+  {"id":"qa-trace","name":"HU → caso de uso","description":"Una misma ficha compartida por dos perspectivas","type":"trace","createdAt":"2026-11-13","nodes":[{"id":"qa-node-hu","elementId":"qa-requirement","x":130,"y":200},{"id":"qa-node-reuse","elementId":"qa-usecase","x":480,"y":200}],"edges":[{"id":"qa-trace-edge","source":"qa-node-hu","target":"qa-node-reuse","label":"Se especifica mediante","direction":"forward"}]}
+ ],
+ "fieldDefinitions":[]
+}

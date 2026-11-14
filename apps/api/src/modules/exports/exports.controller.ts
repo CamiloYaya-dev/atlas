@@ -11,6 +11,7 @@ import {encodeCapturedDiagram} from './raster-export'
 import {embedProvenance,readProvenance,sha256,signature,signaturesMatch} from './provenance'
 import type {Provenance} from './provenance'
 import {buildDiagramDictionary,zipFiles} from './advanced-document'
+import {buildDiagramDocx,buildDiagramPdf} from './diagram-documents'
 import {validateAdvancedExport} from '@atlas/contracts'
 import type {AdvancedExportRequest} from '@atlas/contracts'
 
@@ -62,12 +63,13 @@ export async function registerExportsController(app:FastifyInstance){
    await tx.query('COMMIT')
   }catch(error){await tx.query('ROLLBACK');throw error}finally{tx.release()}
   if(advanced&&['dictionary','both'].includes(advanced.mode)){
-   const html=buildDiagramDictionary(saved.document,d,advanced,exportId)
+   const documentFormat=advanced.documentFormat||'html'
+   const documentBytes=documentFormat==='docx'?buildDiagramDocx(saved.document,d,advanced):documentFormat==='pdf'?buildDiagramPdf(saved.document,d,advanced):Buffer.from(buildDiagramDictionary(saved.document,d,advanced,exportId),'utf8')
    const zip=zipFiles([
     {name:`ATLAS_${safeFile(d.name)}.${fmt}`,bytes:finalImage},
-    {name:`ATLAS_${safeFile(d.name)}_Diccionario.html`,bytes:Buffer.from(html,'utf8')}
+    {name:`ATLAS_${safeFile(d.name)}_Fichas.${documentFormat}`,bytes:documentBytes}
    ])
-   return reply.header('X-ATLAS-Export-Id',exportId).header('Content-Disposition',`attachment; filename="ATLAS_${safeFile(d.name)}_Documentacion.zip"`).type('application/zip').send(zip)
+   return reply.header('X-ATLAS-Export-Id',exportId).header('Content-Disposition',`attachment; filename="ATLAS_${safeFile(d.name)}_Fichas.zip"`).type('application/zip').send(zip)
   }
   return reply.header('X-ATLAS-Export-Id',exportId).header('Content-Disposition',`attachment; filename="ATLAS_${safeFile(d.name)}.${fmt}"`).type(fmt==='png'?'image/png':'image/jpeg').send(finalImage)
  })

@@ -1,3 +1,19 @@
+## 2026-11-13 · UML componentes, estructura compuesta, despliegue y paquetes
+- Ensamblaje de interfaces con bola encajada en socket; etiquetas desplazadas para no tapar el símbolo.
+- En estructura compuesta: clasificador estructurado, parte, rol de referencia, colaboración y puerto acoplado a borde; conectores cuadrados entre partes.
+- En despliegue: cuatro clases de elemento, nodos/entornos anidados, iconos de dispositivo y solo comunicación o despliegue para conexiones nuevas.
+- En paquetes: únicamente paquetes y subpaquetes reales; jerarquías anidadas con validación de ciclos y posiciones relativas.
+- Reglas de extremos por semántica UML protegidas en frontend y backend, con compatibilidad de lectura de diagramas antiguos.
+- 47 regresiones específicas del grafo y JSON de QA vinculado con cuatro vistas; sin migraciones ni cambios de licencia.
+- Suite UI completa y cobertura ≥90% pendientes de ejecución con dependencias nativas compatibles.
+
+## 2026-11-13 · UML estructural: clases, objetos y componentes (parche)
+- Paquetes reales con pertenencia de nodos por vista, drag & drop y cambio en Inspector; coordenadas relativas, validación backend y permisos.
+- Atributos y operaciones UML tipadas (visibilidad, longitud, multiplicidad, parámetros y retorno), slots de objetos con clase y valor, componente con símbolo UML.
+- Líneas estructurales específicas: asociación, agregación, composición, generalización, realización, dependencia, interfaces proporcionadas/requeridas y ensamblaje; multiplicidad y roles en extremos.
+- Fichas de exportación avanzadas incluyen estructura UML (se mantiene la autorización premium).
+- Contrato/validación compatibles con documentos anteriores, sin migraciones; 35 pruebas de grafo específicas y ejemplo importable de tres vistas UML más trazabilidad.
+
 ## ATLAS V4.8.1 — Editor de relaciones y navegación precisa (13 noviembre 2026)
 
 - Corregida validación de conexiones del laboratorio técnico C2 para reconocer relaciones correctas independientemente del sentido de dibujo.
@@ -187,3 +203,26 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Selección por caja y campo: imagen, diccionario o excluir. Incluye relaciones/vínculos y personalizados.
 - Exportación HTML autónoma de diccionario en ZIP junto con PNG/JPG firmados. Sin migraciones ni nuevas dependencias.
 - Nuevas pruebas unitarias, de UI y regresión independientes de binarios nativos.
+
+## 2026-11-13 · ATLAS V4.8.1 — UML y fichas exportables
+- Corrección de fichas de Inspector fuera de la geometría del grafo en imágenes; rutas, nodos y puertos conservan su render real.
+- Nueva elección de PDF, Word (.docx) o HTML para fichas documentales de exportación PRO; «Diccionario» pasa a «Fichas de elementos».
+- Retirado acceso superior redundante «Aprender ATLAS»; sigue en menú lateral.
+- Catálogo agrupado de 14 vistas UML con paletas y tipos de relaciones específicos; diagrama de casos de uso con actor representado como persona y óvalo; elementos reutilizables y navegación a caja concreta desde trazabilidad.
+- Validaciones de compatibilidad y permisos en backend, sin migraciones.
+- Véase `docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md` para alcance y limitaciones del soporte UML.
+
+### 13/11/2026 · UML 2.5.1, conectores normativos y QA tutorial
+- Registro único de relaciones UML de las 14 vistas con dirección, trazo y terminales SVG según tipo.
+- Control de notación en frontend/API, renderizado compatible con relaciones históricas sin mutarlas.
+- Rombos blanco/negro, triángulos, bola/socket, orientados por puertos; nuevas asociaciones navegables por tipo.
+- Mejoras visuales para decisiones, bifurcaciones, pseudostates y líneas de vida.
+- Test UI de tutorial navega por Temario para evitar seis actualizaciones pesadas bajo cobertura.
+- Documentación en `docs/UML_2_5_1_NOTACION_Y_QA_2026_11_13.md`. Conformidad normativa total no declarada.
+
+## Hotfix — ensamblaje UML y redimensionado por vista (13/11/2026)
+
+- Ensamblaje orientado a la tangente del recorrido SVG real, con máscara localizada para evitar trazos cruzando la bola/socket.
+- Ocultar delegación de nuevos conectores en estructura compuesta, conservando visualización histórica.
+- Ancho/alto opcional por aparición de caja, resize desde esquinas e Inspector, validación de servidor, reanclaje de puertos y límites para contenedores.
+- 5 nuevas pruebas enfocadas y actualización de mocks React Flow (`NodeResizer`).

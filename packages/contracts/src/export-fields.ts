@@ -1,10 +1,12 @@
 /** Campos exportables del inspector; catálogo compartido entre frontend y servidor. */
 import type {Diagram,FieldDefinition,ModelElement,ProjectDocument} from './index'
+import {umlAttributeText,umlOperationText,umlObjectTitle} from './uml-structure'
 
 export type ExportPlacement='omit'|'embed'|'dictionary'
 export type AdvancedExportMode='simple'|'embedded'|'dictionary'|'both'
 export type ExportFieldChoices=Record<string,Record<string,ExportPlacement>>
-export interface AdvancedExportRequest {mode:AdvancedExportMode;fields:ExportFieldChoices}
+export type DocumentExportFormat='html'|'pdf'|'docx'
+export interface AdvancedExportRequest {mode:AdvancedExportMode;fields:ExportFieldChoices;documentFormat?:DocumentExportFormat}
 export interface ExportField {key:string;label:string;value:string}
 export const EXPORT_BASE_FIELDS:ReadonlyArray<readonly [string,string]>=[
  ['summary','Resumen'],['description','Descripción'],['technical','Detalle técnico'],
@@ -40,9 +42,14 @@ export function availableExportFields(doc:ProjectDocument,diagram:Diagram,elemen
   '@linked':linkedName,'@relations':incident
  }
  const standard=EXPORT_BASE_FIELDS.map(([key,label])=>({key,label,value:vals[key]||''}))
+ const uml=element.uml||{}
+ const node=diagram.nodes.find(n=>n.elementId===elementId)
+ const packageNode=diagram.nodes.find(n=>n.id===node?.parentNodeId)
+ const umlFields:ExportField[]=element.type==='uml-object'?[{key:'uml.classifier',label:'Clase de la instancia',value:umlObjectTitle(element.name,uml.classifier)},{key:'uml.slots',label:'Valores del objeto',value:(uml.slots||[]).map(s=>`${s.name}${s.type?`: ${s.type}`:''} = ${s.value}`).join('\n')}]:['uml-class','uml-interface','uml-enumeration'].includes(element.type)?[{key:'uml.attributes',label:'Atributos UML',value:(uml.attributes||[]).map(umlAttributeText).join('\n')},{key:'uml.operations',label:'Operaciones UML',value:(uml.operations||[]).map(umlOperationText).join('\n')}]:[]
+ if(packageNode)umlFields.push({key:'uml.package',label:'Paquete contenedor',value:doc.elements[packageNode.elementId]?.name||''})
  const custom=doc.fieldDefinitions.filter((definition:FieldDefinition)=>definition.forType==='all'||definition.forType===element.type)
   .map(definition=>({key:`custom:${definition.id}`,label:definition.label,value:stringify(element.fields[definition.id])}))
- return [...standard,...custom]
+ return [...standard,...umlFields,...custom]
 }
 /** El servidor reconstruye todos los campos desde el documento autorizado, nunca desde texto del cliente. */
 export function validateAdvancedExport(doc:ProjectDocument,diagram:Diagram,value:unknown):AdvancedExportRequest{
@@ -63,7 +70,8 @@ export function validateAdvancedExport(doc:ProjectDocument,diagram:Diagram,value
    if(placement==='dictionary'&&!['dictionary','both'].includes(String(mode)))throw Error('Modo no permite diccionario')
   }
  }
- return {mode:mode as AdvancedExportMode,fields:fields as ExportFieldChoices}
+ if(input.documentFormat!==undefined&&!['html','pdf','docx'].includes(String(input.documentFormat)))throw Error('Formato de documento no permitido')
+ return {mode:mode as AdvancedExportMode,fields:fields as ExportFieldChoices,...(input.documentFormat?{documentFormat:input.documentFormat as DocumentExportFormat}:{})}
 }
 export function exportFieldsFor(doc:ProjectDocument,diagram:Diagram,element:ModelElement,nodeId:string,request:AdvancedExportRequest,placement:Exclude<ExportPlacement,'omit'>):ExportField[]{
  const selected=request.fields[nodeId]||{}

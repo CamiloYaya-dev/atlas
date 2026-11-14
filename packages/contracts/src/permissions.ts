@@ -1,6 +1,6 @@
 import type {DiagramType,ElementType} from './index'
-export const DIAGRAM_KINDS=['c1','c2','c3','c4','process','sequence','data','trace','custom'] as const satisfies readonly DiagramType[]
-export const ELEMENT_KINDS=['system','actor','container','component','service','endpoint','process','activity','usecase','requirement','database','external','event','document'] as const satisfies readonly ElementType[]
+export const DIAGRAM_KINDS=['c1','c2','c3','c4','process','sequence','data','trace','custom','uml-class','uml-object','uml-component','uml-composite','uml-deployment','uml-package','uml-profile','uml-usecase','uml-activity','uml-state','uml-sequence','uml-communication','uml-interaction-overview','uml-timing'] as const satisfies readonly DiagramType[]
+export const ELEMENT_KINDS=['system','actor','container','component','service','endpoint','process','activity','usecase','requirement','database','external','event','document','uml-class','uml-interface','uml-enumeration','uml-object','uml-package','uml-node','uml-artifact','uml-device','uml-execution','uml-port','uml-part','uml-reference-role','uml-collaboration','uml-profile','uml-stereotype','uml-action','uml-decision','uml-start','uml-end','uml-fork','uml-state','uml-transition','uml-lifeline','uml-message','uml-interaction','uml-time','uml-constraint','uml-frame','uml-signal','uml-region'] as const satisfies readonly ElementType[]
 export const RELATION_KINDS=['functional','technical','mixed'] as const
 export const GLOBAL_ACTIONS=['project.read','project.create','project.rename','project.delete','project.members.manage','workspace.rename','workspace.delete','element.technical.view','element.technical.edit','field.configure','artifact.import','artifact.export','workspace.members.manage','workspace.roles.manage','workspace.audit.view'] as const
 export const PERMISSIONS = [
@@ -14,7 +14,7 @@ export type PermissionScope='functional'|'technical'|'mixed'
 export const ELEMENT_SCOPE:Record<ElementType,PermissionScope> = {
  system:'mixed', actor:'mixed', container:'technical',component:'technical',service:'technical',endpoint:'technical',
  process:'functional',activity:'functional',usecase:'functional',requirement:'functional',database:'technical',
- external:'mixed',event:'mixed',document:'mixed'
+ external:'mixed',event:'mixed',document:'mixed','uml-class':'technical','uml-interface':'technical','uml-enumeration':'technical','uml-object':'technical','uml-package':'technical','uml-node':'technical','uml-artifact':'technical','uml-device':'technical','uml-execution':'technical','uml-port':'technical','uml-part':'technical','uml-reference-role':'technical','uml-collaboration':'technical','uml-profile':'technical','uml-stereotype':'technical','uml-action':'functional','uml-decision':'functional','uml-start':'functional','uml-end':'functional','uml-fork':'functional','uml-state':'functional','uml-transition':'functional','uml-lifeline':'technical','uml-message':'functional','uml-interaction':'functional','uml-time':'technical','uml-constraint':'technical','uml-frame':'technical','uml-signal':'functional','uml-region':'functional'
 }
 export function relationScope(a:ElementType,b:ElementType):PermissionScope {
  const x=ELEMENT_SCOPE[a], y=ELEMENT_SCOPE[b]
@@ -24,18 +24,18 @@ export const ROLE_PRESETS:{key:string;name:string;description:string;permissions
  {key:'owner',name:'Propietario',description:'Control completo del espacio',permissions:[...PERMISSIONS]},
  {key:'admin',name:'Administrador',description:'Gestión de usuarios, roles, diagramas y modelos',permissions:PERMISSIONS.filter(p=>p!=='workspace.delete')},
  {key:'functional',name:'Analista funcional',description:'Procesos, casos de uso y requerimientos',permissions:[
-  'project.read','project.create',...['c1','process','trace','sequence','custom'].map(x=>`diagram.view.${x}`),
-  ...['process','trace','custom'].flatMap(x=>['create','edit','delete','layout'].map(a=>`diagram.${a}.${x}`)),
-  ...['process','activity','usecase','requirement','actor','system','event','external','document'].map(x=>`element.view.${x}`),
-  ...['process','activity','usecase','requirement'].flatMap(x=>['create','edit','delete'].map(a=>`element.${a}.${x}`)),
-  ...['create','edit','delete'].map(a=>`relation.${a}.functional`),
+  'project.read','project.create',...['c1','process','trace','sequence','custom','uml-usecase','uml-activity','uml-state'].map(x=>`diagram.view.${x}`),
+  ...['process','trace','custom','uml-usecase','uml-activity','uml-state'].flatMap(x=>['create','edit','delete','layout'].map(a=>`diagram.${a}.${x}`)),
+  ...['process','activity','usecase','requirement','actor','system','event','external','document','uml-action','uml-decision','uml-start','uml-end','uml-fork','uml-state','uml-transition'].map(x=>`element.view.${x}`),
+  ...['process','activity','usecase','requirement','actor','uml-action','uml-decision','uml-start','uml-end','uml-fork','uml-state','uml-transition'].flatMap(x=>['create','edit','delete'].map(a=>`element.${a}.${x}`)),
+  ...['create','edit','delete'].map(a=>`relation.${a}.functional`),...['create','edit','delete'].map(a=>`relation.${a}.mixed`),
  ]},
  {key:'technical',name:'Arquitecto técnico',description:'Arquitectura, componentes, APIs y datos',permissions:[
-  'project.read','project.create','element.technical.view','element.technical.edit',...['c1','c2','c3','c4','sequence','data','custom'].map(x=>`diagram.view.${x}`),
-  ...['c2','c3','c4','data','sequence','custom'].flatMap(x=>['create','edit','delete','layout'].map(a=>`diagram.${a}.${x}`)),
-  ...['system','actor','container','component','service','endpoint','database','event','external','document'].map(x=>`element.view.${x}`),
-  ...['container','component','service','endpoint','database'].flatMap(x=>['create','edit','delete'].map(a=>`element.${a}.${x}`)),
-  ...['create','edit','delete'].map(a=>`relation.${a}.technical`),
+  'project.read','project.create','element.technical.view','element.technical.edit',...['c1','c2','c3','c4','sequence','data','custom',...DIAGRAM_KINDS.filter(x=>x.startsWith('uml-'))].map(x=>`diagram.view.${x}`),
+  ...['c2','c3','c4','data','sequence','custom',...DIAGRAM_KINDS.filter(x=>x.startsWith('uml-'))].flatMap(x=>['create','edit','delete','layout'].map(a=>`diagram.${a}.${x}`)),
+  ...['system','actor','container','component','service','endpoint','database','event','external','document',...ELEMENT_KINDS.filter(x=>x.startsWith('uml-'))].map(x=>`element.view.${x}`),
+  ...['container','component','service','endpoint','database','actor','usecase',...ELEMENT_KINDS.filter(x=>x.startsWith('uml-'))].flatMap(x=>['create','edit','delete'].map(a=>`element.${a}.${x}`)),
+  ...['create','edit','delete'].map(a=>`relation.${a}.technical`),...['create','edit','delete'].map(a=>`relation.${a}.mixed`),
  ]},
  {key:'viewer',name:'Lector',description:'Solo consulta de vistas autorizadas',permissions:[
   'project.read',...['c1','process','trace'].map(x=>`diagram.view.${x}`),
