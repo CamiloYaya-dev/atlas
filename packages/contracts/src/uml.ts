@@ -18,9 +18,9 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-profile':['uml-profile','uml-stereotype','uml-metaclass','uml-package'],
  'uml-usecase':['actor','usecase','uml-subject'],
  'uml-activity':['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'],
- 'uml-state':['uml-start','uml-state','uml-transition','uml-end','uml-region'],
- 'uml-sequence':['actor','uml-lifeline','uml-message','uml-frame','uml-interaction'],
- 'uml-communication':['actor','uml-object','uml-lifeline','uml-message'],
+ 'uml-state':['uml-start','uml-state','uml-end','uml-region','uml-decision','uml-fork','uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point','uml-terminate'],
+ 'uml-sequence':['uml-lifeline','uml-frame','uml-interaction','uml-activation','uml-destruction'],
+ 'uml-communication':['actor','uml-object','uml-lifeline','uml-frame'],
  'uml-interaction-overview':['uml-start','uml-interaction','uml-decision','uml-end','uml-frame'],
  'uml-timing':['uml-lifeline','uml-state','uml-time','uml-constraint'],
 }
@@ -46,6 +46,9 @@ export const UML_LEGACY_ELEMENTS:Partial<Record<DiagramType,readonly ElementType
  'uml-usecase':['system','requirement'],
  'uml-profile':['uml-class','uml-constraint','uml-model'],
  'uml-activity':['uml-signal'],
+ 'uml-state':['uml-transition'],
+ 'uml-sequence':['actor','uml-message'],
+ 'uml-communication':['uml-message'],
  'uml-package':['uml-class','uml-interface','component']
 }
 export const UML_LEGACY_RELATIONS:Partial<Record<DiagramType,readonly string[]>>={
@@ -77,7 +80,15 @@ export const UML_RELATION_LABELS:Record<string,string>={
  deployment:'Dependencia / Despliegue / Manifestación — «deploy» (artefacto → nodo)',
  manifestation:'Dependencia / Despliegue / Manifestación — «manifest» (artefacto → elemento)',
  'control-flow':'Flujo de control — línea continua con punta abierta',
- 'object-flow':'Flujo de objeto — línea continua con punta abierta'
+ 'object-flow':'Flujo de objeto — línea continua con punta abierta',
+ transition:'Transición — evento [guarda] / efecto',
+ trigger:'Disparador — etiqueta de evento sobre la transición',
+ completion:'Transición de finalización — sin disparador explícito',
+ message:'Mensaje síncrono — línea continua con punta rellena',
+ reply:'Mensaje de retorno — línea discontinua con punta abierta',
+ 'async-message':'Mensaje asíncrono — línea continua con punta abierta',
+ create:'Creación de participante — «create»',
+ destroy:'Destrucción de participante — final en X'
 }
 export const umlRelationLabel=(kind:string)=>UML_RELATION_LABELS[kind]||kind.replaceAll('-', ' ')
 
@@ -116,6 +127,25 @@ export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:
   if(kind==='include'||kind==='extend')return source==='usecase'&&target==='usecase'
   if(kind==='generalization')return source===target&&(source==='actor'||source==='usecase')
   return false
+ }
+
+ if(diagram==='uml-sequence'){
+  const participant=(t:ElementType)=>['actor','uml-lifeline','uml-activation'].includes(t)
+  if(kind==='create')return participant(source)&&target==='uml-lifeline'
+  if(kind==='destroy')return participant(source)&&['uml-lifeline','uml-activation','uml-destruction'].includes(target)
+  return participant(source)&&participant(target)&&['message','reply','async-message'].includes(kind)
+ }
+ if(diagram==='uml-communication'){
+  const participant=(t:ElementType)=>['actor','uml-object','uml-lifeline'].includes(t)
+  if(!participant(source)||!participant(target))return false
+  return ['link','message','reply','async-message'].includes(kind)
+ }
+ if(diagram==='uml-state'){
+  const stateLike=(t:ElementType)=>['uml-start','uml-state','uml-end','uml-region','uml-decision','uml-fork','uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point','uml-terminate'].includes(t)
+  if(!stateLike(source)||!stateLike(target))return false
+  if(target==='uml-start'||source==='uml-end'||source==='uml-terminate')return false
+  if(kind==='generalization')return source==='uml-state'&&target==='uml-state'
+  return ['transition','trigger','completion'].includes(kind)
  }
  if(diagram==='uml-composite'){
   const connectable=(t:ElementType)=>['uml-part','uml-reference-role','uml-port'].includes(t)

@@ -13,7 +13,8 @@ for(const name of ['coverage-summary.json','index.html','lcov.info'])
 const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
 const env={...process.env,NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
  MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',ATLAS_ALLOW_DB_TESTS:'true',
- ATLAS_CSRF_SECRET:'atlas-local-qa-coverage-only-2026-not-production'}
+ ATLAS_CSRF_SECRET:'atlas-local-qa-coverage-only-2026-not-production',
+ ATLAS_EXPORT_SIGNING_KEY:'atlas-local-qa-export-signing-only-2026-not-production'}
 function exec(label,bin,args){
  console.log(`\n[ATLAS COVERAGE] ${label}`)
  // Windows requires a shell for npm.cmd, but an absolute node.exe path MUST NOT

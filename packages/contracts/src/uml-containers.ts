@@ -15,6 +15,7 @@ export function umlContainerAllows(diagram:DiagramType,parent:ElementType,child:
   if(parent==='uml-part')return child==='uml-port'
   return false
  }
+ if(diagram==='uml-sequence')return (parent==='uml-lifeline'||parent==='actor')&&['uml-activation','uml-destruction'].includes(child)||parent==='uml-activation'&&child==='uml-destruction'
  if(diagram==='uml-activity')return parent==='uml-partition'&&['uml-partition','uml-start','uml-end','uml-flow-final','uml-action','uml-decision','uml-fork','uml-object-node'].includes(child)
  if(diagram==='uml-deployment'){
   if(parent==='uml-node'||parent==='uml-device')return ['uml-node','uml-execution','uml-artifact'].includes(child)

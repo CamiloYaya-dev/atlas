@@ -242,6 +242,34 @@
 .uml-lifeline-head{padding:10px 12px;text-align:center;background:white;border:1.5px solid #617eaa;border-radius:3px;min-width:125px;font-size:12px;font-weight:700;color:#304c71}
 .uml-lifeline-tail{flex:1;width:2px;background:repeating-linear-gradient(to bottom,#6b85ac 0 9px,transparent 9px 15px)}
 
+.atlas-node.uml-sequence-participant,.atlas-node.uml-interaction-frame,.atlas-node.uml-interaction-ref,.atlas-node.uml-state-card,.atlas-node.uml-state-region,.atlas-node.uml-communication-participant{box-shadow:none!important}
+.atlas-node.uml-interaction-frame{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border:1.8px solid #546f95!important;border-radius:2px!important;padding:0!important;background:#fff!important;overflow:hidden!important}
+.uml-interaction-frame-shell{position:relative;height:100%;padding:34px 14px 12px 14px;color:#294565}
+.uml-interaction-frame-tag{position:absolute;left:0;top:0;min-width:44px;padding:4px 9px 5px;border-right:1.8px solid #546f95;border-bottom:1.8px solid #546f95;background:#eef4ff;font-weight:800;font-size:12px;text-transform:lowercase}
+.uml-interaction-frame-title{font-size:15px;font-weight:800;color:#213a5c;overflow-wrap:anywhere}
+.uml-interaction-frame-summary{margin-top:8px;font-size:12px;color:#5c708e;white-space:pre-wrap;line-height:1.45}
+.atlas-node.uml-interaction-ref{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border:1.8px solid #546f95!important;border-radius:2px!important;padding:0!important;background:#fff!important;overflow:hidden!important}
+.uml-interaction-ref-shell{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 14px 14px;color:#294565;text-align:center}
+.uml-interaction-ref-tag{position:absolute;left:0;top:0;min-width:46px;padding:4px 9px 5px;border-right:1.8px solid #546f95;border-bottom:1.8px solid #546f95;background:#eef4ff;font-weight:800;font-size:12px;text-transform:lowercase}
+.uml-interaction-ref-title{font-size:15px;font-weight:800;color:#213a5c;max-width:100%;overflow-wrap:anywhere}
+.uml-interaction-ref-summary{margin-top:6px;font-size:12px;color:#5c708e;line-height:1.4}
+.atlas-node.uml-state-card{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border:2px solid #526a8f!important;border-radius:19px!important;padding:0!important;background:#fff!important;overflow:hidden!important}
+.uml-state-shell{display:flex;flex-direction:column;height:100%;color:#294565}
+.uml-state-name{padding:15px 14px 12px;text-align:center;font-size:16px;font-weight:800;color:#253c5e}
+.uml-state-compartment{border-top:1.5px solid #cfd8ea;padding:10px 12px 12px;font-size:12px;line-height:1.45;color:#48627f;white-space:pre-wrap;overflow-wrap:anywhere}
+.atlas-node.uml-state-region{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border:1.8px solid #546f95!important;border-radius:18px!important;padding:0!important;background:#f8fbff!important;overflow:hidden!important}
+.uml-state-region-title{padding:14px 16px 10px;text-align:center;font-size:16px;font-weight:800;color:#243d61;border-bottom:1px solid #d8e1f0}
+.uml-state-region-caption{padding:8px 14px;font-size:11px;color:#607791;text-align:center}
+.atlas-node.uml-communication-participant{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;border:1.8px solid #546f95!important;border-radius:10px!important;padding:10px 12px!important;background:#fff!important;display:flex!important;align-items:center;justify-content:center;text-align:center!important}
+.uml-communication-participant-box{display:grid;gap:5px;max-width:100%}
+.uml-communication-title{font-size:14px;font-weight:800;color:#233d5f;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.uml-communication-participant-box small{font-size:11px;color:#627993;line-height:1.35}
+.uml-diagram-uml-state.uml-decision-card .uml-decision-shape,.uml-diagram-uml-state.uml-decision-card .uml-decision-shape svg{width:100%;height:100%;display:block;color:#405a80}
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-state.uml-decision-card,.react-flow__node-atlas .atlas-node.uml-diagram-uml-state.uml-fork-card,.react-flow__node-atlas .atlas-node.uml-diagram-uml-state.uml-pseudostate-card{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important}
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-state.uml-fork-card .uml-fork-symbol{top:calc(50% - 5px);height:10px;background:#1e2741;border-radius:1px}
+.react-flow__node-atlas:hover .uml-diagram-uml-state>.node-handle{opacity:1}
+.react-flow__node-atlas .uml-diagram-uml-state.uml-decision-card:not(.selected)>.node-handle,.react-flow__node-atlas .uml-diagram-uml-state.uml-fork-card:not(.selected)>.node-handle,.react-flow__node-atlas .uml-diagram-uml-state.uml-pseudostate-card:not(.selected)>.node-handle{opacity:0;transition:opacity .12s}
+
 /* ATLAS UML 2.5.1 — encapsulated classifiers, ports and nested packages */
 .atlas-node.uml-composite-classifier{
  width:780px!important;min-width:780px!important;height:520px!important;min-height:520px!important;
@@ -426,3 +454,63 @@
 .react-flow__node-atlas>.atlas-activity-control .atlas-uml-symbol-resize-handle{
  width:6px;height:6px;background:#fff;border:1px solid #326ee7;border-radius:1px;
 }
+
+/* UML state/sequence symbol fixes: dedicated symbol host instead of legacy cards. */
+.atlas-node.uml-decision-card::before{display:none!important}
+.react-flow__node-atlas:has(>.atlas-uml-control),
+.react-flow__node-atlas.selected:has(>.atlas-uml-control){
+ background:transparent!important;border:0!important;border-radius:0!important;
+ outline:0!important;box-shadow:none!important;padding:0!important;
+}
+.react-flow__node-atlas>.atlas-uml-control{
+ position:relative;width:100%;height:100%;min-width:0;min-height:0;
+ border:0!important;outline:0!important;border-radius:0!important;
+ padding:0!important;background:transparent!important;box-shadow:none!important;
+ display:block;isolation:isolate;
+}
+.react-flow__node-atlas>.atlas-uml-control:hover,
+.react-flow__node-atlas>.atlas-uml-control.selected{border:0!important;background:transparent!important;box-shadow:none!important}
+.react-flow__node-atlas>.atlas-uml-control .uml-control-glyph{
+ position:absolute!important;inset:0!important;display:block!important;
+ width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+ padding:0!important;margin:0!important;background:transparent!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ pointer-events:none;overflow:visible;z-index:0;
+}
+.react-flow__node-atlas>.atlas-uml-control .atlas-activity-symbol-port,
+.react-flow__node-atlas>.atlas-uml-control .atlas-sequence-symbol-port{
+ width:9px!important;height:9px!important;min-width:9px!important;min-height:9px!important;
+ border-radius:50%!important;border:2px solid white!important;
+ background:#6c91c1!important;box-shadow:0 0 0 1px #bad0e8!important;
+ z-index:2;
+}
+.react-flow__node-atlas>.atlas-uml-control:not(.selected)>.atlas-activity-symbol-port,
+.react-flow__node-atlas>.atlas-uml-control:not(.selected)>.atlas-sequence-symbol-port{opacity:0;transition:opacity .12s}
+.react-flow__node-atlas:hover>.atlas-uml-control>.atlas-activity-symbol-port,
+.react-flow__node-atlas:hover>.atlas-uml-control>.atlas-sequence-symbol-port,
+.react-flow__node-atlas>.atlas-uml-control.selected>.atlas-activity-symbol-port,
+.react-flow__node-atlas>.atlas-uml-control.selected>.atlas-sequence-symbol-port{opacity:1}
+.react-flow__node-atlas>.atlas-uml-control .atlas-uml-symbol-resize-line{border-color:transparent!important}
+.react-flow__node-atlas>.atlas-uml-control .atlas-uml-symbol-resize-handle{width:6px;height:6px;background:#fff;border:1px solid #326ee7;border-radius:1px}
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-fork .uml-fork-symbol.uml-control-glyph{left:0!important;right:0!important;top:0!important;bottom:0!important;background:transparent!important;border-radius:0!important}
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-activation .uml-sequence-activation-bar rect{fill:white;stroke:#344965}
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-destruction,
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-terminate{color:#344965}
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-history-shallow text,
+.react-flow__node-atlas>.atlas-uml-control.kind-uml-history-deep text{font-family:Arial,sans-serif}
+
+/* ATLAS UML · Secuencia: combined fragments with UML operand separators. */
+.atlas-node.uml-diagram-uml-sequence.uml-interaction-frame{z-index:auto!important;background:#fff9!important}
+.uml-interaction-frame-shell.uml-combined-fragment{display:flex;flex-direction:column;padding:34px 0 0!important;min-height:100%;height:100%}
+.uml-combined-fragment>.uml-interaction-frame-title{padding:0 12px 9px;flex:0 0 auto;font-size:12px;max-width:100%;overflow-wrap:anywhere}
+.uml-fragment-operands{flex:1;min-height:0;display:flex;flex-direction:column}
+.uml-fragment-operand{flex:1;min-height:34px;position:relative;padding:5px 9px;color:#27486c;font:11px/1.5 ui-monospace,monospace}
+.uml-fragment-operand+.uml-fragment-operand{border-top:1.5px dashed #6c7e9c}
+.uml-fragment-operand>span{display:inline-block;background:#ffffffeb;padding:1px 4px;border-radius:3px}
+.react-flow__node-atlas:has(>.atlas-uml-control.kind-uml-activation),
+.react-flow__node-atlas:has(>.atlas-uml-control.kind-uml-destruction){z-index:4!important}
+/* El modo área habilita una selección múltiple real sin diálogos nativos. */
+.atlas-select-area.active{background:#e6efff!important;color:#2252a7!important;border-color:#7ba4ed!important}
+.atlas-select-area,.atlas-remove-selection{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.canvas-actions:has(.atlas-select-area){flex-wrap:wrap}
+.atlas-node.uml-diagram-uml-sequence.uml-interaction-frame{background:transparent!important}

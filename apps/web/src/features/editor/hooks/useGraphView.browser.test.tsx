@@ -47,3 +47,41 @@ describe('Relaciones configurables',()=>{
   expect(edge.style?.strokeDasharray).toBe('7 5');expect(edge.type).toBe('bezier')
  })
 })
+
+describe('UML Secuencia — regresión de mensajes paralelos',()=>{
+ it('seis mensajes entre dos ejecuciones se distribuyen en distintos anclajes laterales, sin sobrescribir JSON',()=>{
+  const model=structuredClone(doc)
+  const element=(id:string,type:'uml-lifeline'|'uml-activation')=>({
+   ...structuredClone(Object.values(doc.elements)[0]),id,name:id,type
+  })
+  model.elements['participant-a']=element('participant-a','uml-lifeline')
+  model.elements['participant-b']=element('participant-b','uml-lifeline')
+  model.elements['activation-a']=element('activation-a','uml-activation')
+  model.elements['activation-b']=element('activation-b','uml-activation')
+  const diagram={
+   id:'test-sequence',type:'uml-sequence' as const,name:'Mensajes múltiples',description:'',createdAt:'2026-11-14',
+   nodes:[
+    {id:'pa',elementId:'participant-a',x:50,y:80,width:170,height:500},
+    {id:'pb',elementId:'participant-b',x:420,y:80,width:170,height:500},
+    {id:'aa',elementId:'activation-a',x:61,y:80,width:48,height:340,parentNodeId:'pa'},
+    {id:'ab',elementId:'activation-b',x:61,y:80,width:48,height:340,parentNodeId:'pb'},
+   ],
+   edges:Array.from({length:6},(_,i)=>({
+    id:`edge-${i}`,source:i%2===0?'aa':'ab',target:i%2===0?'ab':'aa',
+    sourceHandle:i===0?'top-2':i%2===0?'right':'left',
+    targetHandle:i%2===0?'left':'right',relationKind:i%2===0?'message':'reply',label:`mensaje ${i}`
+   }))
+  }
+  model.diagrams=[diagram]
+  const input={doc:model,diagram,groups:[],dependencies:false,mode:'technical' as const,selectedId:null,canEdit:true}
+  const {result}=renderHook(()=>useGraphView(input))
+  expect(result.current.edges).toHaveLength(6)
+  expect(result.current.edges.every(e=>e.type==='atlas-uml')).toBe(true)
+  expect(result.current.edges.every(e=>String(e.sourceHandle).startsWith('seq-'))).toBe(true)
+  expect(result.current.edges.every(e=>String(e.targetHandle).startsWith('seq-'))).toBe(true)
+  expect(new Set(result.current.edges.filter(e=>e.source==='aa').map(e=>e.sourceHandle)).size).toBe(3)
+  expect(new Set(result.current.edges.filter(e=>e.target==='aa').map(e=>e.targetHandle)).size).toBe(3)
+  expect(diagram.edges[0].sourceHandle).toBe('top-2') // No se reescribe el historial.
+  expect(result.current.nodes.find(n=>n.id==='aa')?.data.sequenceActivationHeight).toBe(340)
+ })
+})

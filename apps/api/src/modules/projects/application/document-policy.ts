@@ -1,6 +1,6 @@
 import {isDeepStrictEqual} from 'node:util'
 import type {Diagram,DiagramNode,DiagramEdge,ModelElement,ProjectDocument,FieldDefinition} from '@atlas/contracts'
-import {isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,atlasNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@atlas/contracts'
+import {sequenceSnapChild,sequenceActivationHandleValid,isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,atlasNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@atlas/contracts'
 import {relationScope,umlElementAllowed,umlRelationAllowed,validUmlDetail} from '@atlas/contracts'
 import type {Access} from '../../../security/roles'
 import {allowed,requirePermission} from '../../../security/roles'
@@ -52,7 +52,12 @@ export function ensureUniqueIds(doc:ProjectDocument){
     const parentKind=doc.elements[parent.elementId].type
     const size=atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id))
     const port=doc.elements[n.elementId].type==='uml-port'
-    if(n.x<(port?-100:0)||n.y<(port?-45:0)||n.x>size.width+(port?0:-20)||n.y>size.height+(port?0:-20))throw new DomainError('Caja fuera de contenedor UML',400)
+    const destruction=d.type==='uml-sequence'&&doc.elements[n.elementId].type==='uml-destruction'
+    // A destruction occurrence is centered on the endpoint and intentionally
+    // straddles the lower edge of the participant or activation.
+    const anchor=destruction?sequenceSnapChild(parentKind,'uml-destruction',size,atlasNodeSize(d.type,doc.elements[n.elementId],n),n.y):undefined
+    const anchored=!!anchor&&n.x===anchor.x&&n.y===anchor.y
+    if(!anchored&&(n.x<(port?-100:0)||n.y<(port?-45:0)||n.x>size.width+(port?0:-20)||n.y>size.height+(port?0:-20)))throw new DomainError('Caja fuera de contenedor UML',400)
    }
    const element=doc.elements[n.elementId]
    if((n.width!==undefined||n.height!==undefined)&&d.nodes.some(child=>child.parentNodeId===n.id)&&element){
@@ -61,6 +66,10 @@ export function ensureUniqueIds(doc:ProjectDocument){
      const childElement=doc.elements[child.elementId]
      if(!childElement||childElement.type==='uml-port')continue
      const childSize=atlasNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
+     if(d.type==='uml-sequence'&&childElement.type==='uml-destruction'){
+      const anchor=sequenceSnapChild(element.type,childElement.type,size,childSize,child.y)
+      if(child.x===anchor.x&&child.y===anchor.y)continue
+     }
      if(child.x+childSize.width>size.width||child.y+childSize.height>size.height)
       throw new DomainError('El contenedor no puede cortar sus elementos internos',400)
     }
@@ -72,8 +81,12 @@ export function ensureUniqueIds(doc:ProjectDocument){
    if(e.direction&&!['forward','reverse','both','none'].includes(e.direction))throw new DomainError('Dirección de relación inválida',400)
    if(e.lineStyle&&!['solid','dashed','dotted'].includes(e.lineStyle))throw new DomainError('Trazo de relación inválido',400)
    if(e.pathStyle&&!['smoothstep','straight','step','bezier'].includes(e.pathStyle))throw new DomainError('Tipo de recorrido de relación inválido',400)
-   if(e.sourceHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.sourceHandle))throw new DomainError('Puerto de salida inválido',400)
-   if(e.targetHandle&&!['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'].includes(e.targetHandle))throw new DomainError('Puerto de entrada inválido',400)
+   const legacyHandles=['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3']
+   const sequenceActivationAt=(nodeId:string)=>d.type==='uml-sequence'&&doc.elements[d.nodes.find(n=>n.id===nodeId)?.elementId||'']?.type==='uml-activation'
+   const validHandle=(nodeId:string,handle:string|undefined)=>!handle||legacyHandles.includes(handle)||
+    (sequenceActivationAt(nodeId)&&sequenceActivationHandleValid(handle))
+   if(!validHandle(e.source,e.sourceHandle))throw new DomainError('Puerto de salida inválido',400)
+   if(!validHandle(e.target,e.targetHandle))throw new DomainError('Puerto de entrada inválido',400)
    if(e.relationKind&&!umlRelationAllowed(d.type,e.relationKind))throw new DomainError('Relación no permitida para este diagrama UML',400)
    if(['sourceMultiplicity','targetMultiplicity','sourceRole','targetRole'].some(k=>{const v=e[k as keyof DiagramEdge];return v!==undefined&&(typeof v!=='string'||v.length>80)}))throw new DomainError('Extremos UML inválidos',400)
    edges.add(e.id)

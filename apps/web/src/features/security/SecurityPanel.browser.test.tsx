@@ -27,21 +27,30 @@ beforeEach(()=>{
 describe('Consola de permisos',()=>{
  it('propietario ve catálogo y política inmutable',async()=>{
   setup()
-  await waitFor(()=>expect(screen.getByText('diagram.view.c1')).toBeTruthy())
+  await screen.findByText('Propietario (owner)')
   fireEvent.change(screen.getByLabelText('Rol a configurar'),{target:{value:'r1'}})
   expect(screen.getByText(/Propietario tiene todos los permisos/)).toBeTruthy()
   expect(screen.getByText('diagram.view.c1')).toBeTruthy()
   expect(screen.getByRole('button',{name:/Guardar política/}).hasAttribute('disabled')).toBe(true)
- })
+  expect((screen.getByText('diagram.view.c1').closest('label')?.querySelector('input') as HTMLInputElement).disabled).toBe(true)
+  expect(api.updateRole).not.toHaveBeenCalled()
+ },15000)
  it('puede cambiar permisos de un rol no propietario y guardarlos',async()=>{
   setup()
-  await waitFor(()=>expect(screen.getByText('diagram.view.c1')).toBeTruthy())
+  await screen.findByText('Funcional (functional)')
   fireEvent.change(screen.getByLabelText('Rol a configurar'),{target:{value:'r2'}})
+  const c1=screen.getByText('diagram.view.c1').closest('label')!.querySelector('input')!
+  const c2=screen.getByText('diagram.view.c2').closest('label')!.querySelector('input')!
+  await waitFor(()=>expect(c1.checked).toBe(true))
+  expect(c2.checked).toBe(false)
+  fireEvent.click(c2)
+  expect(c2.checked).toBe(true)
   const save=screen.getByRole('button',{name:/Guardar política/})
   expect(save.hasAttribute('disabled')).toBe(false)
   fireEvent.click(save)
-  await waitFor(()=>expect(api.updateRole).toHaveBeenCalledWith('w1','r2',['diagram.view.c1']))
- })
+  await waitFor(()=>expect(api.updateRole).toHaveBeenCalledWith('w1','r2',['diagram.view.c1','diagram.view.c2']))
+  expect(await screen.findByText('Permisos guardados correctamente')).toBeTruthy()
+ },15000)
  it('administrador de plataforma crea una cuenta sin registro público',async()=>{
   setup()
   fireEvent.click(screen.getByRole('button',{name:/Cuentas/}))

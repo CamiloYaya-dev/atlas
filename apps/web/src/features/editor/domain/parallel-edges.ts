@@ -32,7 +32,7 @@ export function parallelRoute({sourceX:sx,sourceY:sy,targetX:tx,targetY:ty,offse
   const sv=sideVector(sourcePosition),tv=sideVector(targetPosition),lead=26
   const sx2=sx+sv[0]*lead,sy2=sy+sv[1]*lead,tx2=tx+tv[0]*lead,ty2=ty+tv[1]*lead
   const ddx=tx2-sx2,ddy=ty2-sy2,dist=Math.hypot(ddx,ddy)||1
-  const nx=-ddy/dist,ny=ddx/dist
+  const nx=ddx===0&&ddy===0?1:-ddy/dist,ny=ddx/dist
   const mx=(sx2+tx2)/2+nx*offset*1.1,my=(sy2+ty2)/2+ny*offset*1.1
   if(pathStyle==='bezier'){
    return {path:`M ${fmt(sx)},${fmt(sy)} C ${fmt(sx2)},${fmt(sy2)} ${fmt(mx-sv[0]*15)},${fmt(my-sv[1]*15)} ${fmt(mx)},${fmt(my)} C ${fmt(mx)},${fmt(my)} ${fmt(tx2)},${fmt(ty2)} ${fmt(tx)},${fmt(ty)}`,
@@ -49,7 +49,7 @@ export function parallelRoute({sourceX:sx,sourceY:sy,targetX:tx,targetY:ty,offse
  }
 
  const dx=tx-sx,dy=ty-sy,dist=Math.hypot(dx,dy)||1
- const nx=-dy/dist,ny=dx/dist
+ const nx=dx===0&&dy===0?1:-dy/dist,ny=dx/dist
  const midX=(sx+tx)/2,midY=(sy+ty)/2
  if(pathStyle==='bezier'){
   const bulge=offset*1.75
@@ -82,7 +82,7 @@ export function parallelOffsets<T extends {id:string;source:string;target:string
  const offsets=new Map<string,number>()
  for(const items of groups.values()){
   const sorted=[...items].sort((a,b)=>a.id.localeCompare(b.id))
-  for(const [i,e] of sorted.entries())offsets.set(e.id,(i-(sorted.length-1)/2)*spacing*(e.source<=e.target?1:-1))
+  for(const [i,e] of sorted.entries())offsets.set(e.id,(i-(sorted.length-1)/2)*spacing*(e.source<=e.target?1:-1)||0)
  }
  return offsets
 }

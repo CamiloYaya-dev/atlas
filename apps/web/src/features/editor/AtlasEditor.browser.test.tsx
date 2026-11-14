@@ -9,6 +9,7 @@ vi.mock('@xyflow/react',()=>({
  ReactFlowProvider:({children}:{children:ReactNode})=><>{children}</>,
  ReactFlow:()=>null,Background:()=>null,Controls:()=>null,MiniMap:()=>null,
  useNodesState:(initial:unknown)=>[initial,vi.fn(),vi.fn()],
+ useEdgesState:(initial:unknown)=>[initial,vi.fn(),vi.fn()],
  useReactFlow:()=>({getNode:()=>null,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})}),
  Handle:()=>null,NodeResizer:()=>null,Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
 }))

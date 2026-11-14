@@ -6,6 +6,16 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
  if(diagram==='uml-activity'&&['uml-start','uml-end','uml-flow-final'].includes(type))return {width:48,height:48}
  if(diagram==='uml-activity'&&type==='uml-decision')return {width:68,height:68}
  if(diagram==='uml-activity'&&type==='uml-fork')return {width:90,height:20}
+ if(diagram==='uml-state'&&type==='uml-region')return {width:260,height:180}
+ if(diagram==='uml-state'&&type==='uml-state')return {width:170,height:90}
+ if(diagram==='uml-state'&&type==='uml-decision')return {width:52,height:52}
+ if(diagram==='uml-state'&&type==='uml-fork')return {width:90,height:16}
+ if(diagram==='uml-state'&&['uml-start','uml-end','uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point'].includes(type))return {width:48,height:48}
+ if(diagram==='uml-state'&&type==='uml-terminate')return {width:42,height:42}
+ if(['uml-sequence','uml-communication'].includes(diagram)&&type==='uml-frame')return {width:260,height:160}
+ if(diagram==='uml-sequence'&&type==='uml-activation')return {width:48,height:70}
+ if(diagram==='uml-sequence'&&type==='uml-destruction')return {width:48,height:48}
+ if(diagram==='uml-sequence'&&type==='uml-interaction')return {width:220,height:78}
  if(diagram==='uml-composite'&&type==='uml-class')return {width:320,height:230}
  if(['uml-package','uml-profile','uml-usecase'].includes(diagram)&&['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject'].includes(type))return {width:190,height:130}
  if(diagram==='uml-deployment'&&['uml-node','uml-device','uml-execution'].includes(type))return {width:190,height:145}
@@ -34,7 +44,11 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
  }else if(type==='uml-start'||type==='uml-end'||type==='uml-flow-final'){width=54;height=54}
  else if(type==='uml-decision'){width=84;height=84}
  else if(type==='uml-fork'){width=160;height=28}
+ else if(type==='uml-history-shallow'||type==='uml-history-deep'||type==='uml-entry-point'||type==='uml-exit-point'){width=54;height=54}
+ else if(type==='uml-terminate'){width=40;height=40}
  else if(type==='uml-lifeline'){width=170;height=260}
+ else if(diagram==='uml-sequence'&&type==='uml-activation'){width=48;height=120}
+ else if(diagram==='uml-sequence'&&type==='uml-destruction'){width=48;height=48}
  const min=atlasNodeMinimum(diagram,type)
  return {width:Math.max(min.width,node?.width??width),height:Math.max(min.height,node?.height??height)}
 }

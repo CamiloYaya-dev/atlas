@@ -3,6 +3,8 @@ import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest'
 import {fireEvent,render,screen,waitFor,within} from '@testing-library/react'
 import type {ReactNode} from 'react'
 import {demoDocument} from '@atlas/fixtures'
+import {createElement} from '@atlas/contracts'
+import type {Diagram,ElementType} from '@atlas/contracts'
 import type {WorkspaceAccess} from '../security/types'
 import AtlasEditor from './AtlasEditor'
 import * as auth from '../security/api'
@@ -16,7 +18,7 @@ vi.mock('@xyflow/react',async()=>{
  const React=await import('react')
  return {
   ReactFlowProvider:({children}:{children:ReactNode})=><>{children}</>,
-  ReactFlow:({nodes=[],edges=[],onNodeClick,onNodeDoubleClick,onNodeDragStop,onPaneClick,onConnect,onEdgeClick,nodesConnectable}: {
+  ReactFlow:({nodes=[],edges=[],onNodeClick,onNodeDoubleClick,onNodeDragStop,onPaneClick,onConnect,onEdgeClick,nodesConnectable,onSelectionChange,selectionOnDrag}: {
    nodes?:Array<{id:string;data:{element?:{name:string};elementId?:string}}>,
    edges?:Array<{id:string;label?:string;source:string;target:string}>,
    onNodeClick?:(e:unknown,n:unknown)=>void,
@@ -26,8 +28,12 @@ vi.mock('@xyflow/react',async()=>{
    onConnect?:(c:{source:string|null;target:string|null;sourceHandle?:string;targetHandle?:string})=>void,
    onEdgeClick?:(e:unknown,edge:unknown)=>void,
    nodesConnectable?:boolean
+   selectionOnDrag?:boolean
+   onSelectionChange?:(value:{nodes:unknown[];edges:unknown[]})=>void
   })=><div className="react-flow" data-testid="graph-renderer" data-relations-enabled={String(nodesConnectable)}>
    {nodes.map(n=><button type="button" key={n.id} onClick={()=>onNodeClick?.({},n)}>{n.data.element?.name||n.id}</button>)}
+   {selectionOnDrag&&<button type="button" onClick={()=>onSelectionChange?.({nodes:nodes.slice(0,2),edges:[]})}>Seleccionar dos QA</button>}
+   {nodes.some(n=>n.id==='qa-aa')&&<><button type="button" onClick={()=>onConnect?.({source:'qa-aa',target:'qa-bb',sourceHandle:'seq-right-1',targetHandle:'seq-left-1'})}>Mensaje QA 1</button><button type="button" onClick={()=>onConnect?.({source:'qa-bb',target:'qa-aa',sourceHandle:'seq-left-3',targetHandle:'seq-right-3'})}>Mensaje QA 2</button><button type="button" onClick={()=>onConnect?.({source:'qa-aa',target:'qa-bb',sourceHandle:'top-2',targetHandle:'seq-left-1'})}>Mensaje vertical QA</button></>}
    {edges.length>0&&<button type="button" onClick={()=>onEdgeClick?.({},edges[0])}>Editar relación QA</button>}
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-payment-provider'})}>Conectar QA</button>
    <button type="button" onClick={()=>onConnect?.({source:'n-actor',target:'n-payment-provider',sourceHandle:'top-1',targetHandle:'bottom-3'})}>Conectar puertos adicionales QA</button>
@@ -40,6 +46,7 @@ vi.mock('@xyflow/react',async()=>{
   </div>,
   useReactFlow:()=>({getNode:()=>null,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})}),
   useNodesState:(initial:unknown[])=>{const [nodes,setNodes]=React.useState(initial);return[nodes,setNodes,()=>{}]},
+  useEdgesState:(initial:unknown[])=>{const [edges,setEdges]=React.useState(initial);return[edges,setEdges,()=>{}]},
   Background:()=>null,Controls:()=>null,MiniMap:()=>null,Handle:()=>null,
   NodeResizer:()=>null,Position:{Left:'left',Right:'right'},MarkerType:{ArrowClosed:'arrowclosed'},ConnectionMode:{Loose:'loose',Strict:'strict'}
  }
@@ -895,4 +902,26 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(screen.getByText(/Primero espera a que se guarden los cambios/)).toBeTruthy()
  })
 
+})
+
+// The same real editor is mounted with the existing API/React Flow boundary mocks.
+// These assertions cover accepted/rejected mutations and the actual autosave payload.
+describe('Regresión funcional de UML y selección de área',()=>{
+ it('crea tres mensajes de secuencia, prohíbe conexión vertical y persiste identidades',async()=>{
+  const doc=demoDocument();const elements:[string,ElementType][]=[['qa-a','uml-lifeline'],['qa-b','uml-lifeline'],['qa-aa','uml-activation'],['qa-bb','uml-activation']]
+  for(const [id,type] of elements)doc.elements[id]={...createElement(id,type),id}
+  const seq:Diagram={id:'qa-seq',name:'Secuencia de QA',type:'uml-sequence',description:'',createdAt:'2026-11-14',nodes:[{id:'qa-a',elementId:'qa-a',x:0,y:0,width:170,height:500},{id:'qa-b',elementId:'qa-b',x:400,y:0,width:170,height:500},{id:'qa-aa',elementId:'qa-aa',x:61,y:70,width:48,height:320,parentNodeId:'qa-a'},{id:'qa-bb',elementId:'qa-bb',x:61,y:70,width:48,height:320,parentNodeId:'qa-b'}],edges:[]}
+  doc.diagrams.push(seq);vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor()
+  fireEvent.click(screen.getByRole('button',{name:/Secuencia de QA/}));await screen.findByRole('heading',{name:'Secuencia de QA'})
+  fireEvent.click(await screen.findByRole('button',{name:'Mensaje QA 1'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje QA 2'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje QA 1'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje vertical QA'}))
+  expect(screen.getByText(/únicamente por sus lados/)).toBeTruthy()
+  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];const edges=last?.diagrams.find(d=>d.id===seq.id)?.edges||[];expect(edges).toHaveLength(3);expect(new Set(edges.map(e=>e.id)).size).toBe(3);expect(edges.every(e=>e.sourceHandle?.startsWith('seq-')&&e.targetHandle?.startsWith('seq-'))).toBe(true)},{timeout:4500})
+ })
+ it('selección por área: cancelar conserva datos y confirmar quita el grupo sin borrar catálogo',async()=>{
+  await openEditor();const doc=demoDocument();const first=doc.diagrams[0].nodes.slice(0,2);const nativeConfirm=vi.spyOn(window,'confirm')
+  fireEvent.click(screen.getByRole('button',{name:'Seleccionar área del diagrama'}));fireEvent.click(await screen.findByRole('button',{name:'Seleccionar dos QA'}));fireEvent.click(screen.getByRole('button',{name:'Eliminar selección del diagrama'}))
+  let modal=screen.getByRole('dialog',{name:'Eliminar selección del diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button',{name:'Eliminar selección del diagrama'}));modal=screen.getByRole('dialog',{name:'Eliminar selección del diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar selección'}))
+  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(last).toBeDefined();for(const n of first){expect(last!.diagrams[0].nodes.some(x=>x.id===n.id)).toBe(false);expect(last!.elements[n.elementId]).toBeDefined()}},{timeout:4500});expect(nativeConfirm).not.toHaveBeenCalled()
+ })
 })

@@ -1,11 +1,11 @@
-import {createDiagram as commandCreateDiagram,editDiagram as commandEditDiagram,deleteDiagram as commandDeleteDiagram,addElementNode as commandAddElementNode,reuseElementNode as commandReuseElementNode,removeElementNode as commandRemoveElementNode,connectNodes as commandConnectNodes,editRelation as commandEditRelation,removeRelation as commandRemoveRelation,moveNode as commandMoveNode,resizeNode as commandResizeNode,setNodePackage as commandSetNodePackage,editElement as commandEditElement,addFieldDefinition as commandAddFieldDefinition,removeFieldDefinition as commandRemoveFieldDefinition} from './domain/document-commands'
+import {createDiagram as commandCreateDiagram,editDiagram as commandEditDiagram,deleteDiagram as commandDeleteDiagram,addElementNode as commandAddElementNode,reuseElementNode as commandReuseElementNode,removeElementNode as commandRemoveElementNode,connectNodes as commandConnectNodes,editRelation as commandEditRelation,removeRelation as commandRemoveRelation,moveNode as commandMoveNode,moveDiagramSelection as commandMoveDiagramSelection,removeDiagramSelection as commandRemoveDiagramSelection,resizeNode as commandResizeNode,setNodePackage as commandSetNodePackage,editElement as commandEditElement,addFieldDefinition as commandAddFieldDefinition,removeFieldDefinition as commandRemoveFieldDefinition} from './domain/document-commands'
 import {useGraphView} from './hooks/useGraphView'
 import GuidedTutorial from '../tutorial/GuidedTutorial'
 import AcademyMissions from '../academy/AcademyMissions'
 import LicensePanel from '../licensing/LicensePanel'
 import {captureDiagramPng} from './capture-diagram'
 import AdvancedExportFields,{defaultExportChoices,normalizeChoices} from './AdvancedExportFields'
-import {exportFieldsFor,UML_DIAGRAM_GROUPS,UML_RELATIONS_BY_DIAGRAM,umlElementAllowed,umlElementCreatable,umlRelationLabel,umlRelationEndpointValid,umlContainerAllows,umlAbsolutePosition,umlNodeDepth,atlasNodeSize,validNodeDimension,canonicalUmlEdge,isUmlDiagram,umlRelationNotation} from '@atlas/contracts'
+import {exportFieldsFor,UML_DIAGRAM_GROUPS,UML_RELATIONS_BY_DIAGRAM,umlElementAllowed,umlElementCreatable,umlRelationLabel,umlRelationEndpointValid,umlContainerAllows,umlAbsolutePosition,umlNodeDepth,atlasNodeSize,validNodeDimension,sequenceIsAttachment,sequenceActivationPorts,sequenceActivationSide,sequenceNearestPort,canonicalUmlEdge,isUmlDiagram,umlRelationNotation} from '@atlas/contracts'
 import type {AdvancedExportMode,ExportFieldChoices,ExportField} from '@atlas/contracts'
 import {readAcademyLab,storeAcademyLab} from '../academy/progress'
 import type {AcademyLabIdentity} from '../academy/progress'
@@ -21,9 +21,9 @@ import {Overlay,Field} from '../../components/molecules/Overlay'
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react'
 import type {ChangeEvent,FormEvent,ReactNode} from 'react'
 import {createPortal} from 'react-dom'
-import {ReactFlow,Background,Controls,MiniMap,ReactFlowProvider,useNodesState,useReactFlow,ConnectionMode} from '@xyflow/react'
-import type {Connection,Node} from '@xyflow/react'
-import {ArrowRight,Award,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Download,ExternalLink,Folder,FolderPlus,Grip,Home,LogIn,LogOut,Maximize2,Minimize2,Map,PanelLeftClose,PanelLeftOpen,Menu,Network,PanelRightClose,Plus,RefreshCcw,Save,Settings2,ShieldCheck,Trash2,Upload,UserRound,Workflow,X} from 'lucide-react'
+import {ReactFlow,Background,Controls,MiniMap,ReactFlowProvider,useNodesState,useEdgesState,useReactFlow,ConnectionMode} from '@xyflow/react'
+import type {Connection,Node,Edge} from '@xyflow/react'
+import {ArrowRight,Award,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Download,ExternalLink,Folder,FolderPlus,Grip,Home,LogIn,LogOut,Maximize2,Minimize2,MousePointer2,Map,PanelLeftClose,PanelLeftOpen,Menu,Network,PanelRightClose,Plus,RefreshCcw,Save,Settings2,ShieldCheck,Trash2,Upload,UserRound,Workflow,X} from 'lucide-react'
 import {login as apiLogin,logout as apiLogout,session as apiSession,workspaceAccess} from '../security/api'
 import SecurityPanel from '../security/SecurityPanel'
 import VersionHistory from '../projects/VersionHistory'
@@ -47,7 +47,7 @@ const diagramDescriptions:Record<DiagramType,string>={
  c3:'Componentes: organización interna de un contenedor y sus dependencias.',
  c4:'Código: clases, módulos y estructuras internas de implementación.',
  process:'Flujo de procesos: actividades y decisiones del negocio conectadas de principio a fin.',
- sequence:'Secuencia: orden temporal de mensajes e interacciones entre participantes.',
+ sequence:'Flujo de secuencia: orden temporal propio de ATLAS para narrar pasos sin confundirse con UML · Secuencia.',
  data:'Flujo de datos: orígenes, transformaciones, almacenamientos y destinos.',
  trace:'Trazabilidad: vínculos entre objetivos, requerimientos, procesos y soluciones.',
  custom:'Libre: utiliza elementos y relaciones para diseñar cualquier tipo de vista.',
@@ -60,9 +60,9 @@ const diagramDescriptions:Record<DiagramType,string>={
  'uml-profile':'Perfiles que contienen estereotipos, referencias a metaclases y aplicaciones a paquetes/modelos.',
  'uml-usecase':'Actores, casos de uso y sujeto que los encapsula; requisitos y HU se vinculan desde otras vistas.',
  'uml-activity':'Nodos UML reales: inicio, final de actividad, final de flujo, acciones, decisiones, barras, objetos y particiones. Control y objeto son flujos distintos según UML 2.5.1.',
- 'uml-state':'Estados, eventos y transiciones.',
- 'uml-sequence':'Intercambio temporal de mensajes entre participantes.',
- 'uml-communication':'Mensajes entre objetos y vínculos.',
+ 'uml-state':'Estados, regiones y transiciones; usa pseudostados y barras conforme a la guía UML de ATLAS.',
+ 'uml-sequence':'Participantes con línea de vida, fragmentos combinados (alt, opt, loop, par), referencias, activaciones ancladas y destrucción al final de la ejecución.',
+ 'uml-communication':'Participantes enlazados estructuralmente; los mensajes se expresan sobre enlaces con numeración jerárquica.',
  'uml-interaction-overview':'Actividades y referencias a interacciones.',
  'uml-timing':'Líneas de tiempo y cambios de estado.'
 }
@@ -74,6 +74,27 @@ const dateOf=()=>new Date().toISOString().slice(0,10)
 const editorEdgeTypes={...edgeTypes,...umlEdgeTypes}
 const safeLink=(url:string)=>{try{const parsed=new URL(url);return ['https:','http:'].includes(parsed.protocol)?parsed.href:null}catch{return null}}
 function emptyName(name:string){return name.trim().length>=2}
+function diagramElementLabel(diagramType:DiagramType|undefined,type:ElementType){
+ if(diagramType==='uml-composite'&&type==='uml-class')return 'Clasificador estructurado'
+ if(diagramType==='uml-activity'&&type==='uml-end')return 'Final de actividad'
+ if(diagramType==='uml-state'&&type==='uml-decision')return 'Elección / unión'
+ if(diagramType==='uml-state'&&type==='uml-fork')return 'Bifurcación / unión'
+ if(diagramType==='uml-state'&&type==='uml-region')return 'Estado compuesto / región'
+ if(diagramType==='uml-state'&&type==='uml-history-shallow')return 'Historial superficial'
+ if(diagramType==='uml-state'&&type==='uml-history-deep')return 'Historial profundo'
+ if(diagramType==='uml-state'&&type==='uml-entry-point')return 'Entrada'
+ if(diagramType==='uml-state'&&type==='uml-exit-point')return 'Salida'
+ if(diagramType==='uml-state'&&type==='uml-terminate')return 'Terminación'
+ if(diagramType==='uml-sequence'&&type==='uml-frame')return 'Fragmento combinado'
+ if(diagramType==='uml-communication'&&type==='uml-frame')return 'Marco de interacción'
+ if(diagramType==='uml-sequence'&&type==='uml-interaction')return 'Referencia de interacción'
+ if(diagramType==='uml-sequence'&&type==='uml-lifeline')return 'Participante'
+ if(diagramType==='uml-sequence'&&type==='uml-activation')return 'Ejecución / activación'
+ if(diagramType==='uml-sequence'&&type==='uml-destruction')return 'Destrucción'
+ if(diagramType==='uml-sequence'&&type==='actor')return 'Participante'
+ if(diagramType==='uml-communication'&&['actor','uml-object','uml-lifeline'].includes(type))return 'Participante'
+ return elementLabels[type]
+}
 function AppInner(){
  const flow=useReactFlow()
  const [account,setAccount]=useState<Account|null>(null)
@@ -252,7 +273,16 @@ function AppInner(){
  const onResizeView=useCallback((nodeId:string,width:number,height:number,x?:number,y?:number)=>resizeSelected(nodeId,width,height,x,y),[diagram,doc,projectPolicy,patch])
  const filtered=useGraphView({diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,canEdit,onResize:onResizeView})
  const [displayNodes,setDisplayNodes,onDisplayNodesChange]=useNodesState<Node>([])
- useEffect(()=>{setDisplayNodes(filtered.nodes)},[filtered.nodes,setDisplayNodes])
+ const [displayEdges,setDisplayEdges,onDisplayEdgesChange]=useEdgesState<Edge>([])
+ const [areaSelectionMode,setAreaSelectionMode]=useState(false)
+ const [batchSelection,setBatchSelection]=useState<{nodeIds:string[];edgeIds:string[]}>({nodeIds:[],edgeIds:[]})
+ const onAreaSelectionChange=useCallback(({nodes,edges}:{nodes:Node[];edges:Edge[]})=>{
+  const nodeIds=nodes.map(n=>n.id),edgeIds=edges.map(e=>e.id)
+  setBatchSelection(prev=>prev.nodeIds.join('|')===nodeIds.join('|')&&prev.edgeIds.join('|')===edgeIds.join('|')?prev:{nodeIds,edgeIds})
+ },[])
+ useEffect(()=>{setDisplayNodes(filtered.nodes);setDisplayEdges(filtered.edges)},[filtered.nodes,filtered.edges,setDisplayNodes,setDisplayEdges])
+ useEffect(()=>{setBatchSelection({nodeIds:[],edgeIds:[]});setAreaSelectionMode(false)},[diagramId,projectId])
+
  const visitDiagram=(id:string)=>{if(!doc?.diagrams.some(d=>d.id===id))return;setNavigationTrail([]);setFocusRequest(null);setDiagramId(id);setSelectedId(null);setSidebarOpen(false)}
  const navigateToNode=(target:Diagram,nodeId:string|null,rememberOrigin=false,originElementId?:string)=>{
   if(!doc)return
@@ -292,8 +322,9 @@ function AppInner(){
  const addNode=(elementId:string)=>{
   const element=doc?.elements[elementId]
   if(!diagram||!can(`diagram.layout.${diagram.type}`)||!element||!umlElementCreatable(diagram.type,element.type)||!can(`element.view.${element.type}`))return
-  const parent=diagram.nodes.find(n=>doc?.elements[n.elementId]&&umlContainerAllows(diagram.type,doc.elements[n.elementId].type,element.type))
+  const parent=([diagram.nodes.find(n=>n.elementId===selectedId),...diagram.nodes].filter(Boolean) as typeof diagram.nodes).find(n=>doc?.elements[n.elementId]&&umlContainerAllows(diagram.type,doc.elements[n.elementId].type,element.type))
   if(diagram.type==='uml-package'&&element.type==='uml-subpackage'&&!parent){announce('Selecciona un paquete o modelo que contenga el subpaquete.');return}
+  if(diagram.type==='uml-sequence'&&sequenceIsAttachment(element.type)&&!parent){announce('Primero crea o selecciona un Participante (línea de vida).');return}
   const nid=uid(),absolute=parent?umlAbsolutePosition(diagram,parent):null
   patch(old=>{
    const added=commandReuseElementNode(old,diagram.id,elementId,{id:nid,x:absolute?absolute.x+38:180+diagram.nodes.length*42,y:absolute?absolute.y+80:160+diagram.nodes.length*27})
@@ -302,13 +333,14 @@ function AppInner(){
  }
  const addNewNode=()=>{
   if(!emptyName(newName)||!can(`element.create.${newElementType}`)||!diagram||!can(`diagram.layout.${diagram.type}`)||!umlElementCreatable(diagram.type,newElementType))return
-  const requiredParent=newElementType==='uml-subpackage'&&diagram.type==='uml-package'
+  const requiredParent=newElementType==='uml-subpackage'&&diagram.type==='uml-package'||diagram.type==='uml-sequence'&&sequenceIsAttachment(newElementType)
   const preferred=selectedId?diagram.nodes.find(n=>n.elementId===selectedId):undefined
   const parent=([preferred,...diagram.nodes].filter(Boolean) as typeof diagram.nodes).find(n=>{
    const parentElement=doc?.elements[n.elementId];return !!parentElement&&umlContainerAllows(diagram.type,parentElement.type,newElementType)
   })
-  if(requiredParent&&!parent){announce('Primero crea o selecciona un Paquete o Model para contener el subpaquete.');return}
+  if(requiredParent&&!parent){announce(diagram.type==='uml-sequence'?'Primero crea o selecciona un Participante para acoplar el elemento.':'Primero crea o selecciona un Paquete o Model para contener el subpaquete.');return}
   const element=createElement(newName.trim(),newElementType,account?.email||'Usuario'),id=element.id,nodeId=uid(),target=diagram.id
+  if(diagram.type==='uml-sequence'&&newElementType==='uml-frame'){element.uml={classifier:'alt'};element.summary='[condición]\n[else]'}
   const absolute=parent?umlAbsolutePosition(diagram,parent):null
   patch(old=>{
    const created=commandAddElementNode(old,target,element,{id:nodeId,x:absolute?absolute.x+38:230+diagram.nodes.length*34,y:absolute?absolute.y+78:160+diagram.nodes.length*22})
@@ -331,28 +363,91 @@ function AppInner(){
   const targetDiagram=diagram.id,targetElement=selectedId
   ask('Quitar caja de la vista','La caja desaparecerá de este diagrama, pero el elemento seguirá disponible en el catálogo.',()=>{patch(old=>commandRemoveElementNode(old,targetDiagram,targetElement));setSelectedId(null)},true,'Quitar caja')
  }
- const onConnect=(edge:Connection)=>{if(!diagram||!edge.source||!edge.target||edge.source===edge.target)return;const s=diagram.nodes.find(n=>n.id===edge.source),t=diagram.nodes.find(n=>n.id===edge.target);if(!s||!t||!doc)return;const a=doc.elements[s.elementId],b=doc.elements[t.elementId];if(!a||!b||!can(`relation.create.${relationScope(a.type,b.type)}`)){announce('No tienes permiso para crear esta relación');return}const umlKind=UML_RELATIONS_BY_DIAGRAM[diagram.type]?.find(kind=>umlRelationEndpointValid(diagram.type,kind,a.type,b.type));if(UML_RELATIONS_BY_DIAGRAM[diagram.type]&&!umlKind){announce('Estos tipos de elementos no tienen una relación UML válida; revisa los extremos.');return}const fresh:DiagramEdge=canonicalUmlEdge(diagram.type,{id:uid(),source:edge.source,target:edge.target,sourceHandle:edge.sourceHandle||'right',targetHandle:edge.targetHandle||'left',label:'',direction:'forward',...(umlKind?{relationKind:umlKind}:{}),...(umlKind&&['include','extend','dependency','realization'].includes(umlKind)?{lineStyle:'dashed' as const}:{})});patch(old=>commandConnectNodes(old,diagram.id,fresh))}
- const onNodeDragStop=(_:unknown,node:Node)=>{
+ const onConnect=(edge:Connection)=>{
+  if(!diagram||!edge.source||!edge.target||edge.source===edge.target)return
+  const s=diagram.nodes.find(n=>n.id===edge.source),t=diagram.nodes.find(n=>n.id===edge.target)
+  if(!s||!t||!doc)return
+  const a=doc.elements[s.elementId],b=doc.elements[t.elementId]
+  if(!a||!b||!can(`relation.create.${relationScope(a.type,b.type)}`)){
+   announce('No tienes permiso para crear esta relación');return
+  }
+  const umlKind=UML_RELATIONS_BY_DIAGRAM[diagram.type]?.find(kind=>umlRelationEndpointValid(diagram.type,kind,a.type,b.type))
+  if(UML_RELATIONS_BY_DIAGRAM[diagram.type]&&!umlKind){announce('Estos tipos de elementos no tienen una relación UML válida; revisa los extremos.');return}
+  const sourceHandle=edge.sourceHandle||'right'
+  let targetHandle=edge.targetHandle||'left'
+  if(diagram.type==='uml-sequence'){
+   const lateral=(type:ElementType,handle:string)=>type!=='uml-activation'||['left','right'].includes(handle)||/^seq-(?:left|right)-[1-9]\d{0,2}$/.test(handle)
+   if(!lateral(a.type,sourceHandle)||!lateral(b.type,targetHandle)){
+    announce('Las ejecuciones UML se conectan únicamente por sus lados, no por arriba o abajo.');return
+   }
+   if(a.type==='uml-activation'&&b.type==='uml-activation'){
+    const sourceSize=atlasNodeSize(diagram.type,a,s)
+    const targetSize=atlasNodeSize(diagram.type,b,t)
+    const sourcePct=sequenceActivationPorts(sourceSize.height).find(p=>p.id===sourceHandle)?.topPercent??50
+    const messageY=umlAbsolutePosition(diagram,s).y+sourceSize.height*sourcePct/100
+    const targetLocalY=messageY-umlAbsolutePosition(diagram,t).y
+    targetHandle=sequenceNearestPort(targetSize.height,sequenceActivationSide(targetHandle,'target'),targetLocalY).id
+   }
+  }
+  const fresh:DiagramEdge=canonicalUmlEdge(diagram.type,{
+   id:uid(),source:edge.source,target:edge.target,sourceHandle,targetHandle,label:'',direction:'forward',
+   ...(umlKind?{relationKind:umlKind}:{}),
+   ...(umlKind&&['include','extend','dependency','realization'].includes(umlKind)?{lineStyle:'dashed' as const}:{})
+  })
+  patch(old=>commandConnectNodes(old,diagram.id,fresh))
+ }
+ const onNodeDragStop=(_:unknown,node:Node,draggedNodes:Node[])=>{
   if(!diagram||!doc||!can(`diagram.layout.${diagram.type}`))return
+  if(areaSelectionMode&&draggedNodes?.length>1){
+   try{patch(old=>commandMoveDiagramSelection(old,diagram.id,draggedNodes.map(n=>({id:n.id,x:n.position.x,y:n.position.y}))))}
+   catch(error){announce((error as Error).message)}
+   return
+  }
   const original=diagram.nodes.find(n=>n.id===node.id)
   const element=doc.elements[original?.elementId||'']
   if(!original||!element)return
-  // An existing child is moved in its parent's local coordinates (not the global canvas).
   const absolute=node.parentId?umlAbsolutePosition(diagram,{...original,x:node.position.x,y:node.position.y}):node.position
-  const cx=absolute.x+(element.type==='uml-port'?70:120),cy=absolute.y+40
+  const cx=absolute.x+(element.type==='uml-port'?70:diagram.type==='uml-sequence'&&sequenceIsAttachment(element.type)?24:120),cy=absolute.y+40
   const candidates=diagram.nodes.filter(n=>n.id!==node.id).filter(n=>{
    const parent=doc.elements[n.elementId]
    if(!parent||!umlContainerAllows(diagram.type,parent.type,element.type))return false
    const pos=umlAbsolutePosition(diagram,n),size=atlasNodeSize(diagram.type,parent,n,umlNodeDepth(diagram,n),diagram.nodes.some(c=>c.parentNodeId===n.id))
-   const margin=element.type==='uml-port'?90:0
+   const margin=element.type==='uml-port'?90:diagram.type==='uml-sequence'?35:0
    return cx>=pos.x-margin&&cx<=pos.x+size.width+margin&&cy>=pos.y-margin&&cy<=pos.y+size.height+margin
   }).sort((a,b)=>umlNodeDepth(diagram,b)-umlNodeDepth(diagram,a))
   const target=!node.parentId?candidates[0]:undefined
-  patch(old=>{
+  try{patch(old=>{
    const moved=commandMoveNode(old,diagram.id,node.id,node.position.x,node.position.y)
-   return target?commandSetNodePackage(moved,diagram.id,node.id,target.id):node.parentId&&diagram.type==='uml-composite'&&element.type==='uml-port'?commandSetNodePackage(moved,diagram.id,node.id,node.parentId):moved
-  })
+   return target?commandSetNodePackage(moved,diagram.id,node.id,target.id):node.parentId&&(diagram.type==='uml-composite'&&element.type==='uml-port'||diagram.type==='uml-sequence'&&sequenceIsAttachment(element.type))?commandSetNodePackage(moved,diagram.id,node.id,node.parentId):moved
+  })}catch(error){announce((error as Error).message)}
  }
+ const removeAreaSelection=()=>{
+  if(!diagram||!doc||!can(`diagram.layout.${diagram.type}`))return
+  const {nodeIds,edgeIds}=batchSelection
+  if(!nodeIds.length&&!edgeIds.length)return
+  const candidates=diagram.edges.filter(e=>edgeIds.includes(e.id))
+  const missingPermission=candidates.some(edge=>{
+   const source=diagram.nodes.find(n=>n.id===edge.source),target=diagram.nodes.find(n=>n.id===edge.target)
+   const a=doc.elements[source?.elementId||''],b=doc.elements[target?.elementId||'']
+   return !a||!b||!can(`relation.delete.${relationScope(a.type,b.type)}`)
+  })
+  if(missingPermission){announce('No tienes permiso para eliminar alguna relación seleccionada');return}
+  ask('Eliminar selección del diagrama',`Quitar ${nodeIds.length} elementos y ${edgeIds.length} relaciones seleccionadas. Las fichas compartidas se conservarán.`,()=>{
+   patch(old=>commandRemoveDiagramSelection(old,diagram.id,nodeIds,edgeIds))
+   setBatchSelection({nodeIds:[],edgeIds:[]});setSelectedId(null)
+  },true,'Eliminar selección')
+ }
+ useEffect(()=>{
+  if(!areaSelectionMode)return
+  const onDeleteKey=(event:KeyboardEvent)=>{
+   if(!['Delete','Backspace'].includes(event.key)||event.repeat||!batchSelection.nodeIds.length&&!batchSelection.edgeIds.length)return
+   const active=document.activeElement
+   if(active instanceof HTMLElement&&(active.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(active.tagName)))return
+   event.preventDefault();removeAreaSelection()
+  }
+  document.addEventListener('keydown',onDeleteKey)
+  return()=>document.removeEventListener('keydown',onDeleteKey)
+ },[areaSelectionMode,batchSelection,diagram,doc,projectPolicy])
  const setPackageForSelected=(parentId:string)=>{if(!diagram||!selected||!can(`diagram.layout.${diagram.type}`))return;const node=diagram.nodes.find(n=>n.elementId===selected.id);if(!node)return;patch(old=>commandSetNodePackage(old,diagram.id,node.id,parentId||undefined))}
  const deleteDiagram=()=>{if(!diagram||!can(`diagram.delete.${diagram.type}`))return
   const target=diagram.id,next=doc?.diagrams.find(d=>d.id!==target)?.id||''
@@ -387,7 +482,7 @@ function AppInner(){
   const target=doc.diagrams.find(d=>d.type===sourceType)
   if(!target){announce(`Primero crea el diagrama ${diagramLabels[sourceType]}.`);return}
   const source=target.nodes.find(n=>doc.elements[n.elementId]?.type===elementType)
-  if(!source){navigateToNode(target,null);announce(`Agrega una caja ${elementLabels[elementType]} en ${diagramLabels[sourceType]}.`);return}
+  if(!source){navigateToNode(target,null);announce(`Agrega una caja ${diagramElementLabel(diagram?.type,elementType)} en ${diagramLabels[sourceType]}.`);return}
   navigateToNode(target,source.id)
   setInspectorOpen(true)
   setAcademyLinkPulse(true)
@@ -595,10 +690,12 @@ function AppInner(){
          {navigationTrail.length>0&&<button type="button" className="ghost atlas-back-link atlas-canvas-back" onClick={navigateBack} title="Volver al diagrama anterior"><ArrowRight size={14}/> Volver</button>}
          {expanded&&<button type="button" className="icon-btn" title="Restaurar distribución" aria-label="Restaurar distribución" aria-pressed={true} onClick={()=>setExpanded(false)}><Minimize2 size={16}/></button>}
          {canAddBox&&<button type="button" className="primary canvas-add-node" data-tour="add-box" onClick={showNewNodeDialog}><Plus size={16}/> Agregar caja</button>}
+         {diagram&&can(`diagram.layout.${diagram.type}`)&&<button type="button" className={`ghost atlas-select-area${areaSelectionMode?' active':''}`} aria-label="Seleccionar área del diagrama" aria-pressed={areaSelectionMode} title="Seleccionar un área para mover o eliminar múltiples elementos" onClick={()=>{setAreaSelectionMode(v=>!v);setBatchSelection({nodeIds:[],edgeIds:[]});setSelectedId(null)}}><MousePointer2 size={15}/> Seleccionar área</button>}
+         {areaSelectionMode&&(batchSelection.nodeIds.length+batchSelection.edgeIds.length)>0&&<button type="button" className="danger outlined atlas-remove-selection" aria-label="Eliminar selección del diagrama" onClick={removeAreaSelection}><Trash2 size={15}/> Eliminar ({batchSelection.nodeIds.length+batchSelection.edgeIds.length})</button>}
          <button type="button" className="icon-btn" title={canvasFullscreen?'Salir de pantalla completa':'Pantalla completa del diagrama'} aria-label={canvasFullscreen?'Salir de pantalla completa':'Pantalla completa del diagrama'} onClick={()=>void toggleFullscreen()}>{canvasFullscreen?<Minimize2 size={16}/>:<Maximize2 size={16}/>}</button>
-        </div><div className="canvas-label"><div><strong>{diagram?diagramLabels[diagram.type]:'Lienzo'}</strong><small>{filtered.nodes.length} elementos · {filtered.edges.length} relaciones</small></div><span className="diagram-badge">{diagram&&can(`diagram.layout.${diagram.type}`)?'Edición estructural':'Lectura'}</span></div>{diagram?<ReactFlow key={diagram.id} nodes={displayNodes} onNodesChange={onDisplayNodesChange} edges={filtered.edges} nodeTypes={nodeTypes} edgeTypes={editorEdgeTypes} nodesDraggable={!!diagram&&can(`diagram.layout.${diagram.type}`)} nodesConnectable={!!diagram&&['functional','technical','mixed'].some(scope=>can(`relation.create.${scope}`))} elementsSelectable connectionMode={ConnectionMode.Loose} fitView fitViewOptions={{padding:.25,minZoom:.4,maxZoom:1.1}} minZoom={.15} maxZoom={2} snapToGrid snapGrid={[15,15]} onConnect={onConnect} onNodeDragStop={onNodeDragStop} onNodeClick={(_,node)=>{setSelectedId(String(node.data.elementId));setInspectorOpen(true)}} onNodeDoubleClick={(_,node)=>{const e=doc.elements[String(node.data.elementId)];if(e?.childDiagramId)navigateChildOf(e)}} onPaneClick={()=>setSelectedId(null)} onEdgeClick={(_,edge)=>{if(!diagram)return;const e=diagram.edges.find(x=>x.id===edge.id),source=diagram.nodes.find(n=>n.id===e?.source),target=diagram.nodes.find(n=>n.id===e?.target);if(!source||!target)return;const a=doc.elements[source.elementId],b=doc.elements[target.elementId];if(!a||!b)return;const scope=relationScope(a.type,b.type);if(!can(`relation.edit.${scope}`)&&!can(`relation.delete.${scope}`))return;setEdgeEdit({diagramId:diagram.id,edgeId:edge.id,label:e?.label||'',direction:isUmlDiagram(diagram.type)?umlRelationNotation(e?.relationKind||UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'association').direction:e?.direction||'forward',lineStyle:isUmlDiagram(diagram.type)?umlRelationNotation(e?.relationKind||UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'association').stroke:e?.lineStyle||'solid',relationKind:e?.relationKind,sourceMultiplicity:e?.sourceMultiplicity||'',targetMultiplicity:e?.targetMultiplicity||'',sourceRole:e?.sourceRole||'',targetRole:e?.targetRole||'',pathStyle:e?.pathStyle||({process:'step',sequence:'straight',trace:'straight',c4:'bezier'} as Partial<Record<DiagramType,EdgePathStyle>>)[diagram.type]||'smoothstep'});setDialog('edit-relation')}} deleteKeyCode={null} proOptions={{hideAttribution:false}}><Background color="#dfe7f0" gap={22} size={1}/><Controls position="bottom-left" showInteractive={false}/>{minimapVisible&&<MiniMap position="bottom-right" nodeStrokeWidth={2} pannable zoomable/>}</ReactFlow>:<div className="empty-canvas"><Network size={42}/><h3>No hay diagramas todavía</h3><p>Crea un diagrama C4, de procesos o personalizado para empezar.</p>{DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="primary" onClick={()=>setDialog('new-diagram')}><Plus size={16}/> Crear mi primer diagrama</button>}</div>}{diagram&&<div className="canvas-hint"><Grip size={13}/> Arrastra para mover · enlaza desde cualquiera de los 8 puertos · doble clic para navegar</div>}</section>
+        </div><div className="canvas-label"><div><strong>{diagram?diagramLabels[diagram.type]:'Lienzo'}</strong><small>{filtered.nodes.length} elementos · {filtered.edges.length} relaciones</small></div><span className="diagram-badge">{diagram&&can(`diagram.layout.${diagram.type}`)?'Edición estructural':'Lectura'}</span></div>{diagram?<ReactFlow key={diagram.id} nodes={displayNodes} onNodesChange={onDisplayNodesChange} edges={displayEdges} onEdgesChange={onDisplayEdgesChange} onSelectionChange={onAreaSelectionChange} selectionOnDrag={areaSelectionMode} panOnDrag={areaSelectionMode?[1,2]:true} multiSelectionKeyCode="Shift" nodeTypes={nodeTypes} edgeTypes={editorEdgeTypes} nodesDraggable={!!diagram&&can(`diagram.layout.${diagram.type}`)} nodesConnectable={!!diagram&&['functional','technical','mixed'].some(scope=>can(`relation.create.${scope}`))} elementsSelectable connectionMode={ConnectionMode.Loose} fitView fitViewOptions={{padding:.25,minZoom:.4,maxZoom:1.1}} minZoom={.15} maxZoom={2} snapToGrid snapGrid={[15,15]} onConnect={onConnect} onNodeDragStop={onNodeDragStop} onNodeClick={(_,node)=>{if(areaSelectionMode)return;setSelectedId(String(node.data.elementId));setInspectorOpen(true)}} onNodeDoubleClick={(_,node)=>{const e=doc.elements[String(node.data.elementId)];if(e?.childDiagramId)navigateChildOf(e)}} onPaneClick={()=>setSelectedId(null)} onEdgeClick={(_,edge)=>{if(!diagram)return;const e=diagram.edges.find(x=>x.id===edge.id),source=diagram.nodes.find(n=>n.id===e?.source),target=diagram.nodes.find(n=>n.id===e?.target);if(!source||!target)return;const a=doc.elements[source.elementId],b=doc.elements[target.elementId];if(!a||!b)return;const scope=relationScope(a.type,b.type);if(!can(`relation.edit.${scope}`)&&!can(`relation.delete.${scope}`))return;setEdgeEdit({diagramId:diagram.id,edgeId:edge.id,label:e?.label||'',direction:isUmlDiagram(diagram.type)?umlRelationNotation(e?.relationKind||UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'association').direction:e?.direction||'forward',lineStyle:isUmlDiagram(diagram.type)?umlRelationNotation(e?.relationKind||UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'association').stroke:e?.lineStyle||'solid',relationKind:e?.relationKind,sourceMultiplicity:e?.sourceMultiplicity||'',targetMultiplicity:e?.targetMultiplicity||'',sourceRole:e?.sourceRole||'',targetRole:e?.targetRole||'',pathStyle:e?.pathStyle||({process:'step',sequence:'straight',trace:'straight',c4:'bezier'} as Partial<Record<DiagramType,EdgePathStyle>>)[diagram.type]||'smoothstep'});setDialog('edit-relation')}} deleteKeyCode={null} proOptions={{hideAttribution:false}}><Background color="#dfe7f0" gap={22} size={1}/><Controls position="bottom-left" showInteractive={false}/>{minimapVisible&&<MiniMap position="bottom-right" nodeStrokeWidth={2} pannable zoomable/>}</ReactFlow>:<div className="empty-canvas"><Network size={42}/><h3>No hay diagramas todavía</h3><p>Crea un diagrama C4, de procesos o personalizado para empezar.</p>{DIAGRAM_TYPES.some(t=>can(`diagram.create.${t}`))&&<button className="primary" onClick={()=>setDialog('new-diagram')}><Plus size={16}/> Crear mi primer diagrama</button>}</div>}{diagram&&<div className="canvas-hint"><Grip size={13}/>{areaSelectionMode?'Arrastra sobre el fondo para seleccionar un área · mueve el grupo arrastrando una caja · Supr para quitarlo':'Arrastra para mover · enlaza desde los puertos · doble clic para navegar'}</div>}</section>
        {inspectorOpen&&<aside className="inspector" data-tour="inspector"><div className="inspector-heading"><div><span className="eyebrow">INSPECTOR</span><h3>{selected?'Ficha del elemento':'Detalles del diagrama'}</h3></div><button className="icon-btn small" onClick={()=>setInspectorOpen(false)}><X size={16}/></button></div><div className="inspector-scroll">{selected?<>
-        <div className="selected-type"><IconFor type={selected.type}/>{diagram?.type==='uml-composite'&&selected.type==='uml-class'?'Clasificador estructurado':diagram?.type==='uml-activity'&&selected.type==='uml-end'?'Final de actividad':elementLabels[selected.type]} <span className="status-pill">{selected.status}</span></div>
+        <div className="selected-type"><IconFor type={selected.type}/>{diagramElementLabel(diagram?.type,selected.type)} <span className="status-pill">{selected.status}</span></div>
         <Field label="Nombre"><input value={selected.name} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{name:e.target.value})}/></Field>
         {diagram&&selectedNode&&<section className="atlas-size-controls" aria-label="Dimensiones de caja"><strong>Tamaño de esta caja</strong><div className="atlas-size-fields"><Field label="Ancho (px)"><input aria-label="Ancho (px)" type="number" min="48" max="4000" step="1" value={sizeWidthDraft} disabled={!can(`diagram.layout.${diagram.type}`)} onChange={e=>setSizeWidthDraft(e.target.value)}/></Field><Field label="Alto (px)"><input aria-label="Alto (px)" type="number" min="48" max="4000" step="1" value={sizeHeightDraft} disabled={!can(`diagram.layout.${diagram.type}`)} onChange={e=>setSizeHeightDraft(e.target.value)}/></Field></div><button type="button" className="ghost" disabled={!can(`diagram.layout.${diagram.type}`)||!validNodeDimension(Number(sizeWidthDraft))||!validNodeDimension(Number(sizeHeightDraft))} onClick={()=>resizeSelected(selectedNode.id,Number(sizeWidthDraft),Number(sizeHeightDraft))}>Aplicar tamaño</button><small>Puedes arrastrar las esquinas de la caja seleccionada. El tamaño se guarda solo en esta vista.</small></section>}
         {diagram&&['uml-class','uml-object','uml-component','uml-package','uml-profile','uml-usecase','uml-composite','uml-deployment'].includes(diagram.type)&&<Field label={diagram.type==='uml-composite'?'Clasificador / parte contenedora':diagram.type==='uml-deployment'?'Nodo / entorno contenedor':diagram.type==='uml-usecase'?'Sujeto que encapsula el caso de uso':diagram.type==='uml-profile'?'Perfil / paquete contenedor':'Paquete contenedor en este diagrama'}><select aria-label="Contenedor UML" disabled={!can(`diagram.layout.${diagram.type}`)} value={diagram.nodes.find(n=>n.elementId===selected.id)?.parentNodeId||''} onChange={e=>setPackageForSelected(e.target.value)}><option value="">Sin contenedor</option>{diagram.nodes.filter(n=>{if(!doc.elements[n.elementId]||!umlContainerAllows(diagram.type,doc.elements[n.elementId].type,selected.type)||n.elementId===selected.id)return false;const self=diagram.nodes.find(x=>x.elementId===selected.id);let cursor=n;const seen=new Set<string>();while(cursor.parentNodeId&&!seen.has(cursor.id)){if(cursor.parentNodeId===self?.id)return false;seen.add(cursor.id);cursor=diagram.nodes.find(x=>x.id===cursor.parentNodeId)||cursor}return true}).map(n=><option key={n.id} value={n.id}>{doc.elements[n.elementId]?.name}</option>)}</select></Field>}
@@ -607,7 +704,13 @@ function AppInner(){
         {diagram?.type==='uml-deployment'&&selected.type==='uml-device'&&can('element.technical.view')&&<Field label="Icono del dispositivo"><select aria-label="Icono del dispositivo UML" disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} value={selected.uml?.deviceIcon||'server'} onChange={e=>updateElement(selected.id,{uml:{...(selected.uml||{}),deviceIcon:e.target.value as NonNullable<ModelElement['uml']>['deviceIcon']}})}>{[['server','Servidor físico'],['desktop','Computador / PC'],['android','Android'],['mobile','Móvil genérico'],['network','Equipo de red'],['storage','Dispositivo de almacenamiento'],['generic','Dispositivo genérico']].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></Field>}
         {diagram?.type==='uml-deployment'&&selected.type==='uml-execution'&&can('element.technical.view')&&<Field label="Tipo de entorno de ejecución"><select aria-label="Tipo de entorno UML" disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} value={selected.uml?.runtimeIcon||'generic'} onChange={e=>updateElement(selected.id,{uml:{...(selected.uml||{}),runtimeIcon:e.target.value as NonNullable<ModelElement['uml']>['runtimeIcon']}})}>{[['generic','Entorno genérico'],['docker','Contenedor Docker'],['jvm','Máquina virtual Java'],['nodejs','Node.js'],['database','Motor de base de datos']].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></Field>}
         {can('element.technical.view')&&<UmlDetailsEditor element={selected} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} onChange={uml=>updateElement(selected.id,{uml})}/>}
-        <Field label="Resumen"><textarea rows={2} value={selected.summary||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{summary:e.target.value})}/></Field>
+        {diagram?.type==='uml-sequence'&&selected.type==='uml-frame'&&<>
+         <Field label="Operador del fragmento combinado"><select aria-label="Operador del fragmento UML" disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} value={['alt','opt','loop','par'].includes(selected.uml?.classifier||'alt')?selected.uml?.classifier||'alt':'alt'} onChange={e=>updateElement(selected.id,{uml:{...(selected.uml||{}),classifier:e.target.value}})}>
+          {['alt','opt','loop','par'].map(operator=><option value={operator} key={operator}>{operator}</option>)}
+         </select></Field>
+         <Field label="Guardas de los operandos (una por línea)"><textarea rows={3} aria-label="Guardas del fragmento combinado" disabled={!can(`element.edit.${selected.type}`)} value={selected.summary} placeholder={'[condición]\n[else]'} onChange={e=>updateElement(selected.id,{summary:e.target.value})}/></Field>
+        </>}
+        {!(diagram?.type==='uml-sequence'&&selected.type==='uml-frame')&&<Field label="Resumen"><textarea rows={2} value={selected.summary||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{summary:e.target.value})}/></Field>}
         <Field label="Descripción"><textarea rows={3} value={selected.description||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{description:e.target.value})}/></Field>
         {can('element.technical.view')&&<Field label="Detalle técnico"><textarea rows={2} value={selected.technical||''} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} placeholder="Backend, endpoint, entrada/salida..." onChange={e=>updateElement(selected.id,{technical:e.target.value})}/></Field>}
         <div className="inspector-pair"><Field label="Responsable"><input value={selected.owner||''} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{owner:e.target.value})}/></Field><Field label="Estado"><select value={selected.status} disabled={!can(`element.edit.${selected.type}`)} onChange={e=>updateElement(selected.id,{status:e.target.value})}>{[...new Set(['Borrador','En análisis','En desarrollo','En QA','Validado','Obsoleto',selected.status])].map(x=><option key={x}>{x}</option>)}</select></Field></div>
@@ -637,8 +740,8 @@ function AppInner(){
    {toast&&<div className="toast"><CheckCircle2 size={16}/>{toast}</div>}
    {saveStatus==='error'&&<div className="save-error" role="alert"><strong>No se guardaron los cambios.</strong> {saveError}<p>ATLAS fusiona automáticamente cambios independientes en diferentes diagramas, cajas o campos. Si dos personas cambian el mismo dato de forma incompatible, protege ambas versiones y conserva tu borrador en esta pestaña. No recargues sin revisar.</p><div className="save-recovery-actions"><button onClick={()=>setDialog('history')}>Ver historial</button>{can('artifact.export')&&<button onClick={downloadLocalBackup}>Descargar mis cambios</button>}<button onClick={()=>ask('Descartar borrador local','Perderás los cambios que no se han guardado en este navegador. Puedes descargar una copia antes de continuar si tienes permiso de exportación.',()=>location.reload(),true,'Descartar y recargar')}>Recargar desde servidor</button></div></div>}
    {(dialog==='new-workspace'||dialog==='new-project'||dialog==='new-diagram')&&<Overlay title={dialog==='new-workspace'?'Crear espacio de trabajo':dialog==='new-project'?'Crear proyecto':'Nuevo diagrama'} onClose={()=>setDialog(null)}><div className="modal-body"><Field label={dialog==='new-workspace'?'Nombre de la organización':dialog==='new-project'?'Nombre del proyecto':'Nombre del diagrama'}><input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder={dialog==='new-workspace'?'Ej. Mi empresa':dialog==='new-project'?'Ej. Plataforma de pagos':'Ej. Flujo de autenticación'}/></Field>{dialog==='new-diagram'&&<Field label="Tipo de visualización"><select value={newType} onChange={e=>setNewType(e.target.value as DiagramType)}><optgroup label="Arquitectura, procesos y trazabilidad">{DIAGRAM_TYPES.filter(t=>!t.startsWith('uml-')&&can(`diagram.create.${t}`)).map(t=><option value={t} key={t}>{diagramLabels[t]}</option>)}</optgroup>{UML_DIAGRAM_GROUPS.map(group=><optgroup key={group.title} label={group.title}>{group.types.filter(t=>can(`diagram.create.${t}`)).map(t=><option value={t} key={t}>{diagramLabels[t]}</option>)}</optgroup>)}</select></Field>}{dialog==='new-diagram'&&<div className="diagram-type-help" role="note"><strong>{diagramLabels[newType]}</strong><p>{diagramDescriptions[newType]}</p><small>{newType==='uml-usecase'?'Para vincular una HU de trazabilidad con un caso de uso, selecciona esa HU en la matriz y usa Vista vinculada → este diagrama → caja de destino.':newType.startsWith('uml-')?'El catálogo de cajas y relaciones se adapta al tipo UML. No se modifica la ficha compartida en otras vistas.':'Podrás crear filtros propios para esta vista después de guardarla.'}</small></div>}<div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!emptyName(newName)} onClick={dialog==='new-workspace'?createWs:dialog==='new-project'?createPrj:addDiagram}><Plus size={15}/> Crear</button></div></div></Overlay>}
-   {dialog==='new-node'&&inFullscreenCanvas(<Overlay title="Agregar caja al diagrama" onClose={()=>setDialog(null)} wide><div className="modal-body"><div className="segmented node-modal-tabs"><button className={nodeTab==='new'?'active':''} onClick={()=>setNodeTab('new')}>Crear elemento</button><button className={nodeTab==='existing'?'active':''} onClick={()=>setNodeTab('existing')}>Reutilizar existente</button></div>{nodeTab==='new'?<><Field label="Nombre de la caja"><input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Ej. Motor de facturación"/></Field><Field label="Tipo de elemento"><select value={newElementType} onChange={e=>setNewElementType(e.target.value as ElementType)}>{ELEMENT_TYPES.filter(t=>can(`element.create.${t}`)&&(!diagram||umlElementCreatable(diagram.type,t))).map(t=><option key={t} value={t}>{diagram?.type==='uml-composite'&&t==='uml-class'?'Clasificador estructurado':diagram?.type==='uml-activity'&&t==='uml-end'?'Final de actividad':elementLabels[t]}</option>)}</select></Field><div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!emptyName(newName)} onClick={addNewNode}><Plus size={15}/> Agregar al lienzo</button></div></>:<><Field label="Buscar elemento del proyecto"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Nombre, tipo, resumen..."/></Field><div className="existing-list">{Object.values(doc?.elements||{}).filter(e=>(e.name+' '+e.type+' '+e.summary).toLowerCase().includes(query.toLowerCase())&&!diagram?.nodes.some(n=>n.elementId===e.id)&&(!diagram||umlElementAllowed(diagram.type,e.type))).slice(0,100).map(e=><button key={e.id} onClick={()=>addNode(e.id)}><IconFor type={e.type}/><span><strong>{e.name}</strong><small>{elementLabels[e.type]} · {e.summary}</small></span><Plus size={15}/></button>)}{!Object.values(doc?.elements||{}).some(e=>!diagram?.nodes.some(n=>n.elementId===e.id)&&(!diagram||umlElementAllowed(diagram.type,e.type)))&&<p className="muted-mini">No hay más elementos disponibles.</p>}</div></>}</div></Overlay>)}
-   {dialog==='fields'&&<Overlay title="Campos personalizados por tipo de elemento" onClose={()=>setDialog(null)} wide><div className="modal-body"><p className="dialog-description">Configura fichas específicas para componentes, requerimientos, procesos, endpoints y otros elementos. Los campos se comparten entre las vistas del mismo proyecto.</p><div className="field-grid"><Field label="Nombre del campo"><input value={fieldLabel} onChange={e=>setFieldLabel(e.target.value)} placeholder="Ej. Enlace en Azure DevOps" disabled={!can('field.configure')}/></Field><Field label="Aplica a"><select value={fieldType} disabled={!can('field.configure')} onChange={e=>setFieldType(e.target.value as ElementType|'all')}><option value="all">Todos los tipos</option>{ELEMENT_TYPES.map(t=><option value={t} key={t}>{diagram?.type==='uml-composite'&&t==='uml-class'?'Clasificador estructurado':diagram?.type==='uml-activity'&&t==='uml-end'?'Final de actividad':elementLabels[t]}</option>)}</select></Field><Field label="Tipo de dato"><select value={fieldKind} disabled={!can('field.configure')} onChange={e=>setFieldKind(e.target.value as FieldKind)}>{FIELD_TYPES.map(t=><option value={t} key={t}>{fieldLabels[t]}</option>)}</select></Field><div className="field-add"><button className="primary" disabled={!can('field.configure')||!emptyName(fieldLabel)} onClick={addField}><Plus size={14}/> Crear campo</button></div></div>{fieldKind==='select'&&<Field label="Opciones separadas por coma"><input value={fieldOptions} disabled={!can('field.configure')} onChange={e=>setFieldOptions(e.target.value)} placeholder="Ej. Pendiente, En revisión, Finalizado"/></Field>}<div className="section-head"><strong>Campos configurados</strong><span className="tiny-count">{doc?.fieldDefinitions.length||0}</span></div><div className="defs-list">{doc?.fieldDefinitions.map(f=><div className="def-row" key={f.id}><span><strong>{f.label}</strong><small>{f.forType==='all'?'Todos':elementLabels[f.forType]} · {fieldLabels[f.kind]}</small></span>{can('field.configure')&&<button title="Eliminar campo" onClick={()=>ask('Eliminar campo personalizado',`Se eliminará la definición «${f.label}».`,()=>patch(old=>commandRemoveFieldDefinition(old,f.id)),true,'Eliminar campo')}><Trash2 size={14}/></button>}</div>)}</div></div></Overlay>}
+   {dialog==='new-node'&&inFullscreenCanvas(<Overlay title="Agregar caja al diagrama" onClose={()=>setDialog(null)} wide><div className="modal-body"><div className="segmented node-modal-tabs"><button className={nodeTab==='new'?'active':''} onClick={()=>setNodeTab('new')}>Crear elemento</button><button className={nodeTab==='existing'?'active':''} onClick={()=>setNodeTab('existing')}>Reutilizar existente</button></div>{nodeTab==='new'?<><Field label="Nombre de la caja"><input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Ej. Motor de facturación"/></Field><Field label="Tipo de elemento"><select value={newElementType} onChange={e=>setNewElementType(e.target.value as ElementType)}>{ELEMENT_TYPES.filter(t=>can(`element.create.${t}`)&&(!diagram||umlElementCreatable(diagram.type,t))).map(t=><option key={t} value={t}>{diagramElementLabel(diagram?.type,t)}</option>)}</select></Field><div className="modal-actions"><button className="ghost" onClick={()=>setDialog(null)}>Cancelar</button><button className="primary" disabled={!emptyName(newName)} onClick={addNewNode}><Plus size={15}/> Agregar al lienzo</button></div></>:<><Field label="Buscar elemento del proyecto"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Nombre, tipo, resumen..."/></Field><div className="existing-list">{Object.values(doc?.elements||{}).filter(e=>(e.name+' '+e.type+' '+e.summary).toLowerCase().includes(query.toLowerCase())&&!diagram?.nodes.some(n=>n.elementId===e.id)&&(!diagram||umlElementAllowed(diagram.type,e.type))).slice(0,100).map(e=><button key={e.id} onClick={()=>addNode(e.id)}><IconFor type={e.type}/><span><strong>{e.name}</strong><small>{diagramElementLabel(diagram?.type,e.type)} · {e.summary}</small></span><Plus size={15}/></button>)}{!Object.values(doc?.elements||{}).some(e=>!diagram?.nodes.some(n=>n.elementId===e.id)&&(!diagram||umlElementAllowed(diagram.type,e.type)))&&<p className="muted-mini">No hay más elementos disponibles.</p>}</div></>}</div></Overlay>)}
+   {dialog==='fields'&&<Overlay title="Campos personalizados por tipo de elemento" onClose={()=>setDialog(null)} wide><div className="modal-body"><p className="dialog-description">Configura fichas específicas para componentes, requerimientos, procesos, endpoints y otros elementos. Los campos se comparten entre las vistas del mismo proyecto.</p><div className="field-grid"><Field label="Nombre del campo"><input value={fieldLabel} onChange={e=>setFieldLabel(e.target.value)} placeholder="Ej. Enlace en Azure DevOps" disabled={!can('field.configure')}/></Field><Field label="Aplica a"><select value={fieldType} disabled={!can('field.configure')} onChange={e=>setFieldType(e.target.value as ElementType|'all')}><option value="all">Todos los tipos</option>{ELEMENT_TYPES.map(t=><option value={t} key={t}>{diagramElementLabel(diagram?.type,t)}</option>)}</select></Field><Field label="Tipo de dato"><select value={fieldKind} disabled={!can('field.configure')} onChange={e=>setFieldKind(e.target.value as FieldKind)}>{FIELD_TYPES.map(t=><option value={t} key={t}>{fieldLabels[t]}</option>)}</select></Field><div className="field-add"><button className="primary" disabled={!can('field.configure')||!emptyName(fieldLabel)} onClick={addField}><Plus size={14}/> Crear campo</button></div></div>{fieldKind==='select'&&<Field label="Opciones separadas por coma"><input value={fieldOptions} disabled={!can('field.configure')} onChange={e=>setFieldOptions(e.target.value)} placeholder="Ej. Pendiente, En revisión, Finalizado"/></Field>}<div className="section-head"><strong>Campos configurados</strong><span className="tiny-count">{doc?.fieldDefinitions.length||0}</span></div><div className="defs-list">{doc?.fieldDefinitions.map(f=><div className="def-row" key={f.id}><span><strong>{f.label}</strong><small>{f.forType==='all'?'Todos':diagramElementLabel(diagram?.type,f.forType)} · {fieldLabels[f.kind]}</small></span>{can('field.configure')&&<button title="Eliminar campo" onClick={()=>ask('Eliminar campo personalizado',`Se eliminará la definición «${f.label}».`,()=>patch(old=>commandRemoveFieldDefinition(old,f.id)),true,'Eliminar campo')}><Trash2 size={14}/></button>}</div>)}</div></div></Overlay>}
    {dialog==='diagram-filters'&&diagram&&<Overlay title={`Filtros: ${diagram.name}`} onClose={()=>setDialog(null)} wide><div className="modal-body diagram-filter-settings">
     <p className="dialog-description">Define contextos, flujos, dominios o capas de este diagrama. Cada vista tiene filtros propios; las etiquetas se asignan a las cajas desde el inspector.</p>
     <div className="diagram-filter-add"><Field label="Nueva categoría"><input aria-label="Nueva categoría" autoFocus placeholder="Ej. Contexto externo, Técnico, Autenticación" value={filterLabel} onChange={e=>setFilterLabel(e.target.value)} maxLength={80}/></Field><button className="primary" disabled={!filterLabel.trim()} onClick={createFilter}><Plus size={15}/> Agregar filtro</button></div>

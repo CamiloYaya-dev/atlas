@@ -4,6 +4,8 @@ import {randomUUID} from 'node:crypto'
 import {buildApp} from '../app'
 import {pool} from '../db/pool'
 import {hashPassword} from '../security/password'
+import sharp from 'sharp'
+import {readProvenance} from '../modules/exports/provenance'
 import {createElement,emptyDoc} from '@atlas/contracts'
 import type {ProjectDocument} from '@atlas/contracts'
 
@@ -108,6 +110,64 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal(loaded.status,200);assert.equal(loaded.data.version,1)
    assert.equal((await send('POST',`/workspaces/${workspaceId}/projects`,admin,{name:'Inválido',document:{foo:'bar'}})).status,400)
   })
+  await resetQaRateLimitWindow()
+  await t.test('Licencias y exportaciones reales: permiso, vigencia, marca, firma e historial',async()=>{
+   const license=`/workspaces/${workspaceId}/license`,adminLicense=`/admin/workspaces/${workspaceId}/license`
+   const active={planCode:'pro',status:'active',startsAt:'2020-01-01T00:00:00Z',expiresAt:null}
+   assert.equal((await send('GET',license)).status,401)
+   assert.equal((await send('GET',license,member)).status,403)
+   assert.equal((await send('PUT',adminLicense,member,active)).status,403)
+   const free=await send('GET',license,admin);assert.equal(free.status,200);assert.equal(free.data.licenseActive,false);assert.equal(free.data.features['diagram.export.clean'],false)
+   assert.equal((await send('PUT',`/admin/workspaces/${randomUUID()}/license`,admin,active)).status,404)
+   for(const invalid of [{},{...active,planCode:'unknown'},{...active,status:'unknown'},{...active,startsAt:'bad'},{...active,startsAt:'2026-99-99T00:00:00Z'},{...active,expiresAt:'2019-01-01T00:00:00Z'},{...active,features:{unknown:true}},{...active,features:{'diagram.export.clean':'yes'}},{...active,planCode:'free',features:{'diagram.export.clean':true}}])assert.equal((await send('PUT',adminLicense,admin,invalid)).status,400)
+   const doc=emptyDoc(),a=createElement('Participante QA','actor');a.summary='Campo de prueba';doc.elements[a.id]=a
+   doc.diagrams.push({id:'lic-qa',name:'Exportación QA',type:'c1',description:'',createdAt:a.createdAt,nodes:[{id:'na',elementId:a.id,x:0,y:0}],edges:[]})
+   const created=await send('POST',`/workspaces/${workspaceId}/projects`,admin,{name:'QA exportación '+suffix,document:emptyDoc()})
+   assert.equal(created.status,201,JSON.stringify(created.data));const pid=created.data.id
+   try{
+   const saved=await send('PUT',`/projects/${pid}/document`,admin,{document:doc,expectedVersion:1})
+   assert.equal(saved.status,200,JSON.stringify(saved.data))
+   const persisted=await send('GET',`/projects/${pid}/document`,admin)
+   assert.equal(persisted.status,200,JSON.stringify(persisted.data));assert.equal(persisted.data.version,2)
+   assert.ok(persisted.data.document.diagrams.some((d:{id:string})=>d.id==='lic-qa'))
+   const version=persisted.data.version as number
+   const url=`/projects/${pid}/diagrams/lic-qa/export-image`,history=`/projects/${pid}/export-history`
+   const bytes=await sharp({create:{width:450,height:270,channels:3,background:'#ffffff'}}).png().toBuffer()
+   const body={format:'png',expectedVersion:version,imageBase64:bytes.toString('base64')}
+   const advanced={mode:'dictionary',fields:{na:{summary:'dictionary'}},documentFormat:'pdf'}
+   const binary=async(payload:object)=>app.inject({method:'POST',url:`/api/v1${url}`,headers:{cookie:admin!.cookie,'x-csrf-token':admin!.csrf},payload})
+    assert.equal((await send('POST',url,admin,{...body,format:'gif'})).status,400)
+    assert.equal((await send('POST',url,admin,{...body,expectedVersion:0})).status,400)
+    assert.equal((await send('POST',url,admin,{...body,expectedVersion:version-1})).status,409)
+    assert.equal((await send('POST',url,admin,{...body,advanced})).status,403)
+    assert.equal((await send('POST',url,admin,{format:'png',expectedVersion:version})).status,400)
+    assert.equal((await send('POST',url,admin,{...body,imageBase64:'not-a-capture'})).status,400)
+    assert.equal((await send('POST',url.replace('lic-qa','missing-diagram'),admin,body)).status,404)
+    assert.equal((await send('POST',url,member,body)).status,404)
+    assert.equal((await send('GET',history,admin)).data.length,0,'Rechazos no generan auditoría de exportación')
+    const marked=await binary(body);assert.equal(marked.statusCode,200,marked.statusCode===200?'':marked.body);assert.match(String(marked.headers['content-type']),/image\/png/)
+    const original=readProvenance(marked.rawPayload);assert.equal(original?.proof.watermarkApplied,true);assert.equal(original?.proof.licenseActive,false);assert.equal(original?.proof.documentVersion,version)
+    const verified=await send('POST','/exports/verify',admin,{imageBase64:marked.rawPayload.toString('base64')});assert.equal(verified.status,200);assert.equal(verified.data.verified,true)
+    assert.equal((await send('POST','/exports/verify',member,{imageBase64:marked.rawPayload.toString('base64')})).status,403)
+    assert.equal((await send('POST','/exports/verify',admin,{imageBase64:bytes.toString('base64')})).data.verified,false)
+    const pro=await send('PUT',adminLicense,admin,active);assert.equal(pro.status,200);assert.equal(pro.data.licenseActive,true)
+    assert.equal((await send('POST',url,admin,{...body,advanced:{...advanced,fields:{missing:{summary:'dictionary'}}}})).status,400)
+    assert.equal((await send('POST',url,admin,{...body,advanced:{mode:'simple',fields:{}}})).status,400)
+    assert.equal((await send('POST','/exports/verify',admin,{imageBase64:'invalid!'})).status,400)
+    const clean=await binary({...body,format:'jpg'});assert.equal(clean.statusCode,200,clean.statusCode===200?'':clean.body);assert.equal(readProvenance(clean.rawPayload)?.proof.watermarkApplied,false)
+    const zip=await binary({...body,advanced});assert.equal(zip.statusCode,200,zip.statusCode===200?'':zip.body);assert.match(String(zip.headers['content-type']),/application\/zip/);assert.equal(zip.rawPayload.readUInt32LE(0),0x04034b50);assert.ok(zip.rawPayload.includes(Buffer.from('_Fichas.pdf')))
+    for(const documentFormat of ['docx','html'] as const){
+     const bundle=await binary({...body,advanced:{...advanced,documentFormat}});assert.equal(bundle.statusCode,200,bundle.statusCode===200?'':bundle.body);assert.match(String(bundle.headers['content-type']),/application\/zip/);assert.ok(bundle.rawPayload.includes(Buffer.from(`_Fichas.${documentFormat}`)))
+    }
+    const logs=await send('GET',history,admin);assert.equal(logs.status,200);assert.equal(logs.data.length,5);assert.ok(logs.data.some((entry:{watermark_applied:boolean})=>entry.watermark_applied));assert.ok(logs.data.some((entry:{watermark_applied:boolean})=>!entry.watermark_applied))
+    const revoked=await send('PUT',adminLicense,admin,{...active,status:'revoked'});assert.equal(revoked.status,200);assert.equal(revoked.data.features['diagram.export.advanced'],false);assert.equal((await send('POST',url,admin,{...body,advanced})).status,403)
+   }finally{
+    // El historial append-only permanece en la BD QA; nunca se toca la base productiva.
+    const deleted=await send('DELETE',`/projects/${pid}`,admin)
+    assert.equal(deleted.status,200,JSON.stringify(deleted.data))
+   }
+  })
+  await resetQaRateLimitWindow()
   await t.test('Roles y miembros: configurables, con permisos mínimos y sin asignar propietario',async()=>{
    const roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
    assert.equal(roles.status,200)

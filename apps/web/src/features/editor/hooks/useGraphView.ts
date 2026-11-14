@@ -2,7 +2,7 @@ import {graphSelection} from '../domain/graph-selection'
 import {parallelOffsets} from '../domain/parallel-edges'
 import {useMemo} from 'react'
 import {MarkerType} from '@xyflow/react'
-import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,atlasNodeSize} from '@atlas/contracts'
+import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,atlasNodeSize,sequenceActivationPorts,sequenceRenderedHandle,sequenceActivationSide} from '@atlas/contracts'
 import type {Node,Edge} from '@xyflow/react'
 import type {Diagram,ProjectDocument,Perspective} from '@atlas/contracts'
 export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;includeUntagged?:boolean;mode:Perspective;selectedId:string|null;canEdit:boolean;onResize?: (nodeId:string,width:number,height:number,x?:number,y?:number)=>void}){
@@ -30,16 +30,65 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const element=doc.elements[n.elementId]
    const depth=umlNodeDepth(diagram,n)
    const size=atlasNodeSize(diagram.type,element,n,depth,visibleNodes.some(x=>x.parentNodeId===n.id))
+   // UML: a lifeline terminates where its destruction marker is attached,
+   // including when that marker belongs to the end of an activation.
+   const sequenceEndY=diagram.type==='uml-sequence'&&['uml-lifeline','actor'].includes(element.type)?(()=>{
+    const destruction=visibleNodes.find(candidate=>{
+     if(doc.elements[candidate.elementId]?.type!=='uml-destruction')return false
+     const direct=visibleNodes.find(parent=>parent.id===candidate.parentNodeId)
+     return direct?.id===n.id||direct?.parentNodeId===n.id
+    })
+    if(!destruction)return undefined
+    const parent=visibleNodes.find(item=>item.id===destruction.parentNodeId)
+    const top=parent?.id===n.id?destruction.y:(parent?.y||0)+destruction.y
+    return Math.max(38,top+atlasNodeSize(diagram.type,doc.elements[destruction.elementId],destruction).height/2)
+   })():undefined
    return {
     id:n.id,type:'atlas',position,style:{width:size.width,height:size.height},
-    data:{element,elementId:n.elementId,mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,linkedDiagramType:doc.diagrams.find(d=>d.id===element.childDiagramId)?.type,canResize:canEdit,onResize,minWidth:80,minHeight:60},
-    ...(visibleParent?{parentId:n.parentNodeId,...(diagram.type==='uml-composite'&&element.type==='uml-port'?{}:{extent:'parent' as const})}:{}),
+    data:{element,elementId:n.elementId,mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,sequenceEndY,sequenceActivationHeight:diagram.type==='uml-sequence'&&element.type==='uml-activation'?size.height:undefined,linkedDiagramType:doc.diagrams.find(d=>d.id===element.childDiagramId)?.type,canResize:canEdit,onResize,minWidth:80,minHeight:60},
+    ...(visibleParent?{parentId:n.parentNodeId,...((diagram.type==='uml-composite'&&element.type==='uml-port'||diagram.type==='uml-sequence'&&element.type==='uml-destruction')?{}:{extent:'parent' as const})}:{}),
     zIndex:['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject','uml-partition'].includes(element.type)||diagram.type==='uml-composite'&&element.type==='uml-class'?depth*10:depth*10+2,
     selected:selectedId===n.elementId,draggable:canEdit
    }
   })
-  const defaultPaths:Partial<Record<Diagram['type'],'smoothstep'|'straight'|'step'|'bezier'>>={process:'step',sequence:'straight',trace:'straight',data:'smoothstep',c4:'bezier'}
+  const defaultPaths:Partial<Record<Diagram['type'],'smoothstep'|'straight'|'step'|'bezier'>>={process:'step',sequence:'straight',trace:'straight',data:'smoothstep',c4:'bezier','uml-sequence':'straight','uml-communication':'straight','uml-state':'smoothstep'}
   const visibleEdges=diagram.edges.filter(e=>allowedEdges.has(e.id))
+  // Old UML sequence JSON may use the same lateral anchor for many messages
+  // (or obsolete top/bottom activation handles). Fan these edges out at
+  // different execution heights in the VIEW; do not rewrite persisted history.
+  const activationNodes=new Map(visibleNodes.filter(n=>doc.elements[n.elementId]?.type==='uml-activation').map(n=>[n.id,n]))
+  const legacyBuckets=new Map<string,string[]>()
+  if(diagram.type==='uml-sequence'){
+   for(const e of visibleEdges){
+    for(const role of ['source','target'] as const){
+     const nodeId=e[role],node=activationNodes.get(nodeId)
+     if(!node)continue
+     const handle=role==='source'?e.sourceHandle:e.targetHandle
+     if(handle?.startsWith('seq-'))continue
+     const side=sequenceActivationSide(handle,role)
+     const key=`${nodeId}:${side}`
+     const bucket=legacyBuckets.get(key)||[]
+     bucket.push(e.id)
+     legacyBuckets.set(key,bucket)
+    }
+   }
+  }
+  const sequenceHandle=(edge:Diagram['edges'][number],role:'source'|'target')=>{
+   const nodeId=edge[role],handle=role==='source'?edge.sourceHandle:edge.targetHandle
+   const node=activationNodes.get(nodeId)
+   if(diagram.type!=='uml-sequence'||!node)return activityTipHandle(nodeId,handle|| (role==='source'?'right':'left'))
+   const fallback=sequenceRenderedHandle(handle,role)
+   const size=atlasNodeSize(diagram.type,doc.elements[node.elementId],node)
+   const side=sequenceActivationSide(fallback,role)
+   const ports=sequenceActivationPorts(size.height).filter(p=>p.side===side)
+   if(fallback.startsWith('seq-'))return ports.some(p=>p.id===fallback)?fallback:ports[ports.length-1]?.id||side
+   const bucket=legacyBuckets.get(`${nodeId}:${side}`)||[]
+   if(bucket.length<2)return side
+   const index=bucket.indexOf(edge.id)
+   // Spread inherited relations evenly over all available lateral anchors.
+   const pos=Math.max(0,Math.min(ports.length-1,Math.round((index+1)*ports.length/(bucket.length+1))-1))
+   return ports[pos]?.id||side
+  }
   const offsets=parallelOffsets(visibleEdges)
   const counts=new Map<string,number>()
   for(const e of visibleEdges){const key=[e.source,e.target].sort().join('\u0000');counts.set(key,(counts.get(key)||0)+1)}
@@ -54,7 +103,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const noArrow=['association','link','assembly','connector','communication-path','containment','composition','aggregation'].includes(semantic)
    const relationLabel=e.label||(uml?notation.label||'':(['include','extend'].includes(semantic)?`«${semantic}»`:''))
    return ({
-    id:e.id,source:e.source,target:e.target,sourceHandle:activityTipHandle(e.source,e.sourceHandle||'right'),targetHandle:activityTipHandle(e.target,e.targetHandle||'left'),label:relationLabel,
+    id:e.id,source:e.source,target:e.target,sourceHandle:sequenceHandle(e,'source'),targetHandle:sequenceHandle(e,'target'),label:relationLabel,
     type:uml?'atlas-uml':parallel?'atlas-parallel':route,
     data:uml?{parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole}:parallel?{parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
     animated:diagram.type==='sequence',

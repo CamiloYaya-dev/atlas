@@ -10,6 +10,9 @@ export default defineConfig({
   setupFiles:['./src/test/setup.ts'],
   include:['src/**/*.browser.test.{ts,tsx}'],
   clearMocks:true,
+  // El catálogo UML y los recorridos DOM compiten por CPU/memoria bajo V8.
+  // Limitar concurrencia; no reintentar ni ocultar fallos.
+  maxWorkers:4,
   coverage:{
    provider:'v8',
    include:['src/**/*.{ts,tsx}'],
