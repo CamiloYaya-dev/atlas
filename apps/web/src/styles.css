@@ -302,3 +302,127 @@
 .react-flow__node-atlas .atlas-node.uml-deployment-node.uml-deployment-container.kind-uml-node,
 .react-flow__node-atlas .atlas-node.uml-deployment-node.uml-deployment-container.kind-uml-device,
 .react-flow__node-atlas .atlas-node.uml-deployment-node.uml-deployment-container.kind-uml-execution{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;}
+
+
+/* UML paquete/modelo/perfil y sujeto: contención real con figuras diferenciadas. */
+.atlas-node.uml-package-container.kind-uml-subpackage{background:#f8fbff!important;border-style:solid!important}
+.atlas-node.uml-package-container.kind-uml-subpackage .uml-package-tab{background:#d9eafe;color:#255684}
+.atlas-node.uml-package-container.kind-uml-model{background:#f3f9f5!important;border-color:#538976!important}
+.atlas-node.uml-package-container.kind-uml-model .uml-package-tab{background:#d6efe2;border-color:#538976;color:#286c50}
+.atlas-node.uml-package-container.kind-uml-profile{background:#f6f1ff!important;border-color:#8065ac!important}
+.atlas-node.uml-package-container.kind-uml-profile .uml-package-tab{background:#e9defa;border-color:#8065ac;color:#65419d}
+.atlas-node.uml-usecase-subject{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;background:#f8faff70!important;border:2px solid #7288a4!important;border-radius:2px!important;box-shadow:none!important;padding:15px 18px!important}
+.uml-subject-title{font-size:15px;font-weight:700;color:#2c4265;text-align:center}
+.uml-subject-caption{display:block;text-align:center;font-style:italic;color:#7588a2;margin-top:6px}
+.atlas-node.uml-metaclass-card{background:#f3f7fc!important;border:1.7px solid #5a739a!important;text-align:center!important;border-radius:3px!important;padding:18px 12px!important}
+.atlas-node.uml-stereotype-card{background:#f4efff!important;border:1.7px solid #8665b2!important;text-align:center!important;border-radius:3px!important;padding:14px 10px!important}
+.uml-profile-stereotype{font:11px/1.4 ui-monospace,monospace;color:#63779d;margin-bottom:10px}
+/* Los contenedores deben poder crecer y reducirse sin medidas CSS impuestas. */
+.atlas-node.uml-package-container.uml-nested-level-1,.atlas-node.uml-package-container.uml-nested-level-2{width:100%!important;min-width:0!important;height:100%!important;min-height:0!important}
+
+
+/* ATLAS UML 2.5.1 — Actividades: cada nodo ES la forma UML, sin tarjeta genérica alrededor. */
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-decision-card,
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-fork-card,
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-pseudostate-card,
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-activity-flow-final {
+  width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;outline:0!important;
+}
+.uml-diagram-uml-activity.uml-decision-card .uml-decision-shape,
+.uml-diagram-uml-activity.uml-decision-card .uml-decision-shape svg {
+  width:100%;height:100%;display:block;color:#405a80;
+}
+.uml-diagram-uml-activity.uml-fork-card .uml-fork-symbol {
+  top:calc(50% - 5px);height:10px;background:#1e2741;border-radius:1px;
+}
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-activity-action {
+  width:100%!important;height:100%!important;display:flex;align-items:center;justify-content:center;
+  padding:12px!important;border:2px solid #31415f!important;border-radius:19px!important;
+  box-shadow:none!important;background:white!important;text-align:center!important;
+}
+.uml-activity-action .uml-action-label {font-size:14px;font-weight:750;color:#1c3150;line-height:1.4;max-width:100%;overflow-wrap:anywhere;}
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-activity-object {
+  width:100%!important;height:100%!important;display:flex;align-items:center;justify-content:center;
+  border:2px solid #344661!important;border-radius:2px!important;background:#fff!important;
+  box-shadow:none!important;padding:10px!important;text-align:center;
+}
+.uml-activity-object .uml-object-node-label {font-size:13px;font-weight:700;color:#243a5b;overflow-wrap:anywhere;}
+.uml-activity-object .uml-object-node-label small {font-size:12px;color:#536b89;}
+.react-flow__node-atlas .atlas-node.uml-diagram-uml-activity.uml-activity-partition {
+  width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+  border:1.5px solid #637996!important;border-left:1.5px solid #637996!important;
+  border-radius:12px!important;padding:0!important;background:#f7f9ff8c!important;
+  box-shadow:none!important;
+}
+.uml-activity-partition .uml-partition-heading {text-align:center;font-size:15px;font-weight:800;padding:15px 12px;background:#f0effa;border-radius:10px 10px 0 0;border-bottom:1px solid #d4dcf0;color:#243c63;}
+.uml-activity-partition .uml-partition-description {font-size:10px;color:#8a96ae;text-align:center;padding:6px;pointer-events:none;}
+.uml-activity-flow-final .uml-flow-final-symbol {display:block;width:100%;height:100%;color:#283755;}
+/* Iconos de control seleccionables sin darles un segundo borde rectangular. */
+.react-flow__node-atlas.selected:has(.uml-diagram-uml-activity.uml-decision-card),
+.react-flow__node-atlas.selected:has(.uml-diagram-uml-activity.uml-fork-card),
+.react-flow__node-atlas.selected:has(.uml-diagram-uml-activity.uml-pseudostate-card),
+.react-flow__node-atlas.selected:has(.uml-diagram-uml-activity.uml-activity-flow-final) {box-shadow:none!important;border:0!important;outline:0!important;}
+
+/* El rectángulo del redimensionador no debe confundirse con una figura UML. */
+.atlas-uml-symbol-resize-line {border-color:transparent!important;}
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-decision-card:not(.selected)>.node-handle,
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-fork-card:not(.selected)>.node-handle,
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-pseudostate-card:not(.selected)>.node-handle,
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-activity-flow-final:not(.selected)>.node-handle {opacity:0;transition:opacity .12s;}
+.react-flow__node-atlas:hover .uml-diagram-uml-activity>.node-handle {opacity:1;}
+
+/* Activity port QA: align the only four visible handles to the circle/diamond contour. */
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-pseudostate-card .uml-start-symbol,
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-pseudostate-card .uml-end-symbol {
+  width:86%;height:86%;margin:0;box-sizing:border-box;
+}
+.react-flow__node-atlas .uml-diagram-uml-activity.uml-activity-flow-final .uml-flow-final-symbol {width:100%;height:100%;}
+
+/* ATLAS UML Activity: native symbols, NEVER rectangular cards.
+   A control node's React Flow bounding box exists for hit-testing only. */
+.react-flow__node-atlas:has(>.atlas-activity-control),
+.react-flow__node-atlas.selected:has(>.atlas-activity-control){
+ background:transparent!important;border:0!important;border-radius:0!important;
+ outline:0!important;box-shadow:none!important;padding:0!important;
+}
+.react-flow__node-atlas>.atlas-activity-control{
+ position:relative;width:100%;height:100%;min-width:0;min-height:0;
+ border:0!important;border-left:0!important;outline:0!important;border-radius:0!important;
+ padding:0!important;background:transparent!important;box-shadow:none!important;
+ display:block;isolation:isolate;
+}
+.react-flow__node-atlas>.atlas-activity-control:hover,
+.react-flow__node-atlas>.atlas-activity-control.selected{
+ border:0!important;background:transparent!important;box-shadow:none!important;
+}
+.react-flow__node-atlas>.atlas-activity-control .atlas-activity-glyph{
+ position:absolute!important;inset:0!important;display:block!important;
+ width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+ padding:0!important;margin:0!important;background:transparent!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ pointer-events:none;overflow:visible;z-index:0;
+}
+/* Override older .uml-fork-symbol rules that inserted a rectangular bar. */
+.react-flow__node-atlas>.atlas-activity-control .uml-fork-symbol.atlas-activity-glyph{
+ left:0!important;right:0!important;top:0!important;bottom:0!important;
+ background:transparent!important;border-radius:0!important;
+}
+.react-flow__node-atlas>.atlas-activity-control .atlas-activity-symbol-port{
+ width:9px!important;height:9px!important;min-width:9px!important;min-height:9px!important;
+ border-radius:50%!important;border:2px solid white!important;
+ background:#6c91c1!important;box-shadow:0 0 0 1px #bad0e8!important;
+ z-index:2;
+}
+.react-flow__node-atlas>.atlas-activity-control:not(.selected)>.atlas-activity-symbol-port{
+ opacity:0;transition:opacity .12s;
+}
+.react-flow__node-atlas:hover>.atlas-activity-control>.atlas-activity-symbol-port,
+.react-flow__node-atlas>.atlas-activity-control.selected>.atlas-activity-symbol-port{
+ opacity:1;
+}
+.react-flow__node-atlas>.atlas-activity-control .atlas-uml-symbol-resize-line{border-color:transparent!important;}
+.react-flow__node-atlas>.atlas-activity-control .atlas-uml-symbol-resize-handle{
+ width:6px;height:6px;background:#fff;border:1px solid #326ee7;border-radius:1px;
+}

@@ -58,7 +58,7 @@ export function AtlasUmlEdge(props:EdgeProps){
  return <>
   {assembly&&<defs><mask id={`atlas-assembly-gap-${props.id}`} maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000">
    <rect x="-100000" y="-100000" width="200000" height="200000" fill="white"/>
-   <rect x="-16" y="-15" width="32" height="30" transform={`translate(${assembly.x} ${assembly.y}) rotate(${assembly.angle})`} fill="black"/>
+   <rect x="-24" y="-15" width="48" height="30" transform={`translate(${assembly.x} ${assembly.y}) rotate(${assembly.angle})`} fill="black"/>
   </mask></defs>}
   <BaseEdge id={props.id} path={route.path} style={{...style,...(assembly?{mask:`url(#atlas-assembly-gap-${props.id})`}:{})}} interactionWidth={28}/>
   {squareStart&&<rect data-uml-terminal="port-square" x={props.sourceX-5.5} y={props.sourceY-5.5} width="11" height="11" fill="white" stroke={INK} strokeWidth="1.8" pointerEvents="none"/>}
@@ -67,9 +67,9 @@ export function AtlasUmlEdge(props:EdgeProps){
   <Terminal kind={n.end} x={props.targetX} y={props.targetY} angle={ta}/>
   {assembly&&<g data-uml-terminal="assembly" transform={`translate(${assembly.x},${assembly.y}) rotate(${assembly.angle})`} stroke={INK} strokeWidth="1.8" fill="none" pointerEvents="none" aria-label="Ensamblaje UML: interfaz proporcionada encajada en interfaz requerida">
     {/* La bola se apoya dentro de la cavidad; ambos comparten tangente con la ruta. */}
-    <path d="M -16,0 H -10 M 15,0 H 24"/>
-    <circle cx="-2" cy="0" r="8" fill="white"/>
-    <path d="M 14,-12 Q -2,0 14,12"/>
+    <path d="M -23,0 H -12 M 15,0 H 23"/>
+    <circle cx="-5" cy="0" r="7" fill="white"/>
+    <path d="M 3,-11 Q 25,0 3,11"/>
    </g>}
   {(props.label||data.sourceMultiplicity||data.targetMultiplicity||data.sourceRole||data.targetRole)&&<EdgeLabelRenderer>
    {props.label&&<div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${assemblyLabel?.x??route.labelX}px,${assemblyLabel?.y??route.labelY}px)`}}>{props.label}</div>}

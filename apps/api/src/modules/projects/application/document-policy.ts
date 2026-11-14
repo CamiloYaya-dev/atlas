@@ -45,6 +45,7 @@ export function ensureUniqueIds(doc:ProjectDocument){
    if(n.filterIds?.some(id=>!filterIds.has(id)))throw new DomainError('Nodo con filtro inexistente',400)
    if(n.width!==undefined&&!validNodeDimension(n.width)||n.height!==undefined&&!validNodeDimension(n.height))throw new DomainError('Dimensiones de caja inválidas',400)
    if(!umlElementAllowed(d.type,doc.elements[n.elementId].type))throw new DomainError('Elemento no permitido para este tipo de diagrama UML',400)
+   if(d.type==='uml-package'&&doc.elements[n.elementId].type==='uml-subpackage'&&!n.parentNodeId)throw new DomainError('Un subpaquete debe estar contenido en un paquete o modelo UML',400)
    if(n.parentNodeId){
     if(!umlAncestryValid(d,n,doc.elements))throw new DomainError('Contención UML inválida: jerarquía o ciclo',400)
     const parent=d.nodes.find(p=>p.id===n.parentNodeId)!
@@ -180,6 +181,11 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     if(oldE.source!==e.source||oldE.target!==e.target)fail('Para cambiar extremos, elimina y recrea la relación')
     requirePermission(a,`relation.edit.${edgeKind(oldE,old,original)}`)
     if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
+    if(isUmlDiagram(d.type)&&e.relationKind){
+     const src=d.nodes.find(n=>n.id===e.source),dst=d.nodes.find(n=>n.id===e.target)
+     if(src&&dst&&!umlRelationEndpointValid(d.type,e.relationKind,full.elements[src.elementId].type,full.elements[dst.elementId].type))
+      throw new DomainError('Extremos incompatibles con la relación UML',400)
+    }
    }
   }
   for(const e of old.edges)if(!nextEdges.has(e.id))requirePermission(a,`relation.delete.${edgeKind(e,old,original)}`)

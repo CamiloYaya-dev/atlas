@@ -1,0 +1,652 @@
+{
+  "name": "ATLAS · QA UML perfiles, casos de uso, paquetes y ensamblaje",
+  "document": {
+    "schema": 1,
+    "elements": {
+      "pkg": {
+        "id": "pkg",
+        "name": "Solicitudes",
+        "type": "uml-package",
+        "summary": "Paquete raíz del modelo",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        }
+      },
+      "model": {
+        "id": "model",
+        "name": "SistemaSolicitudes",
+        "type": "uml-model",
+        "summary": "Modelo UML con componentes y procesos",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        },
+        "childDiagramId": "d-profile"
+      },
+      "subpkg": {
+        "id": "subpkg",
+        "name": "Validaciones",
+        "type": "uml-subpackage",
+        "summary": "Subpaquete encapsulado",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "private"
+        }
+      },
+      "profile": {
+        "id": "profile",
+        "name": "PerfilSolicitudes",
+        "type": "uml-profile",
+        "summary": "Extensión de metamodelo para servicios críticos",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        },
+        "childDiagramId": "d-profile"
+      },
+      "st-critical": {
+        "id": "st-critical",
+        "name": "ServicioCritico",
+        "type": "uml-stereotype",
+        "summary": "Estereotipo de servicio priorizado",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public",
+          "attributes": [
+            {
+              "id": "tag-level",
+              "name": "nivel",
+              "type": "String",
+              "visibility": "public"
+            }
+          ]
+        }
+      },
+      "st-secure": {
+        "id": "st-secure",
+        "name": "ServicioSeguro",
+        "type": "uml-stereotype",
+        "summary": "Especialización del servicio crítico",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        }
+      },
+      "meta": {
+        "id": "meta",
+        "name": "Component",
+        "type": "uml-metaclass",
+        "summary": "Metaclase de UML a extender",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        }
+      },
+      "package-client": {
+        "id": "package-client",
+        "name": "Aplicaciones",
+        "type": "uml-package",
+        "summary": "Paquete que aplica el perfil",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "visibility": "public"
+        }
+      },
+      "subject": {
+        "id": "subject",
+        "name": "Plataforma de solicitudes",
+        "type": "uml-subject",
+        "summary": "Sujeto: límite del sistema",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "actor": {
+        "id": "actor",
+        "name": "Solicitante",
+        "type": "actor",
+        "summary": "Persona externa que registra solicitudes",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "uc1": {
+        "id": "uc1",
+        "name": "Registrar solicitud",
+        "type": "usecase",
+        "summary": "Se inicia el flujo de registro",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "uc2": {
+        "id": "uc2",
+        "name": "Validar identidad",
+        "type": "usecase",
+        "summary": "Subcaso obligatorio",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "port": {
+        "id": "port",
+        "name": "Data Access",
+        "type": "uml-port",
+        "summary": "Interfaz requerida, con encastre ball–socket",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "backend": {
+        "id": "backend",
+        "name": "Servicio de solicitudes",
+        "type": "component",
+        "summary": "Componente que proporciona el contrato",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "device": {
+        "id": "device",
+        "name": "Servidor de aplicaciones",
+        "type": "uml-device",
+        "summary": "Equipo físico",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "deviceIcon": "server"
+        }
+      },
+      "env": {
+        "id": "env",
+        "name": "Docker Runtime",
+        "type": "uml-execution",
+        "summary": "Entorno que contiene artefactos",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "runtimeIcon": "docker"
+        }
+      },
+      "artifact": {
+        "id": "artifact",
+        "name": "solicitudes-api.jar",
+        "type": "uml-artifact",
+        "summary": "Artefacto desplegable",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {}
+      },
+      "external": {
+        "id": "external",
+        "name": "Gateway externo",
+        "type": "uml-device",
+        "summary": "Equipo de red",
+        "description": "",
+        "owner": "Equipo ATLAS QA",
+        "author": "qa@atlas.local",
+        "status": "Borrador",
+        "createdAt": "2026-11-14",
+        "updatedAt": "2026-11-14",
+        "links": [],
+        "fields": {},
+        "uml": {
+          "deviceIcon": "network"
+        }
+      }
+    },
+    "diagrams": [
+      {
+        "id": "d-package",
+        "name": "01 · Paquetes, subpaquetes, Model y Profile",
+        "type": "uml-package",
+        "description": "Paquetes UML anidados. El subpaquete es una presentación de Package dentro de otro Package.",
+        "createdAt": "2026-11-14",
+        "nodes": [
+          {
+            "id": "p-root",
+            "elementId": "pkg",
+            "x": 60,
+            "y": 60,
+            "width": 1040,
+            "height": 710
+          },
+          {
+            "id": "p-model",
+            "elementId": "model",
+            "x": 60,
+            "y": 110,
+            "parentNodeId": "p-root",
+            "width": 390,
+            "height": 330
+          },
+          {
+            "id": "p-sub",
+            "elementId": "subpkg",
+            "x": 570,
+            "y": 150,
+            "parentNodeId": "p-root",
+            "width": 340,
+            "height": 255
+          },
+          {
+            "id": "p-profile",
+            "elementId": "profile",
+            "x": 60,
+            "y": 515,
+            "parentNodeId": "p-root",
+            "width": 290,
+            "height": 152
+          }
+        ],
+        "edges": [
+          {
+            "id": "p-import",
+            "source": "p-sub",
+            "target": "p-model",
+            "sourceHandle": "left",
+            "targetHandle": "right",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "import",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "p-merge",
+            "source": "p-profile",
+            "target": "p-sub",
+            "sourceHandle": "right",
+            "targetHandle": "bottom-2",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "merge",
+            "pathStyle": "straight",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "d-profile",
+        "name": "02 · Perfil, metaclases y aplicación",
+        "type": "uml-profile",
+        "description": "El perfil contiene estereotipos. «extension» no es herencia; «apply» y «reference» representan dependencias diferenciadas.",
+        "createdAt": "2026-11-14",
+        "nodes": [
+          {
+            "id": "pf-main",
+            "elementId": "profile",
+            "x": 50,
+            "y": 50,
+            "width": 800,
+            "height": 590
+          },
+          {
+            "id": "pf-st1",
+            "elementId": "st-critical",
+            "x": 60,
+            "y": 125,
+            "parentNodeId": "pf-main",
+            "width": 245,
+            "height": 145
+          },
+          {
+            "id": "pf-st2",
+            "elementId": "st-secure",
+            "x": 60,
+            "y": 375,
+            "parentNodeId": "pf-main",
+            "width": 245,
+            "height": 130
+          },
+          {
+            "id": "pf-meta",
+            "elementId": "meta",
+            "x": 1010,
+            "y": 210,
+            "width": 255,
+            "height": 130
+          },
+          {
+            "id": "pf-apply",
+            "elementId": "package-client",
+            "x": 1030,
+            "y": 485,
+            "width": 285,
+            "height": 160
+          }
+        ],
+        "edges": [
+          {
+            "id": "pf-extend",
+            "source": "pf-st1",
+            "target": "pf-meta",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "relationKind": "extension",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "pf-gen",
+            "source": "pf-st2",
+            "target": "pf-st1",
+            "sourceHandle": "top-2",
+            "targetHandle": "bottom-2",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "relationKind": "generalization",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "pf-ref",
+            "source": "pf-main",
+            "target": "pf-meta",
+            "sourceHandle": "right",
+            "targetHandle": "top-1",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "reference",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "pf-applied",
+            "source": "pf-apply",
+            "target": "pf-main",
+            "sourceHandle": "left",
+            "targetHandle": "right",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "apply",
+            "pathStyle": "straight",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "d-usecase",
+        "name": "03 · Actor, casos de uso y sujeto",
+        "type": "uml-usecase",
+        "description": "Los requisitos y HU existen en el modelo funcional, no como cajas nativas de UML casos de uso.",
+        "createdAt": "2026-11-14",
+        "nodes": [
+          {
+            "id": "uc-subject",
+            "elementId": "subject",
+            "x": 420,
+            "y": 50,
+            "width": 870,
+            "height": 610
+          },
+          {
+            "id": "uc-actor",
+            "elementId": "actor",
+            "x": 45,
+            "y": 285
+          },
+          {
+            "id": "uc-register",
+            "elementId": "uc1",
+            "x": 120,
+            "y": 170,
+            "parentNodeId": "uc-subject",
+            "width": 265,
+            "height": 140
+          },
+          {
+            "id": "uc-identify",
+            "elementId": "uc2",
+            "x": 475,
+            "y": 190,
+            "parentNodeId": "uc-subject",
+            "width": 260,
+            "height": 140
+          }
+        ],
+        "edges": [
+          {
+            "id": "uc-assoc",
+            "source": "uc-actor",
+            "target": "uc-register",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "direction": "none",
+            "lineStyle": "solid",
+            "relationKind": "association",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "uc-inc",
+            "source": "uc-register",
+            "target": "uc-identify",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "include",
+            "pathStyle": "straight",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "d-component",
+        "name": "04 · Componentes y ensamblaje",
+        "type": "uml-component",
+        "description": "El semicírculo debe mirar a la bola y permanecer alineado después de mover cualquiera de las cajas.",
+        "createdAt": "2026-11-14",
+        "nodes": [
+          {
+            "id": "cmp-port",
+            "elementId": "port",
+            "x": 80,
+            "y": 110,
+            "width": 260,
+            "height": 125
+          },
+          {
+            "id": "cmp-service",
+            "elementId": "backend",
+            "x": 660,
+            "y": 110,
+            "width": 310,
+            "height": 145
+          }
+        ],
+        "edges": [
+          {
+            "id": "cmp-assembly",
+            "source": "cmp-port",
+            "target": "cmp-service",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "direction": "none",
+            "lineStyle": "solid",
+            "relationKind": "assembly",
+            "pathStyle": "straight",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "d-deployment",
+        "name": "05 · Dependencia, despliegue y manifestación",
+        "type": "uml-deployment",
+        "description": "CommunicationPath es distinto de Deployment; «manifest» sigue siendo una dependencia UML especializada, no idéntica a las demás.",
+        "createdAt": "2026-11-14",
+        "nodes": [
+          {
+            "id": "dp-device",
+            "elementId": "device",
+            "x": 100,
+            "y": 100,
+            "width": 780,
+            "height": 600
+          },
+          {
+            "id": "dp-env",
+            "elementId": "env",
+            "x": 80,
+            "y": 130,
+            "parentNodeId": "dp-device",
+            "width": 410,
+            "height": 280
+          },
+          {
+            "id": "dp-artifact",
+            "elementId": "artifact",
+            "x": 50,
+            "y": 95,
+            "parentNodeId": "dp-env",
+            "width": 250,
+            "height": 140
+          },
+          {
+            "id": "dp-gateway",
+            "elementId": "external",
+            "x": 1100,
+            "y": 175,
+            "width": 265,
+            "height": 155
+          }
+        ],
+        "edges": [
+          {
+            "id": "dp-comm",
+            "source": "dp-device",
+            "target": "dp-gateway",
+            "sourceHandle": "right",
+            "targetHandle": "left",
+            "direction": "none",
+            "lineStyle": "solid",
+            "relationKind": "communication-path",
+            "pathStyle": "straight",
+            "label": ""
+          },
+          {
+            "id": "dp-deploy",
+            "source": "dp-artifact",
+            "target": "dp-env",
+            "sourceHandle": "top-1",
+            "targetHandle": "right",
+            "direction": "forward",
+            "lineStyle": "dashed",
+            "relationKind": "deployment",
+            "pathStyle": "straight",
+            "label": ""
+          }
+        ]
+      }
+    ],
+    "fieldDefinitions": []
+  }
+}

@@ -15,6 +15,15 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
   const visibleNodes=diagram.nodes.filter(n=>allowed.has(n.id)&&doc.elements[n.elementId])
   const visibleIds=new Set(visibleNodes.map(n=>n.id))
   // React Flow requires every parent before its children, including nested packages.
+  // Old activity diagrams may use top-1/top-3/bottom-1/bottom-3.
+  // Keep their saved JSON untouched, but display them on the unique UML tip.
+  const activityTipHandle=(nodeId:string,handle:string)=>{
+   if(diagram.type!=='uml-activity')return handle
+   const n=diagram.nodes.find(x=>x.id===nodeId)
+   const type=n?doc.elements[n.elementId]?.type:undefined
+   if(!type||!['uml-decision','uml-start','uml-end','uml-flow-final'].includes(type))return handle
+   return /^top-[123]$/.test(handle)?'top-2':/^bottom-[123]$/.test(handle)?'bottom-2':handle
+  }
   const nodes:Node[]=[...visibleNodes].sort((a,b)=>umlNodeDepth(diagram,a)-umlNodeDepth(diagram,b)).map(n=>{
    const visibleParent=!!n.parentNodeId&&visibleIds.has(n.parentNodeId)
    const position=visibleParent?{x:n.x,y:n.y}:umlAbsolutePosition(diagram,n)
@@ -25,7 +34,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
     id:n.id,type:'atlas',position,style:{width:size.width,height:size.height},
     data:{element,elementId:n.elementId,mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,linkedDiagramType:doc.diagrams.find(d=>d.id===element.childDiagramId)?.type,canResize:canEdit,onResize,minWidth:80,minHeight:60},
     ...(visibleParent?{parentId:n.parentNodeId,...(diagram.type==='uml-composite'&&element.type==='uml-port'?{}:{extent:'parent' as const})}:{}),
-    zIndex:element.type==='uml-package'||diagram.type==='uml-composite'&&element.type==='uml-class'?depth*10:depth*10+2,
+    zIndex:['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject','uml-partition'].includes(element.type)||diagram.type==='uml-composite'&&element.type==='uml-class'?depth*10:depth*10+2,
     selected:selectedId===n.elementId,draggable:canEdit
    }
   })
@@ -45,7 +54,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const noArrow=['association','link','assembly','connector','communication-path','containment','composition','aggregation'].includes(semantic)
    const relationLabel=e.label||(uml?notation.label||'':(['include','extend'].includes(semantic)?`«${semantic}»`:''))
    return ({
-    id:e.id,source:e.source,target:e.target,sourceHandle:e.sourceHandle||'right',targetHandle:e.targetHandle||'left',label:relationLabel,
+    id:e.id,source:e.source,target:e.target,sourceHandle:activityTipHandle(e.source,e.sourceHandle||'right'),targetHandle:activityTipHandle(e.target,e.targetHandle||'left'),label:relationLabel,
     type:uml?'atlas-uml':parallel?'atlas-parallel':route,
     data:uml?{parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole}:parallel?{parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
     animated:diagram.type==='sequence',

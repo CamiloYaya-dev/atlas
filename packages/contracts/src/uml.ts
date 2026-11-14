@@ -14,10 +14,10 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-component':['component','uml-interface','uml-port','uml-artifact','uml-package'],
  'uml-composite':['uml-class','uml-part','uml-reference-role','uml-port','uml-collaboration','uml-interface'],
  'uml-deployment':['uml-node','uml-device','uml-execution','uml-artifact'],
- 'uml-package':['uml-package'],
- 'uml-profile':['uml-profile','uml-stereotype','uml-class','uml-constraint'],
- 'uml-usecase':['actor','usecase','system','requirement'],
- 'uml-activity':['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-signal'],
+ 'uml-package':['uml-package','uml-subpackage','uml-model','uml-profile'],
+ 'uml-profile':['uml-profile','uml-stereotype','uml-metaclass','uml-package'],
+ 'uml-usecase':['actor','usecase','uml-subject'],
+ 'uml-activity':['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'],
  'uml-state':['uml-start','uml-state','uml-transition','uml-end','uml-region'],
  'uml-sequence':['actor','uml-lifeline','uml-message','uml-frame','uml-interaction'],
  'uml-communication':['actor','uml-object','uml-lifeline','uml-message'],
@@ -31,9 +31,9 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
  'uml-composite':['connector','assembly'],
  'uml-deployment':['communication-path','deployment'],
  'uml-package':['dependency','import','merge'],
- 'uml-profile':['extension','stereotype-application','dependency'],
+ 'uml-profile':['extension','apply','reference','generalization'],
  'uml-usecase':['association','include','extend','generalization'],
- 'uml-activity':['control-flow','object-flow','fork','join','exception'],
+ 'uml-activity':['control-flow','object-flow'],
  'uml-state':['transition','trigger','completion','generalization'],
  'uml-sequence':['message','reply','async-message','create','destroy'],
  'uml-communication':['message','reply','async-message','link'],
@@ -43,12 +43,17 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
 /** El catálogo visible es estricto; el backend sigue leyendo los modelos previos de ATLAS sin borrarlos. */
 export const UML_LEGACY_ELEMENTS:Partial<Record<DiagramType,readonly ElementType[]>>={
  'uml-deployment':['database'],
+ 'uml-usecase':['system','requirement'],
+ 'uml-profile':['uml-class','uml-constraint','uml-model'],
+ 'uml-activity':['uml-signal'],
  'uml-package':['uml-class','uml-interface','component']
 }
 export const UML_LEGACY_RELATIONS:Partial<Record<DiagramType,readonly string[]>>={
  'uml-composite':['composition','delegation'],
  'uml-deployment':['manifestation','dependency'],
- 'uml-package':['containment']
+ 'uml-package':['containment'],
+ 'uml-profile':['stereotype-application','dependency'],
+ 'uml-activity':['fork','join','exception']
 }
 export const umlElementCreatable=(diagram:DiagramType,element:ElementType):boolean=>!UML_ELEMENTS_BY_DIAGRAM[diagram]||UML_ELEMENTS_BY_DIAGRAM[diagram]!.includes(element)
 export const umlRelationCreatable=(diagram:DiagramType,relation:string):boolean=>!UML_RELATIONS_BY_DIAGRAM[diagram]||UML_RELATIONS_BY_DIAGRAM[diagram]!.includes(relation)
@@ -66,24 +71,57 @@ export const UML_RELATION_LABELS:Record<string,string>={
  assembly:'Ensamblaje de interfaces — bola y encaje',
  'provided-interface':'Interfaz proporcionada — círculo (lollipop)',
  'required-interface':'Interfaz requerida — semicírculo (socket)',
+ apply:'«apply» — paquete/modelo aplica un perfil',reference:'«reference» — perfil referencia una metaclase',
  connector:'Conector entre partes/puertos — línea continua',delegation:'Delegación: puerto externo → puerto interno',
- 'communication-path':'Comunicación entre nodos — línea continua', deployment:'Despliegue de artefacto — «deploy»'
+ 'communication-path':'Comunicación entre nodos — línea continua',
+ deployment:'Dependencia / Despliegue / Manifestación — «deploy» (artefacto → nodo)',
+ manifestation:'Dependencia / Despliegue / Manifestación — «manifest» (artefacto → elemento)',
+ 'control-flow':'Flujo de control — línea continua con punta abierta',
+ 'object-flow':'Flujo de objeto — línea continua con punta abierta'
 }
 export const umlRelationLabel=(kind:string)=>UML_RELATION_LABELS[kind]||kind.replaceAll('-', ' ')
 
 /** Restringe extremos de las relaciones estrictas al metamodelo soportado.
  * Los modelos históricos conservan sus relaciones, pero no se crean otras nuevas inválidas.
  */
+/** Validaciones semánticas para relaciones nuevas, no para migrar modelos históricos. */
 export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:ElementType,target:ElementType):boolean{
+ if(diagram==='uml-activity'){
+  // UML: particiones encapsulan los nodos; no participan como origen/destino del flujo.
+  const forbidden=['uml-partition']
+  if(forbidden.includes(source)||forbidden.includes(target))return false
+  if(['uml-end','uml-flow-final'].includes(source)||target==='uml-start')return false
+  if(kind==='control-flow')return source!=='uml-object-node'&&target!=='uml-object-node'
+  if(kind==='object-flow')return source==='uml-object-node'||target==='uml-object-node'
+  return false
+ }
  if(diagram==='uml-deployment'){
   const location=(t:ElementType)=>['uml-node','uml-device','uml-execution'].includes(t)
   if(kind==='communication-path')return location(source)&&location(target)
   if(kind==='deployment')return source==='uml-artifact'&&location(target)
  }
- if(diagram==='uml-package')return source==='uml-package'&&target==='uml-package'
+ if(diagram==='uml-package'){
+  const pkg=(t:ElementType)=>['uml-package','uml-subpackage','uml-model','uml-profile'].includes(t)
+  return pkg(source)&&pkg(target)
+ }
+ if(diagram==='uml-profile'){
+  if(kind==='extension')return source==='uml-stereotype'&&target==='uml-metaclass'
+  if(kind==='apply')return ['uml-package','uml-model'].includes(source)&&target==='uml-profile'
+  if(kind==='reference')return source==='uml-profile'&&target==='uml-metaclass'
+  if(kind==='generalization')return source==='uml-stereotype'&&target==='uml-stereotype'
+  return false
+ }
+ if(diagram==='uml-usecase'){
+  if(kind==='association')return (source==='actor'&&target==='usecase')||(source==='usecase'&&target==='actor')
+  if(kind==='include'||kind==='extend')return source==='usecase'&&target==='usecase'
+  if(kind==='generalization')return source===target&&(source==='actor'||source==='usecase')
+  return false
+ }
  if(diagram==='uml-composite'){
   const connectable=(t:ElementType)=>['uml-part','uml-reference-role','uml-port'].includes(t)
-  if(kind==='connector'||kind==='delegation'||kind==='assembly')return connectable(source)&&connectable(target)
+  if(kind==='connector'||kind==='assembly')return connectable(source)&&connectable(target)
+  // Delegación histórica: sólo lectura, no se ofrece al crear.
+  if(kind==='delegation')return connectable(source)&&connectable(target)
  }
  if(diagram==='uml-component'){
   const connector=(t:ElementType)=>['component','uml-port'].includes(t)

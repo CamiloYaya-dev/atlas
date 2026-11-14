@@ -6,7 +6,7 @@ export interface UmlOperation {id:string;name:string;visibility:UmlVisibility;re
 export interface UmlSlot {id:string;name:string;type?:string;value:string}
 export type UmlDeviceIcon='server'|'desktop'|'android'|'mobile'|'network'|'storage'|'generic'
 export type UmlRuntimeIcon='docker'|'jvm'|'nodejs'|'database'|'generic'
-export interface UmlElementDetail {deviceIcon?:UmlDeviceIcon;runtimeIcon?:UmlRuntimeIcon;attributes?:UmlAttribute[];operations?:UmlOperation[];classifier?:string;slots?:UmlSlot[]}
+export interface UmlElementDetail {visibility?:UmlVisibility;deviceIcon?:UmlDeviceIcon;runtimeIcon?:UmlRuntimeIcon;attributes?:UmlAttribute[];operations?:UmlOperation[];classifier?:string;slots?:UmlSlot[]}
 export const UML_VISIBILITY_SYMBOL:Record<UmlVisibility,string>={public:'+',private:'-',protected:'#',package:'~'}
 export function umlAttributeText(item:UmlAttribute):string{
  const length=item.length&&item.length>0?`(${item.length})`:''
@@ -26,6 +26,7 @@ export function validUmlDetail(value:unknown):value is UmlElementDetail{
  const validName=(v:unknown)=>text(v)&&!!(v as string).trim()
  const visibility=(v:unknown)=>['public','private','protected','package'].includes(String(v))
  if(x.classifier!==undefined&&!text(x.classifier))return false
+ if(x.visibility!==undefined&&!visibility(x.visibility))return false
  if(x.deviceIcon!==undefined&&!['server','desktop','android','mobile','network','storage','generic'].includes(String(x.deviceIcon)))return false
  if(x.runtimeIcon!==undefined&&!['docker','jvm','nodejs','database','generic'].includes(String(x.runtimeIcon)))return false
  if(x.attributes!==undefined&&(!Array.isArray(x.attributes)||x.attributes.length>100||!x.attributes.every((a:unknown)=>entry(a)&&validName((a as UmlAttribute).id)&&validName((a as UmlAttribute).name)&&text((a as UmlAttribute).type)&&visibility((a as UmlAttribute).visibility)&&((a as UmlAttribute).length===undefined||Number.isSafeInteger((a as UmlAttribute).length)&&(a as UmlAttribute).length!>=1&&(a as UmlAttribute).length!<=1000000)&&((a as UmlAttribute).multiplicity===undefined||text((a as UmlAttribute).multiplicity))&&((a as UmlAttribute).defaultValue===undefined||text((a as UmlAttribute).defaultValue,500)))))return false

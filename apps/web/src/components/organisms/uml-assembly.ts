@@ -5,14 +5,14 @@ interface Point {x:number;y:number}
 const interpolate=(a:number,b:number,t:number)=>a+(b-a)*t
 export function assemblyAnchor(path:string):AssemblyAnchor{
  const tokens=(path.match(/[MLCQ]|-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi)||[])
- let at=0,previous:Point={x:0,y:0};const points:Point[]=[]
+ let at=0,previous:Point={x:0,y:0};const points:Point[]=[];const straight:{a:Point;b:Point;length:number}[]=[]
  const value=()=>{const n=Number(tokens[at++]);if(!Number.isFinite(n))throw new Error('Ruta SVG inválida');return n}
  const point=():Point=>({x:value(),y:value()})
  const sample=(fn:(t:number)=>Point)=>{for(let i=1;i<=24;i++)points.push(fn(i/24))}
  while(at<tokens.length){
   const command=tokens[at++]
   if(command==='M'){previous=point();points.push(previous)}
-  else if(command==='L'){previous=point();points.push(previous)}
+  else if(command==='L'){const next=point();straight.push({a:previous,b:next,length:Math.hypot(next.x-previous.x,next.y-previous.y)});previous=next;points.push(previous)}
   else if(command==='Q'){
    const start=previous,control=point(),end=point()
    sample(t=>({x:(1-t)**2*start.x+2*(1-t)*t*control.x+t*t*end.x,y:(1-t)**2*start.y+2*(1-t)*t*control.y+t*t*end.y}));previous=end
@@ -23,6 +23,12 @@ export function assemblyAnchor(path:string):AssemblyAnchor{
   }else throw new Error('Comando SVG de ensamblaje no soportado: '+command)
  }
  if(points.length<2)return {x:previous.x,y:previous.y,angle:0}
+ // En rutas ortogonales, el símbolo debe estar sobre un TRAMO recto
+ // suficientemente largo, nunca sobre una esquina o un codo.
+ const suitable=straight.filter(segment=>segment.length>=56).sort((a,b)=>b.length-a.length)[0]
+ if(suitable)return {x:(suitable.a.x+suitable.b.x)/2,y:(suitable.a.y+suitable.b.y)/2,
+  angle:Math.atan2(suitable.b.y-suitable.a.y,suitable.b.x-suitable.a.x)*180/Math.PI}
+
  const lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y))
  const total=lengths.reduce((a,b)=>a+b,0);let traveled=0
  for(let i=0;i<lengths.length;i++){

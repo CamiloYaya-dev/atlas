@@ -11,7 +11,7 @@ const Field=({label,children}:{label:string;children:ReactNode})=><label classNa
 export default function UmlDetailsEditor({element,disabled,onChange}:Props){
  const uml=element.uml||{}
  const set=(patch:Partial<NonNullable<ModelElement['uml']>>)=>onChange({...uml,...patch})
- const classType=['uml-class','uml-interface','uml-enumeration'].includes(element.type)
+ const classType=['uml-class','uml-interface','uml-enumeration','uml-stereotype'].includes(element.type)
  const isObject=element.type==='uml-object'
  if(!classType&&!isObject)return null
  const attrs=uml.attributes||[],operations=uml.operations||[],slots=uml.slots||[]

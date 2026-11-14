@@ -15,24 +15,32 @@ export function umlContainerAllows(diagram:DiagramType,parent:ElementType,child:
   if(parent==='uml-part')return child==='uml-port'
   return false
  }
+ if(diagram==='uml-activity')return parent==='uml-partition'&&['uml-partition','uml-start','uml-end','uml-flow-final','uml-action','uml-decision','uml-fork','uml-object-node'].includes(child)
  if(diagram==='uml-deployment'){
   if(parent==='uml-node'||parent==='uml-device')return ['uml-node','uml-execution','uml-artifact'].includes(child)
   if(parent==='uml-execution')return child==='uml-artifact'
   return false
  }
- if(diagram==='uml-package')return parent==='uml-package'&&child==='uml-package' 
+ if(diagram==='uml-package')return ['uml-package','uml-subpackage','uml-model','uml-profile'].includes(parent)&&['uml-package','uml-subpackage','uml-model','uml-profile'].includes(child)
+ if(diagram==='uml-profile'){
+  if(parent==='uml-profile')return ['uml-stereotype','uml-package','uml-model'].includes(child) // la metaclase es REFERENCIADA, no propiedad del perfil
+  if(parent==='uml-package'||parent==='uml-model')return ['uml-profile','uml-package','uml-model'].includes(child)
+  return false
+ }
+ if(diagram==='uml-usecase')return parent==='uml-subject'&&child==='usecase' 
  if(['uml-class','uml-object','uml-component'].includes(diagram))return parent==='uml-package'&&child!=='uml-package'
  return false
 }
 export function umlContainerSize(kind:ElementType,depth=0){
+ if(kind==='uml-partition')return {width:570,height:380}
  if(kind==='uml-port')return UML_PORT_SIZE
  if(kind==='uml-reference-role')return UML_PART_SIZE
  if(kind==='uml-part')return UML_PART_SIZE
  if(kind==='uml-node'||kind==='uml-device')return UML_DEPLOYMENT_CONTAINER_SIZE
  if(kind==='uml-execution')return UML_EXECUTION_CONTAINER_SIZE
  if(kind==='uml-class')return UML_COMPOSITE_SIZE
- if(kind==='uml-package'&&depth>=2)return {width:300,height:195}
- if(kind==='uml-package'&&depth===1)return {width:460,height:315}
+ if(['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject'].includes(kind)&&depth>=2)return {width:300,height:195}
+ if(['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject'].includes(kind)&&depth===1)return {width:460,height:315}
  return UML_PACKAGE_SIZE
 }
 export function umlNodeDepth(diagram:Diagram,node:DiagramNode):number{

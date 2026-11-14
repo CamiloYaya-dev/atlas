@@ -1,3 +1,10 @@
+## 2026-11-14 — Corrección incremental UML: ensamble, paquetes, casos de uso y perfiles
+
+- Corrige orientación ball/socket y ubicación en tramos rectos.
+- Añade Paquete, Subpaquete, Model, Profile, Sujeto y Metaclass con notación y contención.
+- Añade relaciones `apply`, `reference`, `generalization`, validación y visibilidad UML.
+- Incluye migración 007 para permisos nuevos de roles existentes, QA de cinco vistas y pruebas de regresión.
+
 ## 2026-11-13 · UML componentes, estructura compuesta, despliegue y paquetes
 - Ensamblaje de interfaces con bola encajada en socket; etiquetas desplazadas para no tapar el símbolo.
 - En estructura compuesta: clasificador estructurado, parte, rol de referencia, colaboración y puerto acoplado a borde; conectores cuadrados entre partes.
@@ -226,3 +233,10 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Ocultar delegación de nuevos conectores en estructura compuesta, conservando visualización histórica.
 - Ancho/alto opcional por aparición de caja, resize desde esquinas e Inspector, validación de servidor, reanclaje de puertos y límites para contenedores.
 - 5 nuevas pruebas enfocadas y actualización de mocks React Flow (`NodeResizer`).
+
+### UML Actividades y ajustes (14/11/2026)
+- Formas nativas para todos los nodos UML de actividades, con final de flujo, nodo de objeto y particiones reales.
+- Validaciones diferenciadas para control-flow/object-flow y contención entre carriles.
+- Se retira Modelo UML del selector de Perfiles sin impedir la lectura de documentos históricos.
+- Etiquetado explícito para dependencias/despliegue/manifestación al editar relaciones históricas de Despliegue.
+- Nueva migración 008 para permisos de nodos de actividades.

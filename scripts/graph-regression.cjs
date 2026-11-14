@@ -414,7 +414,7 @@ test('grafo UML antiguo se visualiza con notación correcta sin reescribir relac
 })
 
 test('UML paquetes: catálogo nuevo sólo admite Package; subpaquete es paquete anidado',()=>{
- assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-package']],['uml-package'])
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-package']],['uml-package','uml-subpackage','uml-model','uml-profile'])
  assert.equal(uml.umlElementCreatable('uml-package','uml-class'),false)
  assert.equal(uml.umlElementAllowed('uml-package','uml-class'),true) // lectura histórica
  const v=doc();v.elements.p=e('p','uml-package','Dominio');v.elements.q=e('q','uml-package','Solicitudes');v.elements.r=e('r','uml-package','Validaciones')
@@ -478,8 +478,8 @@ test('UML conexiones: geometría compartida para ensamblaje y terminales cuadrad
  }))
  const assembled=svg('assembly')
  assert.match(assembled,/data-uml-terminal="assembly"/)
- assert.match(assembled,/cx="-2" cy="0" r="8"/)
- assert.match(assembled,/Q -2,0 14,12/)
+ assert.match(assembled,/cx="-5" cy="0" r="7"/)
+ assert.match(assembled,/M 3,-11 Q 25,0 3,11/)
  assert.match(assembled,/data-uml-terminal="assembly"/)
  const connector=svg('connector',{diagramType:'uml-composite',sourceElementType:'uml-part',targetElementType:'uml-part'})
  assert.equal((connector.match(/data-uml-terminal="port-square"/g)||[]).length,2)
@@ -552,7 +552,7 @@ test('ensamblaje calcula la tangente de la RUTA real en horizontal, vertical y c
  const curve=assembly.assemblyAnchor('M 0,0 C 20,0 80,100 100,100')
  assert.equal(h.x,50);assert.equal(h.y,0);assert.equal(h.angle,0)
  assert.equal(v.x,0);assert.equal(v.y,50);assert.equal(v.angle,90)
- assert.equal(bent.angle,90)
+ assert.equal(bent.angle,0) // Símbolo sobre el tramo recto largo, no en el codo
  assert.ok(curve.x>30&&curve.x<70&&curve.y>30&&curve.y<70)
 })
 test('redimensionar cambia únicamente la aparición seleccionada y persiste en el contrato',()=>{
@@ -586,4 +586,239 @@ test('delegación sigue legible en modelos antiguos pero no puede crearse desde 
  assert.equal(uml.umlRelationAllowed('uml-composite','delegation'),true)
  assert.equal(uml.umlRelationCreatable('uml-composite','delegation'),false)
  assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-composite']],['connector','assembly'])
+})
+
+// QA 2026-11-14: paquetes, sujeto de casos de uso, perfiles y ensamble.
+test('UML paquetes ofrece paquete, subpaquete, Model y Profile, manteniendo semántica de contención',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-package']],['uml-package','uml-subpackage','uml-model','uml-profile'])
+ for(const parent of ['uml-package','uml-model'])assert.equal(umlContainers.umlContainerAllows('uml-package',parent,'uml-subpackage'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-package','uml-metaclass','uml-subpackage'),false)
+ const d1=d('pack','uml-package',[{id:'parent',elementId:'parent',x:20,y:40},{id:'child',elementId:'child',x:100,y:110,parentNodeId:'parent'}],[])
+ const v=doc();v.elements.parent=e('parent','uml-package');v.elements.child=e('child','uml-subpackage');v.diagrams=[d1]
+ policy.ensureUniqueIds(v)
+ const invalid=structuredClone(v);delete invalid.diagrams[0].nodes[1].parentNodeId
+ assert.throws(()=>policy.ensureUniqueIds(invalid),/subpaquete debe estar contenido/)
+})
+test('UML casos de uso solamente presenta actor, caso de uso y sujeto; este encapsula casos',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-usecase']],['actor','usecase','uml-subject'])
+ assert.equal(uml.umlElementCreatable('uml-usecase','requirement'),false)
+ assert.equal(uml.umlElementAllowed('uml-usecase','requirement'),true) // histórico
+ assert.equal(umlContainers.umlContainerAllows('uml-usecase','uml-subject','usecase'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-usecase','uml-subject','requirement'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-usecase','include','usecase','usecase'),true)
+ assert.equal(uml.umlRelationEndpointValid('uml-usecase','include','actor','usecase'),false)
+})
+test('UML perfiles dispone de extensión, apply, reference y generalización con extremos reales',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-profile']],['uml-profile','uml-stereotype','uml-metaclass','uml-package'])
+ assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-profile']],['extension','apply','reference','generalization'])
+ for(const [kind,a,b] of [['extension','uml-stereotype','uml-metaclass'],['apply','uml-model','uml-profile'],['reference','uml-profile','uml-metaclass'],['generalization','uml-stereotype','uml-stereotype']]){
+  assert.equal(uml.umlRelationEndpointValid('uml-profile',kind,a,b),true,kind)
+  assert.equal(uml.umlRelationCreatable('uml-profile',kind),true)
+ }
+ assert.equal(uml.umlRelationEndpointValid('uml-profile','apply','uml-stereotype','uml-profile'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-profile','extension','uml-profile','uml-metaclass'),false)
+ assert.equal(uml.umlRelationCreatable('uml-profile','stereotype-application'),false)
+ assert.equal(uml.umlRelationAllowed('uml-profile','stereotype-application'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-profile','uml-profile','uml-stereotype'),true)
+ assert.equal(umlNotation.umlRelationNotation('apply').label,'«apply»')
+ assert.equal(umlNotation.umlRelationNotation('reference').label,'«reference»')
+})
+test('UML visibilidad admite sólo los cuatro valores estándar',()=>{
+ for(const v of ['public','private','protected','package'])assert.equal(umlStructure.validUmlDetail({visibility:v}),true)
+ assert.equal(umlStructure.validUmlDetail({visibility:'internal'}),false)
+})
+test('ensamblaje UML: la concavidad del socket mira a la bola, sobre tramos horizontales y verticales',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
+ const component=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+  '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
+  'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
+  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+ })
+ const render=(kind,coordinates)=>renderToStaticMarkup(React.createElement(component.AtlasUmlEdge,{id:'edge',
+  ...coordinates,data:{parallelOffset:0,parallelPath:'straight',relationKind:kind}}))
+ for(const coords of [
+  {sourceX:20,sourceY:100,targetX:320,targetY:100,sourcePosition:'right',targetPosition:'left'},
+  {sourceX:150,sourceY:0,targetX:150,targetY:340,sourcePosition:'bottom',targetPosition:'top'}
+ ]){
+  const xml=render('assembly',coords)
+  assert.match(xml,/M 3,-11 Q 25,0 3,11/)
+  assert.match(xml,/cx="-5" cy="0" r="7"/)
+  assert.equal((xml.match(/data-uml-terminal="assembly"/g)||[]).length,1)
+ }
+})
+test('al mover cajas con rutas ortogonales el ensamble se mantiene sobre un segmento, nunca en el codo',()=>{
+ for(const path of ['M 0,0 L 90,0 L 90,40 L 200,40','M 50,50 L 50,170 L 90,170 L 90,310']){
+  const anchor=assembly.assemblyAnchor(path)
+  assert.ok(anchor.angle===0||anchor.angle===90)
+  assert.ok(Number.isFinite(anchor.x)&&Number.isFinite(anchor.y))
+ }
+})
+test('importación QA 5 vistas: estructuras anidadas y relaciones de perfiles y casos de uso',()=>{
+ const fixture=JSON.parse(fs.readFileSync(path.join(root,'docs/qa/ATLAS_QA_UML_Cinco_Vistas_20261114.json'),'utf8')).document
+ assert.equal(contract.isProjectDocument(fixture),true)
+ assert.equal(fixture.diagrams.length,5)
+ policy.ensureUniqueIds(fixture)
+ for(const view of fixture.diagrams){
+  for(const node of view.nodes)assert.ok(umlContainers.umlAncestryValid(view,node,fixture.elements),view.name+' / '+node.id)
+  for(const rel of view.edges){
+   const src=fixture.elements[view.nodes.find(n=>n.id===rel.source).elementId]
+   const dst=fixture.elements[view.nodes.find(n=>n.id===rel.target).elementId]
+   assert.ok(uml.umlRelationEndpointValid(view.type,rel.relationKind,src.type,dst.type),view.name+' / '+rel.relationKind)
+   assert.equal(umlNotation.validUmlEdgeNotation(view.type,rel),true)
+  }
+ }
+})
+
+// ATLAS QA UML actividades — controles y formas nativas 14/11/2026.
+test('UML actividades ofrece exactamente sus ocho nodos y dos flujos semánticos',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-activity']],['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'])
+ assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-activity']],['control-flow','object-flow'])
+ assert.equal(uml.umlElementCreatable('uml-activity','uml-signal'),false)
+ assert.equal(uml.umlElementAllowed('uml-activity','uml-signal'),true)
+ for(const t of ['fork','join','exception']){
+  assert.equal(uml.umlRelationCreatable('uml-activity',t),false)
+  assert.equal(uml.umlRelationAllowed('uml-activity',t),true)
+ }
+})
+test('UML actividades: no se pueden conectar particiones o salir de un final',()=>{
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-start','uml-action'),true)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-action','uml-decision'),true)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-object-node','uml-action'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','object-flow','uml-object-node','uml-action'),true)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','object-flow','uml-action','uml-action'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-end','uml-action'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-flow-final','uml-action'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-action','uml-start'),false)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-partition','uml-action'),false)
+})
+test('UML actividades: particiones encapsulan nodos, mantienen tamaño e identidad por vista',()=>{
+ assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-partition','uml-action'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-partition','uml-decision'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-partition','uml-object-node'),true)
+ assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-action','uml-partition'),false)
+ assert.equal(sizing.atlasNodeSize('uml-activity',e('p','uml-partition')).width>=500,true)
+ assert.equal(sizing.atlasNodeSize('uml-activity',e('d','uml-decision')).width,sizing.atlasNodeSize('uml-activity',e('d','uml-decision')).height)
+})
+test('UML perfiles no ofrece Modelo UML nuevo, pero continúa leyendo proyectos antiguos',()=>{
+ assert.equal(uml.umlElementCreatable('uml-profile','uml-model'),false)
+ assert.equal(uml.umlElementAllowed('uml-profile','uml-model'),true)
+ assert.equal(uml.umlElementCreatable('uml-profile','uml-metaclass'),true)
+})
+test('Despliegue muestra nombre del grupo dependencia/despliegue/manifestación sin fusionar semántica',()=>{
+ assert.match(uml.umlRelationLabel('deployment'),/Dependencia \/ Despliegue \/ Manifestación/)
+ assert.match(uml.umlRelationLabel('manifestation'),/Dependencia \/ Despliegue \/ Manifestación/)
+ assert.equal(umlNotation.umlRelationNotation('deployment').label,'«deploy»')
+ assert.equal(umlNotation.umlRelationNotation('manifestation').label,'«manifest»')
+})
+test('UML actividades: las figuras son el nodo, sin tarjeta genérica ni rombo decorativo',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
+ const Stub=()=>React.createElement('i')
+ const nodeView=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+  'lucide-react':new Proxy({}, {get:()=>Stub}),
+  '@xyflow/react':{Handle:({id})=>React.createElement('i',{'data-port':id}),NodeResizer:Stub,Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
+  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-action':'Acción'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum},
+  'react/jsx-runtime':require('react/jsx-runtime')
+ })
+ const render=type=>renderToStaticMarkup(React.createElement(nodeView.AtlasNode,{id:'n-'+type,data:{element:e(type,type,'Prueba'),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ const expected=[['uml-decision','uml-decision-shape'],['uml-fork','uml-fork-symbol'],['uml-action','uml-action-label'],['uml-object-node','uml-object-node-label'],['uml-flow-final','atlas-activity-glyph'],['uml-partition','uml-partition-heading'],['uml-start','atlas-activity-glyph'],['uml-end','atlas-activity-glyph']]
+ for(const [kind,css] of expected){const out=render(kind);assert.match(out,new RegExp(css),`${kind} debe contener ${css}`);assert.doesNotMatch(out,/class="node-top"/,`${kind} no debe heredar cabecera genérica`)}
+ assert.match(render('uml-decision'),/polygon points="42,2 82,42 42,82 2,42"/)
+ assert.match(render('uml-flow-final'),/círculo con X/)
+ assert.match(fs.readFileSync(path.join(root,'apps/web/src/styles.css'),'utf8'),/\.uml-diagram-uml-activity\.uml-decision-card/)
+})
+test('JSON QA UML actividades: válido con objetos, carriles y final de flujo',()=>{
+ const v=JSON.parse(fs.readFileSync(path.join(root,'ATLAS_QA_UML_Actividades_20261114.json'),'utf8')).document
+ assert.equal(contract.isProjectDocument(v),true)
+ policy.ensureUniqueIds(v)
+ assert.equal(v.diagrams[0].nodes.length,14)
+ assert.equal(v.diagrams[0].edges.length,12)
+ const partitionIds=new Set(v.diagrams[0].nodes.filter(n=>v.elements[n.elementId].type==='uml-partition').map(n=>n.id))
+ assert.equal(partitionIds.size,2)
+ assert.ok(v.diagrams[0].nodes.filter(n=>n.parentNodeId).every(n=>partitionIds.has(n.parentNodeId)))
+})
+
+test('UML actividades: decisiones, inicio y finales muestran exactamente cuatro puntos cardinales',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
+ const Stub=()=>React.createElement('i')
+ const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+  'lucide-react':new Proxy({},{get:()=>Stub}),
+  '@xyflow/react':{
+   Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||style?.left||style?.right||''}),
+   Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub
+  },
+  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-start':'Inicial','uml-end':'Final','uml-flow-final':'Fin de flujo','uml-decision':'Decisión'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum},
+  'react/jsx-runtime':require('react/jsx-runtime')
+ })
+ const seen=(type)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'n-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ for(const type of ['uml-start','uml-end','uml-flow-final','uml-decision']){
+  const html=seen(type)
+  assert.equal((html.match(/data-port=/g)||[]).length,4,type)
+  for(const port of ['left','right','top-2','bottom-2'])assert.match(html,new RegExp(`data-port="${port}"`))
+  assert.doesNotMatch(html,/data-port="top-[13]"|data-port="bottom-[13]"/)
+  if(type==='uml-decision')assert.match(html,/data-offset="2.4%"/)
+  else assert.match(html,/data-offset="5%"/)
+ }
+})
+
+test('UML actividades: control symbols no muestran tarjeta y pintan solamente geometría SVG',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
+ const Stub=()=>React.createElement('i')
+ const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+  'lucide-react':new Proxy({},{get:()=>Stub}),
+  '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
+  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum},
+  'react/jsx-runtime':require('react/jsx-runtime')
+ })
+ const view=type=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'qa-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ for(const type of ['uml-start','uml-end','uml-flow-final','uml-decision','uml-fork']){
+  const html=view(type)
+  assert.match(html,/class="atlas-activity-control/,type)
+  assert.doesNotMatch(html,/class="atlas-node/,type)
+  assert.equal((html.match(/<svg /g)||[]).length,1,type)
+  assert.doesNotMatch(html,/class="node-top"|node-title|node-summary/,type)
+ }
+ assert.match(view('uml-decision'),/points="42,2 82,42 42,82 2,42"/)
+ assert.equal((view('uml-decision').match(/<polygon /g)||[]).length,1,'No extra decorative diamond')
+ assert.match(view('uml-start'),/<circle cx="30" cy="30" r="27" fill="#344965"/)
+ assert.equal((view('uml-end').match(/<circle /g)||[]).length,2)
+ assert.match(view('uml-flow-final'),/<path d="M18 18L42 42M42 18L18 42"/)
+ assert.equal((view('uml-fork').match(/<rect /g)||[]).length,1)
+ const css=fs.readFileSync(path.join(root,'apps/web/src/styles.css'),'utf8')
+ assert.match(css,/\.react-flow__node-atlas>\.atlas-activity-control/)
+ assert.match(css,/background:transparent!important/)
+})
+
+test('UML actividades: barra de bifurcación mantiene tres puntos arriba y abajo, uno por lateral',()=>{
+ const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
+ const Stub=()=>React.createElement('i')
+ const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+  'lucide-react':new Proxy({},{get:()=>Stub}),
+  '@xyflow/react':{Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||''}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
+  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-fork':'Bifurcación'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum},
+  'react/jsx-runtime':require('react/jsx-runtime')
+ })
+ const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'fork',data:{element:e('fork','uml-fork'),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ assert.equal((html.match(/data-port=/g)||[]).length,8)
+ for(const port of ['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'])assert.match(html,new RegExp(`data-port="${port}"`))
+ assert.equal((html.match(/data-offset="29%"/g)||[]).length,6)
+})
+
+test('UML actividades: las conexiones históricas se alinean al único puerto sin reescribir el archivo',()=>{
+ const hook=load('apps/web/src/features/editor/hooks/useGraphView.ts',{
+  '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
+  '../domain/parallel-edges':parallel,
+  'react':{useMemo:cb=>cb()},
+  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},
+  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+ })
+ const v={...doc(),elements:{start:e('start','uml-start'),decision:e('decision','uml-decision'),fork:e('fork','uml-fork')},diagrams:[d('act','uml-activity',[node('ns','start'),node('nd','decision'),node('nf','fork')],[
+  edge('historica','ns','nd',{sourceHandle:'top-1',targetHandle:'bottom-3',relationKind:'control-flow'}),
+  edge('barra','nf','nd',{sourceHandle:'top-3',targetHandle:'top-1',relationKind:'control-flow'})]) ]}
+ const result=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true})
+ assert.equal(result.edges[0].sourceHandle,'top-2')
+ assert.equal(result.edges[0].targetHandle,'bottom-2')
+ assert.equal(result.edges[1].sourceHandle,'top-3')
+ assert.equal(result.edges[1].targetHandle,'top-2')
+ assert.equal(v.diagrams[0].edges[0].sourceHandle,'top-1')
+ assert.equal(v.diagrams[0].edges[0].targetHandle,'bottom-3')
 })

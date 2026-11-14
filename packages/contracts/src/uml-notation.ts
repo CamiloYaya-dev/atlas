@@ -41,6 +41,8 @@ export const UML_NOTATION:Readonly<Record<string,UmlRelationNotation>>={
  containment:spec('solid','none'),
  extension:spec('solid','forward','none','extension'),
  'stereotype-application':spec('dashed','forward','none','open-arrow','«apply»'),
+ apply:spec('dashed','forward','none','open-arrow','«apply»'),
+ reference:spec('dashed','forward','none','open-arrow','«reference»'),
  include:spec('dashed','forward','none','open-arrow','«include»'),
  extend:spec('dashed','forward','none','open-arrow','«extend»'),
  'control-flow':spec('solid','forward','none','open-arrow'),
