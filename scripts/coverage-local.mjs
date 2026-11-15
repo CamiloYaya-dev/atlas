@@ -1,3 +1,4 @@
+import {COVERAGE_TARGET} from './coverage-target.mjs'
 import {existsSync,rmSync} from 'node:fs'
 import {spawnSync} from 'node:child_process'
 import {resolve} from 'node:path'
@@ -8,7 +9,7 @@ if(!['unit','full'].includes(mode))throw new Error('Uso: coverage-local.mjs unit
 // Evita que `coverage:summary` lea un consolidado ANTIGUO cuando esta
 // ejecución falla antes de fusionar Node + Vitest. No borra las mediciones
 // backend/frontend de diagnóstico ni otros archivos del usuario.
-for(const name of ['coverage-summary.json','index.html','lcov.info'])
+for(const name of ['coverage-summary.json','coverage-layers.json','index.html','lcov.info'])
  rmSync(resolve(root,'coverage',name),{force:true})
 const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
 const env={...process.env,NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
@@ -44,4 +45,4 @@ exec(`Medir cobertura AGREGADA de ${mode==='full'?'unitarias + integración':'un
 exec('Medir coverage React con Vitest', 'npm', ['run','test:ui:coverage','-w','@atlas/web'])
 exec('Consolidar frontend + backend + contratos',process.execPath,['scripts/coverage-merge.mjs'])
 console.log('\n[ATLAS COVERAGE] Reportes generados en coverage/index.html, coverage/lcov.info y coverage/coverage-summary.json')
-console.log('[ATLAS COVERAGE] Para aplicar umbral por archivo de 95%: npm run coverage:check')
+console.log(`[ATLAS COVERAGE] Para aplicar umbral global y por archivo de ${COVERAGE_TARGET}%: npm run coverage:check`)

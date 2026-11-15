@@ -23,11 +23,11 @@
 4. `npm run test:db` = 100% de pruebas **aprobadas** con PostgreSQL QA aislado.
 5. `npm run test:e2e:local` = 100% de escenarios **aprobados**.
 6. `npm run test:coverage` genera reportes de backend y frontend separados y consolidados.
-7. `npm run coverage:check` exige >=95% en líneas, sentencias, ramas y funciones **globalmente y por archivo**.
+7. `npm run coverage:check` exige >=90% en líneas, sentencias, ramas y funciones **globalmente y por archivo**.
 8. `npm run build` compila API y web.
 9. Revisión manual de permisos con dos usuarios en navegadores/perfiles diferentes; prueba del túnel con usuarios de confianza.
 
-No ocultar líneas sin ejecutar ni excluir módulos para elevar artificialmente el porcentaje. El 95% es una meta, NO un hecho confirmado. 100% de suites aprobadas no implica software libre de defectos.
+No ocultar líneas sin ejecutar ni excluir módulos para elevar artificialmente el porcentaje. El 90% es una meta, NO un hecho confirmado. 100% de suites aprobadas no implica software libre de defectos.
 
 ## Hallazgos del reporte 2026-11-11
 

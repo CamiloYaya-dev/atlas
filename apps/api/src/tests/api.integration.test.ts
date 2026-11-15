@@ -571,6 +571,61 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const full=await pool.query<{document:ProjectDocument}>('SELECT document FROM project_documents WHERE project_id=$1',[projectId])
    assert.ok(full.rows[0].document.elements[orphan.id],'La restauración completa no descarta elementos fuera de vistas')
   })
+  await resetQaRateLimitWindow()
+  await t.test('API real: validación de presencia, versiones y descarte de ramas sin mutar el principal',async()=>{
+   const base=`/projects/${projectId}`,docUrl=`${base}/document`,branches=`${base}/restore-branches`
+   const before=await send('GET',docUrl,admin);assert.equal(before.status,200)
+   const version=before.data.version
+   assert.equal((await send('GET',`${base}/access`,admin)).status,200)
+   assert.equal((await send('GET',`${base}/members`,admin)).status,200)
+   for(const invalid of ['-1','1.5','99999999999999999999999999'])assert.equal((await send('GET',`${base}/versions/${invalid}`,admin)).status,400)
+   for(const body of [{clientId:'x',diagramId:null,elementId:null},{clientId:'qa-valid-123',diagramId:12,elementId:null},{clientId:'qa-valid-123',diagramId:null,elementId:12}])assert.equal((await send('POST',`${base}/presence`,admin,body)).status,400)
+   assert.equal((await send('GET',`${base}/events?clientId=x`,admin)).status,400)
+   assert.equal((await send('POST',`${base}/presence`,admin,{clientId:'qa-valid-123',diagramId:null,elementId:'invisible'})).status,403)
+   assert.equal((await send('POST',`${base}/presence`,admin,{clientId:'qa-valid-123',diagramId:null,elementId:null})).status,200)
+   for(const sourceVersion of ['1',0,1.5])assert.equal((await send('POST',branches,admin,{sourceVersion})).status,400)
+   const proposal=await send('POST',branches,admin,{sourceVersion:1});assert.equal(proposal.status,200)
+   const path=`${branches}/${proposal.data.id}`
+   for(const body of [{expectedVersion:0,mode:'merge'},{expectedVersion:version,mode:'unknown'},{expectedVersion:version,mode:'merge',resolutions:[]},{expectedVersion:version,mode:'merge',resolutions:{'not-document':'current'}},{expectedVersion:version,mode:'merge',resolutions:{'document.foo':'invalid'}}])assert.equal((await send('POST',`${path}/apply`,admin,body)).status,400)
+   assert.equal((await send('DELETE',path,member)).status,403)
+   const removed=await send('DELETE',path,admin);assert.equal(removed.status,200,JSON.stringify(removed.data))
+   const after=await send('GET',docUrl,admin);assert.equal(after.data.version,version);assert.deepEqual(after.data.document,before.data.document)
+  })
+  await resetQaRateLimitWindow()
+  await t.test('API real: autenticación rechaza credenciales ausentes, excesivas y usuarios desconocidos',async()=>{
+   for(const payload of [{},{email:'x'.repeat(255),password:pass},{email:adminEmail,password:'x'.repeat(129)},[],{email:`unknown-${suffix}@example.test`,password:pass}]){
+    const response=await send('POST','/auth/login',undefined,payload)
+    assert.equal(response.status,401,JSON.stringify(response.data));assert.equal(response.headers['set-cookie'],undefined)
+   }
+   assert.equal((await send('GET','/auth/me',admin)).status,200)
+  })
+  await t.test('API real: filtros de auditoría validan parámetros y devuelven únicamente el recurso solicitado',async()=>{
+   const endpoint=`/workspaces/${workspaceId}/audit`
+   for(const query of ['limit=0','limit=101','limit=1.5','limit=abc','beforeId=9007199254740992','eventType=BAD','actor='+ 'x'.repeat(101),'projectId=no-uuid','from=invalid','to=invalid','from=2026-12-01&to=2026-01-01']){
+    const rejected=await send('GET',`${endpoint}?${query}`,admin);assert.equal(rejected.status,400,query)
+   }
+   const query=new URLSearchParams({limit:'100',eventType:'project.renamed',actor:'QA Admin',projectId,from:'2000-01-01',to:'2099-12-31'})
+   const filtered=await send('GET',`${endpoint}?${query}`,admin)
+   assert.equal(filtered.status,200);assert.ok(filtered.data.items.length>0)
+   assert.ok(filtered.data.items.every((x:{event_type:string;resource_id:string;actor_name:string})=>x.event_type==='project.renamed'&&x.resource_id===projectId&&x.actor_name==='QA Admin'))
+   assert.equal(filtered.data.nextCursor,null)
+   const empty=await send('GET',`${endpoint}?projectId=${randomUUID()}`,admin)
+   assert.equal(empty.status,200);assert.deepEqual(empty.data,{items:[],nextCursor:null})
+  })
+  await t.test('API real: membresía de proyecto protege al propietario y rechaza cuerpos o candidatos inválidos',async()=>{
+   const base=`/projects/${projectId}`,roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
+   assert.equal(roles.status,200)
+   const ownerRole=roles.data.find((r:{role_key:string})=>r.role_key==='owner'),viewerRole=roles.data.find((r:{role_key:string})=>r.role_key==='qa_view')
+   assert.ok(ownerRole?.id&&viewerRole?.id)
+   const before=await send('GET',`${base}/members`,admin);assert.equal(before.status,200)
+   assert.equal((await send('GET',`${base}/candidates`,admin)).status,200)
+   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{})).status,400)
+   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{roleId:ownerRole.id})).status,403)
+   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{roleId:randomUUID()})).status,403)
+   assert.equal((await send('PUT',`${base}/members/${adminId}`,admin,{roleId:viewerRole.id})).status,403)
+   assert.equal((await send('PUT',`${base}/members/${randomUUID()}`,admin,{roleId:viewerRole.id})).status,400)
+   const after=await send('GET',`${base}/members`,admin);assert.equal(after.status,200);assert.deepEqual(after.data,before.data)
+  })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)
    assert.equal((await send('GET','/auth/me',member)).status,401)

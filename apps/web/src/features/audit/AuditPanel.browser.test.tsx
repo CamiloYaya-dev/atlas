@@ -1,5 +1,5 @@
 import {beforeEach,describe,expect,it,vi} from 'vitest'
-import {fireEvent,render,screen,waitFor} from '@testing-library/react'
+import {act,fireEvent,render,screen,waitFor} from '@testing-library/react'
 import AuditPanel from './AuditPanel'
 import {listAuditEvents} from './api'
 import {listProjects} from '../projects/api'
@@ -42,3 +42,41 @@ describe('Auditoría paginada y filtrable',()=>{
   await waitFor(()=>expect(listAuditEvents).toHaveBeenLastCalledWith('workspace-1',10,undefined,expect.objectContaining({actor:''})))
  })
 })
+
+it('permite filtrar fechas y acción, volver a la página anterior, actualizar y cerrar',async()=>{
+ const close=vi.fn()
+ vi.mocked(listAuditEvents).mockResolvedValueOnce({items:[{id:'1',event_type:'qa.event',actor_name:'QA',actor_email:null,resource_id:null,detail:{},created_at:'2026-11-14T12:00:00Z'}],nextCursor:'1'}).mockResolvedValue({items:[],nextCursor:null})
+ render(<AuditPanel workspaceId="workspace-1" onClose={close}/>)
+ expect(await screen.findByText('qa.event')).toBeTruthy()
+ expect(screen.getByText('Espacio de trabajo')).toBeTruthy()
+ fireEvent.click(screen.getByRole('button',{name:'Siguiente'}))
+ await screen.findByText('Resultados · página 2')
+ await waitFor(()=>expect((screen.getByRole('button',{name:'Anterior'}) as HTMLButtonElement).disabled).toBe(false))
+ fireEvent.click(screen.getByRole('button',{name:'Anterior'}))
+ await screen.findByText('Resultados · página 1')
+ fireEvent.change(screen.getByLabelText('Filtrar acción'),{target:{value:'project.created'}})
+ fireEvent.change(screen.getByLabelText('Desde'),{target:{value:'2026-11-01'}})
+ fireEvent.change(screen.getByLabelText('Hasta'),{target:{value:'2026-11-14'}})
+ fireEvent.click(screen.getByRole('button',{name:'Aplicar filtros'}))
+ await waitFor(()=>expect(listAuditEvents).toHaveBeenLastCalledWith('workspace-1',25,undefined,expect.objectContaining({eventType:'project.created',from:'2026-11-01',to:'2026-11-14'})))
+ const count=vi.mocked(listAuditEvents).mock.calls.length
+ fireEvent.click(screen.getByRole('button',{name:'Actualizar actividad'}))
+ await waitFor(()=>expect(listAuditEvents).toHaveBeenCalledTimes(count+1))
+ fireEvent.click(screen.getAllByRole('button',{name:'Cerrar'}).at(-1)!);expect(close).toHaveBeenCalled()
+})
+
+
+it('la indisponibilidad del catálogo no impide informar el error textual de auditoría',async()=>{
+ vi.mocked(listProjects).mockRejectedValueOnce(new Error('Catálogo no disponible'))
+ vi.mocked(listAuditEvents).mockRejectedValueOnce('Auditoría no disponible QA')
+ render(<AuditPanel workspaceId="workspace-1" onClose={vi.fn()}/> )
+ expect((await screen.findByRole('alert')).textContent).toContain('Auditoría no disponible QA');expect(screen.queryByText('Proyecto permitido')).toBeNull()
+ vi.mocked(listAuditEvents).mockResolvedValueOnce({items:[],nextCursor:null});fireEvent.click(screen.getByRole('button',{name:'Actualizar actividad'}));expect(await screen.findByText(/No hay eventos/)).toBeTruthy();expect(screen.queryByRole('alert')).toBeNull()
+})
+it('descarta respuestas de otro workspace al cambiar de contexto',async()=>{
+ let resolveOld!:(value:Awaited<ReturnType<typeof listAuditEvents>>)=>void
+ vi.mocked(listAuditEvents).mockReturnValueOnce(new Promise(resolve=>{resolveOld=resolve})).mockResolvedValue({items:[],nextCursor:null})
+ const view=render(<AuditPanel workspaceId="old" onClose={vi.fn()}/>);view.rerender(<AuditPanel workspaceId="new" onClose={vi.fn()}/>);await screen.findByText(/No hay eventos/)
+ await act(async()=>{resolveOld({items:[{id:'old',event_type:'project.created',actor_name:'Usuario anterior QA',actor_email:null,resource_id:null,detail:{},created_at:'2026-11-14'}],nextCursor:null})});expect(screen.queryByText('Usuario anterior QA')).toBeNull()
+})
+

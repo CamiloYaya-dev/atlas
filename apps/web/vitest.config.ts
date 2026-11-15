@@ -17,7 +17,7 @@ export default defineConfig({
    provider:'v8',
    include:['src/**/*.{ts,tsx}'],
    exclude:['src/**/*.browser.test.{ts,tsx}','src/**/*.unit.test.{ts,tsx}','src/**/*.test.ts','src/**/*.d.ts','src/test/**','src/features/security/types.ts'],
-   reporter:['text','html','lcov','json-summary'],
+   reporter:['text','html','lcov','json-summary','json'],
    reportsDirectory:'../../coverage/frontend',
   }
  }

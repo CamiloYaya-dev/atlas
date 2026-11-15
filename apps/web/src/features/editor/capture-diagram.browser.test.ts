@@ -32,3 +32,10 @@ test('captura con zoom y escena muy grande mantiene límite de 4000 px',async()=
 test('errores de imagen y canvas se propagan sin informar exportación exitosa',async()=>{
  const root=scene();raster({error:true});await expect(captureDiagramPng(root)).rejects.toThrow('No fue posible capturar');vi.restoreAllMocks();raster({context:false});await expect(captureDiagramPng(root)).rejects.toThrow('Canvas no disponible');vi.restoreAllMocks();raster({format:'data:image/jpeg;base64,QUJD'});await expect(captureDiagramPng(root)).rejects.toThrow('Formato de captura inválido')
 })
+
+
+test('captura con transform none y caja sin identificador conserva una imagen válida',async()=>{
+ const root=scene(),r=raster();root.querySelector<HTMLElement>('.react-flow__viewport')!.style.transform='none';root.querySelector<HTMLElement>('.react-flow__node')!.removeAttribute('data-id')
+ expect(await captureDiagramPng(root)).toBe('QUJD');expect(r.svg()).toContain('Cuenta QA');expect(r.drawImage).toHaveBeenCalledOnce()
+})
+

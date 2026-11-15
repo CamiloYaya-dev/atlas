@@ -130,3 +130,14 @@ test('dos relaciones del mismo par mantienen identidad, estilo y puerto independ
  assert.equal(d.diagrams[0].edges[0].sourceHandle,'top-2')
  assert.equal(d.diagrams[0].edges[0].label,'Evento')
 })
+
+
+test('operaciones sobre identidad inexistente no cambian el modelo',()=>{
+ const d=fixture(),snapshot=structuredClone(d)
+ assert.throws(()=>deleteDiagram(d,'missing'),/Diagrama no encontrado/)
+ assert.throws(()=>editRelation(d,'d1','missing',{label:'QA'}),/Relación inexistente/)
+ assert.throws(()=>addElementNode(d,'d1',{...d.elements.auth,name:'Otro elemento'},{id:'another',x:0,y:0}),/ID de elemento duplicado/)
+ const result=addElementNode(d,'d1',d.elements.auth,{id:'another',x:0,y:0});assert.equal(Object.keys(result.elements).length,2);assert.equal(result.diagrams[0].nodes.length,3)
+ assert.deepEqual(d,snapshot)
+})
+

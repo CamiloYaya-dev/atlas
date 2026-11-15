@@ -29,3 +29,18 @@ test('rechaza formatos y capturas falsas',async()=>{
  await assert.rejects(encodeCapturedDiagram('aGVsbG8=','png',false),/Captura de diagrama inválida/)
  await assert.rejects(encodeCapturedDiagram('!%$','jpg',true),/Captura de diagrama inválida/)
 })
+
+test('rechaza tipos no textuales, caracteres no base64 y límites antes de decodificar',async()=>{
+ for(const value of [null,42,'a'.repeat(18_000_001),'!'.repeat(24)]){
+  await assert.rejects(encodeCapturedDiagram(value as string,'png',false),{statusCode:400,message:'Captura de diagrama inválida'})
+ }
+ await assert.rejects(encodeCapturedDiagram(Buffer.alloc(30).toString('base64'),'png',false),{statusCode:400,message:'Solo se admite captura PNG'})
+})
+test('rechaza PNG truncado y dimensiones fuera de política sin devolver bytes',async()=>{
+ const truncated=Buffer.concat([Buffer.from('89504e470d0a1a0a','hex'),Buffer.alloc(24)])
+ await assert.rejects(encodeCapturedDiagram(truncated.toString('base64'),'png',false),{statusCode:422,message:'La captura PNG está dañada'})
+ for(const [width,height] of [[5001,1],[1,5001]]){
+  const png=await sharp({create:{width,height,channels:3,background:'white'}}).png().toBuffer()
+  await assert.rejects(encodeCapturedDiagram(png.toString('base64'),'png',false),{statusCode:413,message:'Dimensiones de exportación excesivas'})
+ }
+})

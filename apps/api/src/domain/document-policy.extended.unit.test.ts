@@ -158,3 +158,103 @@ test('múltiples relaciones sobre el mismo par se guardan con permisos propios y
  assert.equal(afterDelete.diagrams.find(d=>d.id==='p')?.edges.length,2)
  assert.ok(afterDelete.diagrams.find(d=>d.id==='p')?.edges.some(e=>e.id==='parallel3'))
 })
+
+test('cambiar el tipo de elemento exige permiso de edición, creación y visibilidad del destino',()=>{
+ const original=fixture(),editor:Access={roleId:'qa',roleKey:'qa',roleName:'QA',permissions:new Set(['diagram.view.process','element.view.activity','element.edit.activity'])}
+ const draft=projectVisible(original,editor);draft.elements.a.type='usecase'
+ assert.throws(()=>applyAuthorizedChange(original,draft,editor),/element.create.usecase/)
+ editor.permissions.add('element.create.usecase');assert.throws(()=>applyAuthorizedChange(original,draft,editor),/element.view.usecase/)
+ editor.permissions.add('element.view.usecase');const saved=applyAuthorizedChange(original,draft,editor)
+ assert.equal(saved.elements.a.type,'usecase');assert.equal(saved.diagrams[0].nodes[0].elementId,'a');assert.equal(original.elements.a.type,'activity')
+})
+test('enlace granular no permite descubrir una vista o caja oculta mediante ID conocido',()=>{
+ const original=fixture(),editor:Access={roleId:'qa',roleKey:'qa',roleName:'QA',permissions:new Set(['diagram.view.process','element.view.activity','element.edit.activity'])}
+ let draft=projectVisible(original,editor);Object.assign(draft.elements.a,{childDiagramId:'c2',childNodeId:'c-node'})
+ assert.throws(()=>applyAuthorizedChange(original,draft,editor),/diagram.view.c2/)
+ editor.permissions.add('diagram.view.c2');draft=projectVisible(original,editor);Object.assign(draft.elements.a,{childDiagramId:'c2',childNodeId:'c-node'})
+ // Simula un cliente que falsifica el nodo oculto con un ID conocido.
+ draft.diagrams.find(d=>d.id==='c2')!.nodes.push({...original.diagrams[1].nodes[0]})
+ assert.throws(()=>applyAuthorizedChange(original,draft,editor),/element.view.container/)
+ editor.permissions.add('element.view.container');draft=projectVisible(original,role());Object.assign(draft.elements.a,{childDiagramId:'c2',childNodeId:'c-node'})
+ // The owner can persist the authorized granular link without changing the target.
+ const saved=applyAuthorizedChange(original,draft,role());assert.equal(saved.elements.a.childNodeId,'c-node');assert.equal(saved.elements.a.childDiagramId,'c2')
+ assert.equal(original.elements.a.childDiagramId,undefined)
+})
+test('una vista existente no cambia de tipo si el editor carece de permisos sobre el nuevo tipo',()=>{
+ const original=fixture(),editor:Access={roleId:'qa',roleKey:'qa',roleName:'QA',permissions:new Set(['diagram.view.process','diagram.edit.process','element.view.activity'])}
+ const draft=projectVisible(original,editor);draft.diagrams[0].type='custom'
+ assert.throws(()=>applyAuthorizedChange(original,draft,editor),/diagram.create.custom/)
+ editor.permissions.add('diagram.create.custom');assert.throws(()=>applyAuthorizedChange(original,draft,editor),/diagram.view.custom/)
+ editor.permissions.add('diagram.view.custom');const result=applyAuthorizedChange(original,draft,editor)
+ assert.equal(result.diagrams[0].type,'custom');assert.equal(result.diagrams[0].nodes.length,original.diagrams[0].nodes.length)
+})
+
+test('un nodo oculto no puede ser reemplazado por un nodo visible con el mismo ID',()=>{
+ const original=fixture(),actor=role('functional'),draft=projectVisible(original,actor)
+ draft.diagrams[0].nodes.push({id:'nc',elementId:'a',x:12,y:20})
+ assert.throws(()=>applyAuthorizedChange(original,draft,actor),/ID de nodo reservado/)
+ assert.equal(original.diagrams[0].nodes.find(n=>n.id==='nc')?.elementId,'c')
+})
+test('una nueva vista no acepta una caja cuyo elemento no existe',()=>{
+ const original=fixture(),draft=projectVisible(original,role())
+ draft.diagrams.push({id:'missing-node',name:'Vista inválida',type:'custom',description:'',createdAt:'2026-01-01',nodes:[{id:'missing',elementId:'not-found',x:0,y:0}],edges:[]})
+ assert.throws(()=>applyAuthorizedChange(original,draft,role()),/Elemento no encontrado/)
+ assert.equal(original.diagrams.length,2)
+})
+test('las relaciones de una nueva vista también requieren permiso de creación',()=>{
+ const original=fixture(),actor:Access={roleId:'qa',roleKey:'qa',roleName:'QA',permissions:new Set(['diagram.view.process','diagram.view.custom','diagram.create.custom','element.view.activity'])}
+ const draft=projectVisible(original,actor)
+ draft.diagrams.push({id:'new',name:'Nueva vista',type:'custom',description:'',createdAt:'2026-01-01',nodes:[{id:'na',elementId:'a',x:0,y:0},{id:'nb',elementId:'b',x:100,y:0}],edges:[{id:'new-edge',source:'na',target:'nb'}]})
+ assert.throws(()=>applyAuthorizedChange(original,draft,actor),/relation.create.functional/)
+ actor.permissions.add('relation.create.functional')
+ assert.equal(applyAuthorizedChange(original,draft,actor).diagrams.find(d=>d.id==='new')?.edges[0].id,'new-edge')
+})
+test('crear datos técnicos requiere privilegio técnico incluso si el elemento es visible',()=>{
+ const original=fixture(),actor:Access={roleId:'qa',roleKey:'qa',roleName:'QA',permissions:new Set(['diagram.view.process','element.view.activity','element.create.activity'])}
+ const draft=projectVisible(original,actor),el=createElement('Nuevo paso','activity');el.technical='Secreto técnico QA';draft.elements[el.id]=el
+ assert.throws(()=>applyAuthorizedChange(original,draft,actor),/No puedes crear detalles técnicos UML/)
+ assert.equal(original.elements[el.id],undefined)
+})
+
+
+// Exercise explicit business validation, independently of API transport.
+for(const [name,change,message] of [
+ ['diagrama repetido',(d:ProjectDocument)=>d.diagrams.push(structuredClone(d.diagrams[0])),/IDs de diagrama duplicados/],
+ ['filtro duplicado',(d:ProjectDocument)=>{d.diagrams[0].filters=[{id:'f',label:'Uno'},{id:'f',label:'Dos'}]},/Filtros de diagrama inválidos/],
+ ['filtro inexistente',(d:ProjectDocument)=>{d.diagrams[0].nodes[0].filterIds=['absent']},/Nodo con filtro inexistente/],
+ ['ancho inválido',(d:ProjectDocument)=>{d.diagrams[0].nodes[0].width=-1},/Dimensiones de caja inválidas/],
+ ['alto inválido',(d:ProjectDocument)=>{d.diagrams[0].nodes[0].height=0},/Dimensiones de caja inválidas/],
+ ['dirección inválida',(d:ProjectDocument)=>{d.diagrams[0].edges[0].direction='invalid' as never},/Dirección de relación inválida/],
+ ['trazo inválido',(d:ProjectDocument)=>{d.diagrams[0].edges[0].lineStyle='invalid' as never},/Trazo de relación inválido/],
+ ['recorrido inválido',(d:ProjectDocument)=>{d.diagrams[0].edges[0].pathStyle='invalid' as never},/Tipo de recorrido de relación inválido/],
+ ['multiplicidad inválida',(d:ProjectDocument)=>{d.diagrams[0].edges[0].sourceMultiplicity='x'.repeat(81)},/Extremos UML inválidos/],
+ ['vista inexistente',(d:ProjectDocument)=>{d.elements.a.childDiagramId='missing'},/Vista vinculada inexistente/],
+ ['destino inexistente',(d:ProjectDocument)=>{d.elements.a.childDiagramId='c2';d.elements.a.childNodeId='missing'},/Caja vinculada inexistente/],
+] as const){
+ test('validación independiente: '+name,async()=>{
+  const {ensureUniqueIds}=await import('../modules/projects/application/document-policy');const doc=fixture();change(doc);assert.throws(()=>ensureUniqueIds(doc),message)
+ })
+}
+test('rechaza versión de esquema no soportada sin mutar documento original',()=>{
+ const d=fixture(),a=role(),incoming=projectVisible(d,a),snapshot=structuredClone(d);incoming.schema=2 as never
+ assert.throws(()=>applyAuthorizedChange(d,incoming,a),/Versión de documento no soportada/);assert.deepEqual(d,snapshot)
+})
+test('no permite sobrescribir un elemento oculto por su identidad',()=>{
+ const d=fixture(),a=role('functional'),incoming=projectVisible(d,a);incoming.elements.c={...createElement('Inyección','activity'),id:'c'}
+ assert.throws(()=>applyAuthorizedChange(d,incoming,a),/elemento oculto/);assert.equal(d.elements.c.name,'Backend')
+})
+test('el destino granular se oculta cuando su caja no es visible aunque la vista sí lo sea',()=>{
+ const d=fixture();Object.assign(d.elements.a,{childDiagramId:'p',childNodeId:'nc'});const a=role('functional'),result=projectVisible(d,a)
+ assert.equal(result.elements.a.childDiagramId,'p');assert.equal(result.elements.a.childNodeId,undefined);assert.equal(d.elements.a.childNodeId,'nc')
+})
+
+
+test('no permite borrar un elemento visible mientras sigue referenciado en otra vista',()=>{
+ const doc=fixture(),actor=role(),incoming=projectVisible(doc,actor);delete incoming.elements.c;incoming.diagrams[0].nodes=incoming.diagrams[0].nodes.filter(n=>n.elementId!=='c');incoming.diagrams[1].nodes=[];const original=structuredClone(doc)
+ assert.throws(()=>applyAuthorizedChange(doc,incoming,actor),/No puedes eliminar un elemento utilizado en una vista/);assert.deepEqual(doc,original)
+})
+
+test('una relación UML existente no puede convertirse a una notación inválida',()=>{
+ const stored=emptyDoc();stored.elements={a:{...createElement('A','uml-class'),id:'a'},b:{...createElement('B','uml-class'),id:'b'}};stored.diagrams=[{id:'u',type:'uml-class',name:'QA',description:'',createdAt:'2026-01-01',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:300,y:0}],edges:[{id:'r',source:'a',target:'b',relationKind:'association'}]}]
+ const original=structuredClone(stored),draft=projectVisible(stored,role());draft.diagrams[0].edges[0].lineStyle='dotted';assert.throws(()=>applyAuthorizedChange(stored,draft,role()),/dirección o trazo normativo/);assert.deepEqual(stored,original)
+})

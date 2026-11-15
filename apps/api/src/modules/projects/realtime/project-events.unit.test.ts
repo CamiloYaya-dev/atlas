@@ -80,3 +80,40 @@ test('restauración: detecta otros usuarios conectados pero no otras pestañas d
  assert.equal(hub.hasOtherParticipants('p','owner'),false)
  hub.closeAll()
 })
+
+test('revocar y actualizar visibilidad elimina focos privados y desconecta solo al usuario afectado',()=>{
+ const hub=new ProjectEvents(),a=new FakeResponse(),b=new FakeResponse()
+ try{
+  hub.subscribe('p','a','owner','Owner',asResponse(a),1,async()=>{})
+  hub.subscribe('p','b','reader','Reader',asResponse(b),1,async()=>{})
+  hub.updatePresence('p','b','reader','d','e')
+  hub.updateVisibility('p','b',new Set(['d']),new Set())
+  const last=()=>JSON.parse(a.chunks.filter(x=>x.startsWith('event: presence')).at(-1)!.split('\n')[1].slice(6)).participants.find((p:{userId:string})=>p.userId==='reader')
+  assert.equal(last().diagramId,'d');assert.equal(last().elementId,null)
+  hub.updateVisibility('p','b',new Set(),new Set());assert.equal(last().diagramId,null)
+  hub.updateVisibility('p','missing',new Set(),new Set())
+  hub.revokeUser('p','reader');assert.equal(b.destroyed,true);assert.equal(a.destroyed,false);assert.equal(hub.hasOtherParticipants('p','owner'),false)
+  hub.revokeUser('unknown','reader')
+ }finally{hub.closeAll()}
+})
+test('límite de cinco pestañas por persona y reemplazo del mismo clientId',()=>{
+ const hub=new ProjectEvents(),tabs=Array.from({length:6},()=>new FakeResponse()),replacement=new FakeResponse()
+ try{
+  tabs.forEach((r,i)=>hub.subscribe('p',String(i),'u','QA',asResponse(r),1,async()=>{}))
+  assert.equal(tabs[5].destroyed,true)
+  hub.subscribe('p','0','u','QA',asResponse(replacement),2,async()=>{})
+  assert.equal(tabs[0].destroyed,true);assert.equal(replacement.destroyed,false);assert.match(replacement.content(),/"version":2/)
+  hub.publishVersion('p',3);assert.match(replacement.content(),/"version":3/)
+ }finally{hub.closeAll()}
+})
+test('heartbeat valida permisos y expira presencia inactiva',async(t)=>{
+ t.mock.timers.enable({apis:['setInterval','Date'],now:100000})
+ const hub=new ProjectEvents(),a=new FakeResponse(),b=new FakeResponse();let validates=0
+ try{
+  hub.subscribe('p','a','owner','Owner',asResponse(a),1,async()=>{validates++})
+  hub.subscribe('p','b','reader','Reader',asResponse(b),1,async()=>{throw Error('revocado')})
+  t.mock.timers.tick(15000);await Promise.resolve();await Promise.resolve()
+  assert.equal(validates,1);assert.match(a.content(),/: heartbeat/);assert.equal(b.destroyed,true)
+  t.mock.timers.tick(60000);assert.equal(a.destroyed,true);assert.equal(hub.hasOtherParticipants('p','reader'),false)
+ }finally{hub.closeAll();t.mock.timers.reset()}
+})

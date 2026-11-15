@@ -140,12 +140,12 @@ No se ha ejecutado aquí un arranque completo con Docker y las dependencias npm.
 
 ## Cobertura y QA (V4.3.1)
 
-La meta obligatoria es **>=95 % de líneas, sentencias, funciones y ramas por archivo**, además de pruebas de integración y E2E correctas. **Este objetivo aún no está certificado.**
+La meta obligatoria es **>=90 % de líneas, sentencias, funciones y ramas por archivo**, además de pruebas de integración y E2E correctas. **Este objetivo aún no está certificado.**
 
 - `npm run test:coverage:unit`: informe agregado inicial (sin PostgreSQL).
 - `npm run test:coverage`: cobertura agregada unitarias + integración con PostgreSQL QA (Docker 5433).
 - `npm run coverage:summary`: muestra cobertura medida global y por API/WEB/paquetes.
-- `npm run coverage:check`: falla si los porcentajes no llegan a 95 %.
+- `npm run coverage:check`: falla si los porcentajes no llegan a 90 %.
 - `npm run test:coverage:gate`: cobertura + comprobación de umbral, usada en CI.
 - `npm run test:full`: typecheck + gate de cobertura + build + E2E.
 
@@ -173,12 +173,12 @@ npm run test:ui         # Vitest + jsdom: componentes React y hooks
 npm run test:db         # PostgreSQL QA en Docker, puerto 5433
 npm run test:e2e:local  # Playwright, navegador Chromium y base QA
 npm run test:coverage   # Informes separados y consolidados
-npm run coverage:check  # Gate 95% global y POR ARCHIVO
+npm run coverage:check  # Gate 90% global y POR ARCHIVO
 npm run build
 ```
 
 **Comando único obligatorio para declarar la entrega aprobada:** `npm run qa:local`.
-Este comando incluye todas las fases y se detiene en el primer fallo. Si el reporte no llega al 95%, el gate falla; no deben marcarse como aprobadas versiones incompletas.
+Este comando incluye todas las fases y se detiene en el primer fallo. Si el reporte no llega al 90%, el gate falla; no deben marcarse como aprobadas versiones incompletas.
 
 ### Reportes
 

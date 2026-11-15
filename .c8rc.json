@@ -20,7 +20,8 @@
     "text",
     "html",
     "lcov",
-    "json-summary"
+    "json-summary",
+    "json"
   ],
   "reports-dir": "coverage/backend",
   "temp-directory": ".coverage/tmp-backend"

@@ -68,3 +68,28 @@ describe('Espacios editables y protegidos',()=>{
   expect(screen.getByRole('heading',{name:'Eliminar espacio: Mi espacio'})).toBeTruthy()
  })
 })
+
+it('no ofrece una confirmación destructiva si falla el inventario del espacio',async()=>{
+ vi.mocked(listProjects).mockRejectedValue(new Error('No se pudo comprobar los proyectos'))
+ render(<WorkspaceSettings workspace={workspace} access={owner} onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+ fireEvent.click(screen.getByRole('button',{name:'Eliminar espacio…'}));expect((await screen.findByRole('alert')).textContent).toContain('No se pudo comprobar los proyectos');expect(screen.queryByRole('button',{name:'Eliminar definitivamente'})).toBeNull();expect(api.deleteWorkspace).not.toHaveBeenCalled()
+})
+it('puede cancelar borrado sin llamar la API y volver a administrar',async()=>{
+ render(<WorkspaceSettings workspace={workspace} access={owner} onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+ fireEvent.click(screen.getByRole('button',{name:'Eliminar espacio…'}));await screen.findByRole('heading',{name:'Eliminar espacio: Mi espacio'});fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(screen.getByRole('heading',{name:'Administrar espacio: Mi espacio'})).toBeTruthy();expect(api.deleteWorkspace).not.toHaveBeenCalled()
+})
+
+
+it('expone errores textuales al renombrar y permite recuperarse sin notificar un falso éxito',async()=>{
+ vi.mocked(api.renameWorkspace).mockRejectedValueOnce('Nombre rechazado QA')
+ const renamed=vi.fn();render(<WorkspaceSettings workspace={workspace} access={owner} onClose={vi.fn()} onRenamed={renamed} onDeleted={vi.fn()}/>)
+ fireEvent.change(screen.getByLabelText('Nombre del espacio'),{target:{value:'Nombre nuevo'}});fireEvent.click(screen.getByRole('button',{name:'Guardar nombre'}))
+ expect((await screen.findByRole('alert')).textContent).toContain('Nombre rechazado QA');expect(renamed).not.toHaveBeenCalled()
+ fireEvent.click(screen.getByRole('button',{name:'Guardar nombre'}));await waitFor(()=>expect(renamed).toHaveBeenCalledWith('w1','Renombrado'))
+})
+it('error textual al recuperar proyectos no ofrece confirmación de borrado',async()=>{
+ vi.mocked(listProjects).mockRejectedValueOnce('Inventario no disponible QA')
+ render(<WorkspaceSettings workspace={workspace} access={owner} onClose={vi.fn()} onRenamed={vi.fn()} onDeleted={vi.fn()}/>)
+ fireEvent.click(screen.getByRole('button',{name:'Eliminar espacio…'}));expect((await screen.findByRole('alert')).textContent).toContain('Inventario no disponible QA');expect(api.deleteWorkspace).not.toHaveBeenCalled()
+})
+

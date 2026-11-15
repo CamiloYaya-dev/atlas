@@ -83,3 +83,28 @@ describe('Administración privada de proyectos',()=>{
   expect(screen.getByRole('heading',{name:'Eliminar proyecto: Proyecto protegido'})).toBeTruthy()
  })
 })
+
+it('un lector no consulta el directorio de miembros ni puede cambiar el proyecto',()=>{
+ render(<ProjectSettings project={project} access={{roleId:'viewer',roleKey:'viewer',roleName:'Lector',permissions:['project.read']}} canEditNow onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+ expect(screen.queryByLabelText('Nombre del proyecto')).toBeNull();expect(screen.queryByRole('button',{name:'Asignar'})).toBeNull();expect(api.projectMembers).not.toHaveBeenCalled();expect(api.projectCandidates).not.toHaveBeenCalled()
+})
+it('cancelar el retiro de un miembro mantiene todos sus permisos',async()=>{
+ vi.mocked(api.projectMembers).mockResolvedValue([{id:'u2',name:'Usuario 2',email:'u2@test.local',role_id:'r-viewer',role_key:'viewer',role_name:'Lector'}])
+ render(<ProjectSettings project={project} access={owner} canEditNow onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+ fireEvent.click(await screen.findByRole('button',{name:'Quitar acceso a Usuario 2'}));fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(api.removeProjectMember).not.toHaveBeenCalled();expect(await screen.findByText('u2@test.local · Lector')).toBeTruthy()
+})
+it('el fallo al asignar un miembro no borra la selección ni anuncia éxito',async()=>{
+ vi.mocked(api.assignProjectMember).mockRejectedValue(new Error('Sin permisos suficientes'))
+ render(<ProjectSettings project={project} access={owner} canEditNow onClose={()=>{}} onRenamed={()=>{}} onDeleted={()=>{}}/>)
+ await screen.findByText('owner@test.local · Propietario');fireEvent.change(screen.getByLabelText('Usuario del espacio'),{target:{value:'u2'}});fireEvent.change(screen.getByLabelText('Rol para el proyecto'),{target:{value:'r-viewer'}});fireEvent.click(screen.getByRole('button',{name:'Asignar'}));expect((await screen.findByRole('alert')).textContent).toContain('Sin permisos suficientes');expect((screen.getByLabelText('Usuario del espacio') as HTMLSelectElement).value).toBe('u2');expect(screen.queryByText('Acceso al proyecto actualizado correctamente.')).toBeNull()
+})
+
+
+it('fallo textual al quitar acceso mantiene el miembro y permite cerrar el modal',async()=>{
+ vi.mocked(api.projectMembers).mockResolvedValue([{id:'u2',name:'Usuario 2',email:'u2@test.local',role_id:'r-viewer',role_key:'viewer',role_name:'Lector'}]);vi.mocked(api.removeProjectMember).mockRejectedValueOnce('Restricción QA')
+ render(<ProjectSettings project={project} access={owner} canEditNow onClose={vi.fn()} onRenamed={vi.fn()} onDeleted={vi.fn()}/>)
+ fireEvent.click(await screen.findByRole('button',{name:'Quitar acceso a Usuario 2'}));fireEvent.click(screen.getByRole('button',{name:'Quitar acceso'}))
+ expect((await screen.findByRole('alert')).textContent).toContain('Restricción QA');expect(screen.getByRole('dialog',{name:'Quitar acceso al proyecto'})).toBeTruthy()
+ fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(await screen.findByText('u2@test.local · Lector')).toBeTruthy()
+})
+

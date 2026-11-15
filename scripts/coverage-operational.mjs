@@ -36,7 +36,7 @@ const cmd=(label,source,options={})=>{
 }
 
 // La configuración se carga en un proceso nuevo para ensayar cada validación.
-const snippet="import {env} from './src/config/env.ts'; console.log('QA-ENV:'+JSON.stringify({port:env.port,host:env.host,allowedOrigins:env.allowedOrigins,dbPoolMax:env.dbPoolMax,trustProxy:env.trustProxy,secureCookies:env.secureCookies}))"
+const snippet="import {deepStrictEqual} from 'node:assert'; import {env,parseEnv} from './src/config/env.ts'; deepStrictEqual(parseEnv(process.env),env); console.log('QA-ENV:'+JSON.stringify({port:env.port,host:env.host,allowedOrigins:env.allowedOrigins,dbPoolMax:env.dbPoolMax,trustProxy:env.trustProxy,secureCookies:env.secureCookies}))"
 function checkEnv(label,overrides,good,expectPattern){
  const result=spawnSync(process.execPath,[tsx,'-e',snippet],{cwd:api,encoding:'utf8',timeout:15000,windowsHide:true,env:{...env,...overrides}})
  if(result.error)throw result.error
@@ -61,6 +61,12 @@ checkEnv('TLS producción obligatorio',{NODE_ENV:'production',CORS_ORIGINS:'http
 checkEnv('BD local prohibida en producción',{NODE_ENV:'production',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true'},false,/DATABASE_URL local/)
 checkEnv('configuración de producción válida (sin conexión)',{NODE_ENV:'production',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true',ATLAS_SECURE_COOKIES:'true',TRUST_PROXY:'true',DB_POOL_MAX:'10'},true,/QA-ENV:/)
 checkEnv('orígenes normalizados',{CORS_ORIGINS:' https://a.example, ,https://b.example ',TRUST_PROXY:'true',ATLAS_SECURE_COOKIES:'true'},true,/https:\/\/b\.example/)
+checkEnv('valores alternativos de configuración', {NODE_ENV:'',AUTH_MODE:'',HOST:'',PORT:'',DB_POOL_MAX:'',CORS_ORIGINS:'',ATLAS_EXPORT_SIGNING_KEY:'',DB_SSL:'false',TRUST_PROXY:'false',ATLAS_SECURE_COOKIES:'false'},true,/"host":"127\.0\.0\.1"/)
+checkEnv('puerto decimal rechazado',{PORT:'3000.5'},false,/PORT inválido/)
+checkEnv('pool decimal rechazado',{DB_POOL_MAX:'2.5'},false,/DB_POOL_MAX inválido/)
+checkEnv('CORS comodín prohibido en producción',{NODE_ENV:'production',CORS_ORIGINS:'*',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',DB_SSL:'true'},false,/CORS_ORIGINS/)
+checkEnv('producción escucha en interfaces disponibles con configuración válida',{NODE_ENV:'production',HOST:'',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true'},true,/"host":"0\.0\.0\.0"/)
+
 
 // El caso positivo del administrador se valida en integración; este caso ejercita
 // la protección contra ejecutar bootstrap dos veces sobre atlas_test.

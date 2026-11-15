@@ -70,3 +70,15 @@ function readLocalEntries(zip:Buffer){
  }
  return entries
 }
+
+test('ZIP rechaza rutas absolutas, traversal, entradas vacías y demasiados archivos',()=>{
+ for(const name of ['/tmp/a.html','../a.html','a/../b.html','a//b.html','.hidden','', 'a'.repeat(181),'con\\barra.html'])assert.throws(()=>zipFiles([{name,bytes:Buffer.from('QA')}]),/Nombre de archivo ZIP inválido/,name)
+ assert.throws(()=>zipFiles(Array.from({length:21},(_,i)=>({name:`doc-${i}.html`,bytes:Buffer.from('QA')}))),/Número de archivos excesivo/)
+})
+test('diccionario vacío omite elementos sin campos y escapa comillas en encabezados',()=>{
+ const doc=structuredClone(document),d=doc.diagrams[0];d.name='Diagrama "QA" & \'prueba\'';d.description=''
+ const html=buildDiagramDictionary(doc,d,{mode:'dictionary',fields:{}},'ref<QA>')
+ assert.match(html,/Diagrama &quot;QA&quot; &amp; &#39;prueba&#39;/)
+ assert.match(html,/No se seleccionaron campos para las fichas/);assert.match(html,/ref&lt;QA&gt;/)
+ assert.doesNotMatch(html,/<section>/)
+})

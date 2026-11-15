@@ -2,7 +2,8 @@ import {describe,it,expect} from 'vitest'
 import {renderHook} from '@testing-library/react'
 import {demoDocument} from '@atlas/fixtures'
 import {useGraphView} from './useGraphView'
-import type {Perspective} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@atlas/contracts'
+import type {Perspective,Diagram} from '@atlas/contracts'
 import type {Node,Edge} from '@xyflow/react'
 
 const doc=demoDocument()
@@ -84,4 +85,60 @@ describe('UML Secuencia — regresión de mensajes paralelos',()=>{
   expect(diagram.edges[0].sourceHandle).toBe('top-2') // No se reescribe el historial.
   expect(result.current.nodes.find(n=>n.id==='aa')?.data.sequenceActivationHeight).toBe(340)
  })
+})
+
+it('los puertos históricos de actividad llegan al único vértice y las flechas conservan la notación UML',()=>{
+ const model=emptyDoc();model.elements={a:{...createElement('Inicio','uml-start'),id:'a'},b:{...createElement('Decisión','uml-decision'),id:'b'}}
+ const diagram:Diagram={id:'d',type:'uml-activity',name:'Actividad',description:'',createdAt:'2026-11-14',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:200,y:180}],edges:[{id:'e',source:'a',target:'b',sourceHandle:'bottom-3',targetHandle:'top-1',relationKind:'control-flow',label:'[ok]'}]}
+ model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+ expect(result.current.edges[0]).toMatchObject({sourceHandle:'bottom-2',targetHandle:'top-2',type:'atlas-uml',label:'[ok]'})
+ expect(diagram.edges[0].sourceHandle).toBe('bottom-3')
+})
+it('destrucción anidada termina la línea de vida y no queda restringida al interior de la activación',()=>{
+ const model=emptyDoc();for(const [id,type] of [['p','uml-lifeline'],['a','uml-activation'],['x','uml-destruction']] as const)model.elements[id]={...createElement(id,type),id}
+ const diagram:Diagram={id:'s',type:'uml-sequence',name:'Seq',description:'',createdAt:'2026-11-14',nodes:[{id:'x',elementId:'x',parentNodeId:'a',x:0,y:176,width:48,height:48},{id:'a',elementId:'a',parentNodeId:'p',x:61,y:70,width:48,height:200},{id:'p',elementId:'p',x:10,y:10,width:170,height:400}],edges:[]};model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+ expect(result.current.nodes.map(n=>n.id)).toEqual(['p','a','x']);expect(result.current.nodes[0].data.sequenceEndY).toBe(270);expect(result.current.nodes[1].extent).toBe('parent');expect(result.current.nodes[2].extent).toBeUndefined()
+})
+
+it('C1 renderiza relaciones bidireccionales, inversas, sin flecha y paralelas sin mutar el documento',()=>{
+ const model=demoDocument(),diagram=model.diagrams[0];const base=diagram.edges[0]
+ diagram.edges=[{...base,id:'a',direction:'reverse',lineStyle:'dotted'},{...base,id:'b',direction:'none',label:''},{...base,id:'c',direction:'both',relationKind:'dependency'}, {...base,id:'d',relationKind:'association',direction:'both'}]
+ const snapshot=structuredClone(model)
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+ const [a,b,c,d]=result.current.edges
+ expect(result.current.edges.every(e=>e.type==='atlas-parallel')).toBe(true)
+ expect(a.markerStart).toBeDefined();expect(a.markerEnd).toBeUndefined();expect(a.style?.strokeDasharray).toBe('2 5')
+ expect(b.markerStart).toBeUndefined();expect(b.markerEnd).toBeUndefined();expect(b.label).toBe('')
+ expect(c.markerStart).toBeDefined();expect(c.markerEnd).toBeDefined();expect(c.style?.strokeDasharray).toBe('7 5')
+ expect(d.markerStart).toBeUndefined();expect(d.markerEnd).toBeUndefined()
+ expect(model).toEqual(snapshot)
+})
+it('una caja cuyo padre está oculto conserva coordenadas absolutas y no referencia un padre inexistente',()=>{
+ const model=emptyDoc();model.elements={p:{...createElement('Paquete','uml-package'),id:'p'},c:{...createElement('Clase','uml-class'),id:'c'}}
+ const diagram:Diagram={id:'p',name:'Paquetes',type:'uml-package',description:'',createdAt:'2026-11-14',filters:[{id:'parent',label:'Padre'},{id:'child',label:'Hijo'}],nodes:[{id:'p',elementId:'p',x:50,y:100,filterIds:['parent']},{id:'c',elementId:'c',parentNodeId:'p',x:20,y:30,filterIds:['child']}],edges:[]};model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:['child'],dependencies:false,includeUntagged:false,mode:'technical',selectedId:null,canEdit:false}))
+ expect(result.current.nodes).toHaveLength(1);expect(result.current.nodes[0].position).toEqual({x:70,y:130});expect(result.current.nodes[0].parentId).toBeUndefined();expect(result.current.nodes[0].draggable).toBe(false)
+})
+it('los mensajes de secuencia explícitos respetan el puerto disponible y degradan el puerto obsoleto sin cambiar la persistencia',()=>{
+ const model=emptyDoc();for(const [id,type] of [['p','uml-lifeline'],['a','uml-activation'],['b','uml-lifeline']] as const)model.elements[id]={...createElement(id,type),id}
+ const diagram:Diagram={id:'s',name:'Secuencia',type:'uml-sequence',description:'',createdAt:'2026-11-14',nodes:[{id:'p',elementId:'p',x:0,y:0,width:170,height:400},{id:'a',elementId:'a',parentNodeId:'p',x:60,y:60,width:48,height:160},{id:'b',elementId:'b',x:300,y:0,width:170,height:400}],edges:[{id:'explicit',source:'a',target:'b',sourceHandle:'seq-right-1',relationKind:'message'},{id:'old',source:'b',target:'a',targetHandle:'seq-left-999',relationKind:'reply'}]};model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+ expect(result.current.edges[0].sourceHandle).toBe('seq-right-1');expect(result.current.edges[1].targetHandle).toMatch(/^seq-left-/);expect(result.current.edges[1].targetHandle).not.toBe('seq-left-999');expect(diagram.edges[1].targetHandle).toBe('seq-left-999')
+})
+
+it('UML sin relación explícita usa notación por defecto y conserva puertos de una acción',()=>{
+ const model=emptyDoc();for(const id of ['a','b'])model.elements[id]={...createElement(id,'uml-action'),id};const diagram:Diagram={id:'a',type:'uml-activity',name:'QA04',description:'',createdAt:'2026-11-14',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:200,y:100}],edges:[{id:'ab',source:'a',target:'b',sourceHandle:'top-1',targetHandle:'bottom-3'}]};model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:'b',canEdit:true}));expect(result.current.edges[0]).toMatchObject({type:'atlas-uml',sourceHandle:'top-1',targetHandle:'bottom-3'});expect(result.current.edges[0].data?.relationKind).toBe('control-flow');expect(result.current.nodes.find(n=>n.id==='b')?.selected).toBe(true);expect(diagram.edges[0].relationKind).toBeUndefined()
+})
+
+it('normaliza exclusivamente las puntas antiguas de símbolos de actividad sin alterar el modelo',()=>{
+ const model=emptyDoc();model.elements={a:{...createElement('Decisión','uml-decision'),id:'a'},b:{...createElement('Final','uml-flow-final'),id:'b'}};const diagram:Diagram={id:'a',type:'uml-activity',name:'QA05',description:'',createdAt:'2026-11-14',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:200,y:100}],edges:[{id:'ab',source:'a',target:'b',sourceHandle:'top-3',targetHandle:'bottom-1',relationKind:'control-flow'},{id:'ab2',source:'a',target:'b',sourceHandle:'left',targetHandle:'right',relationKind:'control-flow'}]};model.diagrams=[diagram];const before=structuredClone(model)
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}));expect(result.current.edges[0]).toMatchObject({sourceHandle:'top-2',targetHandle:'bottom-2'});expect(result.current.edges[1]).toMatchObject({sourceHandle:'left',targetHandle:'right'});expect(model).toEqual(before)
+})
+
+it('destrucción directamente unida a participante recorta su línea de vida, sin encierro en el padre',()=>{
+ const model=emptyDoc();model.elements={p:{...createElement('Participante','uml-lifeline'),id:'p'},x:{...createElement('Fin','uml-destruction'),id:'x'}};const diagram:Diagram={id:'s',type:'uml-sequence',name:'Secuencia',description:'',createdAt:'2026-11-14',nodes:[{id:'p',elementId:'p',x:10,y:10,width:170,height:400},{id:'x',elementId:'x',parentNodeId:'p',x:61,y:200,width:48,height:48}],edges:[]};model.diagrams=[diagram]
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}));expect(result.current.nodes[0].data.sequenceEndY).toBe(224);expect(result.current.nodes[1].parentId).toBe('p');expect(result.current.nodes[1].extent).toBeUndefined()
 })

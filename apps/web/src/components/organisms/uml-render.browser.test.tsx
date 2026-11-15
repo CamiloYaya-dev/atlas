@@ -72,3 +72,27 @@ it('relaciones paralelas muestran rutas y etiquetas independientes, marcadores o
  const props={...edge({parallelOffset:32,parallelPath:'straight'},'Solicitud'),markerEnd:'url(#arrow)'};const {rerender}=render(<svg><AtlasParallelEdge {...props}/></svg>);const path=screen.getByTestId('edge-r').getAttribute('d');expect(screen.getByTestId('edge-r').getAttribute('marker-end')).toBe('url(#arrow)');expect(screen.getByText('Solicitud')).toBeTruthy()
  rerender(<svg><AtlasParallelEdge {...edge({parallelOffset:-32,parallelPath:'straight'},'Respuesta')}/></svg>);expect(screen.getByTestId('edge-r').getAttribute('d')).not.toBe(path);expect(screen.getByText('Respuesta')).toBeTruthy();rerender(<svg><AtlasParallelEdge {...edge({},' ')}/></svg>);expect(document.querySelector('.atlas-parallel-edge-label')).toBeNull()
 })
+
+it('conector sin datos usa asociación y ruta recta por defecto',()=>{
+ const {container}=render(<svg><AtlasUmlEdge {...edge()} data={undefined}/></svg>);expect(screen.getByTestId('edge-r').getAttribute('d')).toBeTruthy();expect(container.querySelector('[data-uml-terminal]')).toBeNull();expect(container.querySelector('.atlas-parallel-edge-label')).toBeNull()
+})
+it('cajas normales exponen enlaces genéricos o C4 y respetan perspectiva',()=>{
+ const {container,rerender}=render(<AtlasNode {...node('system','c1',{summary:'Resumen QA',technical:'Detalle QA',childDiagramId:'d'})}/>);expect(screen.getByText('Resumen QA')).toBeTruthy();expect(screen.getByText('Detalle QA')).toBeTruthy();expect(container.querySelector('.node-drill')?.getAttribute('title')).toMatch(/vista vinculada/)
+ rerender(<AtlasNode {...node('system','c1',{summary:'Resumen QA',technical:'Detalle QA',childDiagramId:'d'},{linkedDiagramType:'c2',mode:'technical'})}/>);expect(screen.queryByText('Resumen QA')).toBeNull();expect(screen.getByText('Detalle QA')).toBeTruthy();expect(container.querySelector('.node-drill b')?.textContent).toBe('C2')
+ rerender(<AtlasNode {...node('system','c1',{summary:'Resumen QA',technical:'Detalle QA',childDiagramId:'d'},{linkedDiagramType:'process',mode:'functional'})}/>);expect(screen.getByText('Resumen QA')).toBeTruthy();expect(screen.queryByText('Detalle QA')).toBeNull();expect(container.querySelector('.node-drill b')).toBeNull()
+})
+
+it('representa fichas UML mínimas sin inventar propiedades ni contenido',()=>{
+ const {container,rerender}=render(<AtlasNode {...node('uml-class','uml-class')}/>);expect(screen.getByText('Sin atributos')).toBeTruthy();expect(screen.getByText('Sin operaciones')).toBeTruthy()
+ rerender(<AtlasNode {...node('uml-object','uml-object')}/>);expect(screen.getByText('Sin valores de instancia')).toBeTruthy()
+ rerender(<AtlasNode {...node('uml-object','uml-object',{uml:{slots:[{id:'s',name:'activo',value:'true'}]}})}/>);expect(screen.getByText('activo = true')).toBeTruthy()
+ rerender(<AtlasNode {...node('uml-stereotype','uml-profile')}/>);expect(container.querySelector('.uml-structural-compartment')).toBeNull()
+ rerender(<AtlasNode {...node('uml-package','uml-package')}/>);expect(screen.getByText('Paquete')).toBeTruthy();expect(screen.getByText(/0 elementos contenidos/)).toBeTruthy()
+ rerender(<AtlasNode {...node('uml-model','uml-package',{uml:{visibility:'public'}})}/>);expect(screen.getByText('«model»')).toBeTruthy();expect(screen.getByText(/Visibilidad: public/)).toBeTruthy()
+ rerender(<AtlasNode {...node('uml-object-node','uml-activity')}/>);expect(container.querySelector('.uml-object-node-label small')).toBeNull()
+ rerender(<AtlasNode {...node('uml-state','uml-state')}/>);expect(container.querySelector('.uml-state-compartment')).toBeNull()
+ rerender(<AtlasNode {...node('uml-region','uml-state')}/>);expect(container.querySelector('.uml-state-region-caption')).toBeNull()
+ rerender(<AtlasNode {...node('uml-interaction','uml-sequence')}/>);expect(container.querySelector('.uml-interaction-ref-summary')).toBeNull()
+ rerender(<AtlasNode {...node('uml-frame','uml-communication')}/>);expect(screen.getByText('sd')).toBeTruthy();expect(container.querySelector('.uml-interaction-frame-summary')).toBeNull()
+ rerender(<AtlasNode {...node('uml-execution','uml-deployment',{uml:{runtimeIcon:'docker'}})}/>);expect(screen.getByText('docker')).toBeTruthy()
+})

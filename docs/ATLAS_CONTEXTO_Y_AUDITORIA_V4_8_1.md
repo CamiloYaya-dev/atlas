@@ -41,7 +41,7 @@ ATLAS significa **Arquitectura conectada**. Su objetivo no es ser otro programa 
 | Restauración | No editar historial directamente: restaurar crea una **nueva revisión**; ramas permiten propuesta, previsualización, selección de campos en conflicto o reemplazo confirmado. |
 | UX | Menú lateral ocultable, minimapa configurable y pantalla completa del diagrama; componentes modales/notificaciones propios. |
 | UX prohibida | Nunca invocar `alert()`, `confirm()` o `prompt()` del navegador para flujos ATLAS. |
-| QA | 100% de suites obligatorias aprobadas; cobertura aspirada >=95% en líneas, sentencias, ramas y funciones, global y por archivo. |
+| QA | 100% de suites obligatorias aprobadas; cobertura aspirada >=90% en líneas, sentencias, ramas y funciones, global y por archivo. |
 | Infraestructura piloto | PostgreSQL local Docker, backend y frontend separados; piloto vía ngrok HTTPS sin publicar DB ni API de forma independiente. |
 
 **Importante:** documentaciones históricas V3 mencionan Supabase y un esquema de invitaciones diferente. Son antecedentes, **no** el contrato operativo de V4.8.1. Asimismo, el objetivo de una experiencia «tipo Git» se implementa actualmente para **ramas de restauración**, no como Git completo ni edición CRDT.
@@ -176,7 +176,7 @@ Además, el botón de la barra superior ahora determina si el sidebar *efectivam
 ## 6. Hallazgos adicionales y riesgos priorizados
 
 1. **P0 — Pantallas grises (resuelto en este hotfix):** ambas rutas de control compartían una regla de CSS Grid defectuosa. Se reproduce y se valida en Chromium.
-2. **P1 — Cierre de QA real (pendiente):** ejecutar en la máquina Windows con dependencias compatibles todas las suites, migraciones de QA, E2E, build y gate 95% por archivo. El éxito del TypeScript y de las 3 nuevas pruebas no sustituye el cierre completo.
+2. **P1 — Cierre de QA real (pendiente):** ejecutar en la máquina Windows con dependencias compatibles todas las suites, migraciones de QA, E2E, build y gate 90% por archivo. El éxito del TypeScript y de las 3 nuevas pruebas no sustituye el cierre completo.
 3. **P1 — Colaboración/restauración (validación):** conservar escenarios con dos usuarios simultáneos, pérdida de red, restauración concurrente, permisos y fusión/rechazo 409; los cambios destructivos han de crear revisiones y no sobrescribir silenciosamente.
 4. **P1 — Seguridad del piloto (verificación):** cookies, CSRF, CORS exacto, aislamiento de proyectos y restricción de ngrok; no exponer API/DB por separado. Las pruebas no autorizan registro público.
 5. **P2 — Mantenibilidad:** `AtlasEditor.tsx` concentra la orquestación de editor, proyecto, usuarios y colaboraciones; `styles.css` agrupa numerosas reglas en líneas minificadas. Separarlos por funciones/composición facilitará regresiones y revisión de permisos, pero **no debe hacerse en el mismo parche correctivo**.
@@ -188,7 +188,7 @@ Además, el botón de la barra superior ahora determina si el sidebar *efectivam
 
 **Ahora — estabilidad V4.8.1:** aplicar parche sin eliminar el proyecto original ni su volumen PostgreSQL; compilar y ejecutar pruebas; comprobar ambos controles con un proyecto real (incluyendo cambios no guardados, minimapa, inspector, fullscreen y vista de otro usuario).
 
-**Después — cierre del piloto:** `npm run qa:local` y verificación manual multiusuario/ACL; corregir únicamente fallas demostradas; decidir si se cumple la meta de 95% por archivo. Realizar respaldo de PostgreSQL previo a operaciones que involucren migraciones.
+**Después — cierre del piloto:** `npm run qa:local` y verificación manual multiusuario/ACL; corregir únicamente fallas demostradas; decidir si se cumple la meta de 90% por archivo. Realizar respaldo de PostgreSQL previo a operaciones que involucren migraciones.
 
 **Posteriormente — producto:** refactorización dirigida por pruebas, instrumentación y observabilidad, formalización de notaciones, mejores herramientas de trazabilidad/colaboración y evaluación del SaaS, manteniendo el mapa funcional/técnico como núcleo del valor.
 

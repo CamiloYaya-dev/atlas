@@ -12,7 +12,8 @@ function load(rel,stubs={}){
  }},{filename,timeout:5000})
  return mod.exports
 }
-const fields=load('packages/contracts/src/export-fields.ts')
+const structure=load('packages/contracts/src/uml-structure.ts')
+const fields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':structure})
 const docs=load('apps/api/src/modules/exports/advanced-document.ts',{'@atlas/contracts':fields})
 const licensing=load('apps/api/src/modules/licensing/licensing-policy.ts')
 const documentFormats=load('apps/api/src/modules/exports/diagram-documents.ts',{'@atlas/contracts':fields,'./advanced-document':docs})

@@ -61,3 +61,18 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(request).toHaveBeenCalledWith('/projects/p1/versions/2')
  })
 })
+
+it('presencia, permisos, administración y licencia codifican identificadores y conservan payloads',async()=>{
+ const api=await import('./api')
+ await api.sendPresence('p/1','client','diagram','element');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/presence',{method:'POST',body:JSON.stringify({clientId:'client',diagramId:'diagram',elementId:'element'})})
+ await api.renameProject('p/1','Nuevo');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1',{method:'PATCH',body:JSON.stringify({name:'Nuevo'})})
+ await api.restoreDocumentVersion('p/1',2,5);expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/restore',{method:'POST',body:JSON.stringify({sourceVersion:2,expectedVersion:5})})
+ await api.projectAccess('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/access')
+ await api.projectMembers('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members')
+ await api.projectCandidates('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/candidates')
+ await api.assignProjectMember('p/1','u/1','r1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members/u%2F1',{method:'PUT',body:JSON.stringify({roleId:'r1'})})
+ await api.removeProjectMember('p/1','u/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members/u%2F1',{method:'DELETE'})
+ await api.deleteProject('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1',{method:'DELETE'})
+ const payload={planCode:'pro' as const,status:'active' as const,features:{}};await api.setWorkspaceLicense('w/1',payload);expect(request).toHaveBeenLastCalledWith('/admin/workspaces/w%2F1/license',{method:'PUT',body:JSON.stringify(payload)})
+ vi.mocked(request).mockResolvedValueOnce({version:6,document:emptyDoc()} as never);expect(await api.saveDocument('p/1',emptyDoc(),5)).toBe(6)
+})

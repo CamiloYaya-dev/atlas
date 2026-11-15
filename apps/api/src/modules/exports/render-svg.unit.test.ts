@@ -30,3 +30,10 @@ test('SVG auxiliar rechaza coordenadas inválidas, tamaño y cantidad excesivos'
  d.nodes[0].x=10000;assert.throws(()=>renderDiagramSVG(doc,d,false),{statusCode:413})
  d.nodes[0].x=original;d.nodes=Array.from({length:261},()=>d.nodes[0]);assert.throws(()=>renderDiagramSVG(doc,d,false),{statusCode:413})
 })
+
+
+test('SVG de respaldo incluye marca de agua, flecha doble y omite nodos sin elemento',()=>{
+ const {doc,d}=sample();d.nodes.push({id:'orphan',elementId:'missing',x:300,y:200});d.edges=[{id:'both',source:'a',target:'b',direction:'both',sourceHandle:'right',targetHandle:'left'}]
+ const {svg}=renderDiagramSVG(doc,d,true);assert.match(svg,/ATLAS · USO NO COMERCIAL/);assert.match(svg,/marker-start="url\(#arrow\)" marker-end="url\(#arrow\)"/);assert.doesNotMatch(svg,/orphan/)
+})
+

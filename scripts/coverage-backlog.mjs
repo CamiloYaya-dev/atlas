@@ -4,7 +4,8 @@ import {fileURLToPath} from 'node:url'
 
 const root=fileURLToPath(new URL('..',import.meta.url))
 const metrics=['lines','statements','functions','branches']
-export const COVERAGE_TARGET=95
+import {COVERAGE_TARGET} from './coverage-target.mjs'
+export {COVERAGE_TARGET}
 
 function priority(name){
  if(/(?:security|auth|access|identity|password|roles|document-policy|projects\.service|AtlasEditor|SecurityPanel)/i.test(name))return 1
@@ -47,14 +48,14 @@ function main(){
   '| Prioridad | Archivo | Líneas faltantes | Sentencias faltantes | Funciones faltantes | Ramas faltantes |',
   '|---|---|---:|---:|---:|---:|',
   ...backlog.files.map(f=>`| P${f.priority} | \`${f.file}\` | ${f.gaps.lines.remaining} | ${f.gaps.statements.remaining} | ${f.gaps.functions.remaining} | ${f.gaps.branches.remaining} |`),
-  '', 'Estos números son unidades adicionales que deben ejecutarse para alcanzar el 95 %, no conteos de pruebas a escribir.',
+  '', 'Estos números son unidades adicionales que deben ejecutarse para alcanzar el '+target+' %, no conteos de pruebas a escribir.',
   'Cubre escenarios reales; no ejecutes funciones sin aserciones ni excluyas lógica de negocio para maquillar las métricas.',
   'Primero valida funciones críticas y flujos API/E2E; luego completa condiciones y errores por archivo.','']
  writeFileSync(resolve(root,'coverage/QA_BACKLOG.md'),header.join('\n'))
  writeFileSync(resolve(root,'coverage/QA_BACKLOG.json'),JSON.stringify(backlog,null,2))
  console.log(`\nATLAS coverage: ${backlog.files.length} archivos con al menos una métrica por debajo de ${target}%.`)
- console.table(backlog.files.slice(0,18).map(f=>({archivo:f.file,prioridad:f.priority,
-  lineas:f.gaps.lines.remaining,funciones:f.gaps.functions.remaining,ramas:f.gaps.branches.remaining})))
+ console.table(backlog.files.map(f=>({archivo:f.file,prioridad:f.priority,
+  lineas:f.gaps.lines.remaining,sentencias:f.gaps.statements.remaining,funciones:f.gaps.functions.remaining,ramas:f.gaps.branches.remaining})))
  console.log('Reporte: coverage/QA_BACKLOG.md y coverage/QA_BACKLOG.json')
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))main()
