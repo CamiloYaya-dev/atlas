@@ -102,6 +102,32 @@ for(const diagram of UML_DIAGRAMS)it(`[${diagram}] renderiza cada tipo del catá
  for(const kind of UML_ELEMENTS_BY_DIAGRAM[diagram]||[]){
   const {container,unmount}=render(<AtlasNode {...node(kind,diagram)}/>);
   const shape=container.querySelector(`.kind-${kind}`);expect(shape,`${diagram}/${kind}`).toBeTruthy();
-  expect(container.querySelectorAll('[data-port]').length,`${diagram}/${kind}: conectores`).toBeGreaterThan(0);unmount()
+  const ports=container.querySelectorAll('[data-port]')
+  // UC-11: un sujeto es un límite visual, no un extremo de relación.
+  if(diagram==='uml-usecase'&&kind==='uml-subject')expect(ports,`${diagram}/${kind}: sin conectores`).toHaveLength(0)
+  else if(diagram==='uml-usecase'&&(kind==='actor'||kind==='usecase')){
+   expect(ports,`${diagram}/${kind}: cuatro anclas cardinales`).toHaveLength(4)
+   expect([...ports].map(p=>p.getAttribute('data-side')).sort()).toEqual(['bottom','left','right','top'])
+  }else expect(ports.length,`${diagram}/${kind}: conectores`).toBeGreaterThan(0)
+  unmount()
  }
+})
+
+it('[uml-usecase] UC-11 límite nunca expone puertos, y las variantes rectangulares conservan anclas',()=>{
+ const {container,rerender}=render(<AtlasNode {...node('uml-subject','uml-usecase',{}, {canResize:true,childrenCount:2},true)}/>);
+ expect(container.querySelector('.uml-subject-title')?.textContent).toBe('Elemento QA')
+ expect(container.querySelectorAll('[data-port]')).toHaveLength(0)
+ expect(screen.getByRole('button',{name:'QA resize'})).toBeTruthy()
+ for(const kind of ['actor','usecase'] as const){
+  rerender(<AtlasNode {...node(kind,'uml-usecase',{useCaseDetail:{presentation:'rectangle'}})}/>);
+  expect(container.querySelector('.uc-rectangle')).toBeTruthy();expect(container.querySelectorAll('[data-port]')).toHaveLength(8)
+  if(kind==='usecase')expect(container.querySelector('.uc-ellipse-icon ellipse')).toBeTruthy()
+  else expect(container.querySelector('.uml-actor-figure')).toBeNull()
+ }
+})
+it('[uml-usecase] AUD-UC-003 actor ancla lateral sobre figura, óvalo y nota enlazada',()=>{
+ const {container,rerender}=render(<AtlasNode {...node('actor','uml-usecase',{useCaseDetail:{stereotype:'external'}})}/>);const port=container.querySelector('[data-port="left"]') as HTMLElement;expect(port.style.left).toContain('calc(');expect(port.style.top).not.toBe('50%');expect(screen.getByText('«external»')).toBeTruthy();expect(container.querySelectorAll('[data-port]')).toHaveLength(4)
+ rerender(<AtlasNode {...node('usecase','uml-usecase',{useCaseDetail:{extensionPoints:[{id:'p',name:'Antes'}]}})}/>);expect(container.querySelectorAll('[data-port]')).toHaveLength(4);expect(screen.getByText('Antes')).toBeTruthy()
+ rerender(<svg><AtlasUmlEdge {...edge({diagramType:'uml-usecase',relationKind:'extend',extensionNote:['condition: {ok}','extension points: Antes']},'nombre indebido')}/></svg>);expect(container.querySelector('[data-uml-note-anchor]')).toBeTruthy();expect(screen.getByText('«extend»')).toBeTruthy();expect(screen.queryByText('nombre indebido')).toBeNull();expect(container.querySelector('[data-uml-terminal="open-arrow"]')).toBeTruthy()
+ rerender(<svg><AtlasUmlEdge {...edge({diagramType:'uml-usecase',relationKind:'extend'})}/></svg>);expect(container.querySelector('[data-uml-note-anchor]')).toBeNull()
 })

@@ -23,8 +23,9 @@ const validMemberName=(v:string)=>!!v.trim()&&v.length<=160
 export default function UmlDetailsEditor({element,disabled,onChange,catalog={}}:Props){
  const uml=element.uml||{}
  const set=(patch:Partial<NonNullable<ModelElement['uml']>>)=>onChange({...uml,...patch})
- const classType=isClassType(element.type)||element.type==='uml-stereotype'
- const capabilities=classCapabilities(element.type),attrsAllowed=capabilities.attributes||element.type==='uml-stereotype',opsAllowed=capabilities.operations||element.type==='uml-stereotype'
+ const ucClassifier=element.type==='actor'||element.type==='usecase'
+ const classType=ucClassifier||isClassType(element.type)||element.type==='uml-stereotype'
+ const capabilities=classCapabilities(element.type),attrsAllowed=ucClassifier||capabilities.attributes||element.type==='uml-stereotype',opsAllowed=ucClassifier||capabilities.operations||element.type==='uml-stereotype'
  const choices=element.type==='uml-interface'?(['public'] as const):visibilities
  const types=Object.values(catalog).filter(e=>classTypeReferenceAllowed(e.type))
  const typeChoices=<><option value="">Tipo externo (texto)</option>{types.map(e=><option value={e.id} key={e.id}>{e.name}</option>)}</>

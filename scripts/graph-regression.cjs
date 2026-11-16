@@ -616,8 +616,8 @@ test('UML paquetes ofrece paquete, subpaquete, Model y Profile, manteniendo sem�
  const invalid=structuredClone(v);delete invalid.diagrams[0].nodes[1].parentNodeId
  assert.throws(()=>policy.ensureUniqueIds(invalid),/subpaquete debe estar contenido/)
 })
-test('UML casos de uso solamente presenta actor, caso de uso y sujeto; este encapsula casos',()=>{
- assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-usecase']],['actor','usecase','uml-subject'])
+test('UML casos de uso presenta catálogo contextual y sujeto; este encapsula casos',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-usecase']],['actor','usecase','uml-subject','uml-comment','uml-constraint','uml-class','uml-interface','uml-enumeration','uml-datatype','uml-primitive','uml-association-class','uml-signal','component'])
  assert.equal(uml.umlElementCreatable('uml-usecase','requirement'),false)
  assert.equal(uml.umlElementAllowed('uml-usecase','requirement'),true) // histórico
  assert.equal(umlContainers.umlContainerAllows('uml-usecase','uml-subject','usecase'),true)

@@ -3,7 +3,7 @@ import type {Project,ProjectDocument} from '@atlas/contracts'
 import {projectAccess,requirePermission} from '../../../security/roles'
 import {applyAuthorizedChange,ensureUniqueIds} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
-import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,adaptClassDocument} from '@atlas/contracts'
+import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,newUseCaseIssues,adaptClassDocument,adaptUseCaseDocument,repairStoredUseCaseAnnotations,retainUseCaseCatalog} from '@atlas/contracts'
 import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string,userId:string):Promise<Project[]>{const {rows}=await pool.query<Project>(`SELECT DISTINCT p.id,p.workspace_id,p.name,p.description FROM projects p
@@ -94,7 +94,7 @@ export class ProjectsRepository {
    if(collaborative&&ac.roleKey!=='owner'&&![...ac.permissions].some(permission=>
     permission==='field.configure'||/^(diagram|element|relation)\.(create|edit|delete|layout)\./.test(permission)))
     throw new DomainError('No tienes permisos de edición colaborativa',403)
-   let submitted=operation==='import'?adaptClassDocument(incoming):incoming
+   let submitted=operation==='import'?adaptUseCaseDocument(adaptClassDocument(incoming)):incoming
    if(version!==baseVersion){
     if(!collaborative||baseVersion>version){await c.query('ROLLBACK');return null}
     const storedBase=await c.query<{document:ProjectDocument}>(
@@ -109,7 +109,7 @@ export class ProjectsRepository {
    // Restore is an owner-authorized, immutable FULL snapshot. The normal projection
    // omits orphaned elements; passing a historical full snapshot through it
    // wrongly raises 'Intento de modificar un elemento oculto'.
-   const merged=operation==='restore' ? structuredClone(submitted) : applyAuthorizedChange(document,submitted,ac)
+   const merged=operation==='restore' ? repairStoredUseCaseAnnotations(adaptUseCaseDocument(structuredClone(submitted))) : applyAuthorizedChange(document,submitted,ac)
    if(operation==='restore'){if(!isProjectDocument(merged))throw new DomainError('Instantánea histórica inválida',400);ensureUniqueIds(merged)}
    const updated=await c.query<{version:number}>(`UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version`,[JSON.stringify(merged),userId,projectId])
    const next=updated.rows[0].version
@@ -147,7 +147,7 @@ export class ProjectsRepository {
     JOIN project_document_versions src ON src.project_id=b.project_id AND src.version=b.source_version
     WHERE b.id=$1 AND b.project_id=$2`,[branchId,projectId])
   const item=rows[0];if(!item)throw notFound()
-  const plan=previewProjectMerge(item.base,item.historical,item.current)
+  const plan=previewProjectMerge(repairStoredUseCaseAnnotations(adaptUseCaseDocument(item.base)),repairStoredUseCaseAnnotations(adaptUseCaseDocument(item.historical)),repairStoredUseCaseAnnotations(adaptUseCaseDocument(item.current)))
   return {id:item.id,sourceVersion:item.source_version,baseVersion:item.base_version,currentVersion:item.current_version,status:item.status,conflicts:plan.conflicts,
     historicalDiagrams:item.historical.diagrams.length,currentDiagrams:item.current.diagrams.length}
  }
@@ -163,12 +163,12 @@ export class ProjectsRepository {
    const snaps=await c.query<{version:number;document:ProjectDocument}>('SELECT version,document FROM project_document_versions WHERE project_id=$1 AND version=ANY($2::int[])',[projectId,[branch.base_version,branch.source_version]])
    const base=snaps.rows.find(x=>x.version===branch.base_version)?.document,historical=snaps.rows.find(x=>x.version===branch.source_version)?.document
    if(!base||!historical)throw notFound()
-   const merged=mode==='replace'?structuredClone(historical):previewProjectMerge(base,historical,row.document,choices)
+   const merged=mode==='replace'?structuredClone(historical):previewProjectMerge(repairStoredUseCaseAnnotations(adaptUseCaseDocument(base)),repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)),repairStoredUseCaseAnnotations(adaptUseCaseDocument(row.document)),choices)
    if(mode==='merge'&&'conflicts' in merged&&merged.conflicts.length)throw new DomainError(`Conflictos sin resolver: ${merged.conflicts.slice(0,5).join(', ')}`,409)
-   const resolved=mode==='replace'?historical:(merged as {document:ProjectDocument}).document
+   const resolved=mode==='replace'?repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)):retainUseCaseCatalog(row.document,(merged as {document:ProjectDocument}).document)
    if(!isProjectDocument(resolved))throw new DomainError('Documento inválido',400)
    ensureUniqueIds(resolved)
-   if(mode==='merge'){const issues=newClassIssues(row.document,resolved).filter(issue=>!newClassIssues(historical,resolved).every(other=>other.key!==issue.key||other.message!==issue.message||other.fingerprint!==issue.fingerprint));if(issues.length)throw new DomainError(issues[0].message,400)}
+   if(mode==='merge'){const uc=newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(row.document)),resolved).filter(issue=>newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)),resolved).some(other=>other.key===issue.key&&other.message===issue.message));if(uc.length)throw new DomainError(uc[0].message,400);const issues=newClassIssues(row.document,resolved).filter(issue=>!newClassIssues(historical,resolved).every(other=>other.key!==issue.key||other.message!==issue.message||other.fingerprint!==issue.fingerprint));if(issues.length)throw new DomainError(issues[0].message,400)}
    if(Buffer.byteLength(JSON.stringify(resolved),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande',413)
    const updated=await c.query<{version:number}>('UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version',[JSON.stringify(resolved),userId,projectId])
    const version=updated.rows[0].version

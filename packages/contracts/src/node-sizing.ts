@@ -25,7 +25,16 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
 export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pick<DiagramNode,'width'|'height'>,depth=0,hasChildren=false){
  let width=250,height=125
  const type=element.type
- if(diagram==='uml-activity'&&type==='uml-partition'){width=570;height=380}
+ if(diagram==='uml-usecase'&&['actor','usecase'].includes(type)){
+  const detail=element.useCaseDetail||{},rectangular=detail.presentation==='rectangle',actor=type==='actor'&&!rectangular,points=detail.extensionPoints||[],members=rectangular?(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0):0
+  width=actor?Math.max(130,Math.min(300,element.name.length*7+20)):Math.max(220,Math.min(560,element.name.length*8+55,...points.map(p=>(p.name.length+(p.description?.length||0))*7+65)))
+  const actualWidth=node?.width??width,characters=Math.max(12,Math.floor(actualWidth*(rectangular?.88:.65)/7)),rows=(value:string)=>value.split(/\n/).reduce((n,line)=>n+Math.max(1,Math.ceil(line.length/characters)),0)
+  const titleRows=rows(element.name)+(detail.stereotype?rows(detail.stereotype):0)+((detail.leaf??element.uml?.leaf)?1:0),pointRows=points.reduce((n,p)=>n+rows(p.name+(p.description?`: ${p.description}`:'')),0)
+  height=actor?Math.max(150,105+titleRows*16):Math.max(105,62+titleRows*17+(points.length?22+pointRows*20:0)+members*21)
+  // Explicit per-occurrence width is retained. Height never clips names/points.
+  return {width:Math.max(atlasNodeMinimum(diagram,type).width,actualWidth),height:Math.max(height,node?.height||0)}
+ }
+ else if(diagram==='uml-activity'&&type==='uml-partition'){width=570;height=380}
  else if(diagram==='uml-activity'&&type==='uml-action'){width=210;height=92}
  else if(diagram==='uml-activity'&&type==='uml-object-node'){width=205;height=96}
  else if(diagram==='uml-composite'&&['uml-class','uml-part','uml-port','uml-reference-role'].includes(type)){

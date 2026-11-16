@@ -1,25 +1,29 @@
+import {adaptUseCaseDocument,canonicalSubjectId,diagramCreationEnabled,newUseCaseIssues,replaceUseCaseRelation,repairStoredUseCaseAnnotations,isUseCaseCatalogType,useCaseElementIsReferenced,retainUseCaseCatalog} from '@atlas/contracts'
 import {classSelfAllowed} from '@atlas/contracts'
 /** Pure model operations used by the editor. Backend policy remains the authority. */
 import type {Diagram,DiagramEdge,DiagramType,FieldDefinition,ModelElement,ProjectDocument} from '@atlas/contracts'
-import {umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,atlasNodeSize,atlasNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment} from '@atlas/contracts'
+import {umlElementCreatable,umlElementReusable,umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,atlasNodeSize,atlasNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment} from '@atlas/contracts'
 
 function withDiagram(doc:ProjectDocument,id:string,mutate:(d:Diagram)=>Diagram):ProjectDocument{
  if(!doc.diagrams.some(d=>d.id===id))throw new Error('Diagrama no encontrado')
  return {...doc,diagrams:doc.diagrams.map(d=>d.id===id?mutate(d):d)}
 }
 export function createDiagram(doc:ProjectDocument,data:{id:string;name:string;type:DiagramType;date:string}):ProjectDocument{
+ if(!diagramCreationEnabled(data.type))throw new Error('Creación temporalmente deshabilitada')
  if(data.name.trim().length<2)throw new Error('Nombre de diagrama inválido')
  if(doc.diagrams.some(d=>d.id===data.id))throw new Error('ID de diagrama duplicado')
  return {...doc,diagrams:[...doc.diagrams,{id:data.id,name:data.name.trim(),type:data.type,description:'',createdAt:data.date,nodes:[],edges:[]}]}
 }
 export function editDiagram(doc:ProjectDocument,id:string,changes:Partial<Diagram>):ProjectDocument{
- return withDiagram(doc,id,d=>({...d,...changes,id:d.id}))
+ return withDiagram(doc,id,d=>{if(changes.type&&changes.type!==d.type&&!diagramCreationEnabled(changes.type))throw new Error('Creación temporalmente deshabilitada');return {...d,...changes,id:d.id}})
 }
 export function deleteDiagram(doc:ProjectDocument,id:string):ProjectDocument{
+ doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  if(!doc.diagrams.some(d=>d.id===id))throw new Error('Diagrama no encontrado')
- return {...doc,diagrams:doc.diagrams.filter(d=>d.id!==id),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined,childNodeId:undefined}:e]))}
+ return retainUseCaseCatalog(doc,{...doc,diagrams:doc.diagrams.filter(d=>d.id!==id),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined,childNodeId:undefined}:e]))})
 }
 export function addElementNode(doc:ProjectDocument,diagramId:string,element:ModelElement,node:{id:string;x:number;y:number}):ProjectDocument{
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-usecase'&&!umlElementCreatable('uml-usecase',element.type))throw new Error('Tipo no permitido para crear en casos de uso; reutiliza un elemento de contexto existente')
  if(doc.elements[element.id]&&JSON.stringify(doc.elements[element.id])!==JSON.stringify(element))throw new Error('ID de elemento duplicado')
  const update={...doc,elements:{...doc.elements,[element.id]:element}}
  return reuseElementNode(update,diagramId,element.id,node)
@@ -27,9 +31,16 @@ export function addElementNode(doc:ProjectDocument,diagramId:string,element:Mode
 export function reuseElementNode(doc:ProjectDocument,diagramId:string,elementId:string,node:{id:string;x:number;y:number}):ProjectDocument{
  if(!doc.elements[elementId])throw new Error('Elemento inexistente')
  return withDiagram(doc,diagramId,d=>{
+  if(d.type==='uml-usecase'&&!umlElementReusable(d.type,doc.elements[elementId].type))throw new Error('Tipo no permitido para reutilizar en casos de uso')
   if(d.nodes.some(n=>n.id===node.id))throw new Error('ID de nodo duplicado')
   return {...d,nodes:[...d.nodes,{id:node.id,elementId,x:node.x,y:node.y}]}
  })
+}
+/** Explicitly remove a detached native UC element, never a placed/referenced element. */
+export function deleteDetachedUseCaseElement(doc:ProjectDocument,id:string):ProjectDocument{
+ const e=doc.elements[id];if(!e||!isUseCaseCatalogType(e.type))throw Error('Elemento de catálogo no disponible')
+ if(useCaseElementIsReferenced(doc,id))throw Error('El elemento todavía tiene referencias en el modelo')
+ const elements={...doc.elements};delete elements[id];return {...doc,elements}
 }
 /** Remove view references atomically; keep shared catalog records. */
 function pruneRelations(d:Diagram,removedNodes:Set<string>,removedEdges:Set<string>){
@@ -39,13 +50,15 @@ function pruneRelations(d:Diagram,removedNodes:Set<string>,removedEdges:Set<stri
  const removedElements=new Set(d.nodes.filter(n=>removedNodes.has(n.id)&&!d.nodes.some(other=>other.elementId===n.elementId&&!removedNodes.has(other.id))).map(n=>n.elementId))
  return d.edges.filter(e=>!dropped.has(e.id)).map(e=>e.associationClassId&&removedElements.has(e.associationClassId)?{...e,associationClassId:undefined}:e)
 }
-export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId:string):ProjectDocument{
+export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId:string,nodeId?:string):ProjectDocument{
+ doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  const target=doc.diagrams.find(d=>d.id===diagramId)
- const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId).map(n=>n.id)||[])
+ const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId&&(!nodeId||n.id===nodeId)).map(n=>n.id)||[])
  const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,parentNodeId:undefined,...umlAbsolutePosition(d,n)}:n),edges:pruneRelations(d,removed,new Set())}))
- return {...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}
+ return retainUseCaseCatalog(doc,{...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))})
 }
 export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-usecase'){const d=doc.diagrams.find(d=>d.id===diagramId)!;if(d.edges.some(e=>e.id===edge.id))throw Error('ID de relación duplicado');if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw Error('Extremos inexistentes');const next=replaceUseCaseRelation(doc,diagramId,edge);const issues=newUseCaseIssues(doc,next);if(issues.length)throw Error(issues[0].message);return next}
  return withDiagram(doc,diagramId,d=>{
   if(edge.source===edge.target&&!(d.type==='uml-class'&&classSelfAllowed(edge.relationKind)))throw new Error('Autoconexión no permitida')
   if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw new Error('Extremos inexistentes')
@@ -63,6 +76,7 @@ export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,
  })
 }
 export function removeRelation(doc:ProjectDocument,diagramId:string,edgeId:string):ProjectDocument{
+ doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  return withDiagram(doc,diagramId,d=>{
   if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
   return {...d,edges:pruneRelations(d,new Set(),new Set([edgeId]))}
@@ -168,6 +182,7 @@ export function moveDiagramSelection(doc:ProjectDocument,diagramId:string,moves:
 /** Elimina elementos seleccionados únicamente de esta vista y retira sus aristas.
  * La ficha compartida subsiste y los hijos no seleccionados se desacoplan. */
 export function removeDiagramSelection(doc:ProjectDocument,diagramId:string,nodeIds:string[],edgeIds:string[]):ProjectDocument{
+ doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  const diagram=doc.diagrams.find(d=>d.id===diagramId)
  if(!diagram)throw new Error('Diagrama inexistente')
  const removed=new Set(nodeIds),removedEdges=new Set(edgeIds)
@@ -178,7 +193,7 @@ export function removeDiagramSelection(doc:ProjectDocument,diagramId:string,node
   nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,...umlAbsolutePosition(d,n),parentNodeId:undefined}:n),
   edges:pruneRelations(d,removed,removedEdges)
  }))
- return {...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}
+ return retainUseCaseCatalog(doc,{...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))})
 }
 
 /** Contención UML: subpaquetes, clasificadores compuestos y puertos encastrados.
@@ -186,7 +201,9 @@ export function removeDiagramSelection(doc:ProjectDocument,diagramId:string,node
  * Nombre histórico conservado para no romper las llamadas anteriores.
  */
 export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:string,parentNodeId?:string):ProjectDocument{
- return withDiagram(doc,diagramId,d=>{
+ const original=doc,view=doc.diagrams.find(d=>d.id===diagramId)
+ if(view?.type==='uml-usecase'&&parentNodeId){const n=view.nodes.find(n=>n.id===nodeId),p=view.nodes.find(n=>n.id===parentNodeId),e=n&&doc.elements[n.elementId];if(e?.type==='usecase'&&p&&doc.elements[p.elementId]?.type==='uml-subject'){const subject=canonicalSubjectId(doc,p.elementId),subjects=e.useCaseDetail?.subjectIds||[];if(!subjects.some(id=>canonicalSubjectId(doc,id)===subject))doc={...doc,elements:{...doc.elements,[e.id]:{...e,useCaseDetail:{...e.useCaseDetail,subjectIds:[...subjects,subject]}}}}}}
+ const updated=withDiagram(doc,diagramId,d=>{
   const node=d.nodes.find(n=>n.id===nodeId)
   if(!node)throw new Error('Caja no encontrada')
   if(parentNodeId===nodeId)throw new Error('Un elemento no puede contenerse a sí mismo')
@@ -203,11 +220,12 @@ export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:strin
     const childSize=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),false)
     ;({x,y}=sequenceSnapChild(doc.elements[parent!.elementId].type,element.type,size,childSize,y))
    }else if(d.type==='uml-composite'&&element.type==='uml-port')({x,y}=umlSnapPort(x,y,size.width,size.height))
-   else{x=Math.max(0,Math.min(size.width-60,x));y=Math.max(0,Math.min(size.height-40,y))}
+   else if(d.type==='uml-usecase'){const child=atlasNodeSize(d.type,element,node);if(child.width>size.width||child.height>size.height)throw Error('El sujeto no tiene espacio para el caso');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}else{x=Math.max(0,Math.min(size.width-60,x));y=Math.max(0,Math.min(size.height-40,y))}
   }
   const changed={...node,parentNodeId:parent?.id,x:Math.round(x),y:Math.round(y)}
   const candidate={...d,nodes:d.nodes.map(n=>n.id===nodeId?changed:n)}
   if(!umlAncestryValid(candidate,changed,doc.elements))throw new Error('La jerarquía UML crearía un ciclo')
   return candidate
  })
+ if(view?.type==='uml-usecase'){const issues=newUseCaseIssues(original,updated);if(issues.length)throw Error(issues[0].message)}return updated
 }

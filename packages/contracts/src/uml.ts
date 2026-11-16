@@ -1,3 +1,4 @@
+import {USECASE_CREATION_TYPES,USECASE_TYPES,USECASE_RELATIONS,useCaseEndpointValid} from './uml-usecase-catalog'
 import {CLASS_TYPES,CLASS_RELATIONS} from './uml-class-catalog'
 import {classEndpointValid} from './uml-class-policy'
 /** Catálogo orientado a UML 2.5.1, para el editor visual de ATLAS.
@@ -18,7 +19,7 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-deployment':['uml-node','uml-device','uml-execution','uml-artifact'],
  'uml-package':['uml-package','uml-subpackage','uml-model','uml-profile'],
  'uml-profile':['uml-profile','uml-stereotype','uml-metaclass','uml-package'],
- 'uml-usecase':['actor','usecase','uml-subject'],
+ 'uml-usecase':USECASE_TYPES,
  'uml-activity':['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'],
  'uml-state':['uml-start','uml-state','uml-end','uml-region','uml-decision','uml-fork','uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point','uml-terminate'],
  'uml-sequence':['uml-lifeline','uml-frame','uml-interaction','uml-activation','uml-destruction'],
@@ -34,7 +35,7 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
  'uml-deployment':['communication-path','deployment'],
  'uml-package':['dependency','import','merge'],
  'uml-profile':['extension','apply','reference','generalization'],
- 'uml-usecase':['association','include','extend','generalization'],
+ 'uml-usecase':USECASE_RELATIONS,
  'uml-activity':['control-flow','object-flow'],
  'uml-state':['transition','trigger','completion','generalization'],
  'uml-sequence':['message','reply','async-message','create','destroy'],
@@ -60,9 +61,12 @@ export const UML_LEGACY_RELATIONS:Partial<Record<DiagramType,readonly string[]>>
  'uml-profile':['stereotype-application','dependency'],
  'uml-activity':['fork','join','exception']
 }
-export const umlElementCreatable=(diagram:DiagramType,element:ElementType):boolean=>!UML_ELEMENTS_BY_DIAGRAM[diagram]||UML_ELEMENTS_BY_DIAGRAM[diagram]!.includes(element)
+/** Catalog for an occurrence, including reusable context but excluding read-only legacy. */
+export const umlElementReusable=(diagram:DiagramType,element:ElementType):boolean=>!UML_ELEMENTS_BY_DIAGRAM[diagram]||UML_ELEMENTS_BY_DIAGRAM[diagram]!.includes(element)
+/** Native element creation is narrower than representation in use-case diagrams. */
+export const umlElementCreatable=(diagram:DiagramType,element:ElementType):boolean=>diagram==='uml-usecase'?USECASE_CREATION_TYPES.includes(element):umlElementReusable(diagram,element)
 export const umlRelationCreatable=(diagram:DiagramType,relation:string):boolean=>!UML_RELATIONS_BY_DIAGRAM[diagram]||UML_RELATIONS_BY_DIAGRAM[diagram]!.includes(relation)
-export const umlElementAllowed=(diagram:DiagramType,element:ElementType):boolean=>umlElementCreatable(diagram,element)||!!UML_LEGACY_ELEMENTS[diagram]?.includes(element)
+export const umlElementAllowed=(diagram:DiagramType,element:ElementType):boolean=>umlElementReusable(diagram,element)||!!UML_LEGACY_ELEMENTS[diagram]?.includes(element)
 export const umlRelationAllowed=(diagram:DiagramType,relation:string):boolean=>umlRelationCreatable(diagram,relation)||!!UML_LEGACY_RELATIONS[diagram]?.includes(relation)
 /** Etiquetas formativas; el valor persistido sigue siendo la clave UML estable. */
 export const UML_RELATION_LABELS:Record<string,string>={
@@ -126,12 +130,7 @@ export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:
   if(kind==='generalization')return source==='uml-stereotype'&&target==='uml-stereotype'
   return false
  }
- if(diagram==='uml-usecase'){
-  if(kind==='association')return (source==='actor'&&target==='usecase')||(source==='usecase'&&target==='actor')
-  if(kind==='include'||kind==='extend')return source==='usecase'&&target==='usecase'
-  if(kind==='generalization')return source===target&&(source==='actor'||source==='usecase')
-  return false
- }
+ if(diagram==='uml-usecase')return useCaseEndpointValid(kind,source,target)
 
  if(diagram==='uml-sequence'){
   const participant=(t:ElementType)=>['actor','uml-lifeline','uml-activation'].includes(t)
@@ -166,3 +165,8 @@ export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:
  }
  return true
 }
+
+/** Feature availability only: existing views and imports remain readable. */
+export const ACTIVE_UML_CREATION_TYPES:readonly DiagramType[]=['uml-class','uml-usecase','uml-activity','uml-sequence','uml-component','uml-deployment']
+export const diagramCreationEnabled=(type:DiagramType)=>!type.startsWith('uml-')||ACTIVE_UML_CREATION_TYPES.includes(type)
+export const DIAGRAM_CREATION_TYPES=UML_DIAGRAMS.filter(diagramCreationEnabled)

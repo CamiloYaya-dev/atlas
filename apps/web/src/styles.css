@@ -522,3 +522,24 @@
 .uml-template-parameters{position:absolute;top:-9px;right:-9px;border:1px dashed #68798b;padding:3px 8px;background:white;font-size:11px}
 .uml-diagram-uml-class.kind-uml-comment,.uml-diagram-uml-class.kind-uml-constraint{border-radius:0!important;background:white!important;box-shadow:none!important}
 .uml-note-content{padding:20px 8px 8px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* UC: symbol remains legible within its actual occurrence, no generic card chrome. */
+.uml-diagram-uml-usecase.kind-usecase,.uml-diagram-uml-usecase.kind-actor{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;box-sizing:border-box}
+.uml-diagram-uml-usecase.kind-usecase{border-radius:50%;padding:13px 24px}
+.uml-diagram-uml-usecase.uc-rectangle{border:1.5px solid #647ca4!important;border-radius:0!important;background:white!important;padding:14px!important;box-shadow:none!important}
+.uml-diagram-uml-usecase .uc-symbol-content{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:100%;overflow-wrap:anywhere;font-size:13px;gap:3px}
+.uc-extension-points{border-top:1px solid #97aac2;padding:5px;font-size:11px;width:100%}.uc-extension-points b{display:block;font-size:10px}.uc-ellipse-icon{position:absolute;right:7px;top:7px;width:24px;height:15px}
+.uml-diagram-uml-usecase .uml-subject-title{text-align:left}.uc-extension-note{position:absolute;pointer-events:none;background:#fffdf4;border:1px solid #9eacc1;padding:6px 9px;color:#506986;font-size:11px;max-width:260px;white-space:pre-wrap;overflow-wrap:anywhere}.uc-detail-fields{border:0;padding:4px 0;display:grid;gap:8px;min-width:0}.uc-detail-fields label{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.uc-detail-fields label>textarea,.uc-detail-fields label>select,.uc-detail-fields label>input:not([type=checkbox]){width:100%;min-width:0;box-sizing:border-box}.uc-point{display:flex;flex-direction:column;gap:6px}
+
+/* Use-case geometry: scoped; four cardinal handles on oval, actor anchors on glyph. */
+.uml-diagram-uml-usecase.kind-usecase:not(.uc-rectangle){border-radius:50%;padding:18px 14%;overflow:visible}
+.uml-diagram-uml-usecase.kind-actor:not(.uc-rectangle){position:relative;justify-content:flex-start;padding:98px 5px 8px;overflow:visible}
+.uml-diagram-uml-usecase.kind-actor:not(.uc-rectangle)>.uml-actor-figure{position:absolute;left:50%;transform:translateX(-50%);margin:0}
+.uml-diagram-uml-usecase .uc-symbol-content{width:100%;min-width:0;overflow-wrap:anywhere}
+.uml-diagram-uml-usecase .uc-stereotype,.uml-subject-title>small{display:block;color:#75849a;font-weight:400;font-size:11px}
+.uml-diagram-uml-usecase:not(.selected)>.node-handle{opacity:0;transition:opacity .12s}
+.react-flow__node-atlas:hover .uml-diagram-uml-usecase>.node-handle,.uml-diagram-uml-usecase.selected>.node-handle{opacity:1}
+.uc-extension-note{max-width:280px}
+
+/* Explicit catalog deletion is distinct from reusing an occurrence. */
+.existing-list .uc-catalog-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}.existing-list .uc-catalog-row>button:first-child{flex:1;min-width:0;border-bottom:0}.existing-list .uc-catalog-row>.uc-catalog-delete{width:40px;flex:none;justify-content:center;border-bottom:0;color:#b64b4b;padding:8px}.existing-list .uc-catalog-row>.uc-catalog-delete:hover{background:#fff0f0}

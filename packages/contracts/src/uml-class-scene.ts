@@ -1,3 +1,4 @@
+import {useCaseExtensionNote} from './uml-usecase-policy'
 /** Standalone SVG scene for authorized class snapshots; no editor handles or HTML. */
 import type {Diagram,ProjectDocument} from './index'
 import {atlasNodeSize} from './node-sizing'
@@ -5,11 +6,12 @@ import {umlAbsolutePosition,umlNodeDepth} from './uml-containers'
 import {umlTypeIdentifier,classEndProperties} from './uml-class-policy'
 import {umlAttributeText,umlOperationTextResolved} from './uml-structure'
 import {umlDisplayLabel,umlRelationNotation} from './uml-notation'
-import {classPort,classFacingPort,classPortAngle,classRelationRoute,classEndTerminal,classEndLabel,classTemplateFormalText} from './uml-class-geometry'
+import {classPort,classFacingPort,classPortAngle,classRelationRoute,classEndTerminal,classEndLabel,classTemplateFormalText,useCasePort,UC_ACTOR_GLYPH} from './uml-class-geometry'
 import {parallelOffsets} from './parallel-edges'
 import type {UmlTerminal} from './uml-notation'
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))
 type Point={x:number;y:number}
+const wrapText=(value:string,limit:number)=>value.split(/\r?\n/).flatMap(line=>{const rows:string[]=[];let rest=line;while(rest.length>limit){const i=rest.lastIndexOf(' ',limit),cut=i>0?i:limit;rows.push(rest.slice(0,cut));rest=rest.slice(cut).trimStart()}rows.push(rest);return rows})
 const text=(x:number,y:number,value:unknown,extra='')=>`<text x="${x}" y="${y}" font-size="12" fill="#34445a" ${extra}>${esc(value)}</text>`
 const line=(a:Point,b:Point,extra='')=>`<path d="M ${a.x} ${a.y} L ${b.x} ${b.y}" fill="none" stroke="#506986" stroke-width="1.5" ${extra}/>`
 function terminal(kind:UmlTerminal,p:ReturnType<typeof classPort>):string{
@@ -19,9 +21,10 @@ function terminal(kind:UmlTerminal,p:ReturnType<typeof classPort>):string{
 }
 export function classSvgScene(doc:ProjectDocument,d:Diagram){
  const records=d.nodes.flatMap(node=>{const e=doc.elements[node.elementId];if(!e)return [];const p=umlAbsolutePosition(d,node),size=atlasNodeSize(d.type,e,node,umlNodeDepth(d,node),d.nodes.some(x=>x.parentNodeId===node.id));return [{...p,...size,node,e}]})
+ const uc=d.type==='uml-usecase',port=(r:typeof records[number],handle:string|undefined,source:boolean)=>uc?useCasePort(r,r.e,handle,source):classPort(r,handle,source)
  const byId=new Map(records.map(r=>[r.node.id,r])),names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name]))
  const edges:string[]=[],offsets=parallelOffsets(d.edges),routes=new Map<string,{a:ReturnType<typeof classPort>;b:ReturnType<typeof classPort>;route:ReturnType<typeof classRelationRoute>}>(),extents:Point[]=[]
- for(const e of d.edges){const from=byId.get(e.source),to=byId.get(e.target);if(!from||!to)continue;const a=classPort(from,classEndProperties(e,'source').handle,true),b=classPort(to,classEndProperties(e,'target').handle,false),route=classRelationRoute({sourceX:a.x,sourceY:a.y,targetX:b.x,targetY:b.y,sourcePosition:a.side,targetPosition:b.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||'smoothstep'},e.source===e.target);routes.set(e.id,{a,b,route})}
+ for(const e of d.edges){const from=byId.get(e.source),to=byId.get(e.target);if(!from||!to)continue;const a=port(from,classEndProperties(e,'source').handle,true),b=port(to,classEndProperties(e,'target').handle,false),route=classRelationRoute({sourceX:a.x,sourceY:a.y,targetX:b.x,targetY:b.y,sourcePosition:a.side,targetPosition:b.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||(uc?'straight':'smoothstep')},e.source===e.target);routes.set(e.id,{a,b,route})}
  for(const e of d.edges){const p=routes.get(e.id);if(!p)continue;const source=classEndProperties(e,'source'),target=classEndProperties(e,'target'),semantic={...e,sourceNavigability:source.navigability,targetNavigability:target.navigability};const {a,b,route}=p,hub={x:route.labelX,y:route.labelY},n=umlRelationNotation(e.relationKind||'association'),dash=n.stroke==='dashed'?'stroke-dasharray="7 5"':n.stroke==='dotted'?'stroke-dasharray="2 5"':''
   const anchored=e.annotationTargetEdgeId?routes.get(e.annotationTargetEdgeId)?.route:undefined,annotation=anchored?{x:anchored.labelX,y:anchored.labelY}:undefined,nary=!!e.associationEnds?.length
   const path=annotation?`M ${a.x} ${a.y} L ${annotation.x} ${annotation.y}`:nary?`M ${a.x} ${a.y} L ${hub.x} ${hub.y} L ${b.x} ${b.y}`:route.path
@@ -31,11 +34,26 @@ export function classSvgScene(doc:ProjectDocument,d:Diagram){
   if(nary){edges.push(`<polygon points="${hub.x},${hub.y-10} ${hub.x+14},${hub.y} ${hub.x},${hub.y+10} ${hub.x-14},${hub.y}" fill="white" stroke="#506986"/>`);for(const extra of e.associationEnds!.slice(2)){const record=byId.get(extra.nodeId);if(record){const q=extra.handle?classPort(record,extra.handle,false):classFacingPort(record,hub);edges.push(line(hub,q),terminal(extra.navigability==='navigable'?'open-arrow':extra.navigability==='non-navigable'?'cross':'none',q),text(q.x+8,q.y-8,[extra.role,extra.multiplicity].filter(Boolean).join(' ')))}}}
   const cls=records.find(r=>r.e.id===e.associationClassId);if(cls)edges.push(line(hub,classFacingPort(cls,hub),'stroke-dasharray="7 5"'))
   const label=umlDisplayLabel(d.type,e,doc,d);if(label)edges.push(text(hub.x,hub.y-12,label,'text-anchor="middle"'))
+  if(uc){const note=useCaseExtensionNote(doc,d,e).flatMap(s=>wrapText(s,40));if(note.length){const width=Math.max(125,...note.map(s=>s.length*6.5+18)),height=note.length*18+12;edges.push(line(hub,{x:hub.x,y:hub.y+15},'stroke-dasharray="4 3" data-uml-note-anchor="true"'),`<rect x="${hub.x-width/2}" y="${hub.y+15}" width="${width}" height="${height}" fill="#fffdf4" stroke="#9eacc1"/>`,...note.map((s,i)=>text(hub.x,hub.y+30+i*18,s,'text-anchor="middle"')));extents.push({x:hub.x-width/2,y:hub.y+14},{x:hub.x+width/2,y:hub.y+14+height})}}
   for(const [q,label] of [[a,[source.role,source.multiplicity].filter(Boolean).join(' ')],[b,[target.role,target.multiplicity].filter(Boolean).join(' ')]] as const)if(label){const pos=classEndLabel(q,q.side);edges.push(text(pos.x,pos.y,label,'text-anchor="middle"'))}
  }
  const nodes=records.sort((a,b)=>umlNodeDepth(d,a.node)-umlNodeDepth(d,b.node)).map(r=>{
   const {e,x,y,width,height}=r,u=e.uml||{},mid=x+width/2
   const outline=`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="white" stroke="#506986" stroke-width="1.5"/>`
+  if(uc&&e.type==='uml-subject')return `<g><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#f8faff" stroke="#506986"/>${text(x+10,y+16,'«Subject»','opacity=".7"')}${text(x+10,y+34,e.name,'font-weight="bold"')}${e.useCaseDetail?.stereotype?text(x+10,y+50,`«${e.useCaseDetail.stereotype}»`):''}</g>`
+  if(uc&&['actor','usecase'].includes(e.type)){
+   const detail=e.useCaseDetail||{},rectangle=detail.presentation==='rectangle',abstract=detail.abstract??u.abstract,leaf=detail.leaf??u.leaf,points=detail.extensionPoints||[],items:string[]=[],characters=Math.max(12,Math.floor(width*(rectangle?.88:.65)/7)),titles=wrapText(e.name,characters),stereo=detail.stereotype?`«${detail.stereotype}»`:''
+   if(e.type==='actor'&&!rectangle){const g=UC_ACTOR_GLYPH;items.push(`<svg x="${mid-g.width/2}" y="${y+g.top}" width="${g.width}" height="${g.height}" viewBox="0 0 40 55" stroke="#506986" stroke-width="2.5" fill="none"><circle cx="20" cy="8" r="6"/><path d="M20 14 V34 M6 24 H34 M20 34 L8 51 M20 34 L32 51"/></svg>`,text(mid,y+17,'«Actor»','text-anchor="middle" opacity=".7"'));let row=y+107;if(stereo){items.push(text(mid,row,stereo,'text-anchor="middle"'));row+=15}for(const title of titles){items.push(text(mid,row,title,`text-anchor="middle" ${abstract?'font-style="italic"':''}`));row+=15}if(leaf)items.push(text(mid,row,'{leaf}','text-anchor="middle"'));return `<g>${items.join('')}</g>`}
+   items.push(rectangle?outline:`<ellipse cx="${mid}" cy="${y+height/2}" rx="${width/2}" ry="${height/2}" fill="white" stroke="#506986" stroke-width="1.5"/>`)
+   if(rectangle&&e.type==='usecase')items.push(`<ellipse cx="${x+width-23}" cy="${y+15}" rx="13" ry="8" fill="none" stroke="#506986"/>`)
+   const pointRows=points.flatMap(p=>wrapText(p.name+(p.description?`: ${p.description}`:''),characters)),attrs=rectangle?(u.attributes||[]).flatMap(a=>wrapText(umlAttributeText(a,true,names),characters)):[],ops=rectangle?(u.operations||[]).flatMap(o=>wrapText(umlOperationTextResolved(o,names),characters)):[]
+   const count=titles.length+(stereo?1:0)+(leaf?1:0)+(pointRows.length?pointRows.length+2:0)+(attrs.length?attrs.length+1:0)+(ops.length?ops.length+1:0)
+   let row=y+(rectangle?38:Math.max(28,(height-count*16)/2+12));items.push(text(mid,y+17,e.type==='actor'?'«actor»':'«Use Case»','text-anchor="middle" opacity=".7"'))
+   if(stereo){items.push(text(mid,row,stereo,'text-anchor="middle"'));row+=16}for(const title of titles){items.push(text(mid,row,title,`text-anchor="middle" font-weight="bold" ${abstract?'font-style="italic"':''}`));row+=16}if(leaf){items.push(text(mid,row,'{leaf}','text-anchor="middle"'));row+=16}
+   if(pointRows.length){items.push(line({x:x+width*.18,y:row-8},{x:x+width*.82,y:row-8}),text(mid,row+7,'extension points','text-anchor="middle" font-weight="bold"'));row+=23;for(const value of pointRows){items.push(text(mid,row,value,'text-anchor="middle"'));row+=16}}
+   for(const group of [attrs,ops])if(group.length){items.push(line({x,y:row-8},{x:x+width,y:row-8}));for(const value of group){items.push(text(x+12,row+7,value));row+=16}row+=7}
+   return `<g>${items.join('')}</g>`
+  }
   if(['uml-package','uml-model'].includes(e.type)){return `<g>${outline}<path d="M ${x} ${y} v -22 h ${Math.min(150,width)} v 22" fill="white" stroke="#506986"/>${text(x+6,y-6,umlTypeIdentifier(e))}${text(mid,y+20,e.name,'text-anchor="middle" font-weight="bold"')}</g>`}
   if(['uml-comment','uml-constraint'].includes(e.type)){const fold=17,body=e.type==='uml-constraint'?`{${u.expression||e.name}}`:u.note||e.name;return `<g><path d="M ${x} ${y} H ${x+width-fold} L ${x+width} ${y+fold} V ${y+height} H ${x} Z M ${x+width-fold} ${y} V ${y+fold} H ${x+width}" fill="white" stroke="#506986"/>${text(mid,y+18,umlTypeIdentifier(e),'text-anchor="middle" opacity=".7"')}${text(mid,y+39,body,'text-anchor="middle"')}</g>`}
   let top=y+57;const items=[outline,text(mid,y+17,umlTypeIdentifier(e),'text-anchor="middle" opacity=".7"'),text(mid,y+36,e.name,`text-anchor="middle" font-weight="bold" ${u.abstract?'font-style="italic"':''}`)]
@@ -46,7 +64,7 @@ export function classSvgScene(doc:ProjectDocument,d:Diagram){
   return `<g>${items.join('')}</g>`
  })
  // containers paint behind edges and children; classifier interiors paint above edge lines.
- const containers=records.filter(r=>['uml-package','uml-model'].includes(r.e.type))
+ const containers=records.filter(r=>['uml-package','uml-model','uml-subject'].includes(r.e.type))
  const backgrounds=nodes.filter((_,i)=>containers.some(r=>r.node.id===records[i].node.id)),foregrounds=nodes.filter((_,i)=>!containers.some(r=>r.node.id===records[i].node.id))
  const minX=Math.min(0,...records.map(r=>r.x),...extents.map(p=>p.x))-25,minY=Math.min(0,...records.map(r=>r.y),...extents.map(p=>p.y))-35
  const maxX=Math.max(280,...records.map(r=>r.x+r.width),...extents.map(p=>p.x))+25,maxY=Math.max(150,...records.map(r=>r.y+r.height),...extents.map(p=>p.y))+25

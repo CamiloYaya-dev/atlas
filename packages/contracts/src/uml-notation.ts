@@ -105,7 +105,7 @@ export function validUmlEdgeNotation(diagram:DiagramType,edge:DiagramEdge):boole
 
 /** Reserved words are derived even on historical snapshots. */
 export function umlEdgeLabel(diagram:DiagramType,edge:DiagramEdge):string{
- return isUmlDiagram(diagram)?umlRelationNotation(edge.relationKind||'').label||(['generalization','realization','specification-realization','containment','annotation'].includes(edge.relationKind||'')&&diagram==='uml-class'?'':edge.label||''):edge.label||''
+ return isUmlDiagram(diagram)?umlRelationNotation(edge.relationKind||'').label||(['generalization','realization','specification-realization','containment','annotation'].includes(edge.relationKind||'')&&['uml-class','uml-usecase'].includes(diagram)?'':edge.label||''):edge.label||''
 }
 /** Derived display label, never stored as a business name. */
 export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:ProjectDocument,view?:Diagram):string{
@@ -116,4 +116,4 @@ export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:Project
  const node=view?.nodes.find(n=>n.id===edge.target),formals=node&&doc.elements[node.elementId]?.uml?.templateParameters
  return `${label} <${edge.templateBindings.map(b=>`${formals?.find(p=>p.id===b.parameterId)?.name||'?'} → ${doc.elements[b.elementId]?.name||'Tipo no disponible'}`).join(', ')}>`
 }
-export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label||diagram==='uml-class'&&['generalization','realization','specification-realization','containment','annotation'].includes(kind)}
+export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label||['uml-class','uml-usecase'].includes(diagram)&&['generalization','realization','specification-realization','containment','annotation'].includes(kind)}

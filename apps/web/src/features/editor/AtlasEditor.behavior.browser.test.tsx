@@ -1724,3 +1724,51 @@ it('AUD-CL-UX UML clases no presenta perspectivas ni diagnóstico; C1 conserva s
  const {doc}=qa10View('uml-class',[{id:'qa10-source',type:'uml-association-class',name:'Asociación borrador QA'}]);const graph=await qa10Open(doc);expect(screen.queryByRole('button',{name:'Funcional'})).toBeNull();expect(screen.queryByRole('button',{name:'Mixta'})).toBeNull();expect(screen.queryByRole('button',{name:'Técnica'})).toBeNull();expect(screen.queryByText(/Diagnóstico UML/)).toBeNull();fireEvent.click(await graph.findByRole('button',{name:'Asociación borrador QA'}));expect(screen.getByText('Borrador · Asociación pendiente de vincular')).toBeTruthy();fireEvent.click(await within(document.querySelector('.diagram-nav') as HTMLElement).findByRole('button',{name:name=>name.includes(doc.diagrams[0].name)}));await screen.findByRole('heading',{name:doc.diagrams[0].name});expect(screen.getByRole('button',{name:'Funcional'})).toBeTruthy();expect(screen.getByRole('button',{name:'Mixta'})).toBeTruthy();expect(screen.getByRole('button',{name:'Técnica'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('AUD-CL-UX UML actividad no muestra perspectivas incluso tras navegar desde C1',async()=>{const {doc}=qa10View('uml-activity',[{id:'qa10-source',type:'uml-action',name:'Acción QA'}]);vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Funcional'}));fireEvent.click(await screen.findByRole('button',{name:/Vista específica QA10/}));await screen.findByRole('heading',{name:'Vista específica QA10'});expect(screen.queryByRole('button',{name:'Funcional'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()})
+
+it('QA10 crear caso de uso: UC-01 inspector funcional y estructural conserva identidad al cambiar selección sin claves duplicadas',async()=>{
+ const {doc}=qa10View('uml-usecase',[{id:'qa10-parent',type:'uml-subject',name:'Sujeto QA UC'},{id:'qa10-source',type:'usecase',name:'Caso QA UC'},{id:'qa10-target',type:'actor',name:'Actor QA UC'}]);
+ const errors=vi.spyOn(console,'error');
+ try{
+  const graph=await qa10Open(doc);
+  for(const name of ['Sujeto QA UC','Caso QA UC','Actor QA UC','Caso QA UC']){
+   fireEvent.click(await graph.findByRole('button',{name}));
+   expect(await screen.findByRole('region',{name:'Detalle funcional UML'})).toBeTruthy();
+   if(name==='Sujeto QA UC')expect(screen.queryByRole('region',{name:'Estructura UML de clase'})).toBeNull();
+   else expect(screen.getByRole('region',{name:'Estructura UML de clase'})).toBeTruthy();
+  }
+  expect(errors.mock.calls.filter(call=>call.some(value=>typeof value==='string'&&/same key|unique.*key/i.test(value)))).toEqual([]);
+  expect(projects.saveDocument).not.toHaveBeenCalled();
+ }finally{errors.mockRestore()}
+},15000)
+
+it('UC catálogo de casos de uso: crear solo tipos nativos y reutilizar contexto existente',async()=>{
+ const {doc,diagram}=qa10View('uml-usecase',[]);
+ for(const [id,name,type] of [['uc-context-class','Clase contexto QA','uml-class'],['uc-context-ac','Clase asociación contexto QA','uml-association-class'],['uc-unrelated','Base no compatible QA','database']] as const){doc.elements[id]={...createElement(name,type),id}}
+ await qa10Open(doc);fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));
+ const modal=within(await screen.findByRole('dialog',{name:'Agregar caja al diagrama'}));
+ const values=modal.getAllByRole('option').map(o=>(o as HTMLOptionElement).value).sort();
+ expect(values).toEqual(['actor','uml-comment','uml-constraint','uml-subject','usecase'].sort());
+ fireEvent.click(modal.getByRole('button',{name:'Reutilizar existente'}));
+ expect(modal.queryByRole('button',{name:/Base no compatible QA/})).toBeNull();
+ expect(modal.getByRole('button',{name:/Clase asociación contexto QA/})).toBeTruthy();
+ fireEvent.click(modal.getByRole('button',{name:/Clase contexto QA/}));
+ const saved=await qa10Saved();
+ expect(saved.elements).toEqual(doc.elements);
+ expect(saved.diagrams.find(d=>d.id===diagram.id)?.nodes.some(n=>n.elementId==='uc-context-class')).toBe(true);
+},15000)
+it('UC catálogo casos de uso: clase de asociación permanece creable en UML clases',async()=>{
+ const {doc}=qa10View('uml-class',[]);await qa10Open(doc);
+ fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));
+ const modal=within(await screen.findByRole('dialog',{name:'Agregar caja al diagrama'}));
+ expect(modal.getAllByRole('option').map(o=>(o as HTMLOptionElement).value)).toContain('uml-association-class');
+ expect(modal.getAllByRole('option').map(o=>(o as HTMLOptionElement).value)).not.toContain('usecase');
+ fireEvent.click(modal.getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled();
+})
+it('UC catálogo AUD-UC-005 ficha aislada recargada reutiliza elementId con nueva ocurrencia',async()=>{
+ const {doc,diagram}=qa10View('uml-usecase',[]);doc.elements['isolated-case']={...createElement('Caso aislado AUD-UC-005','usecase'),id:'isolated-case',useCaseCatalog:true};await qa10Open(doc);
+ fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));const modal=within(await screen.findByRole('dialog',{name:'Agregar caja al diagrama'}));fireEvent.click(modal.getByRole('button',{name:'Reutilizar existente'}));fireEvent.change(modal.getByLabelText('Buscar elemento del proyecto'),{target:{value:'Caso aislado AUD-UC-005'}});fireEvent.click(modal.getByRole('button',{name:/^Caso aislado AUD-UC-005/}));const saved=await qa10Saved();expect(saved.elements['isolated-case']).toEqual(doc.elements['isolated-case']);expect(saved.diagrams.find(d=>d.id===diagram.id)?.nodes.filter(n=>n.elementId==='isolated-case')).toHaveLength(1);expect(saved.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.elementId==='isolated-case')?.id).not.toBe('isolated-case');
+},15000)
+it('UC catálogo AUD-UC-005 borrar ficha es acción explícita con confirmación; cancelar no guarda',async()=>{
+ const {doc,diagram}=qa10View('uml-usecase',[]);doc.elements['isolated-case']={...createElement('Caso aislado para eliminar','usecase'),id:'isolated-case',useCaseCatalog:true};await qa10Open(doc);
+ fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));const modal=within(await screen.findByRole('dialog',{name:'Agregar caja al diagrama'}));fireEvent.click(modal.getByRole('button',{name:'Reutilizar existente'}));fireEvent.click(modal.getByRole('button',{name:'Eliminar del modelo: Caso aislado para eliminar'}));const confirmation=within(await screen.findByRole('dialog',{name:'Eliminar elemento del modelo'}));fireEvent.click(confirmation.getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(modal.getByRole('button',{name:'Eliminar del modelo: Caso aislado para eliminar'}));fireEvent.click(within(await screen.findByRole('dialog',{name:'Eliminar elemento del modelo'})).getByRole('button',{name:'Eliminar del modelo'}));const saved=await qa10Saved();expect(saved.elements['isolated-case']).toBeUndefined();expect(saved.diagrams.find(d=>d.id===diagram.id)).toEqual(diagram);
+},15000)
