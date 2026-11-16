@@ -1,7 +1,8 @@
+import {activityNodeLabel,activitySymbol,activityPorts} from '@atlas/contracts'
 import {umlTypeIdentifier,classTemplateFormalText,UC_ACTOR_GLYPH} from '@atlas/contracts'
 import {UserRound,Boxes,Database,Code2,BookOpen,FileText,Workflow,Cloud,Layers,Maximize2,Server,Monitor,Smartphone,HardDrive,Network,Box,Container} from 'lucide-react'
 import {Handle,Position,NodeResizer,useUpdateNodeInternals} from '@xyflow/react'
-import {useEffect} from 'react'
+import {useEffect,useState} from 'react'
 import type {NodeProps} from '@xyflow/react'
 import {diagramLabels,elementLabels,umlAttributeText,umlOperationText,umlOperationTextResolved,umlObjectTitle,atlasNodeMinimum,sequenceActivationPorts} from '@atlas/contracts'
 import type {DiagramType,ModelElement,Perspective} from '@atlas/contracts'
@@ -27,8 +28,8 @@ function ActivationHandles({id,height}:{id:string;height:number}){
   {ports.map(p=><Handle key={p.id} id={p.id} type="source" position={p.side==='left'?Position.Left:Position.Right} className="node-handle atlas-sequence-symbol-port" style={{[p.side]:'35.42%',top:`${p.topPercent}%`}} title={`Mensaje ${p.side==='left'?'izquierdo':'derecho'} · ${p.topPercent}%`}/>) }
  </>
 }
-function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activationHeight}:{
- id:string;graphType:DiagramType;kind:string;selected:boolean;canResize:boolean;activationHeight?:number;
+function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activationHeight,activityElement}:{
+ id:string;graphType:DiagramType;kind:string;selected:boolean;canResize:boolean;activationHeight?:number;activityElement?:ModelElement;
  onResize?: (nodeId:string,width:number,height:number,x?:number,y?:number)=>void
 }){
  const activity=graphType==='uml-activity'
@@ -40,8 +41,9 @@ function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activat
  const isTerminate=kind==='uml-terminate'
  const isActivation=kind==='uml-activation'
  const isDestruction=kind==='uml-destruction'
+ const vertical=activity&&isBar&&activityElement?.activityDetail?.orientation==='vertical'
  const minGraph=(activity?'uml-activity':state?'uml-state':'uml-sequence') as DiagramType
- const {width:minWidth,height:minHeight}=atlasNodeMinimum(minGraph,kind as ModelElement['type'])
+ const minimum=atlasNodeMinimum(minGraph,kind as ModelElement['type']);const minWidth=vertical?48:minimum.width,minHeight=vertical?90:minimum.height
  const portClass=sequence?'atlas-sequence-symbol-port':'atlas-activity-symbol-port'
  const port=(portId:string,position:Position,style?:Record<string,string>)=><Handle
   key={portId} id={portId} type="source" position={position} className={`node-handle ${portClass}`}
@@ -50,7 +52,8 @@ function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activat
  // Activation messages attach ONLY to its lateral edges, at many heights.
  // Width of the visible UML bar is 14/48 units; inset each connection to it.
  // Preserve historical left/right handle ids for already persisted messages.
- const ports=isActivation?[]:[
+ const pct=(v:number)=>`${Math.round(v*1000)/10}%`
+ const ports=activityElement?activityPorts(activityElement).map(p=>port(p.id,({left:Position.Left,right:Position.Right,top:Position.Top,bottom:Position.Bottom})[p.side],p.side==='left'?{left:pct(p.x),...(p.y!==.5?{top:pct(p.y)}:{})}:p.side==='right'?{right:pct(1-p.x),...(p.y!==.5?{top:pct(p.y)}:{})}:p.side==='top'?{left:pct(p.x),top:pct(p.y)}:{left:pct(p.x),bottom:pct(1-p.y)})):isActivation?[]:[
   ...(isBar?[port('left',Position.Left,{left:'1%'}),...([20,50,80].map((pct,i)=>port(`top-${i+1}`,Position.Top,{left:`${pct}%`,top:'29%'}))),port('right',Position.Right,{right:'1%'}),...([20,50,80].map((pct,i)=>port(`bottom-${i+1}`,Position.Bottom,{left:`${pct}%`,bottom:'29%'})))]:
   [port('left',Position.Left,tip?{left:tip}:undefined),port('top-2',Position.Top,isDecision?{left:'50%',top:'2.4%'}:tip?{left:'50%',top:tip}:undefined),port('right',Position.Right,tip?{right:tip}:undefined),port('bottom-2',Position.Bottom,isDecision?{left:'50%',bottom:'2.4%'}:tip?{left:'50%',bottom:tip}:undefined)])
  ]
@@ -74,8 +77,8 @@ function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activat
   {isDecision?<svg className="uml-decision-shape uml-control-glyph" viewBox="0 0 84 84" preserveAspectRatio="none" role="img" aria-label={label}>
     <polygon points="42,2 82,42 42,82 2,42" fill="white" stroke="#405a80" strokeWidth="2.5"/>
    </svg>:
-   isBar?<svg className="uml-fork-symbol uml-control-glyph" viewBox="0 0 160 28" preserveAspectRatio="none" role="img" aria-label={label}>
-    <rect x="2" y="9" width="156" height="10" rx="1" fill="#1e2741"/>
+   isBar?<svg className="uml-fork-symbol uml-control-glyph" viewBox={vertical?'0 0 28 160':'0 0 160 28'} preserveAspectRatio="none" role="img" aria-label={label}>
+    {vertical?<rect x="8.12" y="2" width="11.76" height="156" rx="1" fill="#1e2741"/>:<rect x="2" y={activity?8.12:9} width="156" height={activity?11.76:10} rx="1" fill="#1e2741"/>}
    </svg>:
    isActivation?<svg className="uml-sequence-activation-bar uml-control-glyph" viewBox="0 0 48 120" preserveAspectRatio="none" role="img" aria-label={label}>
     <rect x="17" y="2" width="14" height="116" fill="white" stroke="#344965" strokeWidth="2"/>
@@ -95,19 +98,29 @@ function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activat
      kind==='uml-entry-point'?<circle cx="30" cy="30" r="18" fill="white" stroke="#344965" strokeWidth="3"/>:
      <><circle cx="30" cy="30" r="27" fill="white" stroke="#344965" strokeWidth="3"/><path d="M20 20L40 40M40 20L20 40" stroke="#344965" strokeWidth="3.2" strokeLinecap="round"/></>}
    </svg>}
+  {activity&&activityElement&&<span className="activity-control-identifier">«{activityNodeLabel(activityElement)}»</span>}
   {isActivation?<ActivationHandles id={id} height={activationHeight||120}/>:ports}
  </div>
 }
 
+export function ExecutionTimeAction({id,times,onAdjust}:{id:string;times:{start:number;finish:number};onAdjust:(id:string,start:number,finish:number,expected:{start:number;finish:number})=>void}){
+ const [open,setOpen]=useState(false),[start,setStart]=useState(''),[finish,setFinish]=useState(''),[expected,setExpected]=useState(times);
+ return <div className="nodrag nopan" style={{position:'absolute',left:'100%',top:0,zIndex:20,minWidth:open?210:130,padding:4,background:'white',border:'1px solid #abb8c9',borderRadius:5,color:'#344965'}} onPointerDown={e=>e.stopPropagation()}>{!open?<button type="button" onClick={()=>{setExpected(times);setStart(String(times.start));setFinish(String(times.finish));setOpen(true)}}>Ajustar tiempo</button>:<><strong>Ajustar límites temporales</strong><label style={{display:'block'}}>Inicio<input aria-label="Inicio temporal" type="number" min="0" value={start} onChange={e=>setStart(e.target.value)} style={{width:85}}/></label><label style={{display:'block'}}>Fin<input aria-label="Fin temporal" type="number" min="0" value={finish} onChange={e=>setFinish(e.target.value)} style={{width:85}}/></label><button type="button" disabled={!start||!finish||!Number.isFinite(Number(start))||!Number.isFinite(Number(finish))} onClick={()=>{setOpen(false);onAdjust(id,Number(start),Number(finish),expected)}}>Revisar ajuste</button><button type="button" onClick={()=>setOpen(false)}>Cancelar</button></>}</div>
+}
+function SequenceSemanticNode({id,data,element,selected}:{id:string;data:NodeProps['data'];element:ModelElement;selected:boolean}){
+ const size=data.sequenceSize as {width:number;height:number};const update=useUpdateNodeInternals();useEffect(()=>update(id),[id,size.width,size.height,update]);const bound=['uml-activation','uml-destruction','uml-gate','uml-sequence-invariant'].includes(element.type),frame=['uml-frame','uml-interaction'].includes(element.type),line=['uml-lifeline','actor'].includes(element.type);const resize=data.onResize as ((id:string,w:number,h:number,x?:number,y?:number)=>void)|undefined;const min=atlasNodeMinimum('uml-sequence',element.type)
+ return <div className={`atlas-sequence-semantic kind-${element.type} ${selected?'selected':''}`} aria-label={`${elementLabels[element.type]} ${element.name}`} style={{width:'100%',height:'100%',position:'relative'}}><svg role="img" aria-label={elementLabels[element.type]} width="100%" height="100%" viewBox={`0 0 ${size.width} ${size.height}`} style={{overflow:'visible'}} dangerouslySetInnerHTML={{__html:String(data.sequenceGlyph)}}/>{selected&&!!data.canResize&&(data.sequencePositionLocked===false||!bound&&!data.sequencePositionLocked)&&element.type!=='uml-destruction'&&<NodeResizer minWidth={min.width} minHeight={min.height} maxWidth={4000} maxHeight={4000} onResizeEnd={(_,v)=>resize?.(id,Math.round(v.width),Math.round(v.height),v.x,v.y)}/>}{selected&&!!data.canResize&&!!data.onAdjustExecution&&data.executionTimes&&Number.isFinite((data.executionTimes as {start:number}).start)&&Number.isFinite((data.executionTimes as {finish:number}).finish)?<ExecutionTimeAction id={id} times={data.executionTimes as {start:number;finish:number}} onAdjust={data.onAdjustExecution as (id:string,start:number,finish:number,expected:{start:number;finish:number})=>void}/>:null}{element.type==='uml-activation'?<ActivationHandles id={id} height={size.height}/>:!frame&&<>{['left','right'].map(side=><Handle key={side} id={side} type="source" position={side==='left'?Position.Left:Position.Right} style={{left:line||bound?'50%':side==='left'?'0%':'100%',right:'auto',top:'50%'}} className="node-handle" title={`Ocurrencia ${side}`}/>)}{line&&sequenceActivationPorts(size.height).map(p=><Handle id={p.id} key={p.id} type="source" position={p.side==='left'?Position.Left:Position.Right} style={{left:'50%',right:'auto',top:`${Math.max(38/size.height*100,p.topPercent)}%`}} className="node-handle" title="Posición de ocurrencia"/>)}</>}</div>
+}
 export function AtlasNode({id,data,selected}:NodeProps){
  const element=data.element as ModelElement|undefined;const mode=data.mode as Perspective;const graphType=data.graphType as DiagramType
  if(!element)return <div className="node missing">Elemento no disponible</div>
+ if(graphType==='uml-sequence'&&typeof data.sequenceGlyph==='string')return <SequenceSemanticNode id={id} data={data} element={element} selected={!!selected}/>
  // UML symbol nodes must bypass the generic card renderer entirely.
  if((data.graphType==='uml-activity'&&ACTIVITY_CONTROL_TYPES.has(element.type))||
     (data.graphType==='uml-state'&&STATE_CONTROL_TYPES.has(element.type))||
     (data.graphType==='uml-sequence'&&SEQUENCE_SYMBOL_TYPES.has(element.type)))
   return <UmlControlSymbol id={id} graphType={data.graphType as DiagramType} kind={element.type} selected={!!selected}
-    activationHeight={typeof data.sequenceActivationHeight==='number'?data.sequenceActivationHeight:undefined}
+    activityElement={data.graphType==='uml-activity'?element:undefined} activationHeight={typeof data.sequenceActivationHeight==='number'?data.sequenceActivationHeight:undefined}
     canResize={!!data.canResize} onResize={data.onResize as ((nodeId:string,width:number,height:number,x?:number,y?:number)=>void)|undefined}/>
 
  const technical=mode!=='functional';const feature=diagramLabels[graphType];const linkedDiagramType=data.linkedDiagramType as DiagramType|undefined
@@ -133,7 +146,9 @@ export function AtlasNode({id,data,selected}:NodeProps){
  const umlAction=activityDiagram&&element.type==='uml-action'
  const umlObjectNode=activityDiagram&&element.type==='uml-object-node'
  const umlFlowFinal=activityDiagram&&element.type==='uml-flow-final'
- const umlPartition=activityDiagram&&element.type==='uml-partition'
+ const umlPartition=activityDiagram&&['uml-partition','uml-activity-interruptible-region'].includes(element.type)
+ const activityPin=activityDiagram&&element.type==='uml-activity-pin',activityParameter=activityDiagram&&element.type==='uml-activity-parameter',activitySpecial=activityDiagram?activitySymbol(element):undefined
+ const hidePorts=umlSubject||umlPartition
  const umlSequenceParticipant=sequenceDiagram&&(element.type==='uml-lifeline'||element.type==='actor')
  const umlSequenceActivation=sequenceDiagram&&element.type==='uml-activation'
  const umlSequenceDestruction=sequenceDiagram&&element.type==='uml-destruction'
@@ -145,7 +160,7 @@ export function AtlasNode({id,data,selected}:NodeProps){
  const umlStateRegion=stateDiagram&&element.type==='uml-region'
  const umlPseudostate=graphType.startsWith('uml-')&&['uml-start','uml-end'].includes(element.type)
  // UML symbols use their native geometry, not the generic 8-point rectangle.
- const activityFourPorts=(activityDiagram||stateDiagram)&&['uml-start','uml-end','uml-flow-final','uml-decision'].includes(element.type)
+ const activityFourPorts=activityPin||(activityDiagram||stateDiagram)&&['uml-start','uml-end','uml-flow-final','uml-decision'].includes(element.type)
  const activityCircular=(activityDiagram||stateDiagram)&&['uml-start','uml-end','uml-flow-final'].includes(element.type)
  const activityBar=(activityDiagram||stateDiagram)&&element.type==='uml-fork'
  const activityPortInset=activityCircular?'7%':activityFourPorts?'2.4%':undefined
@@ -168,8 +183,8 @@ export function AtlasNode({id,data,selected}:NodeProps){
     color="#326ee7" handleClassName="atlas-node-resize-handle" lineClassName={(activityDiagram||stateDiagram)&&['uml-start','uml-end','uml-flow-final','uml-decision','uml-fork'].includes(element.type)?'atlas-uml-symbol-resize-line':'atlas-node-resize-line'}
     onResizeEnd={(_,size)=>resizeCallback?.(id,Math.round(size.width),Math.round(size.height),size.x,size.y)}/>}
   {umlSubject&&data.ucAnnotationTarget===true&&<Handle id="uc-annotation" type="target" position={Position.Left} isConnectable={false} className="uc-internal-anchor" style={{opacity:0,pointerEvents:'none'}}/>}
-  {!umlSubject&&<Handle id="left" type="source" position={Position.Left} className="node-handle" style={actorPortStyle('left')||(activityFourPorts?{left:activityPortInset}:undefined)} title="Conector izquierdo (entrada o salida)"/>}
-  {!umlSubject&&(activityFourPorts||ucCardinal
+  {!hidePorts&&<Handle id="left" type="source" position={Position.Left} className="node-handle" style={actorPortStyle('left')||(activityFourPorts?{left:activityPortInset}:undefined)} title="Conector izquierdo (entrada o salida)"/>}
+  {!hidePorts&&(activityFourPorts||ucCardinal
     ?<Handle id="top-2" type="source" position={Position.Top} className="node-handle atlas-port-vertical" style={actorPortStyle('top')||{left:'50%',top:activityPortInset}} title="Conector superior (punta del símbolo UML)"/>
     :[20,50,80].map((pct,i)=><Handle key={`top-${i}`} id={`top-${i+1}`} type="source" position={Position.Top} className="node-handle atlas-port-vertical" style={{left:`${pct}%`,...(activityBar?{top:'29%'}:{})}} title={`Conector superior ${i+1} (entrada o salida)`}/>))}
   {graphType==='uml-usecase'&&element.type==='actor'&&!ucRectangle&&<svg aria-label="Actor UML" className="uml-actor-figure" style={{width:glyph.width,height:glyph.height,top:glyph.top}} viewBox="0 0 40 55"><circle cx="20" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="2.5"/><path d="M20 14 V34 M6 24 H34 M20 34 L8 51 M20 34 L32 51" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg>}
@@ -187,14 +202,14 @@ export function AtlasNode({id,data,selected}:NodeProps){
   umlMetaclass?<><div className="uml-profile-stereotype">«metaclass»</div><strong className="node-title">{element.name}</strong></>:
   umlStereotype?<><div className="uml-profile-stereotype">«stereotype»</div><strong className="node-title">{element.name}</strong>{attributeLines.length>0&&<div className="uml-structural-compartment">{attributeLines.map(a=><div key={a.id}>{umlAttributeText(a)}</div>)}</div>}</>:
   umlClass?<><div className="uml-class-header"><small className="atlas-uml-type-identifier">{umlTypeIdentifier(element)}</small><strong style={{fontStyle:element.uml?.abstract?'italic':undefined}}>{element.name}</strong>{element.uml?.leaf&&<small>{'{leaf}'}</small>}{!!element.uml?.templateParameters?.length&&<span className="uml-template-parameters">{element.uml.templateParameters.map(p=>classTemplateFormalText(p,data.typeNames as Record<string,string>|undefined)).join(', ')}</span>}</div>{element.type==='uml-enumeration'&&!!element.uml?.literals?.length&&<div className="uml-structural-compartment" aria-label="Literales UML">{element.uml.literals.map(l=><div key={l.id}>{l.name}</div>)}</div>}{attributeLines.length>0&&<div className="uml-structural-compartment" aria-label="Atributos de la clase">{attributeLines.map(a=><div key={a.id} style={{textDecoration:a.static?'underline':undefined}}>{umlAttributeText(a,graphType==='uml-class',data.typeNames as Record<string,string>|undefined)}</div>)}</div>}{operationLines.length>0&&<div className="uml-structural-compartment" aria-label="Operaciones de la clase">{operationLines.map(o=><div key={o.id} style={{textDecoration:o.static?'underline':undefined,fontStyle:o.abstract?'italic':undefined}}>{graphType==='uml-class'?umlOperationTextResolved(o,data.typeNames as Record<string,string>|undefined):umlOperationText(o)}</div>)}</div>}</>:
-  ['uml-class','uml-usecase'].includes(graphType)&&['uml-comment','uml-constraint'].includes(element.type)?<div className="uml-note-content">{element.type==='uml-constraint'?`{${element.uml?.expression||element.name}}`:element.uml?.note||element.name}</div>:
+  ['uml-class','uml-usecase','uml-activity'].includes(graphType)&&['uml-comment','uml-constraint'].includes(element.type)?<div className="uml-note-content">{element.type==='uml-constraint'?`{${element.uml?.expression||element.name}}`:element.uml?.note||element.name}</div>:
   umlObject?<><div className="uml-object-header">{umlObjectTitle(element.name,element.uml?.classifier)}</div><div className="uml-object-slots" aria-label="Valores de instancia">{slotLines.length?slotLines.map(s=><div key={s.id}>{s.name}{s.type?`: ${s.type}`:''} = {s.value}</div>):<span className="uml-compartment-empty">Sin valores de instancia</span>}</div></>:
   umlCommunicationParticipant?<div className="uml-communication-participant-box"><div className="uml-communication-title">{umlObjectTitle(element.name,element.uml?.classifier)}</div>{element.summary&&<small>{element.summary}</small>}</div>:
   umlDecision?<div className="uml-decision-shape" role="img" aria-label={stateDiagram?'Elección o unión UML: rombo':'Decisión o fusión UML: rombo'}><svg viewBox="0 0 84 84" preserveAspectRatio="none" aria-hidden="true"><polygon points="42,2 82,42 42,82 2,42" fill="#fff" stroke="currentColor" strokeWidth="2.5"/></svg></div>:
   umlFlowFinal?<div className="uml-pseudostate-notation" role="img" aria-label="Final de flujo UML: círculo con X"><svg className="uml-flow-final-symbol" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" stroke="currentColor" strokeWidth="2.8" fill="white"/><path d="M16 16L38 38M38 16L16 38" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"/></svg></div>:
-  umlPartition?<><div className="uml-partition-heading">{element.name}</div><div className="uml-partition-description">Partición de actividad · {String(data.childrenCount||0)} nodos</div></>:
-  umlAction?<div className="uml-action-label">{element.name}</div>:
-  umlObjectNode?<div className="uml-object-node-label"><span>{element.name}</span>{element.uml?.classifier&&<small>: {element.uml.classifier}</small>}</div>:
+  umlPartition?<><div className="uml-partition-heading"><small className="atlas-uml-type-identifier">«{activityNodeLabel(element)}»</small> {element.name}</div></>:
+  umlAction?<div className="uml-action-label">{activitySpecial&&<svg className="activity-special-symbol" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d={activitySpecial} fill="white" stroke="currentColor" strokeWidth="1"/></svg>}<small className="atlas-uml-type-identifier">«{activityNodeLabel(element)}»</small><span>{element.name}</span>{!!data.activityMembership&&<small>{String(data.activityMembership)}</small>}{element.activityDetail?.kind==='callBehavior'&&<span className="activity-rake">≋</span>}{(element.activityDetail?.precondition||element.activityDetail?.postcondition)&&<div className="activity-condition-notes">{element.activityDetail.precondition&&<small>«localPrecondition» {element.activityDetail.precondition}</small>}{element.activityDetail.postcondition&&<small>«localPostcondition» {element.activityDetail.postcondition}</small>}</div>}</div>:
+  umlObjectNode?<div className="uml-object-node-label"><small className="atlas-uml-type-identifier">«{activityNodeLabel(element)}»</small><span>{element.name}</span><small>{element.activityDetail?.typeId?(data.typeNames as Record<string,string>|undefined)?.[element.activityDetail.typeId]:element.activityDetail?.externalType||element.uml?.classifier}</small>{element.activityDetail?.inState?.map(state=><small key={state}>[{state}]</small>)}</div>:activityPin||activityParameter?<div className="activity-pin-label"><small className="atlas-uml-type-identifier">«{activityNodeLabel(element)}»</small><span>{String(data.activityParameterLabel||element.name)}</span>{(data.activityParameter as {stream?:boolean;exception?:boolean}|undefined)?.stream&&<small>{'{stream}'}</small>}{(data.activityParameter as {stream?:boolean;exception?:boolean}|undefined)?.exception&&<small>△ excepción</small>}</div>:
   umlFork?<div className="uml-fork-symbol" role="img" aria-label={stateDiagram?'Bifurcación o unión UML de máquina de estados':'Bifurcación o unión paralela UML'}/>:
   umlSequenceFrame?<div className={`uml-interaction-frame-shell ${sequenceDiagram?'uml-combined-fragment':''}`}><div className="uml-interaction-frame-tag">{interactionOperator}</div><div className="uml-interaction-frame-title">{element.name}</div>{sequenceDiagram?<div className="uml-fragment-operands">{combinedOperands.map((guard,i)=><div key={`${i}-${guard}`} className="uml-fragment-operand"><span>{guard.startsWith('[')?guard:`[${guard}]`}</span></div>)}</div>:element.summary&&<div className="uml-interaction-frame-summary">{element.summary}</div>}</div>:
   umlInteractionRef?<div className="uml-interaction-ref-shell"><div className="uml-interaction-ref-tag">ref</div><div className="uml-interaction-ref-title">{element.name}</div>{element.summary&&<div className="uml-interaction-ref-summary">{element.summary}</div>}</div>:
@@ -209,10 +224,10 @@ export function AtlasNode({id,data,selected}:NodeProps){
   {mode!=='technical'&&element.summary&&<div className="node-summary">{element.summary}</div>}
   {technical&&element.technical&&<div className="node-tech"><Code2 size={12}/><span>{element.technical}</span></div>}
   {graphType==='trace'&&<span className="node-mini-label">{feature}</span>}</>}
-  {!umlSubject&&<Handle id="right" type="source" position={Position.Right} className="node-handle" style={actorPortStyle('right')||(activityFourPorts?{right:activityPortInset}:undefined)} title="Conector derecho (entrada o salida)"/>}
-  {!umlSubject&&(activityFourPorts||ucCardinal
+  {!hidePorts&&<Handle id="right" type="source" position={Position.Right} className="node-handle" style={actorPortStyle('right')||(activityFourPorts?{right:activityPortInset}:undefined)} title="Conector derecho (entrada o salida)"/>}
+  {!hidePorts&&(activityFourPorts||ucCardinal
     ?<Handle id="bottom-2" type="source" position={Position.Bottom} className="node-handle atlas-port-vertical" style={actorPortStyle('bottom')||{left:'50%',bottom:activityPortInset}} title="Conector inferior (punta del símbolo UML)"/>
     :[20,50,80].map((pct,i)=><Handle key={`bottom-${i}`} id={`bottom-${i+1}`} type="source" position={Position.Bottom} className="node-handle atlas-port-vertical" style={{left:`${pct}%`,...(activityBar?{bottom:'29%'}:{})}} title={`Conector inferior ${i+1} (entrada o salida)`}/>))}
  </div>
 }
-export const nodeTypes={atlas:AtlasNode}
+export const nodeTypes={atlas:AtlasNode,'activity-frame':({data}:NodeProps)=><div className="atlas-activity-frame"><span>{String(data.label||'Actividad')}</span></div>}

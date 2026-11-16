@@ -1,0 +1,2807 @@
+{
+  "schema": 1,
+  "elements": {
+    "string-type": {
+      "id": "string-type",
+      "type": "uml-primitive",
+      "name": "String",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "approval-signal": {
+      "id": "approval-signal",
+      "type": "uml-signal",
+      "name": "PagoAprobado",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "attributes": [
+          {
+            "id": "signal-order-id",
+            "name": "ordenId",
+            "type": "String",
+            "typeId": "string-type",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "payment-type": {
+      "id": "payment-type",
+      "type": "uml-class",
+      "name": "PagoService",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "payment-type-pagar",
+            "name": "pagar",
+            "visibility": "public",
+            "returnType": "String",
+            "parameters": [
+              {
+                "id": "pay-id",
+                "name": "id",
+                "type": "String",
+                "typeId": "string-type",
+                "direction": "in"
+              }
+            ],
+            "returnTypeId": "string-type"
+          },
+          {
+            "id": "payment-type-validar",
+            "name": "validar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-reintentar",
+            "name": "reintentar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-registrar",
+            "name": "registrar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-auditar",
+            "name": "auditar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-cerrar",
+            "name": "cerrar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-procesar",
+            "name": "procesar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-consultar",
+            "name": "consultar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-confirmar",
+            "name": "confirmar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-compensar",
+            "name": "compensar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-notificar",
+            "name": "notificar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-evaluar",
+            "name": "evaluar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-verificar",
+            "name": "verificar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-rechazar",
+            "name": "rechazar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-preparar",
+            "name": "preparar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-continuar",
+            "name": "continuar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "payment-type-recibir",
+            "name": "recibir",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          }
+        ],
+        "attributes": [
+          {
+            "id": "payment-clients",
+            "name": "clientes",
+            "type": "Cliente",
+            "typeId": "client-type",
+            "visibility": "public",
+            "multiplicity": "0..*"
+          },
+          {
+            "id": "payment-gateway",
+            "name": "pasarela",
+            "type": "Pasarela",
+            "typeId": "gateway-type",
+            "visibility": "public",
+            "multiplicity": "1"
+          }
+        ]
+      }
+    },
+    "gateway-type": {
+      "id": "gateway-type",
+      "type": "uml-class",
+      "name": "Pasarela",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "gateway-type-autorizar",
+            "name": "autorizar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-consultarEstado",
+            "name": "consultarEstado",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-reservar",
+            "name": "reservar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-liberar",
+            "name": "liberar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-enviar",
+            "name": "enviar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-revisar",
+            "name": "revisar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-persistir",
+            "name": "persistir",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-confirmar",
+            "name": "confirmar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-revertir",
+            "name": "revertir",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "gateway-type-registrar",
+            "name": "registrar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "client-type": {
+      "id": "client-type",
+      "type": "uml-class",
+      "name": "Cliente",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "client-type-resultado",
+            "name": "resultado",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "client-type-evento",
+            "name": "evento",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "client-type-aviso",
+            "name": "aviso",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "session-type": {
+      "id": "session-type",
+      "type": "uml-class",
+      "name": "Sesion",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "session-type-crear",
+            "name": "crear",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          },
+          {
+            "id": "session-type-cerrar",
+            "name": "cerrar",
+            "visibility": "public",
+            "returnType": "void",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "client": {
+      "id": "client",
+      "type": "uml-lifeline",
+      "name": "cliente",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "classifierId": "client-type",
+        "coregions": [
+          {
+            "startId": "core-start",
+            "finishId": "core-end"
+          }
+        ],
+        "representsId": "payment-type",
+        "representsPropertyId": "payment-clients",
+        "selector": "2"
+      }
+    },
+    "api": {
+      "id": "api",
+      "type": "uml-lifeline",
+      "name": "api",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "classifierId": "payment-type"
+      }
+    },
+    "gateway": {
+      "id": "gateway",
+      "type": "uml-lifeline",
+      "name": "pasarela",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "classifierId": "gateway-type",
+        "representsId": "payment-type",
+        "representsPropertyId": "payment-gateway"
+      }
+    },
+    "temp": {
+      "id": "temp",
+      "type": "uml-lifeline",
+      "name": "sesión",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "classifierId": "session-type"
+      }
+    },
+    "activation": {
+      "id": "activation",
+      "type": "uml-activation",
+      "name": "Ejecutar pago",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "api",
+        "startOccurrenceId": "call:receive",
+        "finishOccurrenceId": "reply:send",
+        "executionKind": "behavior",
+        "executionBehaviorId": "qa-seq-full"
+      }
+    },
+    "nested": {
+      "id": "nested",
+      "type": "uml-activation",
+      "name": "Validación interna",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "api",
+        "startOccurrenceId": "self:receive",
+        "finishOccurrenceId": "nested-end",
+        "executionKind": "generic"
+      }
+    },
+    "action-exec": {
+      "id": "action-exec",
+      "type": "uml-activation",
+      "name": "Acción de registro",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "api",
+        "startOccurrenceId": "action-start",
+        "finishOccurrenceId": "action-end",
+        "executionKind": "action",
+        "executionActionId": "qa-executed-action"
+      }
+    },
+    "alt": {
+      "id": "alt",
+      "type": "uml-frame",
+      "name": "Resultado del pago",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "alt",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "approved",
+            "guard": "aprobado"
+          },
+          {
+            "id": "rejected",
+            "guard": "else"
+          }
+        ]
+      }
+    },
+    "invariant": {
+      "id": "invariant",
+      "type": "uml-sequence-invariant",
+      "name": "Saldo",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "expression": "saldo >= 0",
+        "lifelineId": "api",
+        "occurrenceId": "invariant-event"
+      }
+    },
+    "time": {
+      "id": "time",
+      "type": "uml-time",
+      "name": "t0",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "timeObservation",
+        "occurrenceIds": [
+          "call:send"
+        ]
+      }
+    },
+    "time-constraint": {
+      "id": "time-constraint",
+      "type": "uml-constraint",
+      "name": "Límite de inicio",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "timeConstraint",
+        "occurrenceIds": [
+          "call:receive"
+        ],
+        "minimum": 0,
+        "maximum": 120,
+        "unit": "ms"
+      }
+    },
+    "duration": {
+      "id": "duration",
+      "type": "uml-constraint",
+      "name": "SLA",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "durationConstraint",
+        "occurrenceIds": [
+          "call:send",
+          "reply:receive"
+        ],
+        "minimum": 0,
+        "maximum": 800,
+        "unit": "ms"
+      }
+    },
+    "duration-observation": {
+      "id": "duration-observation",
+      "type": "uml-time",
+      "name": "duraciónPago",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "durationObservation",
+        "occurrenceIds": [
+          "call:send",
+          "reply:receive"
+        ],
+        "unit": "ms"
+      }
+    },
+    "comment": {
+      "id": "comment",
+      "type": "uml-comment",
+      "name": "Revisar llamada",
+      "summary": "Nota sobre el mensaje pagar(id).",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {}
+    },
+    "ref": {
+      "id": "ref",
+      "type": "uml-interaction",
+      "name": "Referencia recursiva",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "interactionId": "qa-seq-full",
+        "coveredLifelineIds": [
+          "api",
+          "gateway"
+        ],
+        "roleMappings": [
+          {
+            "from": "api",
+            "to": "api"
+          },
+          {
+            "from": "gateway",
+            "to": "gateway"
+          }
+        ],
+        "arguments": [
+          {
+            "value": "id",
+            "parameterId": "root-in",
+            "typeId": "string-type"
+          }
+        ],
+        "results": [
+          {
+            "parameterId": "root-return",
+            "typeId": "string-type",
+            "value": "-",
+            "values": [
+              "ordenId"
+            ],
+            "assignment": "resultadoRef"
+          }
+        ]
+      }
+    },
+    "external-ref": {
+      "id": "external-ref",
+      "type": "uml-interaction",
+      "name": "Referencia textual",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalInteraction": "RegistrarRechazo(id)",
+        "coveredLifelineIds": [
+          "api",
+          "gateway"
+        ]
+      }
+    },
+    "gate-formal": {
+      "id": "gate-formal",
+      "type": "uml-gate",
+      "name": "entrada",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "formal",
+        "ownerId": "qa-seq-full",
+        "side": "left",
+        "position": 0.25,
+        "matchId": "gate-actual"
+      }
+    },
+    "gate-actual": {
+      "id": "gate-actual",
+      "type": "uml-gate",
+      "name": "entrada",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "actual",
+        "ownerId": "ref",
+        "side": "left",
+        "position": 0.5,
+        "matchId": "gate-formal"
+      }
+    },
+    "frame-loop": {
+      "id": "frame-loop",
+      "type": "uml-frame",
+      "name": "loop",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "loop",
+        "coveredLifelineIds": [
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "loop-1",
+            "guard": "intentos < 3",
+            "min": 1,
+            "max": 3
+          }
+        ]
+      }
+    },
+    "frame-opt": {
+      "id": "frame-opt",
+      "type": "uml-frame",
+      "name": "opt",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "opt",
+        "coveredLifelineIds": [
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "opt-1",
+            "guard": "hay datos"
+          }
+        ],
+        "parentOperandId": "loop-1"
+      }
+    },
+    "gate-outer": {
+      "id": "gate-outer",
+      "type": "uml-gate",
+      "name": "reintento",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "outer",
+        "ownerId": "frame-loop",
+        "side": "left",
+        "position": 0.2,
+        "matchId": "gate-inner"
+      }
+    },
+    "gate-inner": {
+      "id": "gate-inner",
+      "type": "uml-gate",
+      "name": "reintento",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "inner",
+        "ownerId": "frame-loop",
+        "side": "left",
+        "position": 0.3,
+        "matchId": "gate-outer"
+      }
+    },
+    "frame-break": {
+      "id": "frame-break",
+      "type": "uml-frame",
+      "name": "break",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "break",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway",
+          "temp"
+        ],
+        "operands": [
+          {
+            "id": "break-1",
+            "guard": "cancelado"
+          }
+        ]
+      }
+    },
+    "frame-par": {
+      "id": "frame-par",
+      "type": "uml-frame",
+      "name": "par",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "par",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "par-1",
+            "guard": "condición"
+          },
+          {
+            "id": "par-2",
+            "guard": "otra condición"
+          }
+        ]
+      }
+    },
+    "frame-seq": {
+      "id": "frame-seq",
+      "type": "uml-frame",
+      "name": "seq",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "seq",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "seq-1",
+            "guard": "condición"
+          },
+          {
+            "id": "seq-2",
+            "guard": "otra condición"
+          }
+        ]
+      }
+    },
+    "frame-strict": {
+      "id": "frame-strict",
+      "type": "uml-frame",
+      "name": "strict",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "strict",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "strict-1",
+            "guard": "condición"
+          },
+          {
+            "id": "strict-2",
+            "guard": "otra condición"
+          }
+        ]
+      }
+    },
+    "frame-critical": {
+      "id": "frame-critical",
+      "type": "uml-frame",
+      "name": "critical",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "critical",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "critical-1",
+            "guard": "bloqueo disponible"
+          }
+        ]
+      }
+    },
+    "frame-neg": {
+      "id": "frame-neg",
+      "type": "uml-frame",
+      "name": "neg",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "neg",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "neg-1",
+            "guard": "rechazado"
+          }
+        ]
+      }
+    },
+    "frame-assert": {
+      "id": "frame-assert",
+      "type": "uml-frame",
+      "name": "assert",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "assert",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "assert-1",
+            "guard": "válido"
+          }
+        ]
+      }
+    },
+    "frame-ignore": {
+      "id": "frame-ignore",
+      "type": "uml-frame",
+      "name": "ignore",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "ignore",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "ignore-1",
+            "guard": "condición"
+          }
+        ],
+        "signatureRefs": [
+          {
+            "kind": "signal",
+            "ownerId": "approval-signal"
+          },
+          {
+            "kind": "operation",
+            "ownerId": "payment-type",
+            "operationId": "payment-type-pagar"
+          },
+          {
+            "kind": "operation",
+            "ownerId": "payment-type",
+            "operationId": "payment-type-validar"
+          }
+        ]
+      }
+    },
+    "frame-consider": {
+      "id": "frame-consider",
+      "type": "uml-frame",
+      "name": "consider",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "consider",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "consider-1",
+            "guard": "condición"
+          }
+        ],
+        "signatureRefs": [
+          {
+            "kind": "signal",
+            "ownerId": "approval-signal"
+          },
+          {
+            "kind": "operation",
+            "ownerId": "payment-type",
+            "operationId": "payment-type-pagar"
+          },
+          {
+            "kind": "operation",
+            "ownerId": "payment-type",
+            "operationId": "payment-type-validar"
+          }
+        ]
+      }
+    },
+    "continuation-start": {
+      "id": "continuation-start",
+      "type": "uml-sequence-continuation",
+      "name": "Continuar pago",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "continuationKind": "start",
+        "coveredLifelineIds": [
+          "client",
+          "api"
+        ],
+        "parentOperandId": "cont-start-op",
+        "continuationMatchId": "continuation-finish"
+      }
+    },
+    "continuation-finish": {
+      "id": "continuation-finish",
+      "type": "uml-sequence-continuation",
+      "name": "Continuar pago",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "continuationKind": "finish",
+        "coveredLifelineIds": [
+          "client",
+          "api"
+        ],
+        "parentOperandId": "cont-finish-op",
+        "continuationMatchId": "continuation-start"
+      }
+    },
+    "x": {
+      "id": "x",
+      "type": "uml-destruction",
+      "name": "Destrucción",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "temp",
+        "occurrenceId": "delete:receive"
+      }
+    },
+    "qa-executed-action": {
+      "id": "qa-executed-action",
+      "type": "uml-action",
+      "name": "Validar transacción",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "frame-continuations": {
+      "id": "frame-continuations",
+      "type": "uml-frame",
+      "name": "Continuaciones",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "seq",
+        "coveredLifelineIds": [
+          "client",
+          "api"
+        ],
+        "operands": [
+          {
+            "id": "cont-start-op"
+          },
+          {
+            "id": "cont-finish-op"
+          }
+        ]
+      }
+    },
+    "alt-outer": {
+      "id": "alt-outer",
+      "type": "uml-gate",
+      "name": "consultaSucursal",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "outer",
+        "ownerId": "alt",
+        "side": "left",
+        "position": 0.13877551020408163,
+        "matchIds": [
+          "alt-inner-approved",
+          "alt-inner-rejected"
+        ]
+      }
+    },
+    "alt-inner-approved": {
+      "id": "alt-inner-approved",
+      "type": "uml-gate",
+      "name": "consultaSucursal",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "inner",
+        "ownerId": "alt",
+        "side": "left",
+        "position": 0.2979591836734694,
+        "parentOperandId": "approved",
+        "matchId": "alt-outer"
+      }
+    },
+    "alt-inner-rejected": {
+      "id": "alt-inner-rejected",
+      "type": "uml-gate",
+      "name": "consultaSucursal",
+      "summary": "",
+      "description": "",
+      "author": "ATLAS QA",
+      "owner": "Equipo QA",
+      "status": "QA",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "inner",
+        "ownerId": "alt",
+        "side": "left",
+        "position": 0.8571428571428571,
+        "parentOperandId": "rejected",
+        "matchId": "alt-outer"
+      }
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa-seq-full",
+      "name": "QA Secuencia — Pago integral",
+      "type": "uml-sequence",
+      "description": "Una sola interacción autocontenida para QA manual. Todos los símbolos modernos, MessageSort, found/lost y 12 operadores. Las fichas de tipo y firma se incluyen en este documento.",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "client",
+          "elementId": "client",
+          "x": 100,
+          "y": 80,
+          "width": 190,
+          "height": 3580
+        },
+        {
+          "id": "api",
+          "elementId": "api",
+          "x": 440,
+          "y": 80,
+          "width": 190,
+          "height": 3580
+        },
+        {
+          "id": "gateway",
+          "elementId": "gateway",
+          "x": 800,
+          "y": 80,
+          "width": 190,
+          "height": 3580
+        },
+        {
+          "id": "temp",
+          "elementId": "temp",
+          "x": 1160,
+          "y": 80,
+          "width": 190,
+          "height": 3580
+        },
+        {
+          "id": "activation",
+          "elementId": "activation",
+          "x": 510,
+          "y": 145,
+          "width": 48,
+          "height": 475
+        },
+        {
+          "id": "nested",
+          "elementId": "nested",
+          "x": 524,
+          "y": 470,
+          "width": 48,
+          "height": 75
+        },
+        {
+          "id": "action-exec",
+          "elementId": "action-exec",
+          "x": 512,
+          "y": 810,
+          "width": 48,
+          "height": 100
+        },
+        {
+          "id": "alt",
+          "elementId": "alt",
+          "x": 75,
+          "y": 180,
+          "width": 960,
+          "height": 245
+        },
+        {
+          "id": "invariant",
+          "elementId": "invariant",
+          "x": 460,
+          "y": 770,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "id": "time",
+          "elementId": "time",
+          "x": -215,
+          "y": 92,
+          "width": 140,
+          "height": 60
+        },
+        {
+          "id": "time-constraint",
+          "elementId": "time-constraint",
+          "x": 1080,
+          "y": 175,
+          "width": 196,
+          "height": 76
+        },
+        {
+          "id": "duration",
+          "elementId": "duration",
+          "x": 70,
+          "y": 752,
+          "width": 196,
+          "height": 76
+        },
+        {
+          "id": "duration-observation",
+          "elementId": "duration-observation",
+          "x": 1090,
+          "y": 405,
+          "width": 196,
+          "height": 76
+        },
+        {
+          "id": "comment",
+          "elementId": "comment",
+          "x": -215,
+          "y": 185,
+          "width": 210,
+          "height": 76
+        },
+        {
+          "id": "ref",
+          "elementId": "ref",
+          "x": 405,
+          "y": 950,
+          "width": 620,
+          "height": 115
+        },
+        {
+          "id": "external-ref",
+          "elementId": "external-ref",
+          "x": 405,
+          "y": 1090,
+          "width": 620,
+          "height": 95
+        },
+        {
+          "id": "gate-formal",
+          "elementId": "gate-formal",
+          "x": 5,
+          "y": 990,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "gate-actual",
+          "elementId": "gate-actual",
+          "x": 380,
+          "y": 990,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "frame-loop",
+          "elementId": "frame-loop",
+          "x": 400,
+          "y": 1330,
+          "width": 625,
+          "height": 295
+        },
+        {
+          "id": "frame-opt",
+          "elementId": "frame-opt",
+          "x": 430,
+          "y": 1430,
+          "width": 560,
+          "height": 160
+        },
+        {
+          "id": "gate-outer",
+          "elementId": "gate-outer",
+          "x": 376,
+          "y": 1352,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "gate-inner",
+          "elementId": "gate-inner",
+          "x": 376,
+          "y": 1382,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "frame-break",
+          "elementId": "frame-break",
+          "x": 75,
+          "y": 1650,
+          "width": 1310,
+          "height": 160
+        },
+        {
+          "id": "frame-par",
+          "elementId": "frame-par",
+          "x": 75,
+          "y": 1835,
+          "width": 960,
+          "height": 185
+        },
+        {
+          "id": "frame-seq",
+          "elementId": "frame-seq",
+          "x": 75,
+          "y": 2045,
+          "width": 960,
+          "height": 185
+        },
+        {
+          "id": "frame-strict",
+          "elementId": "frame-strict",
+          "x": 75,
+          "y": 2255,
+          "width": 960,
+          "height": 185
+        },
+        {
+          "id": "frame-critical",
+          "elementId": "frame-critical",
+          "x": 75,
+          "y": 2465,
+          "width": 960,
+          "height": 160
+        },
+        {
+          "id": "frame-neg",
+          "elementId": "frame-neg",
+          "x": 75,
+          "y": 2650,
+          "width": 960,
+          "height": 160
+        },
+        {
+          "id": "frame-assert",
+          "elementId": "frame-assert",
+          "x": 75,
+          "y": 2835,
+          "width": 960,
+          "height": 160
+        },
+        {
+          "id": "frame-ignore",
+          "elementId": "frame-ignore",
+          "x": 75,
+          "y": 3020,
+          "width": 960,
+          "height": 160
+        },
+        {
+          "id": "frame-consider",
+          "elementId": "frame-consider",
+          "x": 75,
+          "y": 3205,
+          "width": 960,
+          "height": 160
+        },
+        {
+          "id": "continuation-start",
+          "elementId": "continuation-start",
+          "x": 260,
+          "y": 3520,
+          "width": 225,
+          "height": 65
+        },
+        {
+          "id": "continuation-finish",
+          "elementId": "continuation-finish",
+          "x": 260,
+          "y": 3680,
+          "width": 225,
+          "height": 65
+        },
+        {
+          "id": "x",
+          "elementId": "x",
+          "x": 1231,
+          "y": 3575,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "frame-continuations",
+          "elementId": "frame-continuations",
+          "x": 75,
+          "y": 3490,
+          "width": 650,
+          "height": 280
+        },
+        {
+          "id": "alt-outer",
+          "elementId": "alt-outer",
+          "x": 51,
+          "y": 190,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "alt-inner-approved",
+          "elementId": "alt-inner-approved",
+          "x": 51,
+          "y": 229,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "alt-inner-rejected",
+          "elementId": "alt-inner-rejected",
+          "x": 51,
+          "y": 366,
+          "width": 48,
+          "height": 48
+        }
+      ],
+      "edges": [
+        {
+          "id": "call",
+          "source": "client",
+          "target": "activation",
+          "label": "pagar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "arguments": [
+              {
+                "value": "id",
+                "parameterId": "pay-id",
+                "typeId": "string-type"
+              }
+            ],
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-pagar",
+            "sendId": "call:send",
+            "receiveId": "call:receive"
+          }
+        },
+        {
+          "id": "async",
+          "source": "activation",
+          "target": "gateway",
+          "label": "autorizar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-autorizar",
+            "sendId": "async:send",
+            "receiveId": "async:receive"
+          }
+        },
+        {
+          "id": "signal",
+          "source": "gateway",
+          "target": "activation",
+          "label": "PagoAprobado",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchSignal",
+            "signatureOwnerId": "approval-signal",
+            "signatureId": "approval-signal",
+            "sendId": "signal:send",
+            "receiveId": "signal:receive",
+            "arguments": [
+              {
+                "value": "ordenId",
+                "parameterId": "signal-order-id",
+                "typeId": "string-type"
+              }
+            ]
+          }
+        },
+        {
+          "id": "rejected-call",
+          "source": "activation",
+          "target": "gateway",
+          "label": "registrar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-registrar",
+            "sendId": "rejected-call:send",
+            "receiveId": "rejected-call:receive"
+          }
+        },
+        {
+          "id": "self",
+          "source": "activation",
+          "target": "activation",
+          "label": "validar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-validar",
+            "sendId": "self:send",
+            "receiveId": "self:receive"
+          }
+        },
+        {
+          "id": "reply",
+          "source": "activation",
+          "target": "client",
+          "label": "resultado",
+          "relationKind": "reply",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sequenceEdge": {
+            "sort": "reply",
+            "replyToId": "call",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-pagar",
+            "arguments": [
+              {
+                "value": "-",
+                "values": [
+                  "resultado"
+                ],
+                "parameterId": "payment-type-pagar:return",
+                "typeId": "string-type",
+                "assignment": "ordenId"
+              }
+            ],
+            "sendId": "reply:send",
+            "receiveId": "reply:receive"
+          }
+        },
+        {
+          "id": "create",
+          "source": "api",
+          "target": "temp",
+          "label": "crear",
+          "relationKind": "create",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sequenceEdge": {
+            "sort": "createMessage",
+            "signatureOwnerId": "session-type",
+            "signatureId": "session-type-crear",
+            "sendId": "create:send",
+            "receiveId": "create:receive"
+          }
+        },
+        {
+          "id": "parallel",
+          "source": "api",
+          "target": "gateway",
+          "label": "consultarEstado",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-consultarEstado",
+            "sendId": "parallel:send",
+            "receiveId": "parallel:receive"
+          }
+        },
+        {
+          "id": "action-msg",
+          "source": "action-exec",
+          "target": "gateway",
+          "label": "persistir",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-persistir",
+            "sendId": "action-msg:send",
+            "receiveId": "action-msg:receive"
+          }
+        },
+        {
+          "id": "note-edge",
+          "source": "comment",
+          "target": "client",
+          "label": "",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "annotationTargetEdgeId": "call"
+        },
+        {
+          "id": "note-node",
+          "source": "duration",
+          "target": "invariant",
+          "label": "",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "gate-formal-msg",
+          "source": "gate-formal",
+          "target": "client",
+          "label": "entrada",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "gate-formal-msg:send",
+            "receiveId": "gate-formal-msg:receive"
+          }
+        },
+        {
+          "id": "gate-actual-msg",
+          "source": "client",
+          "target": "gate-actual",
+          "label": "entrada",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "gate-actual-msg:send",
+            "receiveId": "gate-actual-msg:receive"
+          }
+        },
+        {
+          "id": "found",
+          "source": "client",
+          "target": "client",
+          "label": "aviso",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "client-type",
+            "signatureId": "client-type-aviso",
+            "receiveId": "found:receive"
+          }
+        },
+        {
+          "id": "lost",
+          "source": "api",
+          "target": "api",
+          "label": "notificar fuera de alcance",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "lost:send"
+          }
+        },
+        {
+          "id": "gate-outer-msg",
+          "source": "client",
+          "target": "gate-outer",
+          "label": "reintento",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "gate-outer-msg:send",
+            "receiveId": "gate-outer-msg:receive"
+          }
+        },
+        {
+          "id": "gate-inner-msg",
+          "source": "gate-inner",
+          "target": "api",
+          "label": "reintento",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "gate-inner-msg:send",
+            "receiveId": "gate-inner-msg:receive"
+          }
+        },
+        {
+          "id": "opt-msg",
+          "source": "api",
+          "target": "gateway",
+          "label": "reservar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-reservar",
+            "sendId": "opt-msg:send",
+            "receiveId": "opt-msg:receive"
+          }
+        },
+        {
+          "id": "break-msg",
+          "source": "client",
+          "target": "api",
+          "label": "cerrar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-cerrar",
+            "sendId": "break-msg:send",
+            "receiveId": "break-msg:receive"
+          }
+        },
+        {
+          "id": "par-m1",
+          "source": "client",
+          "target": "api",
+          "label": "consultar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-consultar",
+            "sendId": "par-m1:send",
+            "receiveId": "par-m1:receive"
+          }
+        },
+        {
+          "id": "par-m2",
+          "source": "api",
+          "target": "gateway",
+          "label": "confirmar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-confirmar",
+            "sendId": "par-m2:send",
+            "receiveId": "par-m2:receive"
+          }
+        },
+        {
+          "id": "seq-m1",
+          "source": "client",
+          "target": "api",
+          "label": "consultar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-consultar",
+            "sendId": "seq-m1:send",
+            "receiveId": "seq-m1:receive"
+          }
+        },
+        {
+          "id": "seq-m2",
+          "source": "api",
+          "target": "gateway",
+          "label": "confirmar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-confirmar",
+            "sendId": "seq-m2:send",
+            "receiveId": "seq-m2:receive"
+          }
+        },
+        {
+          "id": "strict-m1",
+          "source": "client",
+          "target": "api",
+          "label": "consultar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-consultar",
+            "sendId": "strict-m1:send",
+            "receiveId": "strict-m1:receive"
+          }
+        },
+        {
+          "id": "strict-m2",
+          "source": "api",
+          "target": "gateway",
+          "label": "confirmar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-confirmar",
+            "sendId": "strict-m2:send",
+            "receiveId": "strict-m2:receive"
+          }
+        },
+        {
+          "id": "critical-msg",
+          "source": "client",
+          "target": "api",
+          "label": "auditar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-auditar",
+            "sendId": "critical-msg:send",
+            "receiveId": "critical-msg:receive"
+          }
+        },
+        {
+          "id": "neg-msg",
+          "source": "client",
+          "target": "api",
+          "label": "rechazar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-rechazar",
+            "sendId": "neg-msg:send",
+            "receiveId": "neg-msg:receive"
+          }
+        },
+        {
+          "id": "assert-msg",
+          "source": "client",
+          "target": "api",
+          "label": "verificar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-verificar",
+            "sendId": "assert-msg:send",
+            "receiveId": "assert-msg:receive"
+          }
+        },
+        {
+          "id": "ignore-msg",
+          "source": "client",
+          "target": "api",
+          "label": "evaluar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-evaluar",
+            "sendId": "ignore-msg:send",
+            "receiveId": "ignore-msg:receive"
+          }
+        },
+        {
+          "id": "consider-msg",
+          "source": "client",
+          "target": "api",
+          "label": "confirmar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-confirmar",
+            "sendId": "consider-msg:send",
+            "receiveId": "consider-msg:receive"
+          }
+        },
+        {
+          "id": "core-msg-a",
+          "source": "client",
+          "target": "api",
+          "label": "procesar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-procesar",
+            "sendId": "core-msg-a:send",
+            "receiveId": "core-msg-a:receive"
+          }
+        },
+        {
+          "id": "core-msg-b",
+          "source": "client",
+          "target": "gateway",
+          "label": "revisar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "signatureOwnerId": "gateway-type",
+            "signatureId": "gateway-type-revisar",
+            "sendId": "core-msg-b:send",
+            "receiveId": "core-msg-b:receive"
+          }
+        },
+        {
+          "id": "delete",
+          "source": "api",
+          "target": "x",
+          "label": "Eliminar sesión",
+          "relationKind": "destroy",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "deleteMessage",
+            "sendId": "delete:send",
+            "receiveId": "delete:receive"
+          }
+        },
+        {
+          "id": "order",
+          "source": "client",
+          "target": "api",
+          "label": "",
+          "relationKind": "general-ordering",
+          "direction": "forward",
+          "lineStyle": "dotted",
+          "sequenceEdge": {
+            "beforeId": "call:send",
+            "afterId": "invariant-event"
+          }
+        },
+        {
+          "id": "cont-msg-start",
+          "source": "client",
+          "target": "api",
+          "label": "continuar",
+          "direction": "forward",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "lineStyle": "solid",
+          "pathStyle": "straight",
+          "relationKind": "async-message",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "cont-msg-start:send",
+            "receiveId": "cont-msg-start:receive",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "payment-type-continuar"
+          }
+        },
+        {
+          "id": "cont-msg-finish",
+          "source": "api",
+          "target": "client",
+          "label": "resultado",
+          "direction": "forward",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "lineStyle": "solid",
+          "pathStyle": "straight",
+          "relationKind": "async-message",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "cont-msg-finish:send",
+            "receiveId": "cont-msg-finish:receive",
+            "signatureOwnerId": "client-type",
+            "signatureId": "client-type-resultado"
+          }
+        },
+        {
+          "id": "alt-outer-msg",
+          "source": "client",
+          "target": "alt-outer",
+          "label": "consultaSucursal",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "alt-outer-msg:send",
+            "receiveId": "alt-outer-msg:receive"
+          }
+        },
+        {
+          "id": "alt-inner-approved-msg",
+          "source": "alt-inner-approved",
+          "target": "api",
+          "label": "consultaSucursal",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "alt-inner-approved-msg:send",
+            "receiveId": "alt-inner-approved-msg:receive"
+          }
+        },
+        {
+          "id": "alt-inner-rejected-msg",
+          "source": "alt-inner-rejected",
+          "target": "api",
+          "label": "consultaSucursal",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "alt-inner-rejected-msg:send",
+            "receiveId": "alt-inner-rejected-msg:receive"
+          }
+        }
+      ],
+      "interaction": {
+        "id": "qa-seq-full",
+        "occurrences": [
+          {
+            "id": "call:send",
+            "nodeId": "client",
+            "time": 145,
+            "kind": "send"
+          },
+          {
+            "id": "call:receive",
+            "nodeId": "activation",
+            "time": 145,
+            "kind": "receive"
+          },
+          {
+            "id": "async:send",
+            "nodeId": "activation",
+            "time": 240,
+            "kind": "send",
+            "operandId": "approved"
+          },
+          {
+            "id": "async:receive",
+            "nodeId": "gateway",
+            "time": 240,
+            "kind": "receive",
+            "operandId": "approved"
+          },
+          {
+            "id": "signal:send",
+            "nodeId": "gateway",
+            "time": 270,
+            "kind": "send",
+            "operandId": "approved"
+          },
+          {
+            "id": "signal:receive",
+            "nodeId": "activation",
+            "time": 270,
+            "kind": "receive",
+            "operandId": "approved"
+          },
+          {
+            "id": "rejected-call:send",
+            "nodeId": "activation",
+            "time": 365,
+            "kind": "send",
+            "operandId": "rejected"
+          },
+          {
+            "id": "rejected-call:receive",
+            "nodeId": "gateway",
+            "time": 365,
+            "kind": "receive",
+            "operandId": "rejected"
+          },
+          {
+            "id": "self:send",
+            "nodeId": "activation",
+            "time": 455,
+            "kind": "send"
+          },
+          {
+            "id": "self:receive",
+            "nodeId": "activation",
+            "time": 490,
+            "kind": "receive"
+          },
+          {
+            "id": "nested-end",
+            "nodeId": "api",
+            "time": 545,
+            "kind": "finish"
+          },
+          {
+            "id": "reply:send",
+            "nodeId": "activation",
+            "time": 620,
+            "kind": "send"
+          },
+          {
+            "id": "reply:receive",
+            "nodeId": "client",
+            "time": 620,
+            "kind": "receive"
+          },
+          {
+            "id": "create:send",
+            "nodeId": "api",
+            "time": 680,
+            "kind": "send"
+          },
+          {
+            "id": "create:receive",
+            "nodeId": "temp",
+            "time": 680,
+            "kind": "receive"
+          },
+          {
+            "id": "parallel:send",
+            "nodeId": "api",
+            "time": 735,
+            "kind": "send"
+          },
+          {
+            "id": "parallel:receive",
+            "nodeId": "gateway",
+            "time": 735,
+            "kind": "receive"
+          },
+          {
+            "id": "action-start",
+            "nodeId": "api",
+            "time": 810,
+            "kind": "start"
+          },
+          {
+            "id": "action-end",
+            "nodeId": "api",
+            "time": 910,
+            "kind": "finish"
+          },
+          {
+            "id": "action-msg:send",
+            "nodeId": "action-exec",
+            "time": 850,
+            "kind": "send"
+          },
+          {
+            "id": "action-msg:receive",
+            "nodeId": "gateway",
+            "time": 850,
+            "kind": "receive"
+          },
+          {
+            "id": "invariant-event",
+            "nodeId": "api",
+            "time": 780,
+            "kind": "event"
+          },
+          {
+            "id": "gate-formal-msg:send",
+            "nodeId": "gate-formal",
+            "time": 1000,
+            "kind": "send"
+          },
+          {
+            "id": "gate-formal-msg:receive",
+            "nodeId": "client",
+            "time": 1000,
+            "kind": "receive"
+          },
+          {
+            "id": "gate-actual-msg:send",
+            "nodeId": "client",
+            "time": 1010,
+            "kind": "send"
+          },
+          {
+            "id": "gate-actual-msg:receive",
+            "nodeId": "gate-actual",
+            "time": 1010,
+            "kind": "receive"
+          },
+          {
+            "id": "found:receive",
+            "nodeId": "client",
+            "time": 1230,
+            "kind": "receive"
+          },
+          {
+            "id": "lost:send",
+            "nodeId": "api",
+            "time": 1270,
+            "kind": "send"
+          },
+          {
+            "id": "gate-outer-msg:send",
+            "nodeId": "client",
+            "time": 1378,
+            "kind": "send"
+          },
+          {
+            "id": "gate-outer-msg:receive",
+            "nodeId": "gate-outer",
+            "time": 1378,
+            "kind": "receive"
+          },
+          {
+            "id": "gate-inner-msg:send",
+            "nodeId": "gate-inner",
+            "time": 1408,
+            "kind": "send",
+            "operandId": "loop-1"
+          },
+          {
+            "id": "gate-inner-msg:receive",
+            "nodeId": "api",
+            "time": 1408,
+            "kind": "receive",
+            "operandId": "loop-1"
+          },
+          {
+            "id": "opt-msg:send",
+            "nodeId": "api",
+            "time": 1505,
+            "kind": "send",
+            "operandId": "opt-1"
+          },
+          {
+            "id": "opt-msg:receive",
+            "nodeId": "gateway",
+            "time": 1505,
+            "kind": "receive",
+            "operandId": "opt-1"
+          },
+          {
+            "id": "break-msg:send",
+            "nodeId": "client",
+            "time": 1720,
+            "kind": "send",
+            "operandId": "break-1"
+          },
+          {
+            "id": "break-msg:receive",
+            "nodeId": "api",
+            "time": 1720,
+            "kind": "receive",
+            "operandId": "break-1"
+          },
+          {
+            "id": "par-m1:send",
+            "nodeId": "client",
+            "time": 1890,
+            "kind": "send",
+            "operandId": "par-1"
+          },
+          {
+            "id": "par-m1:receive",
+            "nodeId": "api",
+            "time": 1890,
+            "kind": "receive",
+            "operandId": "par-1"
+          },
+          {
+            "id": "par-m2:send",
+            "nodeId": "api",
+            "time": 1973,
+            "kind": "send",
+            "operandId": "par-2"
+          },
+          {
+            "id": "par-m2:receive",
+            "nodeId": "gateway",
+            "time": 1973,
+            "kind": "receive",
+            "operandId": "par-2"
+          },
+          {
+            "id": "seq-m1:send",
+            "nodeId": "client",
+            "time": 2100,
+            "kind": "send",
+            "operandId": "seq-1"
+          },
+          {
+            "id": "seq-m1:receive",
+            "nodeId": "api",
+            "time": 2100,
+            "kind": "receive",
+            "operandId": "seq-1"
+          },
+          {
+            "id": "seq-m2:send",
+            "nodeId": "api",
+            "time": 2183,
+            "kind": "send",
+            "operandId": "seq-2"
+          },
+          {
+            "id": "seq-m2:receive",
+            "nodeId": "gateway",
+            "time": 2183,
+            "kind": "receive",
+            "operandId": "seq-2"
+          },
+          {
+            "id": "strict-m1:send",
+            "nodeId": "client",
+            "time": 2310,
+            "kind": "send",
+            "operandId": "strict-1"
+          },
+          {
+            "id": "strict-m1:receive",
+            "nodeId": "api",
+            "time": 2310,
+            "kind": "receive",
+            "operandId": "strict-1"
+          },
+          {
+            "id": "strict-m2:send",
+            "nodeId": "api",
+            "time": 2393,
+            "kind": "send",
+            "operandId": "strict-2"
+          },
+          {
+            "id": "strict-m2:receive",
+            "nodeId": "gateway",
+            "time": 2393,
+            "kind": "receive",
+            "operandId": "strict-2"
+          },
+          {
+            "id": "critical-msg:send",
+            "nodeId": "client",
+            "time": 2535,
+            "kind": "send",
+            "operandId": "critical-1"
+          },
+          {
+            "id": "critical-msg:receive",
+            "nodeId": "api",
+            "time": 2535,
+            "kind": "receive",
+            "operandId": "critical-1"
+          },
+          {
+            "id": "neg-msg:send",
+            "nodeId": "client",
+            "time": 2720,
+            "kind": "send",
+            "operandId": "neg-1"
+          },
+          {
+            "id": "neg-msg:receive",
+            "nodeId": "api",
+            "time": 2720,
+            "kind": "receive",
+            "operandId": "neg-1"
+          },
+          {
+            "id": "assert-msg:send",
+            "nodeId": "client",
+            "time": 2905,
+            "kind": "send",
+            "operandId": "assert-1"
+          },
+          {
+            "id": "assert-msg:receive",
+            "nodeId": "api",
+            "time": 2905,
+            "kind": "receive",
+            "operandId": "assert-1"
+          },
+          {
+            "id": "ignore-msg:send",
+            "nodeId": "client",
+            "time": 3090,
+            "kind": "send",
+            "operandId": "ignore-1"
+          },
+          {
+            "id": "ignore-msg:receive",
+            "nodeId": "api",
+            "time": 3090,
+            "kind": "receive",
+            "operandId": "ignore-1"
+          },
+          {
+            "id": "consider-msg:send",
+            "nodeId": "client",
+            "time": 3275,
+            "kind": "send",
+            "operandId": "consider-1"
+          },
+          {
+            "id": "consider-msg:receive",
+            "nodeId": "api",
+            "time": 3275,
+            "kind": "receive",
+            "operandId": "consider-1"
+          },
+          {
+            "id": "core-start",
+            "nodeId": "client",
+            "time": 3390,
+            "kind": "event"
+          },
+          {
+            "id": "core-end",
+            "nodeId": "client",
+            "time": 3475,
+            "kind": "event"
+          },
+          {
+            "id": "core-msg-a:send",
+            "nodeId": "client",
+            "time": 3420,
+            "kind": "send"
+          },
+          {
+            "id": "core-msg-a:receive",
+            "nodeId": "api",
+            "time": 3420,
+            "kind": "receive"
+          },
+          {
+            "id": "core-msg-b:send",
+            "nodeId": "client",
+            "time": 3450,
+            "kind": "send"
+          },
+          {
+            "id": "core-msg-b:receive",
+            "nodeId": "gateway",
+            "time": 3450,
+            "kind": "receive"
+          },
+          {
+            "id": "delete:send",
+            "nodeId": "api",
+            "time": 3820,
+            "kind": "send"
+          },
+          {
+            "id": "delete:receive",
+            "nodeId": "x",
+            "time": 3820,
+            "kind": "receive"
+          },
+          {
+            "id": "cont-msg-start:send",
+            "nodeId": "client",
+            "time": 3600,
+            "kind": "send",
+            "operandId": "cont-start-op"
+          },
+          {
+            "id": "cont-msg-start:receive",
+            "nodeId": "api",
+            "time": 3600,
+            "kind": "receive",
+            "operandId": "cont-start-op"
+          },
+          {
+            "id": "cont-msg-finish:send",
+            "nodeId": "api",
+            "time": 3665,
+            "kind": "send",
+            "operandId": "cont-finish-op"
+          },
+          {
+            "id": "cont-msg-finish:receive",
+            "nodeId": "client",
+            "time": 3665,
+            "kind": "receive",
+            "operandId": "cont-finish-op"
+          },
+          {
+            "id": "alt-outer-msg:send",
+            "nodeId": "client",
+            "time": 214,
+            "kind": "send"
+          },
+          {
+            "id": "alt-outer-msg:receive",
+            "nodeId": "alt-outer",
+            "time": 214,
+            "kind": "receive"
+          },
+          {
+            "id": "alt-inner-approved-msg:send",
+            "nodeId": "alt-inner-approved",
+            "time": 253,
+            "kind": "send",
+            "operandId": "approved"
+          },
+          {
+            "id": "alt-inner-approved-msg:receive",
+            "nodeId": "api",
+            "time": 253,
+            "kind": "receive",
+            "operandId": "approved"
+          },
+          {
+            "id": "alt-inner-rejected-msg:send",
+            "nodeId": "alt-inner-rejected",
+            "time": 390,
+            "kind": "send",
+            "operandId": "rejected"
+          },
+          {
+            "id": "alt-inner-rejected-msg:receive",
+            "nodeId": "api",
+            "time": 390,
+            "kind": "receive",
+            "operandId": "rejected"
+          }
+        ],
+        "showFrame": true,
+        "parameters": [
+          {
+            "id": "root-in",
+            "name": "id",
+            "direction": "in",
+            "typeId": "string-type",
+            "lower": 1,
+            "upper": 1
+          },
+          {
+            "id": "root-return",
+            "name": "resultado",
+            "direction": "return",
+            "typeId": "string-type",
+            "lower": 1,
+            "upper": 1
+          }
+        ],
+        "contextId": "payment-type"
+      }
+    }
+  ],
+  "fieldDefinitions": []
+}

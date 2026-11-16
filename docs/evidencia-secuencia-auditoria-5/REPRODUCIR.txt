@@ -1,0 +1,11 @@
+Evidencia auditoría 5 — Node 22.16.0 — base atlas(20261116-222443).zip.
+Runner oficial: npm run qa:uml:secuencia -- --list; npm run qa:uml:secuencia.
+Typecheck: node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit; node node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit.
+Diagnóstico alternativo en Linux: copie los 3 scripts de este directorio a la raíz del repositorio. Establezca variables ficticias de API, sin conexión DB, como las definidas en scripts/qa-uml.mjs (NODE_ENV=test, AUTH_MODE=local, DATABASE_URL de QA, DB_SSL=false, ATLAS_CSRF_SECRET y ATLAS_EXPORT_SIGNING_KEY de QA). Ejecute:
+node --loader ./qa-loader.mjs --test packages/contracts/src/uml-sequence-policy.unit.test.ts apps/api/src/domain/sequence-persistence.unit.test.ts
+node --loader ./qa-loader.mjs --test packages/contracts/src/uml-class-audit.unit.test.ts packages/contracts/src/uml-class-policy.unit.test.ts packages/contracts/src/uml-usecase-policy.unit.test.ts packages/contracts/src/uml-activity-policy.unit.test.ts apps/api/src/domain/uml-class-policy.unit.test.ts apps/api/src/domain/uml-usecase-policy.unit.test.ts apps/api/src/domain/uml-activity-policy.unit.test.ts apps/api/src/domain/import-scope.unit.test.ts
+node --loader ./qa-loader.mjs --test --test-name-pattern '\[uml-sequence\]' apps/api/src/domain/uml-scoped.unit.test.ts
+node --test --test-name-pattern '[Ss]ecuencia' scripts/graph-regression.cjs
+node --loader ./qa-loader.mjs ./check-fixtures.ts
+node --loader ./qa-loader.mjs ./qa-ui-audit5-diagnostic.tsx
+El arnés de UI ejecuta los 4 casos nuevos con componentes reales React/jsdom y aserciones Node, no Vitest oficial. No ejecuta E2E ni persistencia real. El runner oficial se debe ejecutar en la instalación local para el cierre. Los logs .exit corresponden a los códigos de salida realmente registrados. graph.log corresponde a una ejecución directa previa, 7/7; el runner.log final confirma los mismos 7 casos.

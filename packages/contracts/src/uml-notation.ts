@@ -60,6 +60,7 @@ export const UML_NOTATION:Readonly<Record<string,UmlRelationNotation>>={
  reference:spec('dashed','forward','none','open-arrow','«reference»'),
  include:spec('dashed','forward','none','open-arrow','«include»'),
  extend:spec('dashed','forward','none','open-arrow','«extend»'),
+ 'exception-handler':spec('solid','forward','none','open-arrow'),
  'control-flow':spec('solid','forward','none','open-arrow'),
  'object-flow':spec('solid','forward','none','open-arrow'),
  fork:spec('solid','forward','none','open-arrow'),
@@ -68,6 +69,7 @@ export const UML_NOTATION:Readonly<Record<string,UmlRelationNotation>>={
  transition:spec('solid','forward','none','open-arrow'),
  trigger:spec('solid','forward','none','open-arrow'),
  completion:spec('solid','forward','none','open-arrow'),
+ 'general-ordering':spec('dotted','forward'),
  message:spec('solid','forward','none','filled-arrow'),
  reply:spec('dashed','forward','none','open-arrow'),
  'async-message':spec('solid','forward','none','open-arrow'),
@@ -116,4 +118,4 @@ export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:Project
  const node=view?.nodes.find(n=>n.id===edge.target),formals=node&&doc.elements[node.elementId]?.uml?.templateParameters
  return `${label} <${edge.templateBindings.map(b=>`${formals?.find(p=>p.id===b.parameterId)?.name||'?'} → ${doc.elements[b.elementId]?.name||'Tipo no disponible'}`).join(', ')}>`
 }
-export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label||['uml-class','uml-usecase'].includes(diagram)&&['generalization','realization','specification-realization','containment','annotation'].includes(kind)}
+export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label&&!(diagram==='uml-sequence'&&kind==='create')||['uml-class','uml-usecase'].includes(diagram)&&['generalization','realization','specification-realization','containment','annotation'].includes(kind)}

@@ -1,3 +1,5 @@
+import {SEQUENCE_TYPES,SEQUENCE_RELATIONS,sequenceEndpointTypeValid} from './uml-sequence-policy'
+import {ACTIVITY_TYPES,ACTIVITY_RELATIONS,activityEndpointTypeValid} from './uml-activity-policy'
 import {USECASE_CREATION_TYPES,USECASE_TYPES,USECASE_RELATIONS,useCaseEndpointValid} from './uml-usecase-catalog'
 import {CLASS_TYPES,CLASS_RELATIONS} from './uml-class-catalog'
 import {classEndpointValid} from './uml-class-policy'
@@ -20,9 +22,9 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-package':['uml-package','uml-subpackage','uml-model','uml-profile'],
  'uml-profile':['uml-profile','uml-stereotype','uml-metaclass','uml-package'],
  'uml-usecase':USECASE_TYPES,
- 'uml-activity':['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'],
+ 'uml-activity':ACTIVITY_TYPES,
  'uml-state':['uml-start','uml-state','uml-end','uml-region','uml-decision','uml-fork','uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point','uml-terminate'],
- 'uml-sequence':['uml-lifeline','uml-frame','uml-interaction','uml-activation','uml-destruction'],
+ 'uml-sequence':SEQUENCE_TYPES,
  'uml-communication':['actor','uml-object','uml-lifeline','uml-frame'],
  'uml-interaction-overview':['uml-start','uml-interaction','uml-decision','uml-end','uml-frame'],
  'uml-timing':['uml-lifeline','uml-state','uml-time','uml-constraint'],
@@ -36,9 +38,9 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
  'uml-package':['dependency','import','merge'],
  'uml-profile':['extension','apply','reference','generalization'],
  'uml-usecase':USECASE_RELATIONS,
- 'uml-activity':['control-flow','object-flow'],
+ 'uml-activity':ACTIVITY_RELATIONS,
  'uml-state':['transition','trigger','completion','generalization'],
- 'uml-sequence':['message','reply','async-message','create','destroy'],
+ 'uml-sequence':SEQUENCE_RELATIONS,
  'uml-communication':['message','reply','async-message','link'],
  'uml-interaction-overview':['control-flow','interaction-ref','decision'],
  'uml-timing':['timing-transition','duration','constraint'],
@@ -105,15 +107,7 @@ export const umlRelationLabel=(kind:string)=>UML_RELATION_LABELS[kind]||kind.rep
 /** Validaciones semánticas para relaciones nuevas, no para migrar modelos históricos. */
 export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:ElementType,target:ElementType):boolean{
  if(diagram==='uml-class')return classEndpointValid(kind,source,target)
- if(diagram==='uml-activity'){
-  // UML: particiones encapsulan los nodos; no participan como origen/destino del flujo.
-  const forbidden=['uml-partition']
-  if(forbidden.includes(source)||forbidden.includes(target))return false
-  if(['uml-end','uml-flow-final'].includes(source)||target==='uml-start')return false
-  if(kind==='control-flow')return source!=='uml-object-node'&&target!=='uml-object-node'
-  if(kind==='object-flow')return source==='uml-object-node'||target==='uml-object-node'
-  return false
- }
+ if(diagram==='uml-activity')return activityEndpointTypeValid(kind,source,target)
  if(diagram==='uml-deployment'){
   const location=(t:ElementType)=>['uml-node','uml-device','uml-execution'].includes(t)
   if(kind==='communication-path')return location(source)&&location(target)
@@ -132,12 +126,7 @@ export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:
  }
  if(diagram==='uml-usecase')return useCaseEndpointValid(kind,source,target)
 
- if(diagram==='uml-sequence'){
-  const participant=(t:ElementType)=>['actor','uml-lifeline','uml-activation'].includes(t)
-  if(kind==='create')return participant(source)&&target==='uml-lifeline'
-  if(kind==='destroy')return participant(source)&&['uml-lifeline','uml-activation','uml-destruction'].includes(target)
-  return participant(source)&&participant(target)&&['message','reply','async-message'].includes(kind)
- }
+ if(diagram==='uml-sequence')return sequenceEndpointTypeValid(kind,source,target)
  if(diagram==='uml-communication'){
   const participant=(t:ElementType)=>['actor','uml-object','uml-lifeline'].includes(t)
   if(!participant(source)||!participant(target))return false

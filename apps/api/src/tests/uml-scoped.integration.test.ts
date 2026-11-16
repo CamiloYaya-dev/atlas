@@ -1,6 +1,7 @@
 import {test,after} from 'node:test'
 import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
+import {readFileSync,readdirSync} from 'node:fs'
 import {buildApp} from '../app'
 import {pool} from '../db/pool'
 import {hashPassword} from '../security/password'
@@ -10,7 +11,8 @@ const expected='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
 if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||process.env.DATABASE_URL!==expected)throw Error('Solo se permite la BD QA local 5433/atlas_test')
 after(()=>pool.end())
 for(const [type] of examples)test(`[${type}] API HTTP real: importación, invalidación, guardado, historial y exportación`,async()=>{
- const app=await buildApp(),email=`qa-uml-${randomUUID()}@example.test`,password='AtlasQA!2026-local-only';let userId='',workspaceId=''
+ let app=await buildApp();const email=`qa-uml-${randomUUID()}@example.test`,password='AtlasQA!2026-local-only';let userId='',workspaceId=''
+ const resetQaRateLimitWindow=async()=>{await app.close();app=await buildApp()}
  try{
   const result=await pool.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,platform_admin) VALUES($1,$2,$3,true) RETURNING id`,[email,'QA UML',await hashPassword(password)]);userId=result.rows[0].id
   const login=await app.inject({method:'POST',url:'/api/v1/auth/login',payload:{email,password}});assert.equal(login.statusCode,200,login.body)
@@ -22,6 +24,29 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
   const read=await send('GET',base+'/document');assert.equal(read.statusCode,200,read.body);assert.equal(read.json().version,2);assert.deepEqual(read.json().document,doc)
   const invalid=structuredClone(doc);invalid.diagrams[0].edges[0].target='missing';const rejected=await send('PUT',base+'/document',{document:invalid,expectedVersion:2});assert.ok([400,403,409,422].includes(rejected.statusCode),rejected.body)
   const unchanged=await send('GET',base+'/document');assert.equal(unchanged.json().version,2);assert.deepEqual(unchanged.json().document,doc)
+  if(type==='uml-sequence'){
+   const dir=new URL('../../../../qa/uml-sequence-negative/',import.meta.url)
+   const names=readdirSync(dir).filter(n=>n.endsWith('.json')).sort()
+   // Three requests per fixture; isolate batches without weakening actual limits.
+   for(const [index,name] of names.entries()){
+    if(index>0&&index%20===0)await resetQaRateLimitWindow()
+    const bad=JSON.parse(readFileSync(new URL(name,dir),'utf8'))
+    for(const [method,route] of [['PUT','/document'],['POST','/import']] as const){
+     const res=await send(method,base+route,{document:bad,expectedVersion:2})
+     assert.equal(res.statusCode,400,`${name} ${method}: ${res.body}`)
+    }
+    const still=await send('GET',base+'/document')
+    assert.equal(still.statusCode,200,`${name} GET: ${still.body}`)
+    assert.equal(still.json().version,2,name)
+    assert.deepEqual(still.json().document,doc,name)
+   }
+   // Leave the remaining persistence/history/export assertions a fresh window.
+   await resetQaRateLimitWindow()
+  }
+  if(type==='uml-activity'){
+   const mutations:[string,(v:typeof doc)=>void][]=[['segundo else',v=>{v.diagrams[0].edges.find(e=>e.id==='c4')!.activityEdge={guard:'else'}}],['pin incompatible',v=>{v.elements.outpin.activityDetail!.ownerActionId='missing'}],['peso inválido',v=>{v.diagrams[0].edges[0].activityEdge={weight:0}}],['interrupción fuera del ámbito',v=>{v.diagrams[0].edges.find(e=>e.id==='interrupt')!.activityEdge={interruptingRegionId:'lane'}}],['AUD-ACT-001 excepción incompatible',v=>{v.diagrams[0].edges.find(e=>e.id==='exception')!.activityEdge!.exceptionTypeIds=['order-type']}],['AUD-ACT-002 parámetro repetido',v=>{v.elements['param-copy']={...structuredClone(v.elements['param-in']),id:'param-copy'};v.diagrams[0].nodes.push({id:'param-copy',elementId:'param-copy',x:0,y:400})}],['AUD-ACT-003 evento incorrecto',v=>{v.elements.wait.activityDetail={kind:'acceptEvent',referenceId:'order-type'}}],['AUD-ACT-004 pin separado',v=>{const n=v.diagrams[0].nodes.find(n=>n.id==='outpin')!;n.x=20;n.y=20}],['AUD-ACT-005 argumento incompatible',v=>{v.elements.inpin.activityDetail!.typeId='error-type'}],['AUD-ACT-006A firma no compatible con transformación',v=>{v.diagrams.find(d=>d.id==='qa-decision-behavior')!.activity!.parameters![0].typeId='order-type'}]];
+   for(const [name,mutate] of mutations){const bad=structuredClone(doc);mutate(bad);for(const [method,route] of [['PUT','/document'],['POST','/import']] as const){const res=await send(method,base+route,{document:bad,expectedVersion:2});assert.equal(res.statusCode,400,name+': '+res.body)}const still=await send('GET',base+'/document');assert.equal(still.json().version,2);assert.deepEqual(still.json().document,doc)}
+  }
   if(type==='uml-class'){
    const invalidCases:[string,(value:typeof doc)=>void][]=[
     ['AUD-CL-001 paquete como atributo',v=>{v.elements.a.uml={...v.elements.a.uml,attributes:[{id:'audit-attr',name:'invalid',type:'Paquete',typeId:'p',visibility:'private'}]}}],
@@ -65,6 +90,20 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
    const shared=structuredClone(proposed),primary=shared.diagrams[0],relation=primary.edges.find(e=>e.associationClassId)!;relation.description='Descripción común';const secondary=structuredClone(primary);secondary.id='qa3-second';secondary.nodes=secondary.nodes.map(n=>({...n,id:'copy-'+n.id}));secondary.edges=[{...relation,id:'qa3-shared',source:'copy-'+relation.source,target:'copy-'+relation.target,pathStyle:'step',...(relation.associationEnds?{associationEnds:relation.associationEnds.map(end=>({...end,nodeId:'copy-'+end.nodeId}))}:{})}];shared.diagrams.push(secondary);const both=await send('PUT',base+'/document',{document:shared,expectedVersion:4});assert.equal(both.statusCode,200,both.body);assert.equal(both.json().version,5);
    const unilateral=structuredClone(shared);unilateral.diagrams[0].edges.find(e=>e.id===relation.id)!.description='Descripción unilateral';const rejectedShared=await send('PUT',base+'/document',{document:unilateral,expectedVersion:5});assert.equal(rejectedShared.statusCode,400,rejectedShared.body);assert.match(rejectedShared.body,/identidad semántica/);unchanged=await send('GET',base+'/document');assert.equal(unchanged.json().version,5);assert.deepEqual(unchanged.json().document,JSON.parse(JSON.stringify(shared)));
    const synchronized=replaceClassRelationAcrossViews(shared,primary.id,{...relation,description:'Actualizada en ambas'});const savedShared=await send('PUT',base+'/document',{document:synchronized,expectedVersion:5});assert.equal(savedShared.statusCode,200,savedShared.body);assert.equal(savedShared.json().version,6);const latest=await send('GET',base+'/document');assert.equal(latest.json().document.diagrams[1].edges[0].description,'Actualizada en ambas');assert.equal(latest.json().document.diagrams[1].edges[0].id,'qa3-shared');assert.equal(latest.json().document.diagrams[1].edges[0].pathStyle,'step');const historical=await send('GET',base+'/versions/5');assert.equal(historical.json().document.diagrams[1].edges[0].description,'Descripción común');
+  }
+  // IMP: same endpoint, explicit project replacement and single-diagram transactional CAS.
+  if(['uml-usecase','uml-activity','uml-class','uml-sequence'].includes(type)){
+   const latest=(await send('GET',base+'/document')).json(),version=latest.version,initial=latest.document as typeof doc;
+   const from=type==='uml-activity'?doc.diagrams[1]:doc.diagrams[0],target=initial.diagrams.find(d=>d.id===from.id)!;
+   const scope={mode:'diagram',targetDiagramId:target.id,sourceDiagramId:from.id};
+   const wrong=structuredClone(doc);wrong.diagrams.find(d=>d.id===from.id)!.type=type==='uml-class'?'uml-usecase':'uml-class';
+   const mismatch=await send('POST',base+'/import',{document:wrong,expectedVersion:version,scope});assert.ok([400,403].includes(mismatch.statusCode),mismatch.body);
+   const stale=await send('POST',base+'/import',{document:doc,expectedVersion:version-1,scope});assert.equal(stale.statusCode,409,stale.body);
+   assert.deepEqual((await send('GET',base+'/document')).json().document,initial);
+   const scoped=await send('POST',base+'/import',{document:doc,expectedVersion:version,scope});assert.equal(scoped.statusCode,200,scoped.body);
+   const after=(await send('GET',base+'/document')).json();assert.equal(after.version,version+1);assert.equal(after.document.diagrams.find((d:typeof target)=>d.id===target.id).nodes.length,from.nodes.length);assert.deepEqual(after.document.diagrams.filter((d:typeof target)=>d.id!==target.id),initial.diagrams.filter(d=>d.id!==target.id));
+   assert.deepEqual((await send('GET',base+'/versions/'+version)).json().document,initial);
+   const complete=await send('POST',base+'/import',{document:doc,expectedVersion:version+1,scope:{mode:'project'}});assert.equal(complete.statusCode,200,complete.body);assert.deepEqual((await send('GET',base+'/document')).json().document,doc);
   }
  }finally{try{if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]);if(userId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[userId])}finally{await app.close()}}
 })

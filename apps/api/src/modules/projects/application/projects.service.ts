@@ -1,3 +1,4 @@
+import {parseImportScope} from './import-scope'
 import {isProjectDocument,emptyDoc} from '@atlas/contracts'
 import {ProjectsRepository} from '../infrastructure/projects.repository'
 import {DomainError,notFound,cleanName} from '../../../domain/errors'
@@ -61,11 +62,11 @@ export class ProjectsService {
   if(!data)throw notFound()
   return {format:'ATLAS-V4.2',exportedAt:new Date().toISOString(),document:projectVisible(data.document,a)}
  }
- async saveDocument(projectId:string,document:unknown,expectedVersion:unknown,userId:string,operation:'save'|'import'='save'){
+ async saveDocument(projectId:string,document:unknown,expectedVersion:unknown,userId:string,operation:'save'|'import'='save',scope?:unknown){
   if(!isProjectDocument(document))throw new DomainError('Documento ATLAS inválido',400)
   if(Buffer.byteLength(JSON.stringify(document),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande (máximo 4 MB)',413)
   if(typeof expectedVersion!=='number'||!Number.isSafeInteger(expectedVersion)||expectedVersion<1)throw new DomainError('Versión esperada inválida',400)
-  const version=await this.repo.saveAuthorized(projectId,document,expectedVersion,userId,operation)
+  const version=await this.repo.saveAuthorized(projectId,document,expectedVersion,userId,operation,undefined,operation==='import'?parseImportScope(scope):undefined)
   if(version===null)throw new DomainError('Conflicto: otro usuario guardó antes. Recarga antes de modificar.',409)
   return version
  }

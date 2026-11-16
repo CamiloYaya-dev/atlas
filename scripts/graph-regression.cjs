@@ -687,9 +687,9 @@ test('importación QA 5 vistas: estructuras anidadas y relaciones de perfiles y 
 })
 
 // ATLAS QA UML actividades — controles y formas nativas 14/11/2026.
-test('UML actividades ofrece exactamente sus ocho nodos y dos flujos semánticos',()=>{
- assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-activity']],['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition'])
- assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-activity']],['control-flow','object-flow'])
+test('UML actividades ofrece catálogo integral, dos flujos y relaciones auxiliares',()=>{
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-activity']],['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition','uml-activity-pin','uml-activity-parameter','uml-activity-interruptible-region','uml-comment','uml-constraint'])
+ assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-activity']],['control-flow','object-flow','exception-handler','annotation'])
  assert.equal(uml.umlElementCreatable('uml-activity','uml-signal'),false)
  assert.equal(uml.umlElementAllowed('uml-activity','uml-signal'),true)
  for(const t of ['fork','join','exception']){
@@ -700,8 +700,8 @@ test('UML actividades ofrece exactamente sus ocho nodos y dos flujos semánticos
 test('UML actividades: no se pueden conectar particiones o salir de un final',()=>{
  assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-start','uml-action'),true)
  assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-action','uml-decision'),true)
- assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-object-node','uml-action'),false)
- assert.equal(uml.umlRelationEndpointValid('uml-activity','object-flow','uml-object-node','uml-action'),true)
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-object-node','uml-action'),true) // tipo potencialmente compatible; isControlType se valida en política
+ assert.equal(uml.umlRelationEndpointValid('uml-activity','object-flow','uml-object-node','uml-action'),false) // datos requieren pin
  assert.equal(uml.umlRelationEndpointValid('uml-activity','object-flow','uml-action','uml-action'),false)
  assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-end','uml-action'),false)
  assert.equal(uml.umlRelationEndpointValid('uml-activity','control-flow','uml-flow-final','uml-action'),false)

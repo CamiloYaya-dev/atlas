@@ -1,6 +1,6 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument} from '@atlas/contracts'
+import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument,initializeSequenceNode,sequenceBox,sequencePositionLocked} from '@atlas/contracts'
 import type {DiagramType,ElementType,ProjectDocument} from '@atlas/contracts'
 import {addElementNode,createDiagram,resizeNode,moveNode,setNodePackage,moveDiagramSelection,removeDiagramSelection,connectNodes,editElement,removeElementNode} from './document-commands'
 const fixture=(type:DiagramType,items:[string,ElementType,number,number][])=>{
@@ -70,3 +70,29 @@ test('selección: rechaza IDs ajenos o posiciones inválidas antes de cambiar da
 test('quitar nodo padre conserva hijo directo, ficha compartida y coordenadas absolutas',()=>{
  let d=setNodePackage(seq(),'d','activation','participant');const abs=umlAbsolutePosition(d.diagrams[0],find(d,'activation'));d=removeElementNode(d,'d','participant');assert.ok(d.elements.participant);assert.equal(find(d,'activation').parentNodeId,undefined);assert.deepEqual([find(d,'activation').x,find(d,'activation').y],[abs.x,abs.y])
 })
+
+// A root is created before timing exists. Draft attachments must remain editable,
+// while resolved/partially resolved symbols retain the semantic safeguards.
+test('secuencia: borrador con Interaction admite drag absoluto y resize de activación sin alterar ocurrencias ajenas',()=>{
+ let d=seq();d=resizeNode(d,'d','participant',250,500);d=setNodePackage(d,'d','activation','participant');d=setNodePackage(d,'d','destroy','activation');
+ d=addElementNode(d,'d',{...createElement('otro','uml-lifeline'),id:'otro'},{id:'otro',x:800,y:20});
+ d.diagrams[0].interaction!.occurrences.push({id:'unrelated',nodeId:'otro',time:130,kind:'event'});
+ const original=structuredClone(d.diagrams[0].interaction);
+ d=moveDiagramSelection(d,'d',[{id:'activation',x:999,y:10000}]);
+ assert.equal(find(d,'activation').x,101);assert.equal(find(d,'activation').y,371);
+ d=resizeNode(d,'d','activation',48,180);assert.equal(find(d,'activation').y,311);assert.equal(find(d,'destroy').y,156);
+ assert.deepEqual(d.diagrams[0].interaction,original);assert.ok(isProjectDocument(d));
+ const b=sequenceBox(d,d.diagrams[0],find(d,'participant')),a=sequenceBox(d,d.diagrams[0],find(d,'activation'));
+ d=moveDiagramSelection(d,'d',[{id:'participant',x:b.x+40,y:b.y+30},{id:'activation',x:a.x+40,y:a.y+30}]);
+ assert.equal(find(d,'activation').y,311);assert.equal(find(d,'participant').x,140);assert.deepEqual(d.diagrams[0].interaction,original);
+});
+test('secuencia: activación con ocurrencias y X resuelta no permiten drag ni resize geométrico que ignore el tiempo',()=>{
+ let d=seq();d=resizeNode(d,'d','participant',250,500);d=setNodePackage(d,'d','activation','participant');
+ d=initializeSequenceNode(d,'d','activation');d=setNodePackage(d,'d','destroy','participant');d=initializeSequenceNode(d,'d','destroy');
+ const snapshot=JSON.stringify(d),v=d.diagrams[0];
+ for(const id of ['activation','destroy']){assert.equal(sequencePositionLocked(d,v,find(d,id)),true);assert.throws(()=>moveNode(d,'d',id,200,200),/ocurrencias/);assert.throws(()=>moveDiagramSelection(d,'d',[{id,x:200,y:200}]),/ocurrencias/);assert.throws(()=>resizeNode(d,'d',id,48,180),/ocurrencias/);}
+ assert.equal(JSON.stringify(d),snapshot);
+ const b=sequenceBox(d,v,find(d,'participant')),before=v.interaction!.occurrences;
+ const out=moveDiagramSelection(d,'d',[{id:'participant',x:b.x+40,y:b.y+30}]);
+ assert.deepEqual(out.diagrams[0].interaction!.occurrences,before.map(o=>({...o,time:o.time+30})));
+});

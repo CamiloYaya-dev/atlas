@@ -144,3 +144,15 @@ it('destrucción directamente unida a participante recorta su línea de vida, si
 })
 
 it('AUD-CL-UX UML presenta información completa incluso si la perspectiva previa era funcional',()=>{const model=emptyDoc(),element=createElement('Prueba','uml-class');model.elements[element.id]=element;const diagram:Diagram={id:'classes-ux',name:'Clases',type:'uml-class',description:'',createdAt:'2026-11-16',nodes:[{id:'node',elementId:element.id,x:100,y:100}],edges:[]};model.diagrams=[diagram];const {result,rerender}=renderHook(({mode}:{mode:Perspective})=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode,selectedId:null,canEdit:true}),{initialProps:{mode:'functional' as Perspective}});expect(result.current.nodes[0].data.mode).toBe('mixed');rerender({mode:'technical'});expect(result.current.nodes[0].data.mode).toBe('mixed');expect(result.current.nodes[0].data.element).toEqual(element)})
+
+it('destrucción y activación de borrador con Interaction se distinguen de símbolos temporales y respetan permisos',()=>{
+ const model=emptyDoc();for(const [id,type] of [['p','uml-lifeline'],['a','uml-activation'],['x','uml-destruction']] as const)model.elements[id]={...createElement(id,type),id};
+ const diagram:Diagram={id:'s',type:'uml-sequence',name:'Secuencia',description:'',createdAt:'2026-11-16',interaction:{id:'s',occurrences:[]},nodes:[{id:'p',elementId:'p',x:100,y:20,width:170,height:450},{id:'a',elementId:'a',parentNodeId:'p',x:61,y:90,width:48,height:120},{id:'x',elementId:'x',parentNodeId:'p',x:61,y:426,width:48,height:48}],edges:[]};model.diagrams=[diagram];
+ const {result,rerender}=renderHook(({doc,canEdit}:{doc:typeof model;canEdit:boolean})=>useGraphView({doc,diagram:doc.diagrams[0],groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit}),{initialProps:{doc:model,canEdit:true}});
+ const get=(id:string)=>result.current.nodes.find(n=>n.id===id)!;
+ expect(get('a')).toMatchObject({position:{x:161,y:110},draggable:true,data:{sequencePositionLocked:false}});expect(get('x').data.sequencePositionLocked).toBe(false);
+ const typed=structuredClone(model);typed.elements.a.sequenceDetail={lifelineId:'p',startOccurrenceId:'start',finishOccurrenceId:'finish'};typed.elements.x.sequenceDetail={lifelineId:'p',occurrenceId:'end'};typed.diagrams[0].interaction!.occurrences=[{id:'start',nodeId:'a',time:110,kind:'start'},{id:'finish',nodeId:'a',time:230,kind:'finish'},{id:'end',nodeId:'x',time:470,kind:'event'}];
+ rerender({doc:typed,canEdit:true});for(const id of ['a','x'])expect(get(id)).toMatchObject({draggable:false,data:{sequencePositionLocked:true}});
+ rerender({doc:model,canEdit:false});for(const id of ['a','x'])expect(get(id).draggable).toBe(false);
+ expect(model.diagrams[0].interaction?.occurrences).toEqual([]);
+});

@@ -1,7 +1,12 @@
+import {sequenceFragmentSize} from './uml-sequence-geometry'
+import {activityActionSize,activityPinSize} from './uml-activity-layout'
 /** Node dimensions belong to each appearance in a diagram, not to the shared element. */
 import type {DiagramType,ElementType,DiagramNode,ModelElement} from './index'
 import {umlContainerSize} from './uml-containers'
 export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
+ if(diagram==='uml-activity'&&type==='uml-activity-pin')return {width:24,height:24}
+ if(diagram==='uml-activity'&&type==='uml-activity-parameter')return {width:95,height:48}
+ if(diagram==='uml-activity'&&type==='uml-activity-interruptible-region')return {width:250,height:180}
  if(diagram==='uml-activity'&&type==='uml-partition')return {width:250,height:180}
  if(diagram==='uml-activity'&&['uml-start','uml-end','uml-flow-final'].includes(type))return {width:48,height:48}
  if(diagram==='uml-activity'&&type==='uml-decision')return {width:68,height:68}
@@ -15,6 +20,7 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
  if(['uml-sequence','uml-communication'].includes(diagram)&&type==='uml-frame')return {width:260,height:160}
  if(diagram==='uml-sequence'&&type==='uml-activation')return {width:48,height:70}
  if(diagram==='uml-sequence'&&type==='uml-destruction')return {width:48,height:48}
+ if(diagram==='uml-sequence'&&type==='uml-gate')return {width:48,height:48}
  if(diagram==='uml-sequence'&&type==='uml-interaction')return {width:220,height:78}
  if(diagram==='uml-composite'&&type==='uml-class')return {width:320,height:230}
  if(['uml-package','uml-profile','uml-usecase'].includes(diagram)&&['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject'].includes(type))return {width:190,height:130}
@@ -25,6 +31,7 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
 export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pick<DiagramNode,'width'|'height'>,depth=0,hasChildren=false){
  let width=250,height=125
  const type=element.type
+ if(diagram==='uml-sequence'&&['uml-frame','uml-interaction'].includes(type))return sequenceFragmentSize(type,node)
  if(diagram==='uml-usecase'&&['actor','usecase'].includes(type)){
   const detail=element.useCaseDetail||{},rectangular=detail.presentation==='rectangle',actor=type==='actor'&&!rectangular,points=detail.extensionPoints||[],members=rectangular?(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0):0
   width=actor?Math.max(130,Math.min(300,element.name.length*7+20)):Math.max(220,Math.min(560,element.name.length*8+55,...points.map(p=>(p.name.length+(p.description?.length||0))*7+65)))
@@ -34,8 +41,11 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
   // Explicit per-occurrence width is retained. Height never clips names/points.
   return {width:Math.max(atlasNodeMinimum(diagram,type).width,actualWidth),height:Math.max(height,node?.height||0)}
  }
- else if(diagram==='uml-activity'&&type==='uml-partition'){width=570;height=380}
- else if(diagram==='uml-activity'&&type==='uml-action'){width=210;height=92}
+ else if(diagram==='uml-activity'&&['uml-partition','uml-activity-interruptible-region'].includes(type)){width=570;height=380}
+ else if(diagram==='uml-activity'&&type==='uml-activity-pin'){return activityPinSize(node)}
+ else if(diagram==='uml-activity'&&type==='uml-activity-parameter'){width=145;height=65}
+ else if(diagram==='uml-activity'&&type==='uml-fork'&&element.activityDetail?.orientation==='vertical'){return {width:node?.width??48,height:Math.max(90,node?.height??160)}}
+ else if(diagram==='uml-activity'&&type==='uml-action'){return activityActionSize(node)}
  else if(diagram==='uml-activity'&&type==='uml-object-node'){width=205;height=96}
  else if(diagram==='uml-composite'&&['uml-class','uml-part','uml-port','uml-reference-role'].includes(type)){
   const base=umlContainerSize(type,depth);width=base.width;height=base.height
@@ -55,6 +65,8 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
  else if(type==='uml-fork'){width=160;height=28}
  else if(type==='uml-history-shallow'||type==='uml-history-deep'||type==='uml-entry-point'||type==='uml-exit-point'){width=54;height=54}
  else if(type==='uml-terminate'){width=40;height=40}
+ else if(diagram==='uml-sequence'&&type==='uml-gate'){width=48;height=48}
+ else if(diagram==='uml-sequence'&&['uml-sequence-invariant','uml-sequence-continuation'].includes(type)){width=170;height=48}
  else if(type==='uml-lifeline'){width=170;height=260}
  else if(diagram==='uml-sequence'&&type==='uml-activation'){width=48;height=120}
  else if(diagram==='uml-sequence'&&type==='uml-destruction'){width=48;height=48}

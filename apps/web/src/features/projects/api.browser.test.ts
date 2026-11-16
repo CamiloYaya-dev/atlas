@@ -55,6 +55,9 @@ describe('Contratos HTTP de proyectos',()=>{
   const doc=emptyDoc()
   expect(await importProject('p1',doc,7)).toBe(4)
   expect(request).toHaveBeenCalledWith('/projects/p1/import',{method:'POST',body:JSON.stringify({document:doc,expectedVersion:7})})
+  const scope={mode:'diagram' as const,targetDiagramId:'dest',sourceDiagramId:'src'}
+  expect(await importProject('p1',doc,7,scope)).toBe(4)
+  expect(request).toHaveBeenCalledWith('/projects/p1/import',{method:'POST',body:JSON.stringify({document:doc,expectedVersion:7,scope})})
   await listDocumentVersions('p1')
   expect(request).toHaveBeenCalledWith('/projects/p1/versions')
   await loadDocumentVersion('p1',2)

@@ -104,11 +104,13 @@ for(const diagram of UML_DIAGRAMS)it(`[${diagram}] renderiza cada tipo del catá
   const shape=container.querySelector(`.kind-${kind}`);expect(shape,`${diagram}/${kind}`).toBeTruthy();
   const ports=container.querySelectorAll('[data-port]')
   // UC-11: un sujeto es un límite visual, no un extremo de relación.
-  if(diagram==='uml-usecase'&&kind==='uml-subject')expect(ports,`${diagram}/${kind}: sin conectores`).toHaveLength(0)
+  if((diagram==='uml-usecase'&&kind==='uml-subject')||(diagram==='uml-activity'&&['uml-partition','uml-activity-interruptible-region'].includes(kind)))expect(ports,`${diagram}/${kind}: sin conectores`).toHaveLength(0)
   else if(diagram==='uml-usecase'&&(kind==='actor'||kind==='usecase')){
    expect(ports,`${diagram}/${kind}: cuatro anclas cardinales`).toHaveLength(4)
    expect([...ports].map(p=>p.getAttribute('data-side')).sort()).toEqual(['bottom','left','right','top'])
-  }else expect(ports.length,`${diagram}/${kind}: conectores`).toBeGreaterThan(0)
+  }else if(diagram==='uml-activity'&&['uml-start','uml-end','uml-flow-final','uml-decision','uml-activity-pin'].includes(kind))expect(ports,`${diagram}/${kind}: cuatro anclas`).toHaveLength(4)
+  else if(diagram==='uml-activity'&&kind==='uml-fork')expect(ports,`${diagram}/${kind}: ocho anclas`).toHaveLength(8)
+  else expect(ports.length,`${diagram}/${kind}: conectores`).toBeGreaterThan(0)
   unmount()
  }
 })
@@ -131,3 +133,5 @@ it('[uml-usecase] AUD-UC-003 actor ancla lateral sobre figura, óvalo y nota enl
  rerender(<svg><AtlasUmlEdge {...edge({diagramType:'uml-usecase',relationKind:'extend',extensionNote:['condition: {ok}','extension points: Antes']},'nombre indebido')}/></svg>);expect(container.querySelector('[data-uml-note-anchor]')).toBeTruthy();expect(screen.getByText('«extend»')).toBeTruthy();expect(screen.queryByText('nombre indebido')).toBeNull();expect(container.querySelector('[data-uml-terminal="open-arrow"]')).toBeTruthy()
  rerender(<svg><AtlasUmlEdge {...edge({diagramType:'uml-usecase',relationKind:'extend'})}/></svg>);expect(container.querySelector('[data-uml-note-anchor]')).toBeNull()
 })
+
+it('uml-activity: excepción usa conector de rayo dirigido distinto del flujo interruptor',()=>{const {container,rerender}=render(<svg><AtlasUmlEdge {...edge({diagramType:'uml-activity',relationKind:'exception-handler'})}/></svg>);const exception=container.querySelector('[data-testid="edge-r"], .react-flow__edge-path')?.getAttribute('d');expect(exception).toBeTruthy();expect(container.querySelector('[data-activity-interrupt]')).toBeNull();rerender(<svg><AtlasUmlEdge {...edge({diagramType:'uml-activity',relationKind:'control-flow',activityInterrupted:true})}/></svg>);expect(container.querySelector('[data-activity-interrupt]')).toBeTruthy();expect(container.querySelector('[data-testid="edge-r"], .react-flow__edge-path')?.getAttribute('d')).not.toBe(exception)})

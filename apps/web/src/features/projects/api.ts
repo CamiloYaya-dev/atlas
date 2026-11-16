@@ -15,7 +15,7 @@ export interface LivePresence {participants:LiveParticipant[]}
 export const sendPresence=(projectId:string,clientId:string,diagramId:string|null,elementId:string|null)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(projectId)}/presence`,{method:'POST',body:JSON.stringify({clientId,diagramId,elementId})})
 
 export const exportProject=(projectId:string)=>request<{format:string;exportedAt:string;document:ProjectDocument}>(`/projects/${encodeURIComponent(projectId)}/export`)
-export async function importProject(projectId:string,document:ProjectDocument,expectedVersion:number){const r=await request<{version:number}>(`/projects/${encodeURIComponent(projectId)}/import`,{method:'POST',body:JSON.stringify({document,expectedVersion})});return r.version}
+export async function importProject(projectId:string,document:ProjectDocument,expectedVersion:number,scope?:{mode:'project'}|{mode:'diagram';targetDiagramId:string;sourceDiagramId:string}){const r=await request<{version:number}>(`/projects/${encodeURIComponent(projectId)}/import`,{method:'POST',body:JSON.stringify({document,expectedVersion,scope})});return r.version}
 export type DocumentVersion={version:number;created_at:string;updated_by:string;editor_name:string|null}
 export type DocumentVersionSnapshot=DocumentVersion&{document:ProjectDocument}
 export const listDocumentVersions=(projectId:string)=>request<DocumentVersion[]>(`/projects/${encodeURIComponent(projectId)}/versions`)

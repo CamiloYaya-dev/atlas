@@ -1,9 +1,11 @@
+import {applyScopedImport} from '../application/import-scope'
+import type {ImportScope} from '../application/import-scope'
 import {pool} from '../../../db/pool'
 import type {Project,ProjectDocument} from '@atlas/contracts'
 import {projectAccess,requirePermission} from '../../../security/roles'
 import {applyAuthorizedChange,ensureUniqueIds} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
-import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,newUseCaseIssues,adaptClassDocument,adaptUseCaseDocument,repairStoredUseCaseAnnotations,retainUseCaseCatalog} from '@atlas/contracts'
+import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,newUseCaseIssues,newActivityIssues,newSequenceIssues,adaptClassDocument,adaptUseCaseDocument,repairStoredUseCaseAnnotations,retainUseCaseCatalog} from '@atlas/contracts'
 import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string,userId:string):Promise<Project[]>{const {rows}=await pool.query<Project>(`SELECT DISTINCT p.id,p.workspace_id,p.name,p.description FROM projects p
@@ -67,14 +69,14 @@ export class ProjectsRepository {
    WHERE v.project_id=$1 AND v.version=$2`,[projectId,version]);return rows[0]||null
  }
  async loadDocument(projectId:string):Promise<{document:ProjectDocument,version:number}|null>{const {rows}=await pool.query<{document:ProjectDocument,version:number}>('SELECT document,version FROM project_documents WHERE project_id=$1',[projectId]);return rows[0]||null}
- async saveAuthorized(projectId:string,incoming:ProjectDocument,expectedVersion:number,userId:string,operation:'save'|'import'|'restore',sourceVersion?:number){
-  const saved=await this.saveInternal(projectId,incoming,expectedVersion,userId,operation,false,sourceVersion)
+ async saveAuthorized(projectId:string,incoming:ProjectDocument,expectedVersion:number,userId:string,operation:'save'|'import'|'restore',sourceVersion?:number,importScope?:ImportScope){
+  const saved=await this.saveInternal(projectId,incoming,expectedVersion,userId,operation,false,sourceVersion,importScope)
   return saved?.version??null
  }
  async saveCollaborative(projectId:string,incoming:ProjectDocument,baseVersion:number,userId:string){
   return this.saveInternal(projectId,incoming,baseVersion,userId,'save',true)
  }
- private async saveInternal(projectId:string,incoming:ProjectDocument,baseVersion:number,userId:string,operation:'save'|'import'|'restore',collaborative:boolean,sourceVersion?:number){
+ private async saveInternal(projectId:string,incoming:ProjectDocument,baseVersion:number,userId:string,operation:'save'|'import'|'restore',collaborative:boolean,sourceVersion?:number,importScope?:ImportScope){
   const c=await pool.connect()
   try{
    await c.query('BEGIN')
@@ -109,12 +111,13 @@ export class ProjectsRepository {
    // Restore is an owner-authorized, immutable FULL snapshot. The normal projection
    // omits orphaned elements; passing a historical full snapshot through it
    // wrongly raises 'Intento de modificar un elemento oculto'.
-   const merged=operation==='restore' ? repairStoredUseCaseAnnotations(adaptUseCaseDocument(structuredClone(submitted))) : applyAuthorizedChange(document,submitted,ac)
+   const merged=operation==='restore' ? repairStoredUseCaseAnnotations(adaptUseCaseDocument(structuredClone(submitted))) : operation==='import'&&importScope ? applyScopedImport(document,submitted,importScope,ac) : applyAuthorizedChange(document,submitted,ac)
    if(operation==='restore'){if(!isProjectDocument(merged))throw new DomainError('Instantánea histórica inválida',400);ensureUniqueIds(merged)}
+   if(importScope&&Buffer.byteLength(JSON.stringify(merged),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande (máximo 4 MB)',413)
    const updated=await c.query<{version:number}>(`UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version`,[JSON.stringify(merged),userId,projectId])
    const next=updated.rows[0].version
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES ($1,$2,$3::jsonb,$4)',[projectId,next,JSON.stringify(merged),userId])
-   await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey,collaborative,...(sourceVersion?{sourceVersion}:{})})])
+   await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey,collaborative,...(importScope?{importScope}:{}),...(sourceVersion?{sourceVersion}:{})})])
    await c.query('COMMIT')
    return {version:next,document:projectVisible(merged,ac)}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
@@ -168,7 +171,7 @@ export class ProjectsRepository {
    const resolved=mode==='replace'?repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)):retainUseCaseCatalog(row.document,(merged as {document:ProjectDocument}).document)
    if(!isProjectDocument(resolved))throw new DomainError('Documento inválido',400)
    ensureUniqueIds(resolved)
-   if(mode==='merge'){const uc=newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(row.document)),resolved).filter(issue=>newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)),resolved).some(other=>other.key===issue.key&&other.message===issue.message));if(uc.length)throw new DomainError(uc[0].message,400);const issues=newClassIssues(row.document,resolved).filter(issue=>!newClassIssues(historical,resolved).every(other=>other.key!==issue.key||other.message!==issue.message||other.fingerprint!==issue.fingerprint));if(issues.length)throw new DomainError(issues[0].message,400)}
+   if(mode==='merge'){const seq=newSequenceIssues(row.document,resolved).filter(issue=>newSequenceIssues(historical,resolved).some(other=>other.key===issue.key));if(seq.length)throw new DomainError(seq[0].message,400);const act=newActivityIssues(row.document,resolved).filter(issue=>newActivityIssues(historical,resolved).some(other=>other.key===issue.key));if(act.length)throw new DomainError(act[0].message,400);const uc=newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(row.document)),resolved).filter(issue=>newUseCaseIssues(repairStoredUseCaseAnnotations(adaptUseCaseDocument(historical)),resolved).some(other=>other.key===issue.key&&other.message===issue.message));if(uc.length)throw new DomainError(uc[0].message,400);const issues=newClassIssues(row.document,resolved).filter(issue=>!newClassIssues(historical,resolved).every(other=>other.key!==issue.key||other.message!==issue.message||other.fingerprint!==issue.fingerprint));if(issues.length)throw new DomainError(issues[0].message,400)}
    if(Buffer.byteLength(JSON.stringify(resolved),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande',413)
    const updated=await c.query<{version:number}>('UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version',[JSON.stringify(resolved),userId,projectId])
    const version=updated.rows[0].version

@@ -21,7 +21,7 @@ for(const [type,a,b,kind] of examples){
   assert.throws(()=>connectNodes(doc,'d',{...e,id:'bad',target:'missing'}),/inexistentes/)
   assert.ok(isProjectDocument(doc));const saved=applyAuthorizedChange(emptyDoc(),JSON.parse(JSON.stringify(doc)),access('owner'));assert.deepEqual(saved.diagrams[0].edges,JSON.parse(JSON.stringify(doc.diagrams[0].edges)))
   const visible=projectVisible(saved,access('viewer'));if(visible.diagrams.length){const changed=structuredClone(visible);changed.diagrams[0].name='No autorizado';assert.throws(()=>applyAuthorizedChange(saved,changed,access('viewer')))}
-  const {svg,width,height}=renderDiagramSVG(saved,saved.diagrams[0],true);assert.ok(width>0&&height>0);assert.match(svg,/<svg\b/);assert.match(svg,/QA a/)
+  const {svg,width,height}=renderDiagramSVG(saved,saved.diagrams[0],true);assert.ok(width>0&&height>0);assert.match(svg,/<svg\b/);if(type==='uml-activity'){assert.match(svg,/«Initial»/);assert.match(svg,/<circle\b/);assert.match(svg,/QA b/)}else assert.match(svg,/QA a/)
  })
 }
 test('[uml-class] fixture integral de clases: contrato, policy, exportación y roundtrip',()=>{

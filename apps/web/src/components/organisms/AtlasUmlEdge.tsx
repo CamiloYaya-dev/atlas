@@ -1,3 +1,4 @@
+import type {sequenceEdgeGeometry} from '@atlas/contracts'
 /** UML 2.5.1: símbolos geométricos explícitos en los extremos del conector.
  * No usamos markerStart/markerEnd de React Flow para UML: un rombo o socket
  * no es una flecha genérica y su orientación depende del PUERTO conectado.
@@ -5,10 +6,10 @@
 import {BaseEdge,EdgeLabelRenderer} from '@xyflow/react'
 import type {EdgeProps} from '@xyflow/react'
 import type {EdgePathStyle,UmlTerminal,DiagramType,ElementType} from '@atlas/contracts'
-import {umlRelationNotation,classRelationRoute,classEndTerminal,classEndLabel} from '@atlas/contracts'
+import {umlRelationNotation,classRelationRoute,activityInterruptPath,activityExceptionRoute,classEndTerminal,classEndLabel} from '@atlas/contracts'
 import {parallelRoute} from '../../features/editor/domain/parallel-edges'
 import {assemblyAnchor} from './uml-assembly'
-export type UmlEdgeData={parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
+export type UmlEdgeData={sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
 const INK='#506986'
 export function terminalAngle(side:string|undefined,x:number,y:number,otherX:number,otherY:number):number{
  // Vector hacia AFUERA del nodo. En izquierda/derecha se mantiene horizontal;
@@ -44,10 +45,13 @@ export function Terminal({kind,x,y,angle}:{kind:UmlTerminal;x:number;y:number;an
 }
 export function AtlasUmlEdge(props:EdgeProps){
  const data=(props.data||{}) as Partial<UmlEdgeData>
+ const seq=data.sequenceGeometry
+ if(seq)return <><BaseEdge id={props.id} path={seq.path} style={{stroke:INK,strokeWidth:1.5,strokeDasharray:seq.dash,fill:'none'}} interactionWidth={24}/><g pointerEvents="none" dangerouslySetInnerHTML={{__html:seq.marks}}/>{seq.label&&<EdgeLabelRenderer><div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${seq.labelX}px,${seq.labelY}px)`}}>{seq.label}</div></EdgeLabelRenderer>}</>
  const n=umlRelationNotation(data.relationKind||'association')
  const displayLabel=n.label?(data.semanticDisplayLabel?.startsWith(n.label)?data.semanticDisplayLabel:n.label):props.label
  const input={sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,sourcePosition:props.sourcePosition,targetPosition:props.targetPosition,offset:data.parallelOffset||0,pathStyle:data.parallelPath||'straight' as const}
- const route=['uml-class','uml-usecase'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
+ const exception=data.diagramType==='uml-activity'&&data.relationKind==='exception-handler'
+ const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
  const terminal=(side:'source'|'target'):UmlTerminal=>['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndTerminal(data,side):side==='source'?n.start:n.end
  const sourceLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.sourceX,y:props.sourceY},props.sourcePosition):{x:props.sourceX+20,y:props.sourceY-15}
  const targetLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.targetX,y:props.targetY},props.targetPosition):{x:props.targetX-20,y:props.targetY-15}
@@ -69,6 +73,7 @@ export function AtlasUmlEdge(props:EdgeProps){
    <rect x="-24" y="-15" width="48" height="30" transform={`translate(${assembly.x} ${assembly.y}) rotate(${assembly.angle})`} fill="black"/>
   </mask></defs>}
   <BaseEdge id={props.id} path={actualPath} style={{...style,...(assembly?{mask:`url(#atlas-assembly-gap-${props.id})`}:{})}} interactionWidth={28}/>
+  {data.activityInterrupted&&!exception&&<path data-activity-interrupt="true" d={activityInterruptPath(route.labelX,route.labelY)} fill="none" stroke={INK} strokeWidth="2"/>}
   {squareStart&&<rect data-uml-terminal="port-square" x={props.sourceX-5.5} y={props.sourceY-5.5} width="11" height="11" fill="white" stroke={INK} strokeWidth="1.8" pointerEvents="none"/>}
   {nary&&<><polygon points={`${hub.x},${hub.y-10} ${hub.x+14},${hub.y} ${hub.x},${hub.y+10} ${hub.x-14},${hub.y}`} fill="white" stroke={INK}/>{data.extraEnds?.map(p=><g key={p.id}><path d={`M ${hub.x} ${hub.y} L ${p.x} ${p.y}`} stroke={INK} fill="none"/><Terminal kind={p.navigability==='navigable'?'open-arrow':p.navigability==='non-navigable'?'cross':'none'} x={p.x} y={p.y} angle={terminalAngle(p.side,p.x,p.y,hub.x,hub.y)}/><text x={p.x+8} y={p.y-8} fontSize="10" fill={INK}>{p.label}</text></g>)}</>}
   {data.associationClassPoint&&<path data-uml-association-class="true" d={`M ${hub.x} ${hub.y} L ${data.associationClassPoint.x} ${data.associationClassPoint.y}`} stroke={INK} strokeDasharray="7 5" fill="none"/>}

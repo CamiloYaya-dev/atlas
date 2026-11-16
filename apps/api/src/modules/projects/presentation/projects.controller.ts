@@ -89,5 +89,5 @@ export async function registerProjectController(app:FastifyInstance){
   projectEvents.publishVersion(req.params.projectId,version)
   return {version}
  })
- app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/import',async req=>{assertUUID(req.params.projectId);const b=object(req.body);const actor=await identity(req);const version=await service.saveDocument(req.params.projectId,b.document,b.expectedVersion,actor.id,'import');projectEvents.publishVersion(req.params.projectId,version);return {version}})
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/import',async req=>{assertUUID(req.params.projectId);const b=object(req.body);const actor=await identity(req);const version=await service.saveDocument(req.params.projectId,b.document,b.expectedVersion,actor.id,'import',b.scope);projectEvents.publishVersion(req.params.projectId,version);return {version}})
 }

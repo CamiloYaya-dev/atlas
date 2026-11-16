@@ -543,3 +543,24 @@
 
 /* Explicit catalog deletion is distinct from reusing an occurrence. */
 .existing-list .uc-catalog-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}.existing-list .uc-catalog-row>button:first-child{flex:1;min-width:0;border-bottom:0}.existing-list .uc-catalog-row>.uc-catalog-delete{width:40px;flex:none;justify-content:center;border-bottom:0;color:#b64b4b;padding:8px}.existing-list .uc-catalog-row>.uc-catalog-delete:hover{background:#fff0f0}
+/* Activity inspector: local draft, readable controls even at narrow widths. */
+.activity-details fieldset{min-width:0;display:grid;gap:7px;border:1px solid var(--border,#d8e1ef);padding:8px;margin:6px 0;border-radius:6px}
+.activity-details label{display:grid;gap:3px;font-size:12px;min-width:0;color:inherit}
+.activity-details input:not([type=checkbox]),.activity-details select,.activity-details textarea{box-sizing:border-box;width:100%;min-width:0;padding:6px;border:1px solid #cbd7e9;border-radius:5px;font:inherit}
+.activity-details label:has(input[type=checkbox]){display:flex;align-items:center;gap:6px}
+.activity-details [role=alert]{color:#a62929;font-size:12px}
+.activity-control-identifier{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#8290a4;white-space:nowrap;pointer-events:none}
+.uml-diagram-uml-activity.kind-uml-activity-interruptible-region{border:1.5px dashed #8398b4;border-radius:12px;background:rgba(180,196,219,.08);box-shadow:none;align-items:flex-start;justify-content:flex-start}
+.uml-diagram-uml-activity.kind-uml-activity-pin,.uml-diagram-uml-activity.kind-uml-activity-parameter{border-radius:0;border:1px solid #506986;background:white;box-shadow:none;padding:0}
+.activity-pin-label{display:grid;justify-items:center;gap:2px;font-size:10px;overflow-wrap:anywhere;line-height:1.2}
+.activity-special-symbol{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.uml-action-label:has(.activity-special-symbol){position:relative;width:100%;height:100%;display:grid;place-content:center;gap:3px}
+.uml-action-label:has(.activity-special-symbol)>:not(svg){position:relative;z-index:1}
+.uml-diagram-uml-activity.kind-uml-action:has(.activity-special-symbol){border-color:transparent;background:transparent;box-shadow:none;padding:0}
+.uml-diagram-uml-activity.kind-uml-action .uml-action-label,.uml-object-node-label{display:grid;justify-items:center;gap:4px}
+.activity-rake{position:absolute;right:12px;bottom:6px;font-size:15px}
+.activity-validation{padding:8px;border:1px solid #d9e1ec;border-radius:6px}.activity-validation button{display:block;width:100%;text-align:left;margin-top:5px}
+
+.atlas-activity-frame{width:100%;height:100%;border:1.5px solid #506986;box-sizing:border-box;pointer-events:none;background:transparent;color:#344965}.atlas-activity-frame>span{display:inline-block;padding:5px 12px;border-right:1px solid #506986;border-bottom:1px solid #506986;background:#fff;font-size:12px}.activity-condition-notes{position:absolute;top:100%;left:0;right:0;display:grid;gap:3px;pointer-events:none}.activity-condition-notes small{background:white;border:1px dashed #506986;padding:3px;white-space:normal;overflow-wrap:anywhere}
+/* Sequence uses the shared UML scene inside the existing React Flow nodes. */
+.atlas-sequence-semantic{background:transparent;overflow:visible;color:#344965}.atlas-sequence-semantic.selected{outline:1px dashed #8ea9d6;outline-offset:4px}.atlas-sequence-semantic .node-handle{opacity:0}.atlas-sequence-semantic:hover .node-handle,.atlas-sequence-semantic.selected .node-handle,.react-flow__handle.connectingfrom{opacity:1}.atlas-sequence-semantic.kind-uml-frame,.atlas-sequence-semantic.kind-uml-interaction{background:transparent}.atlas-sequence-semantic svg{display:block;overflow:visible;pointer-events:none}

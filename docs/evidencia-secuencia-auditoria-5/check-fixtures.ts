@@ -1,0 +1,2 @@
+import {readFileSync} from 'node:fs';import {isProjectDocument,sequenceDocumentIssues} from '@atlas/contracts';import assert from 'node:assert/strict';
+for(const f of ['ATLAS_QA_UML_SECUENCIA.json','ATLAS_QA_UML_SECUENCIA_DIAGRAMA_UNICO.json','ATLAS_QA_UML_SECUENCIA_FIRMAS.json']){const d=JSON.parse(readFileSync('qa/'+f,'utf8'));assert.ok(isProjectDocument(d));assert.deepEqual(sequenceDocumentIssues(d).filter(i=>i.severity==='error'),[]);console.log(f,'válido',d.diagrams.length,'vistas',Object.keys(d.elements).length,'fichas')}
