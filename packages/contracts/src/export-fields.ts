@@ -1,6 +1,9 @@
 /** Campos exportables del inspector; catálogo compartido entre frontend y servidor. */
+import {umlDisplayLabel} from './uml-notation'
+import {classTemplateFormalText} from './uml-class-geometry'
+import {classCapabilities} from './uml-class-policy'
 import type {Diagram,FieldDefinition,ModelElement,ProjectDocument} from './index'
-import {umlAttributeText,umlOperationText,umlObjectTitle} from './uml-structure'
+import {umlAttributeText,umlOperationText,umlOperationTextResolved,umlObjectTitle} from './uml-structure'
 
 export type ExportPlacement='omit'|'embed'|'dictionary'
 export type AdvancedExportMode='simple'|'embedded'|'dictionary'|'both'
@@ -33,7 +36,7 @@ export function availableExportFields(doc:ProjectDocument,diagram:Diagram,elemen
   if(!from||!to||from.id!==elementId&&to.id!==elementId)return []
   const direction=edge.direction||'forward'
   const symbol=direction==='both'?'↔':direction==='none'?'—':direction==='reverse'?'←':'→'
-  return [`${from.name} ${symbol} ${to.name}${edge.label?` (${edge.label})`:''}`]
+  return [`${from.name} ${symbol} ${to.name}${umlDisplayLabel(diagram.type,edge,doc,diagram)?` (${umlDisplayLabel(diagram.type,edge,doc,diagram)})`:''}`]
  }).join(' | ')
  const vals:Record<string,string>={
   summary:element.summary,description:element.description,technical:element.technical||'',
@@ -45,7 +48,18 @@ export function availableExportFields(doc:ProjectDocument,diagram:Diagram,elemen
  const uml=element.uml||{}
  const node=diagram.nodes.find(n=>n.elementId===elementId)
  const packageNode=diagram.nodes.find(n=>n.id===node?.parentNodeId)
- const umlFields:ExportField[]=element.type==='uml-object'?[{key:'uml.classifier',label:'Clase de la instancia',value:umlObjectTitle(element.name,uml.classifier)},{key:'uml.slots',label:'Valores del objeto',value:(uml.slots||[]).map(s=>`${s.name}${s.type?`: ${s.type}`:''} = ${s.value}`).join('\n')}]:['uml-class','uml-interface','uml-enumeration'].includes(element.type)?[{key:'uml.attributes',label:'Atributos UML',value:(uml.attributes||[]).map(umlAttributeText).join('\n')},{key:'uml.operations',label:'Operaciones UML',value:(uml.operations||[]).map(umlOperationText).join('\n')}]:[]
+ const umlFields:ExportField[]=element.type==='uml-object'?[{key:'uml.classifier',label:'Clase de la instancia',value:umlObjectTitle(element.name,uml.classifier)},{key:'uml.slots',label:'Valores del objeto',value:(uml.slots||[]).map(s=>`${s.name}${s.type?`: ${s.type}`:''} = ${s.value}`).join('\n')}]:['uml-class','uml-interface','uml-enumeration'].includes(element.type)?[{key:'uml.attributes',label:'Atributos UML',value:(uml.attributes||[]).map(a=>umlAttributeText(a)).join('\n')},{key:'uml.operations',label:'Operaciones UML',value:(uml.operations||[]).map(umlOperationText).join('\n')}]:[]
+ if(diagram.type==='uml-class'){
+  umlFields.splice(0,umlFields.length)
+  const cap=classCapabilities(element.type),names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name]))
+  if(cap.attributes)umlFields.push({key:'uml.attributes',label:'Atributos UML',value:(uml.attributes||[]).map(a=>umlAttributeText(a,true,names)).join('\n')})
+  if(cap.attributes&&(uml.attributes||[]).some(a=>a.length!==undefined))umlFields.push({key:'uml.attributeLengths',label:'Longitud técnica ATLAS',value:(uml.attributes||[]).filter(a=>a.length!==undefined).map(a=>`${a.name}: ${a.length}`).join('\n')})
+  if(cap.operations)umlFields.push({key:'uml.operations',label:'Operaciones UML',value:(uml.operations||[]).map(o=>umlOperationTextResolved(o,names)).join('\n')})
+  if(cap.literals)umlFields.push({key:'uml.literals',label:'Literales UML',value:(uml.literals||[]).map(l=>l.name).join('\n')})
+  if(cap.note)umlFields.push({key:'uml.note',label:'Anotación UML',value:uml.expression||uml.note||''})
+  if(cap.template)umlFields.push({key:'uml.templateParameters',label:'Parámetros de plantilla',value:(uml.templateParameters||[]).map(p=>classTemplateFormalText(p,Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name])))).join(', ')})
+  if(element.semanticOwnerId)umlFields.push({key:'uml.semanticOwner',label:'Propietario UML',value:doc.elements[element.semanticOwnerId]?.name||''})
+ }
  if(packageNode)umlFields.push({key:'uml.package',label:'Paquete contenedor',value:doc.elements[packageNode.elementId]?.name||''})
  const custom=doc.fieldDefinitions.filter((definition:FieldDefinition)=>definition.forType==='all'||definition.forType===element.type)
   .map(definition=>({key:`custom:${definition.id}`,label:definition.label,value:stringify(element.fields[definition.id])}))

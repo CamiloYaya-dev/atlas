@@ -1,12 +1,14 @@
+import type {ProjectDocument,Diagram} from './index'
 /** Semántica de la notación UML 2.5.1 utilizada por las 14 vistas de ATLAS.
  * La representación gráfica se deriva del tipo, nunca de ajustes libres del trazo.
  * Esto implementa un subconjunto explícito del metamodelo; no declara conformidad total.
  * Referencia: OMG UML 2.5.1, §§ 7.7, 9.7, 10.4, 11.5–11.6, 12, 14–19 y anexo B.
  */
+import {classImportAliasAllowed} from './uml-class-catalog'
 import {UML_DIAGRAMS,UML_RELATIONS_BY_DIAGRAM} from './uml'
 import type {DiagramEdge,DiagramType,EdgeDirection,EdgeLineStyle} from './index'
 
-export type UmlTerminal='none'|'open-arrow'|'filled-arrow'|'triangle'|'diamond-open'|'diamond-filled'|'ball'|'socket'|'assembly'|'cross'|'extension'
+export type UmlTerminal='none'|'open-arrow'|'filled-arrow'|'triangle'|'diamond-open'|'diamond-filled'|'ball'|'socket'|'assembly'|'cross'|'extension'|'ownership'
 export interface UmlRelationNotation {
  stroke:EdgeLineStyle
  direction:EdgeDirection
@@ -39,6 +41,19 @@ export const UML_NOTATION:Readonly<Record<string,UmlRelationNotation>>={
  import:spec('dashed','forward','none','open-arrow','«import»'),
  merge:spec('dashed','forward','none','open-arrow','«merge»'),
  containment:spec('solid','none'),
+ usage:spec('dashed','forward','none','open-arrow','«use»'),
+ access:spec('dashed','forward','none','open-arrow','«access»'),
+ elementAccess:spec('dashed','forward','none','open-arrow','«access»'),
+ packageAccess:spec('dashed','forward','none','open-arrow','«access»'),
+ packageImport:spec('dashed','forward','none','open-arrow','«import»'),
+ elementImport:spec('dashed','forward','none','open-arrow','«import»'),
+ 'specification-realization':spec('dashed','forward','none','triangle'),
+ abstraction:spec('dashed','forward','none','open-arrow','«abstraction»'),
+ trace:spec('dashed','forward','none','open-arrow','«trace»'),
+ refine:spec('dashed','forward','none','open-arrow','«refine»'),
+ derive:spec('dashed','forward','none','open-arrow','«derive»'),
+ bind:spec('dashed','forward','none','open-arrow','«bind»'),
+ annotation:spec('dashed','none'),
  extension:spec('solid','forward','none','extension'),
  'stereotype-application':spec('dashed','forward','none','open-arrow','«apply»'),
  apply:spec('dashed','forward','none','open-arrow','«apply»'),
@@ -69,10 +84,13 @@ export function umlRelationNotation(kind:string):UmlRelationNotation{return UML_
 export function canonicalUmlEdge(diagram:DiagramType,edge:DiagramEdge):DiagramEdge{
  if(!isUmlDiagram(diagram))return edge
  const allowed=UML_RELATIONS_BY_DIAGRAM[diagram]
- const kind=edge.relationKind && allowed?.includes(edge.relationKind) ? edge.relationKind : allowed?.[0]
+ const kind=edge.relationKind || allowed?.[0]
+ if(kind&&!allowed?.includes(kind))return edge
  if(!kind)return edge
  const notation=umlRelationNotation(kind)
- return {...edge,relationKind:kind,direction:notation.direction,lineStyle:notation.stroke}
+ const locked=umlRelationNameLocked(diagram,kind)
+ const historical=locked&&edge.label&&edge.label!==notation.label?edge.label:undefined
+ return {...edge,relationKind:kind,direction:notation.direction,lineStyle:notation.stroke,...(locked?{label:undefined,...(historical?{description:[edge.description,historical].filter(Boolean).join('\n')}: {})}:{})}
 }
 /** Sólo para relaciones nuevas o editadas. Los JSON antiguos se siguen leyendo,
  * y se normalizan visualmente antes de ser editados, sin alterar su historial.
@@ -84,3 +102,18 @@ export function validUmlEdgeNotation(diagram:DiagramType,edge:DiagramEdge):boole
  return (edge.direction===undefined||edge.direction===notation.direction) &&
         (edge.lineStyle===undefined||edge.lineStyle===notation.stroke)
 }
+
+/** Reserved words are derived even on historical snapshots. */
+export function umlEdgeLabel(diagram:DiagramType,edge:DiagramEdge):string{
+ return isUmlDiagram(diagram)?umlRelationNotation(edge.relationKind||'').label||(['generalization','realization','specification-realization','containment','annotation'].includes(edge.relationKind||'')&&diagram==='uml-class'?'':edge.label||''):edge.label||''
+}
+/** Derived display label, never stored as a business name. */
+export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:ProjectDocument,view?:Diagram):string{
+ const label=umlEdgeLabel(diagram,edge)
+ if(diagram!=='uml-class')return label
+ if(classImportAliasAllowed(edge.relationKind||'')&&edge.importAlias)return `${label} {alias: ${edge.importAlias}}`
+ if(edge.relationKind!=='bind'||!edge.templateBindings?.length)return label
+ const node=view?.nodes.find(n=>n.id===edge.target),formals=node&&doc.elements[node.elementId]?.uml?.templateParameters
+ return `${label} <${edge.templateBindings.map(b=>`${formals?.find(p=>p.id===b.parameterId)?.name||'?'} → ${doc.elements[b.elementId]?.name||'Tipo no disponible'}`).join(', ')}>`
+}
+export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label||diagram==='uml-class'&&['generalization','realization','specification-realization','containment','annotation'].includes(kind)}

@@ -1,3 +1,4 @@
+import {classEndpointValid} from './uml-class-policy'
 /** Contención gráfica, sin confundirla con una relación UML.
  * Las posiciones hijas son relativas al contenedor; se preservan en JSON.
  */
@@ -10,6 +11,7 @@ export const UML_PORT_SIZE={width:180,height:82} as const
 export const UML_DEPLOYMENT_CONTAINER_SIZE={width:570,height:370} as const
 export const UML_EXECUTION_CONTAINER_SIZE={width:360,height:235} as const
 export function umlContainerAllows(diagram:DiagramType,parent:ElementType,child:ElementType):boolean{
+ if(diagram==='uml-class')return classEndpointValid('containment',parent,child)
  if(diagram==='uml-composite'){
   if(parent==='uml-class')return ['uml-part','uml-reference-role','uml-port','uml-collaboration','uml-interface'].includes(child)
   if(parent==='uml-part')return child==='uml-port'

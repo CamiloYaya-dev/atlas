@@ -1,0 +1,53 @@
+[
+  {
+    "id": "T02",
+    "description": "Realización invertida",
+    "patch": {
+      "relationKind": "realization",
+      "source": "ni",
+      "target": "na"
+    }
+  },
+  {
+    "id": "T03",
+    "description": "Herencia reflexiva",
+    "patch": {
+      "relationKind": "generalization",
+      "source": "na",
+      "target": "na"
+    }
+  },
+  {
+    "id": "T04",
+    "description": "Composición con todo múltiple",
+    "patch": {
+      "relationKind": "composition",
+      "source": "na",
+      "target": "nb",
+      "sourceMultiplicity": "*"
+    }
+  },
+  {
+    "id": "T07",
+    "description": "Extremo n-ario inexistente",
+    "patch": {
+      "relationKind": "association",
+      "source": "na",
+      "target": "nb",
+      "associationEnds": [
+        {
+          "id": "a",
+          "nodeId": "na"
+        },
+        {
+          "id": "b",
+          "nodeId": "nb"
+        },
+        {
+          "id": "c",
+          "nodeId": "missing"
+        }
+      ]
+    }
+  }
+]

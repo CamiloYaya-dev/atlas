@@ -3,7 +3,7 @@ import type {Project,ProjectDocument} from '@atlas/contracts'
 import {projectAccess,requirePermission} from '../../../security/roles'
 import {applyAuthorizedChange,ensureUniqueIds} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
-import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument} from '@atlas/contracts'
+import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,adaptClassDocument} from '@atlas/contracts'
 import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string,userId:string):Promise<Project[]>{const {rows}=await pool.query<Project>(`SELECT DISTINCT p.id,p.workspace_id,p.name,p.description FROM projects p
@@ -94,7 +94,7 @@ export class ProjectsRepository {
    if(collaborative&&ac.roleKey!=='owner'&&![...ac.permissions].some(permission=>
     permission==='field.configure'||/^(diagram|element|relation)\.(create|edit|delete|layout)\./.test(permission)))
     throw new DomainError('No tienes permisos de edición colaborativa',403)
-   let submitted=incoming
+   let submitted=operation==='import'?adaptClassDocument(incoming):incoming
    if(version!==baseVersion){
     if(!collaborative||baseVersion>version){await c.query('ROLLBACK');return null}
     const storedBase=await c.query<{document:ProjectDocument}>(
@@ -168,6 +168,7 @@ export class ProjectsRepository {
    const resolved=mode==='replace'?historical:(merged as {document:ProjectDocument}).document
    if(!isProjectDocument(resolved))throw new DomainError('Documento inválido',400)
    ensureUniqueIds(resolved)
+   if(mode==='merge'){const issues=newClassIssues(row.document,resolved).filter(issue=>!newClassIssues(historical,resolved).every(other=>other.key!==issue.key||other.message!==issue.message||other.fingerprint!==issue.fingerprint));if(issues.length)throw new DomainError(issues[0].message,400)}
    if(Buffer.byteLength(JSON.stringify(resolved),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande',413)
    const updated=await c.query<{version:number}>('UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version',[JSON.stringify(resolved),userId,projectId])
    const version=updated.rows[0].version

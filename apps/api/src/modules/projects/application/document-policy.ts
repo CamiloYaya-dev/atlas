@@ -1,3 +1,4 @@
+import {newClassIssues,classSelfAllowed,umlRelationNameLocked} from '@atlas/contracts'
 import {isDeepStrictEqual} from 'node:util'
 import type {Diagram,DiagramNode,DiagramEdge,ModelElement,ProjectDocument,FieldDefinition} from '@atlas/contracts'
 import {sequenceSnapChild,sequenceActivationHandleValid,isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,atlasNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@atlas/contracts'
@@ -20,9 +21,15 @@ export function projectVisible(document:ProjectDocument,a:Access):ProjectDocumen
   else if(e.childNodeId&&!diagrams.find(d=>d.id===e.childDiagramId)?.nodes.some(n=>n.id===e.childNodeId&&!!document.elements[n.elementId]&&allowed(a,`element.view.${document.elements[n.elementId].type}`)))delete copy.childNodeId
   elements[id]=copy
  }
+ // An ACL-projected document must not expose semantic reference IDs into hidden elements.
+ for(const e of Object.values(elements)){
+  if(e.semanticOwnerId&&!elements[e.semanticOwnerId])delete e.semanticOwnerId
+  if(e.uml){e.uml=structuredClone(e.uml);for(const a of e.uml.attributes||[])if(a.typeId&&!elements[a.typeId])delete a.typeId;for(const o of e.uml.operations||[]){if(o.returnTypeId&&!elements[o.returnTypeId])delete o.returnTypeId;for(const p of o.parameters)if(p.typeId&&!elements[p.typeId])delete p.typeId}for(const p of e.uml.templateParameters||[])if(p.typeId&&!elements[p.typeId])delete p.typeId}
+ }
  const redacted=diagrams.map(d=>{
   const nodes=d.nodes.filter(n=>!!elements[n.elementId]), ids=new Set(nodes.map(n=>n.id))
-  return {...d,nodes,edges:d.edges.filter(e=>ids.has(e.source)&&ids.has(e.target))}
+  const edges=d.edges.filter(e=>ids.has(e.source)&&ids.has(e.target)&&(!e.associationClassId||!!elements[e.associationClassId])&&(!e.associationEnds||e.associationEnds.every(end=>ids.has(end.nodeId)))&&(!e.templateBindings||e.templateBindings.every(b=>!!elements[b.elementId])))
+  return {...d,nodes,edges:edges.filter(e=>!e.annotationTargetEdgeId||edges.some(x=>x.id===e.annotationTargetEdgeId))}
  })
  return structuredClone({schema:1,elements,diagrams:redacted,fieldDefinitions:document.fieldDefinitions.filter(f=>allowed(a,'field.configure')||f.forType==='all'||Object.values(elements).some(e=>e.type===f.forType))})
 }
@@ -77,7 +84,7 @@ export function ensureUniqueIds(doc:ProjectDocument){
    nodes.add(n.id)
   }
   for(const e of d.edges){
-   if(edges.has(e.id)||!nodes.has(e.source)||!nodes.has(e.target)||e.source===e.target)throw new DomainError('Relación duplicada o inválida',400)
+   if(edges.has(e.id)||!nodes.has(e.source)||!nodes.has(e.target)||e.source===e.target&&!(d.type==='uml-class'&&classSelfAllowed(e.relationKind)))throw new DomainError('Relación duplicada o inválida',400)
    if(e.direction&&!['forward','reverse','both','none'].includes(e.direction))throw new DomainError('Dirección de relación inválida',400)
    if(e.lineStyle&&!['solid','dashed','dotted'].includes(e.lineStyle))throw new DomainError('Trazo de relación inválido',400)
    if(e.pathStyle&&!['smoothstep','straight','step','bezier'].includes(e.pathStyle))throw new DomainError('Tipo de recorrido de relación inválido',400)
@@ -87,7 +94,7 @@ export function ensureUniqueIds(doc:ProjectDocument){
     (sequenceActivationAt(nodeId)&&sequenceActivationHandleValid(handle))
    if(!validHandle(e.source,e.sourceHandle))throw new DomainError('Puerto de salida inválido',400)
    if(!validHandle(e.target,e.targetHandle))throw new DomainError('Puerto de entrada inválido',400)
-   if(e.relationKind&&!umlRelationAllowed(d.type,e.relationKind))throw new DomainError('Relación no permitida para este diagrama UML',400)
+   if(e.relationKind&&d.type!=='uml-class'&&!umlRelationAllowed(d.type,e.relationKind))throw new DomainError('Relación no permitida para este diagrama UML',400)
    if(['sourceMultiplicity','targetMultiplicity','sourceRole','targetRole'].some(k=>{const v=e[k as keyof DiagramEdge];return v!==undefined&&(typeof v!=='string'||v.length>80)}))throw new DomainError('Extremos UML inválidos',400)
    edges.add(e.id)
   }
@@ -142,9 +149,10 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     }
    }
    if(created.technical!==undefined&&created.technical!==stored.technical)requirePermission(a,'element.technical.edit')
-   if(!equal(created.uml,stored.uml)&&allowed(a,'element.technical.view'))requirePermission(a,'element.technical.edit')
+   if(!equal(created.uml,before.uml)&&allowed(a,'element.technical.view')){requirePermission(a,'element.technical.edit');if(!equal(before.uml,stored.uml))fail('No puedes modificar detalles UML con referencias ocultas')}
    full.elements[id]={...stored,...created,
-     ...(!allowed(a,'element.technical.edit')?{technical:stored.technical,uml:stored.uml}:{}),
+     ...(stored.semanticOwnerId&&!before.semanticOwnerId?{semanticOwnerId:stored.semanticOwnerId}:{}),
+     ...(!allowed(a,'element.technical.edit')||equal(before.uml,created.uml)&&!equal(before.uml,stored.uml)?{technical:stored.technical,uml:stored.uml}:{}),
      ...(!allowed(a,`diagram.view.${storedDiagrams.get(stored.childDiagramId||'')?.type}`)?{childDiagramId:stored.childDiagramId,childNodeId:stored.childNodeId}:{}),
    }
   }
@@ -191,8 +199,9 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
      if(s&&t&&!umlRelationEndpointValid(d.type,e.relationKind,full.elements[s.elementId].type,full.elements[t.elementId].type))throw new DomainError('Extremos incompatibles con la relación UML',400)
     }}
    else if(!equal(oldE,e)){
-    if(oldE.source!==e.source||oldE.target!==e.target)fail('Para cambiar extremos, elimina y recrea la relación')
+    if((oldE.source!==e.source||oldE.target!==e.target)&&!(d.type==='uml-class'&&(oldE.source===e.target&&oldE.target===e.source||oldE.source===e.source&&oldE.relationKind==='annotation'&&e.annotationTargetEdgeId&&d.edges.some(target=>target.id===e.annotationTargetEdgeId&&target.source===e.target))))fail('Para cambiar extremos, elimina y recrea la relación')
     requirePermission(a,`relation.edit.${edgeKind(oldE,old,original)}`)
+    requirePermission(a,`relation.edit.${edgeKind(e,d,full)}`)
     if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
     if(isUmlDiagram(d.type)&&e.relationKind){
      const src=d.nodes.find(n=>n.id===e.source),dst=d.nodes.find(n=>n.id===e.target)
@@ -220,5 +229,21 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
  }
  // Deleting nodes cannot silently delete an edge from the hidden slice.
  ensureUniqueIds(full)
+ // An explicit unlink is a semantic change, not merely removal of a visual occurrence.
+ // Check against the unprojected document, with a generic error that does not disclose hidden views.
+ for(const d of original.diagrams.filter(x=>x.type==='uml-class'))for(const e of d.edges){
+  if(!e.associationClassId)continue
+  const updated=full.diagrams.find(x=>x.id===d.id)?.edges.find(x=>x.id===e.id)
+  if(updated&&updated.associationClassId!==e.associationClassId&&full.diagrams.some(x=>x.type==='uml-class'&&x.edges.some(y=>y.associationClassId===e.associationClassId)))throw new DomainError('No se puede modificar la asociación en todas sus apariciones',400)
+ }
+ const issues=newClassIssues(original,full)
+ if(issues.length)throw new DomainError(issues[0].message,400)
+ // References crossing ACL boundaries cannot be introduced from a partial projection.
+ const requireReference=(id:string|undefined)=>{if(!id)return;const target=full.elements[id];if(!target)throw new DomainError('Referencia UML inválida',400);requirePermission(a,`element.view.${target.type}`);if(!visible.elements[id]&&!incoming.elements[id])fail('Referencia UML oculta')}
+ for(const e of Object.values(full.elements)){
+  const old=original.elements[e.id];if(old?.semanticOwnerId!==e.semanticOwnerId){requirePermission(a,old?`element.edit.${e.type}`:`element.create.${e.type}`);requirePermission(a,'element.technical.edit');requireReference(e.semanticOwnerId)}
+  if(!equal(old?.uml,e.uml)){for(const member of e.uml?.attributes||[])requireReference(member.typeId);for(const op of e.uml?.operations||[]){requireReference(op.returnTypeId);for(const param of op.parameters)requireReference(param.typeId)};for(const param of e.uml?.templateParameters||[])requireReference(param.typeId)}
+ }
+ for(const d of full.diagrams)for(const e of d.edges){const old=original.diagrams.find(x=>x.id===d.id)?.edges.find(x=>x.id===e.id);if(!equal(old,e)&&umlRelationNameLocked(d.type,e.relationKind||'')&&e.label&&e.label!==old?.label)throw new DomainError('El nombre de la relación UML es reservado',400);if(!equal(old,e)){for(const binding of e.templateBindings||[])requireReference(binding.elementId);requireReference(e.associationClassId);if(d.type==='uml-class'&&e.associationClassId!==old?.associationClassId){for(const id of [old?.associationClassId,e.associationClassId])if(id){requireReference(id);requirePermission(a,'element.edit.uml-association-class');requirePermission(a,'element.technical.edit')}}for(const end of e.associationEnds||[]){const el=d.nodes.find(n=>n.id===end.nodeId)?.elementId;requireReference(el);const source=d.nodes.find(n=>n.id===e.source)?.elementId;if(el&&source&&full.elements[el]&&full.elements[source])requirePermission(a,`relation.${old?'edit':'create'}.${relationScope(full.elements[source].type,full.elements[el].type)}`)}}}
  return full
 }

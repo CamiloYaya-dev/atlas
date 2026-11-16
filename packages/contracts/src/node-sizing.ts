@@ -39,7 +39,7 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
  }else if(diagram==='uml-composite'&&type==='uml-collaboration'){width=205;height=110}
  else if(diagram==='uml-component'&&type==='component'){width=270;height=115}
  else if(['uml-class','uml-object'].includes(diagram)){
-  const lines=(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0)+(element.uml?.slots?.length||0)
+  const lines=(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0)+(element.uml?.slots?.length||0)+(element.uml?.literals?.length||0)
   width=290;height=Math.max(145,95+lines*21)
  }else if(type==='uml-start'||type==='uml-end'||type==='uml-flow-final'){width=54;height=54}
  else if(type==='uml-decision'){width=84;height=84}

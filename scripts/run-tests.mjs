@@ -18,7 +18,7 @@ if(mode==='unit'){
  if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/atlas_test(?:\?|$)/.test(url)){
   console.error('INTEGRACIÓN BLOQUEADA: requiere PostgreSQL LOCAL QA, puerto 5433 y nombre atlas_test. Usa npm run test:db');process.exit(1)
  }
- files=[resolve(root,'apps/api/src/tests/integration.test.ts'),resolve(root,'apps/api/src/tests/api.integration.test.ts')]
+ files=[resolve(root,'apps/api/src/tests/integration.test.ts'),resolve(root,'apps/api/src/tests/api.integration.test.ts'),resolve(root,'apps/api/src/tests/uml-scoped.integration.test.ts')]
 }
 files.sort()
 console.log(`[ATLAS QA] ${mode}: ${files.length} archivos de pruebas`)

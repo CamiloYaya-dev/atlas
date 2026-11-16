@@ -2,32 +2,46 @@
 const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');const assert=require('node:assert/strict');const ts=require('typescript');
 const {test}=require('node:test');
 const root=path.resolve(__dirname,'..');
+// Resolve the real shared TypeScript modules, including transitive dependencies.
+const contractCache=new Map();
+function loadContract(filename){
+ filename=path.resolve(filename);if(!path.extname(filename))filename+='.ts';
+ if(contractCache.has(filename))return contractCache.get(filename).exports;
+ const mod={exports:{}};contractCache.set(filename,mod);
+ const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ const run=vm.runInThisContext('(function(module,exports,require){'+code+'\n})',{filename});
+ run(mod,mod.exports,id=>{if(id.startsWith('.'))return loadContract(path.resolve(path.dirname(filename),id));if(id.startsWith('node:'))return require(id);throw Error('Dependencia de contrato no prevista '+id)});return mod.exports;
+}
+const actualContracts=loadContract(path.join(root,'packages/contracts/src/index.ts'));
 function load(rel,stubs={}){
  const filename=path.join(root,rel);
+ if(rel.startsWith('packages/contracts/src/'))return loadContract(filename);
  const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
  const module={exports:{}};
  const sandbox={module,exports:module.exports,require:(id)=>{
   if(id==='@xyflow/react'&&Object.prototype.hasOwnProperty.call(stubs,id))return {...stubs[id],useUpdateNodeInternals:()=>()=>{}};
-  if(Object.prototype.hasOwnProperty.call(stubs,id))return stubs[id];
+  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@atlas/contracts'?{...actualContracts,...stubs[id]}:stubs[id];
   if(id==='react'||id.startsWith('node:'))return require(id);
   throw Error(`Unexpected require ${id} in ${rel}`);
  },console,crypto:global.crypto,structuredClone:global.structuredClone};
  vm.runInNewContext(code,sandbox,{filename,timeout:5000});return module.exports;
 }
-const umlContainers=load('packages/contracts/src/uml-containers.ts');
-const sizing=load('packages/contracts/src/node-sizing.ts',{'./uml-containers':umlContainers});
+const classPolicy=load('packages/contracts/src/uml-class-policy.ts');
+const umlContainers=load('packages/contracts/src/uml-containers.ts',{'./uml-class-policy':classPolicy});
+const sizing=load('packages/contracts/src/node-sizing.ts',{'./uml-containers':umlContainers,'./uml-class-policy':classPolicy});
 const sequenceLayout=load('packages/contracts/src/uml-sequence-layout.ts');
 const sequencePorts=load('packages/contracts/src/uml-sequence-ports.ts');
-const commands=load('apps/web/src/features/editor/domain/document-commands.ts',{'@atlas/contracts':{...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000}});
-const parallel=load('apps/web/src/features/editor/domain/parallel-edges.ts');
+const commands=load('apps/web/src/features/editor/domain/document-commands.ts',{'@atlas/contracts':{...classPolicy,...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000}});
+const parallel=loadContract(path.join(root,'packages/contracts/src/parallel-edges.ts'));
 const assembly=load('apps/web/src/components/organisms/uml-assembly.ts');
 const progress=load('apps/web/src/features/academy/progress.ts');
 const umlStructure=load('packages/contracts/src/uml-structure.ts');
-const exportFields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':umlStructure});
-const uml=load('packages/contracts/src/uml.ts');
+const uml=load('packages/contracts/src/uml.ts',{'./uml-class-policy':classPolicy});
 const umlNotation=load('packages/contracts/src/uml-notation.ts',{'./uml':uml});
-const umlPolicy={...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000,relationScope:()=> 'mixed',umlElementAllowed:uml.umlElementAllowed,umlRelationAllowed:uml.umlRelationAllowed,umlRelationEndpointValid:uml.umlRelationEndpointValid,validUmlDetail:umlStructure.validUmlDetail,isUmlDiagram:umlNotation.isUmlDiagram,validUmlEdgeNotation:umlNotation.validUmlEdgeNotation};
-const contract=load('packages/contracts/src/index.ts',{'./permissions':{},'./collaboration':{},'./export-fields':exportFields,'./uml':uml,'./uml-structure':umlStructure,'./uml-notation':umlNotation,'./uml-containers':umlContainers,'./node-sizing':sizing,'./uml-sequence-layout':sequenceLayout,'./uml-sequence-ports':sequencePorts});
+const exportFields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':umlStructure,'./uml-class-policy':classPolicy,'./uml-notation':umlNotation});
+const classScene=load('packages/contracts/src/uml-class-scene.ts',{'./uml-structure':umlStructure,'./uml-class-policy':classPolicy,'./uml-notation':umlNotation,'./uml-containers':umlContainers,'./node-sizing':sizing});
+const umlPolicy={...classPolicy,...umlNotation,...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000,relationScope:()=> 'mixed',umlElementAllowed:uml.umlElementAllowed,umlRelationAllowed:uml.umlRelationAllowed,umlRelationEndpointValid:uml.umlRelationEndpointValid,validUmlDetail:umlStructure.validUmlDetail,isUmlDiagram:umlNotation.isUmlDiagram,validUmlEdgeNotation:umlNotation.validUmlEdgeNotation};
+const contract=load('packages/contracts/src/index.ts',{'./uml-class-policy':classPolicy,'./uml-class-scene':classScene,'./permissions':{},'./collaboration':{},'./export-fields':exportFields,'./uml':uml,'./uml-structure':umlStructure,'./uml-notation':umlNotation,'./uml-containers':umlContainers,'./node-sizing':sizing,'./uml-sequence-layout':sequenceLayout,'./uml-sequence-ports':sequencePorts});
 const roles={allowed:()=>true,requirePermission:()=>{}};
 class DomainError extends Error{constructor(message,status){super(message);this.statusCode=status}}
 const policy=load('apps/api/src/modules/projects/application/document-policy.ts',{'@atlas/contracts':umlPolicy,'../../../security/roles':roles,'../../../domain/errors':{DomainError}});
@@ -71,7 +85,7 @@ test('las cajas presentan tres puertos arriba y tres abajo además de izquierda/
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':icons,
   '@xyflow/react':{Handle:({id,type,position})=>React.createElement('span',{'data-port':id,'data-kind':type,'data-side':position}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{diagramLabels:{c2:'C2'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{c2:'C2'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  });
  const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}));
@@ -83,7 +97,7 @@ test('el render de relaciones muestra ambas flechas y respeta el trazo',()=>{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
-  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  });
  const v=doc();v.diagrams[0].edges[0]={...v.diagrams[0].edges[0],direction:'both',lineStyle:'dashed',pathStyle:'bezier',sourceHandle:'top-2',targetHandle:'bottom-1'};
  const graph=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true});
@@ -143,7 +157,7 @@ test('adaptador ReactFlow da una ruta única a cada relación del mismo par',()=
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
-  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc()
  v.diagrams[0].edges.push(edge('r3','na','nb',{sourceHandle:'top-1',targetHandle:'bottom-1'}))
@@ -172,7 +186,7 @@ test('ReactFlow renderiza rutas paralelas seleccionables y etiquetas independien
    EdgeLabelRenderer:({children})=>React.createElement('span',{'data-edge-label':true},children)
   },
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing},
+  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const html=renderToStaticMarkup(React.createElement(edgeComponent.AtlasParallelEdge,{
@@ -189,7 +203,7 @@ test('los ocho puertos pueden iniciar y recibir conexiones en modo loose',()=>{
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id,type})=>React.createElement('span',{'data-port':id,'data-direction':type}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{diagramLabels:{c2:'C2 · Contenedores'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{c2:'C2 · Contenedores'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}))
@@ -285,7 +299,7 @@ test('UML backend: no deja persistir detalles técnicos sin permisos',()=>{
 test('UML grafo: se dibuja dentro del paquete y las conexiones usan notación propia',()=>{
  const hook=load('apps/web/src/features/editor/hooks/useGraphView.ts',{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
-  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc();v.elements.pkg=e('pkg','uml-package');v.elements.a.type='uml-class';v.elements.b.type='uml-class';v.diagrams[0]=d('uml','uml-class',[
   {id:'parent',elementId:'pkg',x:10,y:10},{id:'na',elementId:'a',x:30,y:90,parentNodeId:'parent'},{id:'nb',elementId:'b',x:670,y:90}
@@ -301,7 +315,7 @@ test('UML clases, objetos y componentes usan compartimentos, valores y símbolo 
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{diagramLabels:{'uml-class':'UML Clases','uml-object':'Objetos','uml-component':'Componentes'},elementLabels:{'uml-class':'Clase','uml-object':'Instancia',component:'Componente'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-class':'UML Clases','uml-object':'Objetos','uml-component':'Componentes'},elementLabels:{'uml-class':'Clase','uml-object':'Instancia',component:'Componente'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const html=(element,graphType)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element,mode:'technical',graphType},selected:false}))
@@ -316,7 +330,7 @@ test('UML líneas: agregación, composición, herencia, realización y ball/sock
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':require('react'),
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing},
+  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const rel=edges.umlRelationAdornment
@@ -345,7 +359,7 @@ test('UML componentes: formas de marcador SVG para generalización y composició
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const el=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:({id,path,markerStart,markerEnd,style})=>React.createElement('path',{id,d:path,'data-start':markerStart||'','data-end':markerEnd||'',style}),EdgeLabelRenderer:({children})=>React.createElement('g',null,children)},
-  'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'@atlas/contracts':{...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
  const edge=(kind)=>renderToStaticMarkup(React.createElement(el.AtlasUmlEdge,{id:'uml-edge-test',sourceX:10,sourceY:40,targetX:300,targetY:40,sourcePosition:'right',targetPosition:'left',data:{parallelOffset:0,parallelPath:'straight',relationKind:kind},label:''}))
  assert.match(edge('composition'),/data-uml-terminal="diamond-filled"/)
@@ -379,7 +393,7 @@ test('los 14 tipos UML ofrecen notación fija para cada relación (trazo, sentid
 test('orientación de símbolos UML sigue el lado del puerto, no el vector diagonal',()=>{
  const edges=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
-  'react':require('react'),'@atlas/contracts':{...umlNotation,...umlContainers,...sizing},
+  'react':require('react'),'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'react/jsx-runtime':require('react/jsx-runtime')
  })
  assert.equal(edges.terminalAngle('top',100,100,400,400),-90)
@@ -404,7 +418,7 @@ test('API rechaza nuevas relaciones UML semánticamente inválidas y conserva el
 test('grafo UML antiguo se visualiza con notación correcta sin reescribir relaciones persistidas',()=>{
  const hook=load('apps/web/src/features/editor/hooks/useGraphView.ts',{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
-  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc();v.elements.a.type='uml-class';v.elements.b.type='uml-class'
  v.diagrams[0]=d('old','uml-class',[node('na','a'),node('nb','b')],[edge('r','na','nb',{relationKind:'composition',direction:'both',lineStyle:'dotted'})])
@@ -473,7 +487,7 @@ test('UML conexiones: geometría compartida para ensamblaje y terminales cuadrad
  const component=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
  const svg=(kind,additional={})=>renderToStaticMarkup(React.createElement(component.AtlasUmlEdge,{
   id:'relation',sourceX:30,sourceY:75,targetX:380,targetY:75,sourcePosition:'right',targetPosition:'left',
@@ -523,7 +537,7 @@ test('UML render: clasificador, puerto, dispositivos Docker y subpaquete son fig
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:()=>React.createElement('i',{'data-port':1}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{diagramLabels:{'uml-composite':'Compuesta','uml-deployment':'Despliegue','uml-package':'Paquetes'},elementLabels:{'uml-class':'Clase UML','uml-port':'Puerto','uml-device':'Dispositivo','uml-execution':'Entorno','uml-package':'Paquete'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-composite':'Compuesta','uml-deployment':'Despliegue','uml-package':'Paquetes'},elementLabels:{'uml-class':'Clase UML','uml-port':'Puerto','uml-device':'Dispositivo','uml-execution':'Entorno','uml-package':'Paquete'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const html=(model,view,extra={})=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:model,mode:'technical',graphType:view,...extra},selected:false}))
@@ -635,7 +649,7 @@ test('ensamblaje UML: la concavidad del socket mira a la bola, sobre tramos hori
  const component=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
  const render=(kind,coordinates)=>renderToStaticMarkup(React.createElement(component.AtlasUmlEdge,{id:'edge',
   ...coordinates,data:{parallelOffset:0,parallelPath:'straight',relationKind:kind}}))
@@ -719,7 +733,7 @@ test('UML actividades: las figuras son el nodo, sin tarjeta genérica ni rombo d
  const nodeView=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('i',{'data-port':id}),NodeResizer:Stub,Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-action':'Acción'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-action':'Acción'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const render=type=>renderToStaticMarkup(React.createElement(nodeView.AtlasNode,{id:'n-'+type,data:{element:e(type,type,'Prueba'),mode:'mixed',graphType:'uml-activity'},selected:false}))
@@ -749,7 +763,7 @@ test('UML actividades: decisiones, inicio y finales muestran exactamente cuatro 
    Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||style?.left||style?.right||''}),
    Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub
   },
-  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-start':'Inicial','uml-end':'Final','uml-flow-final':'Fin de flujo','uml-decision':'Decisión'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-start':'Inicial','uml-end':'Final','uml-flow-final':'Fin de flujo','uml-decision':'Decisión'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const seen=(type)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'n-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
@@ -769,7 +783,7 @@ test('UML actividades: control symbols no muestran tarjeta y pintan solamente ge
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const view=type=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'qa-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
@@ -797,7 +811,7 @@ test('UML actividades: barra de bifurcación mantiene tres puntos arriba y abajo
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||''}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-fork':'Bifurcación'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-fork':'Bifurcación'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'fork',data:{element:e('fork','uml-fork'),mode:'mixed',graphType:'uml-activity'},selected:false}))
@@ -812,7 +826,7 @@ test('UML actividades: las conexiones históricas se alinean al único puerto si
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
   '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},
-  '@atlas/contracts':{...umlNotation,...umlContainers,...sizing}
+  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v={...doc(),elements:{start:e('start','uml-start'),decision:e('decision','uml-decision'),fork:e('fork','uml-fork')},diagrams:[d('act','uml-activity',[node('ns','start'),node('nd','decision'),node('nf','fork')],[
   edge('historica','ns','nd',{sourceHandle:'top-1',targetHandle:'bottom-3',relationKind:'control-flow'}),
@@ -896,7 +910,7 @@ test('Render UML de secuencia: fragmento combinado contiene operandos; activaci�
  const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{diagramLabels:{'uml-sequence':'Secuencia'},elementLabels:{'uml-frame':'Fragmento'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-sequence':'Secuencia'},elementLabels:{'uml-frame':'Fragmento'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const make=(type,summary,uml)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:type,data:{element:{...e('x',type),summary,uml},mode:'technical',graphType:'uml-sequence'},selected:false}))

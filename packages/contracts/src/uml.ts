@@ -1,3 +1,5 @@
+import {CLASS_TYPES,CLASS_RELATIONS} from './uml-class-catalog'
+import {classEndpointValid} from './uml-class-policy'
 /** Catálogo orientado a UML 2.5.1, para el editor visual de ATLAS.
  * Tipos y restricciones persistidos; no constituye un motor de validación UML formal.
  */
@@ -9,7 +11,7 @@ export const UML_DIAGRAM_GROUPS = [
 ] as const
 export const UML_DIAGRAMS=UML_DIAGRAM_GROUPS.flatMap(group=>group.types) as DiagramType[]
 export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly ElementType[]>>={
- 'uml-class':['uml-class','uml-interface','uml-enumeration','uml-package'],
+ 'uml-class':CLASS_TYPES,
  'uml-object':['uml-object','uml-class','uml-package'],
  'uml-component':['component','uml-interface','uml-port','uml-artifact','uml-package'],
  'uml-composite':['uml-class','uml-part','uml-reference-role','uml-port','uml-collaboration','uml-interface'],
@@ -25,7 +27,7 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-timing':['uml-lifeline','uml-state','uml-time','uml-constraint'],
 }
 export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string[]>>={
- 'uml-class':['association','navigable-association','bidirectional-association','generalization','aggregation','composition','dependency','realization'],
+ 'uml-class':CLASS_RELATIONS,
  'uml-object':['link','dependency'],
  'uml-component':['assembly','provided-interface','required-interface','dependency','realization'],
  'uml-composite':['connector','assembly'],
@@ -70,6 +72,7 @@ export const UML_RELATION_LABELS:Record<string,string>={
  generalization:'Generalización / herencia — triángulo hueco',
  realization:'Realización — línea discontinua y triángulo hueco',
  aggregation:'Agregación — rombo blanco',composition:'Composición — rombo negro',
+ elementImport:'Importación pública de elemento — «import»',elementAccess:'Importación privada de elemento — «access»',packageImport:'Importación pública de miembros de paquete — «import»',packageAccess:'Importación privada de miembros de paquete — «access»',
  dependency:'Dependencia — línea discontinua y flecha abierta',
  assembly:'Ensamblaje de interfaces — bola y encaje',
  'provided-interface':'Interfaz proporcionada — círculo (lollipop)',
@@ -97,6 +100,7 @@ export const umlRelationLabel=(kind:string)=>UML_RELATION_LABELS[kind]||kind.rep
  */
 /** Validaciones semánticas para relaciones nuevas, no para migrar modelos históricos. */
 export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:ElementType,target:ElementType):boolean{
+ if(diagram==='uml-class')return classEndpointValid(kind,source,target)
  if(diagram==='uml-activity'){
   // UML: particiones encapsulan los nodos; no participan como origen/destino del flujo.
   const forbidden=['uml-partition']

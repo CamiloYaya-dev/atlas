@@ -221,7 +221,7 @@
 .uml-property-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;border:1px solid #d6e1ee;background:white;padding:9px;border-radius:9px}
 .uml-property-field{display:grid;gap:4px;min-width:0;font-size:10px;font-weight:700;color:#536987}.uml-property-field input,.uml-property-field select{width:100%;min-width:0;padding:7px;font-size:12px;border:1px solid #cdd9e9;border-radius:5px;background:#fff;color:#233e60}
 .uml-property-row .uml-remove,.uml-parameters{grid-column:1/-1}.uml-remove{font-size:11px;display:flex;align-items:center;gap:5px;color:#a03b44;background:transparent;border:0;padding:4px;justify-content:flex-start}
-.uml-parameters{display:grid;gap:6px}.uml-parameters>b{font-size:11px}.uml-parameter-row{display:flex;gap:4px}.uml-parameter-row input{min-width:0;width:45%;font-size:12px;padding:5px}.uml-parameter-row button{flex:0 0 auto}
+.uml-parameters{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;max-width:100%;gap:6px}.uml-parameters>b{font-size:11px}.uml-parameter-scroll{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;padding:4px 2px 9px;scrollbar-width:auto}.uml-parameter-row{display:flex;width:max-content;align-items:flex-start;gap:8px}.uml-parameter-row>.uml-property-field{flex:0 0 145px;min-width:145px;width:145px}.uml-parameter-row>.uml-property-field:nth-child(2),.uml-parameter-row>.uml-property-field:nth-child(6){flex-basis:190px;min-width:190px;width:190px}.uml-parameter-row>.uml-property-field:nth-child(3){flex-basis:100px;min-width:100px;width:100px}.uml-parameter-row input,.uml-parameter-row select{box-sizing:border-box;min-width:0;width:100%;font-size:12px;padding:6px}.uml-parameter-row button{flex:0 0 auto;align-self:flex-start;margin-top:19px}.uml-validated-field{min-width:0;display:grid;gap:3px}.uml-validated-field input{width:100%;min-width:0;box-sizing:border-box}.uml-validated-field input[aria-invalid=true]{border-color:#c43c49;outline-color:#c43c49}.uml-inline-error{font-size:11px;line-height:1.3;color:#a42c38;white-space:normal}.uml-property-row{min-width:0}
 @media(max-width:740px){.uml-property-row{grid-template-columns:1fr}.uml-structural-class,.uml-instance-card{min-width:280px;width:280px}}
 .atlas-uml-end-label{position:absolute;pointer-events:none;padding:1px 3px;border-radius:3px;color:#435973;font-size:10px;white-space:nowrap;background:#ffffffcc;z-index:5}
 
@@ -514,3 +514,11 @@
 .atlas-select-area,.atlas-remove-selection{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .canvas-actions:has(.atlas-select-area){flex-wrap:wrap}
 .atlas-node.uml-diagram-uml-sequence.uml-interaction-frame{background:transparent!important}
+
+/* Semantic type is independent of the editable title. */
+.atlas-uml-type-identifier{font-size:10px!important;font-weight:500!important;color:#69717e!important;opacity:.9;pointer-events:none;user-select:none;text-decoration:none!important;font-style:normal!important}
+.atlas-uml-type-corner{position:absolute;top:2px;right:7px;z-index:2;max-width:90%;white-space:nowrap;background:#ffffffd9;padding:1px 3px;border-radius:2px}
+.uml-diagram-uml-class.uml-structural-class{border-radius:0!important;box-shadow:none!important;min-width:0!important;width:100%!important}
+.uml-template-parameters{position:absolute;top:-9px;right:-9px;border:1px dashed #68798b;padding:3px 8px;background:white;font-size:11px}
+.uml-diagram-uml-class.kind-uml-comment,.uml-diagram-uml-class.kind-uml-constraint{border-radius:0!important;background:white!important;box-shadow:none!important}
+.uml-note-content{padding:20px 8px 8px;white-space:pre-wrap;overflow-wrap:anywhere}

@@ -1,3 +1,4 @@
+import {classSelfAllowed} from '@atlas/contracts'
 /** Pure model operations used by the editor. Backend policy remains the authority. */
 import type {Diagram,DiagramEdge,DiagramType,FieldDefinition,ModelElement,ProjectDocument} from '@atlas/contracts'
 import {umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,atlasNodeSize,atlasNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment} from '@atlas/contracts'
@@ -30,15 +31,23 @@ export function reuseElementNode(doc:ProjectDocument,diagramId:string,elementId:
   return {...d,nodes:[...d.nodes,{id:node.id,elementId,x:node.x,y:node.y}]}
  })
 }
+/** Remove view references atomically; keep shared catalog records. */
+function pruneRelations(d:Diagram,removedNodes:Set<string>,removedEdges:Set<string>){
+ const dropped=new Set(removedEdges)
+ for(const e of d.edges)if(removedNodes.has(e.source)||removedNodes.has(e.target)||e.associationEnds?.some(end=>removedNodes.has(end.nodeId)))dropped.add(e.id)
+ let count=-1;while(count!==dropped.size){count=dropped.size;for(const e of d.edges)if(e.annotationTargetEdgeId&&dropped.has(e.annotationTargetEdgeId))dropped.add(e.id)}
+ const removedElements=new Set(d.nodes.filter(n=>removedNodes.has(n.id)&&!d.nodes.some(other=>other.elementId===n.elementId&&!removedNodes.has(other.id))).map(n=>n.elementId))
+ return d.edges.filter(e=>!dropped.has(e.id)).map(e=>e.associationClassId&&removedElements.has(e.associationClassId)?{...e,associationClassId:undefined}:e)
+}
 export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId:string):ProjectDocument{
  const target=doc.diagrams.find(d=>d.id===diagramId)
  const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId).map(n=>n.id)||[])
- const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,parentNodeId:undefined,x:n.x+(d.nodes.find(p=>p.id===n.parentNodeId)?.x||0),y:n.y+(d.nodes.find(p=>p.id===n.parentNodeId)?.y||0)}:n),edges:d.edges.filter(e=>!removed.has(e.source)&&!removed.has(e.target))}))
+ const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,parentNodeId:undefined,...umlAbsolutePosition(d,n)}:n),edges:pruneRelations(d,removed,new Set())}))
  return {...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}
 }
 export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
  return withDiagram(doc,diagramId,d=>{
-  if(edge.source===edge.target)throw new Error('Autoconexión no permitida')
+  if(edge.source===edge.target&&!(d.type==='uml-class'&&classSelfAllowed(edge.relationKind)))throw new Error('Autoconexión no permitida')
   if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw new Error('Extremos inexistentes')
   // Varias relaciones semánticamente distintas pueden unir las mismas cajas, incluso desde un mismo puerto.
   // La identidad estable de la relación es el ID, nunca el par origen/destino.
@@ -49,14 +58,14 @@ export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEd
 export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,changes:Partial<DiagramEdge>):ProjectDocument{
  return withDiagram(doc,diagramId,d=>{
   if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
-  if('source' in changes||'target' in changes||'id' in changes)throw new Error('No se pueden cambiar los extremos de una relación')
+  if('id' in changes||('source' in changes||'target' in changes)&&!(d.type==='uml-class'&&d.edges.some(e=>e.id===edgeId&&(e.source===changes.target&&e.target===changes.source||e.source===changes.source&&e.relationKind==='annotation'&&changes.annotationTargetEdgeId&&d.edges.some(target=>target.id===changes.annotationTargetEdgeId&&target.source===changes.target)))))throw new Error('No se pueden cambiar los extremos de una relación')
   return {...d,edges:d.edges.map(e=>e.id===edgeId?{...e,...changes}:e)}
  })
 }
 export function removeRelation(doc:ProjectDocument,diagramId:string,edgeId:string):ProjectDocument{
  return withDiagram(doc,diagramId,d=>{
   if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
-  return {...d,edges:d.edges.filter(e=>e.id!==edgeId)}
+  return {...d,edges:pruneRelations(d,new Set(),new Set([edgeId]))}
  })
 }
 /** Guarda dimensiones por aparición, sin afectar el mismo elemento usado en otras vistas. */
@@ -167,7 +176,7 @@ export function removeDiagramSelection(doc:ProjectDocument,diagramId:string,node
  const updated=withDiagram(doc,diagramId,d=>({
   ...d,
   nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,...umlAbsolutePosition(d,n),parentNodeId:undefined}:n),
-  edges:d.edges.filter(e=>!removedEdges.has(e.id)&&!removed.has(e.source)&&!removed.has(e.target))
+  edges:pruneRelations(d,removed,removedEdges)
  }))
  return {...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}
 }

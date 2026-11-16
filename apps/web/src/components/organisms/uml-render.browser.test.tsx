@@ -2,7 +2,7 @@ import {render,screen,fireEvent} from '@testing-library/react'
 import {it,expect,vi} from 'vitest'
 import type {ReactNode,CSSProperties} from 'react'
 import type {NodeProps,EdgeProps} from '@xyflow/react'
-import {createElement,sequenceActivationPorts} from '@atlas/contracts'
+import {createElement,sequenceActivationPorts,UML_DIAGRAMS,UML_ELEMENTS_BY_DIAGRAM} from '@atlas/contracts'
 import type {DiagramType,ElementType,ModelElement,UmlTerminal} from '@atlas/contracts'
 import {AtlasNode} from './AtlasNode'
 import {AtlasUmlEdge,Terminal,terminalAngle,umlRelationAdornment} from './AtlasUmlEdge'
@@ -83,7 +83,7 @@ it('cajas normales exponen enlaces genéricos o C4 y respetan perspectiva',()=>{
 })
 
 it('representa fichas UML mínimas sin inventar propiedades ni contenido',()=>{
- const {container,rerender}=render(<AtlasNode {...node('uml-class','uml-class')}/>);expect(screen.getByText('Sin atributos')).toBeTruthy();expect(screen.getByText('Sin operaciones')).toBeTruthy()
+ const {container,rerender}=render(<AtlasNode {...node('uml-class','uml-class')}/>);expect(screen.queryByText('Sin atributos')).toBeNull();expect(screen.queryByText('Sin operaciones')).toBeNull();expect(screen.getByText('«Class»')).toBeTruthy()
  rerender(<AtlasNode {...node('uml-object','uml-object')}/>);expect(screen.getByText('Sin valores de instancia')).toBeTruthy()
  rerender(<AtlasNode {...node('uml-object','uml-object',{uml:{slots:[{id:'s',name:'activo',value:'true'}]}})}/>);expect(screen.getByText('activo = true')).toBeTruthy()
  rerender(<AtlasNode {...node('uml-stereotype','uml-profile')}/>);expect(container.querySelector('.uml-structural-compartment')).toBeNull()
@@ -95,4 +95,13 @@ it('representa fichas UML mínimas sin inventar propiedades ni contenido',()=>{
  rerender(<AtlasNode {...node('uml-interaction','uml-sequence')}/>);expect(container.querySelector('.uml-interaction-ref-summary')).toBeNull()
  rerender(<AtlasNode {...node('uml-frame','uml-communication')}/>);expect(screen.getByText('sd')).toBeTruthy();expect(container.querySelector('.uml-interaction-frame-summary')).toBeNull()
  rerender(<AtlasNode {...node('uml-execution','uml-deployment',{uml:{runtimeIcon:'docker'}})}/>);expect(screen.getByText('docker')).toBeTruthy()
+})
+
+// Scoped smoke for each diagram, in the existing global UI suite as well.
+for(const diagram of UML_DIAGRAMS)it(`[${diagram}] renderiza cada tipo del catálogo con su geometría`,()=>{
+ for(const kind of UML_ELEMENTS_BY_DIAGRAM[diagram]||[]){
+  const {container,unmount}=render(<AtlasNode {...node(kind,diagram)}/>);
+  const shape=container.querySelector(`.kind-${kind}`);expect(shape,`${diagram}/${kind}`).toBeTruthy();
+  expect(container.querySelectorAll('[data-port]').length,`${diagram}/${kind}: conectores`).toBeGreaterThan(0);unmount()
+ }
 })

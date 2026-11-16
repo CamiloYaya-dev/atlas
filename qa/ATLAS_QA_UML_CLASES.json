@@ -1,0 +1,655 @@
+{
+  "schema": 1,
+  "elements": {
+    "a": {
+      "id": "a",
+      "name": "Pedido",
+      "type": "uml-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "aa",
+            "name": "id",
+            "type": "Integer",
+            "typeId": "prim",
+            "visibility": "private",
+            "static": true,
+            "readOnly": true,
+            "length": 12
+          }
+        ],
+        "operations": [
+          {
+            "id": "oa",
+            "name": "pagar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "b": {
+      "id": "b",
+      "name": "Cliente",
+      "type": "uml-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "abstract": true
+      }
+    },
+    "c": {
+      "id": "c",
+      "name": "Carpeta",
+      "type": "uml-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "leaf": true
+      }
+    },
+    "i": {
+      "id": "i",
+      "name": "IPago",
+      "type": "uml-interface",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "en": {
+      "id": "en",
+      "name": "EstadoPago",
+      "type": "uml-enumeration",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "literals": [
+          {
+            "id": "l1",
+            "name": "PENDIENTE"
+          },
+          {
+            "id": "l2",
+            "name": "APROBADO"
+          }
+        ]
+      }
+    },
+    "dt": {
+      "id": "dt",
+      "name": "Dirección",
+      "type": "uml-datatype",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "ad",
+            "name": "calle",
+            "type": "String",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "prim": {
+      "id": "prim",
+      "name": "Integer",
+      "type": "uml-primitive",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "s": {
+      "id": "s",
+      "name": "PagoAprobado",
+      "type": "uml-signal",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "as",
+            "name": "idPago",
+            "type": "UUID",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "p": {
+      "id": "p",
+      "name": "Pagos",
+      "type": "uml-package",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "p2": {
+      "id": "p2",
+      "name": "Dominio",
+      "type": "uml-package",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "semanticOwnerId": "p"
+    },
+    "ac": {
+      "id": "ac",
+      "name": "Matrícula",
+      "type": "uml-association-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "ac1",
+            "name": "fecha",
+            "type": "Date",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "note": {
+      "id": "note",
+      "name": "Revisar contrato",
+      "type": "uml-comment",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "note": "Revisión de trazabilidad de extremos"
+      }
+    },
+    "constraint": {
+      "id": "constraint",
+      "name": "Saldo no negativo",
+      "type": "uml-constraint",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "expression": "saldo >= 0"
+      }
+    },
+    "m": {
+      "id": "m",
+      "name": "Modelo QA",
+      "type": "uml-model",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "t": {
+      "id": "t",
+      "name": "Caja",
+      "type": "uml-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "templateParameters": [
+          {
+            "id": "T",
+            "name": "T",
+            "typeId": "prim"
+          }
+        ]
+      }
+    },
+    "bound": {
+      "id": "bound",
+      "name": "CajaEntera",
+      "type": "uml-class",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa-class",
+      "type": "uml-class",
+      "name": "QA · Clases UML",
+      "description": "Catálogo, relaciones y escenarios válidos",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "na",
+          "elementId": "a",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "nb",
+          "elementId": "b",
+          "x": 460,
+          "y": 0
+        },
+        {
+          "id": "nc",
+          "elementId": "c",
+          "x": 920,
+          "y": 0
+        },
+        {
+          "id": "ni",
+          "elementId": "i",
+          "x": 1380,
+          "y": 0
+        },
+        {
+          "id": "nen",
+          "elementId": "en",
+          "x": 0,
+          "y": 320
+        },
+        {
+          "id": "ndt",
+          "elementId": "dt",
+          "x": 460,
+          "y": 320
+        },
+        {
+          "id": "nprim",
+          "elementId": "prim",
+          "x": 920,
+          "y": 320
+        },
+        {
+          "id": "ns",
+          "elementId": "s",
+          "x": 1380,
+          "y": 320
+        },
+        {
+          "id": "np",
+          "elementId": "p",
+          "x": 0,
+          "y": 640
+        },
+        {
+          "id": "np2",
+          "elementId": "p2",
+          "x": 460,
+          "y": 640
+        },
+        {
+          "id": "nac",
+          "elementId": "ac",
+          "x": 920,
+          "y": 640
+        },
+        {
+          "id": "nnote",
+          "elementId": "note",
+          "x": 1380,
+          "y": 640
+        },
+        {
+          "id": "nconstraint",
+          "elementId": "constraint",
+          "x": 0,
+          "y": 960
+        },
+        {
+          "id": "nm",
+          "elementId": "m",
+          "x": 460,
+          "y": 960
+        },
+        {
+          "id": "nt",
+          "elementId": "t",
+          "x": 920,
+          "y": 960
+        },
+        {
+          "id": "nbound",
+          "elementId": "bound",
+          "x": 1380,
+          "y": 960
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-1",
+          "source": "na",
+          "target": "nb",
+          "relationKind": "association",
+          "sourceRole": "pedido",
+          "targetRole": "cliente",
+          "sourceMultiplicity": "0..*",
+          "targetMultiplicity": "1",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-2",
+          "source": "na",
+          "target": "ndt",
+          "relationKind": "navigable-association",
+          "targetNavigability": "navigable",
+          "direction": "forward",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-3",
+          "source": "nb",
+          "target": "na",
+          "relationKind": "bidirectional-association",
+          "sourceNavigability": "navigable",
+          "targetNavigability": "navigable",
+          "direction": "both",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-4",
+          "source": "nb",
+          "target": "na",
+          "relationKind": "aggregation",
+          "wholeEnd": "target",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-5",
+          "source": "nc",
+          "target": "nc",
+          "relationKind": "composition",
+          "wholeEnd": "source",
+          "sourceMultiplicity": "1",
+          "targetMultiplicity": "0..*",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-6",
+          "source": "na",
+          "target": "nb",
+          "relationKind": "generalization",
+          "direction": "forward",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-7",
+          "source": "na",
+          "target": "ni",
+          "relationKind": "realization",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-8",
+          "source": "ndt",
+          "target": "ni",
+          "relationKind": "specification-realization",
+          "description": "Correspondencia de especificación",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-9",
+          "source": "na",
+          "target": "ns",
+          "relationKind": "dependency",
+          "label": "Notifica",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-10",
+          "source": "nb",
+          "target": "ndt",
+          "relationKind": "usage",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-11",
+          "source": "na",
+          "target": "np",
+          "relationKind": "packageImport",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "description": "QA: importación explícita de miembros públicos del paquete."
+        },
+        {
+          "id": "edge-12",
+          "source": "np",
+          "target": "nm",
+          "relationKind": "packageImport",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-13",
+          "source": "np",
+          "target": "nen",
+          "relationKind": "elementImport",
+          "importAlias": "Estado",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-14",
+          "source": "np",
+          "target": "nprim",
+          "relationKind": "access",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-15",
+          "source": "np",
+          "target": "nm",
+          "relationKind": "merge",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-16",
+          "source": "na",
+          "target": "ndt",
+          "relationKind": "abstraction",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-17",
+          "source": "na",
+          "target": "ni",
+          "relationKind": "trace",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-18",
+          "source": "nb",
+          "target": "ni",
+          "relationKind": "refine",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-19",
+          "source": "ndt",
+          "target": "nprim",
+          "relationKind": "derive",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-20",
+          "source": "np",
+          "target": "np2",
+          "relationKind": "containment",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-21",
+          "source": "na",
+          "target": "nb",
+          "relationKind": "association",
+          "associationClassId": "ac",
+          "associationEnds": [
+            {
+              "id": "end1",
+              "nodeId": "na"
+            },
+            {
+              "id": "end2",
+              "nodeId": "nb"
+            },
+            {
+              "id": "end3",
+              "nodeId": "nc"
+            }
+          ],
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "edge-22",
+          "source": "nnote",
+          "target": "na",
+          "relationKind": "annotation",
+          "annotationTargetEdgeId": "edge-21",
+          "direction": "none",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-23",
+          "source": "nconstraint",
+          "target": "na",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "edge-24",
+          "source": "nbound",
+          "target": "nt",
+          "relationKind": "bind",
+          "templateBindings": [
+            {
+              "parameterId": "T",
+              "elementId": "prim"
+            }
+          ],
+          "direction": "forward",
+          "lineStyle": "dashed"
+        }
+      ]
+    }
+  ],
+  "fieldDefinitions": []
+}

@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "elements": {
+    "estu": {
+      "id": "estu",
+      "name": "Estudiante",
+      "type": "uml-class",
+      "description": "AUD-CL-013: editar la descripción de la relación en una vista; comprobar la otra. Las coordenadas y los puertos deben conservarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "curso": {
+      "id": "curso",
+      "name": "Curso",
+      "type": "uml-class",
+      "description": "AUD-CL-013: editar la descripción de la relación en una vista; comprobar la otra. Las coordenadas y los puertos deben conservarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "mat": {
+      "id": "mat",
+      "name": "Matrícula",
+      "type": "uml-association-class",
+      "description": "AUD-CL-013: editar la descripción de la relación en una vista; comprobar la otra. Las coordenadas y los puertos deben conservarse.",
+      "summary": "T07: asociación binaria con clase adjunta. Editar relación, guardar/recargar y probar borrar de forma coherente.",
+      "owner": "QA",
+      "author": "ATLAS",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa3-a",
+      "name": "Asociación compartida A",
+      "type": "uml-class",
+      "description": "Editar la descripción de Matrícula y cambiar el recorrido local.",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "n-estu",
+          "elementId": "estu",
+          "x": 80,
+          "y": 80
+        },
+        {
+          "id": "n-curso",
+          "elementId": "curso",
+          "x": 480,
+          "y": 80
+        },
+        {
+          "id": "n-mat",
+          "elementId": "mat",
+          "x": 280,
+          "y": 360
+        }
+      ],
+      "edges": [
+        {
+          "id": "matricula",
+          "source": "n-estu",
+          "target": "n-curso",
+          "relationKind": "association",
+          "associationClassId": "mat",
+          "sourceMultiplicity": "0..*",
+          "targetMultiplicity": "0..*",
+          "label": "matricula",
+          "direction": "none",
+          "lineStyle": "solid",
+          "description": "Descripción común de la matrícula",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight"
+        }
+      ]
+    },
+    {
+      "id": "qa3-b",
+      "name": "Asociación compartida B",
+      "type": "uml-class",
+      "description": "Comprobar descripción sincronizada y recorrido independiente.",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "b-n-estu",
+          "elementId": "estu",
+          "x": 170,
+          "y": 120
+        },
+        {
+          "id": "b-n-curso",
+          "elementId": "curso",
+          "x": 570,
+          "y": 120
+        },
+        {
+          "id": "b-n-mat",
+          "elementId": "mat",
+          "x": 370,
+          "y": 400
+        }
+      ],
+      "edges": [
+        {
+          "id": "qa3-matricula-b",
+          "source": "b-n-estu",
+          "target": "b-n-curso",
+          "relationKind": "association",
+          "associationClassId": "mat",
+          "sourceMultiplicity": "0..*",
+          "targetMultiplicity": "0..*",
+          "label": "matricula",
+          "direction": "none",
+          "lineStyle": "solid",
+          "description": "Descripción común de la matrícula",
+          "sourceHandle": "bottom-1",
+          "targetHandle": "top-2",
+          "pathStyle": "step"
+        }
+      ]
+    }
+  ],
+  "fieldDefinitions": []
+}

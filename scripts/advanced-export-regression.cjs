@@ -1,19 +1,34 @@
 /** Ejecución sin binarios nativos: valida selección, licencias, HTML y ZIP reales. */
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict'),{inflateRawSync}=require('node:zlib'),{test}=require('node:test')
 const root=path.resolve(__dirname,'..')
+// Resolve the real shared TypeScript modules, including transitive dependencies.
+const contractCache=new Map();
+function loadContract(filename){
+ filename=path.resolve(filename);if(!path.extname(filename))filename+='.ts';
+ if(contractCache.has(filename))return contractCache.get(filename).exports;
+ const mod={exports:{}};contractCache.set(filename,mod);
+ const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ const run=vm.runInThisContext('(function(module,exports,require){'+code+'\n})',{filename});
+ run(mod,mod.exports,id=>{if(id.startsWith('.'))return loadContract(path.resolve(path.dirname(filename),id));if(id.startsWith('node:'))return require(id);throw Error('Dependencia de contrato no prevista '+id)});return mod.exports;
+}
+const actualContracts=loadContract(path.join(root,'packages/contracts/src/index.ts'));
 function load(rel,stubs={}){
  const filename=path.join(root,rel)
+ if(rel.startsWith('packages/contracts/src/'))return loadContract(filename)
  const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText
  const mod={exports:{}}
  vm.runInNewContext(code,{module:mod,exports:mod.exports,Buffer,console,require:(id)=>{
-  if(Object.prototype.hasOwnProperty.call(stubs,id))return stubs[id]
+  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@atlas/contracts'?{...actualContracts,...stubs[id]}:stubs[id]
   if(id.startsWith('node:'))return require(id)
   throw Error('Dependencia no prevista '+id)
  }},{filename,timeout:5000})
  return mod.exports
 }
 const structure=load('packages/contracts/src/uml-structure.ts')
-const fields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':structure})
+const classPolicy=load('packages/contracts/src/uml-class-policy.ts')
+const uml=load('packages/contracts/src/uml.ts',{'./uml-class-policy':classPolicy})
+const notation=load('packages/contracts/src/uml-notation.ts',{'./uml':uml})
+const fields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':structure,'./uml-class-policy':classPolicy,'./uml-notation':notation})
 const docs=load('apps/api/src/modules/exports/advanced-document.ts',{'@atlas/contracts':fields})
 const licensing=load('apps/api/src/modules/licensing/licensing-policy.ts')
 const documentFormats=load('apps/api/src/modules/exports/diagram-documents.ts',{'@atlas/contracts':fields,'./advanced-document':docs})
