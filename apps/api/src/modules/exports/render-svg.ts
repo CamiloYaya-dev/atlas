@@ -1,4 +1,4 @@
-import {diagramLabels,elementLabels,classSvgScene,componentSvgScene,activitySvgScene,sequenceSvgScene,umlEdgeLabel,isUmlDiagram} from '@atlas/contracts'
+import {deploymentSvgScene,diagramLabels,elementLabels,classSvgScene,componentSvgScene,activitySvgScene,sequenceSvgScene,umlEdgeLabel,isUmlDiagram} from '@atlas/contracts'
 import type {Diagram,DiagramEdge,DiagramNode,ModelElement,ProjectDocument} from '@atlas/contracts'
 import {DomainError} from '../../domain/errors'
 
@@ -22,8 +22,8 @@ export function renderDiagramSVG(doc:ProjectDocument,d:Diagram,watermarked:boole
  if(d.nodes.length>260||d.edges.length>700)throw new DomainError('Exportación demasiado grande: máximo 260 cajas y 700 conexiones',413)
  const points=d.nodes.filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)&&Math.abs(n.x)<100000&&Math.abs(n.y)<100000)
  if(points.length!==d.nodes.length)throw new DomainError('Posición de caja no válida para exportación',422)
- if(['uml-class','uml-usecase','uml-activity','uml-sequence','uml-component'].includes(d.type)){
-  const scene=d.type==='uml-component'?componentSvgScene(doc,d):d.type==='uml-activity'?activitySvgScene(doc,d):d.type==='uml-sequence'?sequenceSvgScene(doc,d):classSvgScene(doc,d),width=Math.ceil(scene.width+MARGIN*2),height=Math.ceil(scene.height+HEADER+MARGIN*2)
+ if(['uml-class','uml-usecase','uml-activity','uml-sequence','uml-component','uml-deployment'].includes(d.type)){
+  const scene=d.type==='uml-deployment'?deploymentSvgScene(doc,d):d.type==='uml-component'?componentSvgScene(doc,d):d.type==='uml-activity'?activitySvgScene(doc,d):d.type==='uml-sequence'?sequenceSvgScene(doc,d):classSvgScene(doc,d),width=Math.ceil(scene.width+MARGIN*2),height=Math.ceil(scene.height+HEADER+MARGIN*2)
   if(width>5000||height>5000||width*height>20_000_000)throw new DomainError('El diagrama supera las dimensiones máximas de exportación',413)
   const watermark=watermarked?`<g opacity=".19" fill="#314d77" font-size="29" font-weight="800" text-anchor="middle" transform="rotate(-23 ${width/2} ${height/2})">${Array.from({length:Math.ceil(height/180)+3},(_,r)=>Array.from({length:Math.ceil(width/460)+3},(_,c)=>`<text x="${c*460-280}" y="${r*180-160}">ATLAS · USO NO COMERCIAL</text>`).join('')).join('')}</g>`:''
   return {width,height,svg:`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" font-family="Arial, Helvetica, sans-serif"><rect width="100%" height="100%" fill="#f4f7fc"/><rect width="100%" height="${HEADER}" fill="#15243b"/><text x="${MARGIN}" y="42" fill="#b4c6e5" font-size="14">ATLAS · ${d.type==='uml-class'?'UML Clases':escapeText(diagramLabels[d.type])}</text><text x="${MARGIN}" y="81" fill="white" font-size="27">${escapeText(d.name,70)}</text><g transform="translate(${MARGIN-scene.minX} ${HEADER+MARGIN-scene.minY})">${scene.markup}</g>${watermark}</svg>`}

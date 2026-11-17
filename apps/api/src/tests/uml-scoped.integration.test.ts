@@ -24,8 +24,8 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
   const read=await send('GET',base+'/document');assert.equal(read.statusCode,200,read.body);assert.equal(read.json().version,2);assert.deepEqual(read.json().document,doc)
   const invalid=structuredClone(doc);invalid.diagrams[0].edges[0].target='missing';const rejected=await send('PUT',base+'/document',{document:invalid,expectedVersion:2});assert.ok([400,403,409,422].includes(rejected.statusCode),rejected.body)
   const unchanged=await send('GET',base+'/document');assert.equal(unchanged.json().version,2);assert.deepEqual(unchanged.json().document,doc)
-  if(type==='uml-sequence'||type==='uml-component'){
-   const dir=new URL(type==='uml-component'?'../../../../qa/uml-component-negative/':'../../../../qa/uml-sequence-negative/',import.meta.url)
+  if(type==='uml-sequence'||type==='uml-component'||type==='uml-deployment'){
+   const dir=new URL(type==='uml-component'?'../../../../qa/uml-component-negative/':type==='uml-deployment'?'../../../../qa/uml-deployment-negative/':'../../../../qa/uml-sequence-negative/',import.meta.url)
    const names=readdirSync(dir).filter(n=>n.endsWith('.json')).sort()
    // Three requests per fixture; isolate batches without weakening actual limits.
    for(const [index,name] of names.entries()){
@@ -34,6 +34,8 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
     for(const [method,route] of [['PUT','/document'],['POST','/import']] as const){
      const res=await send(method,base+route,{document:bad,expectedVersion:2})
      assert.equal(res.statusCode,400,`${name} ${method}: ${res.body}`)
+     if(type==='uml-deployment'&&name==='11-destino-anotacion.json')assert.match(res.body,/Destino de anotación inválido/)
+     if(type==='uml-deployment'&&/^(27|28|29|30)-aud-dep-007-/.test(name))assert.match(res.body,/Valores duplicados en propiedad única/)
     }
     const still=await send('GET',base+'/document')
     assert.equal(still.statusCode,200,`${name} GET: ${still.body}`)
@@ -59,7 +61,9 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
   if(type==='uml-usecase'){
    for(const [name,mutate] of [['extend sin puntos',(v:typeof doc)=>{v.diagrams[0].edges.find(e=>e.relationKind==='extend')!.extensionPointIds=[]}],['include con condición',(v:typeof doc)=>{v.diagrams[0].edges.find(e=>e.relationKind==='include')!.extensionCondition='inválida'}],['multiplicidad mal formada',(v:typeof doc)=>{v.diagrams[0].edges.find(e=>e.relationKind==='association')!.sourceMultiplicity='3..1'}]] as const){const bad=structuredClone(doc);mutate(bad);for(const [method,route] of [['PUT','/document'],['POST','/import']] as const){const res=await send(method,base+route,{document:bad,expectedVersion:2});assert.equal(res.statusCode,400,name+': '+res.body)}const still=await send('GET',base+'/document');assert.equal(still.json().version,2);assert.deepEqual(still.json().document,doc)}
   }
-  const changed=structuredClone(doc);changed.diagrams[0].name='QA actualizado';const saved=await send('PUT',base+'/document',{document:changed,expectedVersion:2});assert.equal(saved.statusCode,200,saved.body);assert.equal(saved.json().version,3)
+  const changed=structuredClone(doc);changed.diagrams[0].name='QA actualizado';
+  if(type==='uml-deployment'){const annotation=changed.diagrams[0].edges.find(e=>e.id==='a')!;annotation.target='host';assert.equal(annotation.annotationTargetEdgeId,'p1')}
+  const saved=await send('PUT',base+'/document',{document:changed,expectedVersion:2});assert.equal(saved.statusCode,200,saved.body);assert.equal(saved.json().version,3)
   const history=await send('GET',base+'/versions/2');assert.equal(history.statusCode,200,history.body);assert.deepEqual(history.json().document,doc)
   const exported=await send('GET',base+'/export');assert.equal(exported.statusCode,200,exported.body);assert.deepEqual(exported.json().document,changed)
   if(type==='uml-usecase'){

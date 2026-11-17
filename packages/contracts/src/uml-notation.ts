@@ -1,3 +1,4 @@
+import {deploymentEdgePresentation} from './uml-deployment-policy'
 import {componentWiringContractName} from './uml-component-policy'
 import type {ProjectDocument,Diagram} from './index'
 /** Semántica de la notación UML 2.5.1 utilizada por las 14 vistas de ATLAS.
@@ -110,10 +111,11 @@ export function validUmlEdgeNotation(diagram:DiagramType,edge:DiagramEdge):boole
 
 /** Reserved words are derived even on historical snapshots. */
 export function umlEdgeLabel(diagram:DiagramType,edge:DiagramEdge):string{
- return isUmlDiagram(diagram)?umlRelationNotation(edge.relationKind||'').label||(['generalization','realization','specification-realization','component-realization','containment','annotation'].includes(edge.relationKind||'')&&['uml-class','uml-usecase','uml-component'].includes(diagram)?'':edge.label||''):edge.label||''
+ return isUmlDiagram(diagram)?umlRelationNotation(edge.relationKind||'').label||(['generalization','realization','specification-realization','component-realization','containment','annotation'].includes(edge.relationKind||'')&&['uml-class','uml-usecase','uml-component','uml-deployment'].includes(diagram)?'':edge.label||''):edge.label||''
 }
 /** Derived display label, never stored as a business name. */
 export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:ProjectDocument,view?:Diagram):string{
+ if(diagram==='uml-deployment'&&view)edge=deploymentEdgePresentation(doc,view,edge)
  const record=diagram==='uml-component'&&edge.componentRelationId?doc.componentRelations?.[edge.componentRelationId]:undefined
  const label=umlEdgeLabel(diagram,record?{...edge,label:record.name}:edge)
  if(diagram==='uml-component'&&view){const source=view.nodes.find(n=>n.id===edge.source)?.elementId,target=view.nodes.find(n=>n.id===edge.target)?.elementId;if(target&&['provided-interface','required-interface'].includes(edge.relationKind||''))return doc.elements[target]?.name||'';if(source&&target&&['wiring','assembly'].includes(edge.relationKind||'')){if(record?.wiring?.requiredInterfaceId)return doc.elements[record.wiring.requiredInterfaceId]?.name||'';return componentWiringContractName(doc,source,target)||label}const alias=record?.importAlias||edge.importAlias;if(alias&&['elementImport','elementAccess'].includes(edge.relationKind||''))return `${label} {alias: ${alias}}`}
@@ -123,4 +125,4 @@ export function umlDisplayLabel(diagram:DiagramType,edge:DiagramEdge,doc:Project
  const node=view?.nodes.find(n=>n.id===edge.target),formals=node&&doc.elements[node.elementId]?.uml?.templateParameters
  return `${label} <${edge.templateBindings.map(b=>`${formals?.find(p=>p.id===b.parameterId)?.name||'?'} → ${doc.elements[b.elementId]?.name||'Tipo no disponible'}`).join(', ')}>`
 }
-export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return diagram==='uml-component'&&['provided-interface','required-interface','wiring'].includes(kind)||isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label&&!(diagram==='uml-sequence'&&kind==='create')||['uml-class','uml-usecase','uml-component'].includes(diagram)&&['generalization','realization','specification-realization','component-realization','containment','annotation'].includes(kind)}
+export function umlRelationNameLocked(diagram:DiagramType,kind:string):boolean{return diagram==='uml-component'&&['provided-interface','required-interface','wiring'].includes(kind)||isUmlDiagram(diagram)&&!!umlRelationNotation(kind).label&&!(diagram==='uml-sequence'&&kind==='create')||['uml-class','uml-usecase','uml-component','uml-deployment'].includes(diagram)&&['generalization','realization','specification-realization','component-realization','containment','annotation'].includes(kind)}

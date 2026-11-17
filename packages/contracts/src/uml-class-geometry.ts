@@ -25,7 +25,7 @@ export function classRelationRoute(input:RouteEndpoints,self:boolean){
 export function classEndTerminal(e:Pick<DiagramEdge,'relationKind'|'wholeEnd'|'sourceNavigability'|'targetNavigability'>,side:'source'|'target'):UmlTerminal{
  const n=umlRelationNotation(e.relationKind||'association')
  if(e.relationKind==='containment')return side==='source'?'ownership':'none'
- if(!isAssociation(e.relationKind))return side==='source'?n.start:n.end
+ if(e.relationKind!=='communication-path'&&!isAssociation(e.relationKind))return side==='source'?n.start:n.end
  const whole=e.wholeEnd||'source';if(whole===side&&['aggregation','composition'].includes(e.relationKind||''))return e.relationKind==='composition'?'diamond-filled':'diamond-open'
  const nav=side==='source'?e.sourceNavigability:e.targetNavigability
  if(nav)return nav==='navigable'?'open-arrow':nav==='non-navigable'?'cross':'none'

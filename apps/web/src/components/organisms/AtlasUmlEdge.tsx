@@ -51,10 +51,10 @@ export function AtlasUmlEdge(props:EdgeProps){
  const displayLabel=n.label?(data.semanticDisplayLabel?.startsWith(n.label)?data.semanticDisplayLabel:n.label):props.label
  const input={sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,sourcePosition:props.sourcePosition,targetPosition:props.targetPosition,offset:data.parallelOffset||0,pathStyle:data.parallelPath||'straight' as const}
  const exception=data.diagramType==='uml-activity'&&data.relationKind==='exception-handler'
- const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity','uml-component'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
- const terminal=(side:'source'|'target'):UmlTerminal=>['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndTerminal(data,side):side==='source'?n.start:n.end
- const sourceLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.sourceX,y:props.sourceY},props.sourcePosition):{x:props.sourceX+20,y:props.sourceY-15}
- const targetLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.targetX,y:props.targetY},props.targetPosition):{x:props.targetX-20,y:props.targetY-15}
+ const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity','uml-component','uml-deployment'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
+ const terminal=(side:'source'|'target'):UmlTerminal=>['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndTerminal(data,side):side==='source'?n.start:n.end
+ const sourceLabel=['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndLabel({x:props.sourceX,y:props.sourceY},props.sourcePosition):{x:props.sourceX+20,y:props.sourceY-15}
+ const targetLabel=['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndLabel({x:props.targetX,y:props.targetY},props.targetPosition):{x:props.targetX-20,y:props.targetY-15}
  const nary=!!data.extraEnds?.length,hub={x:route.labelX,y:route.labelY}
  const actualPath=data.annotationPoint?`M ${props.sourceX} ${props.sourceY} L ${data.annotationPoint.x} ${data.annotationPoint.y}`:nary?`M ${props.sourceX} ${props.sourceY} L ${hub.x} ${hub.y} L ${props.targetX} ${props.targetY}`:route.path
  const sa=terminalAngle(props.sourcePosition,props.sourceX,props.sourceY,props.targetX,props.targetY)

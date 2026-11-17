@@ -58,6 +58,7 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
   if(type==='uml-node'||type==='uml-device'){width=hasChildren?570:260;height=hasChildren?370:128}
   else if(type==='uml-execution'){width=hasChildren?360:260;height=hasChildren?235:128}
   else{width=260;height=128}
+  const detail=element.uml?.deployment;const lines=(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0)+(detail?.kind==='instance'?detail.slots?.length||0:0);if(!hasChildren){width=Math.max(width,Math.min(720,element.name.length*7+45));height=Math.max(height,90+lines*18)}
  }else if(diagram==='uml-composite'&&type==='uml-collaboration'){width=205;height=110}
  else if(diagram==='uml-component'&&type==='component'){width=270;height=Math.max(115,85+((element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0))*21)}
  else if(diagram==='uml-component'&&['uml-part','uml-reference-role'].includes(type)){width=260;height=118}

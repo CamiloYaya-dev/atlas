@@ -1,3 +1,4 @@
+import {DEPLOYMENT_TYPES,DEPLOYMENT_RELATIONS,deploymentEndpointValid} from './uml-deployment-catalog'
 import {COMPONENT_TYPES,COMPONENT_RELATIONS,componentEndpointValid} from './uml-component-catalog'
 import {SEQUENCE_TYPES,SEQUENCE_RELATIONS,sequenceEndpointTypeValid} from './uml-sequence-policy'
 import {ACTIVITY_TYPES,ACTIVITY_RELATIONS,activityEndpointTypeValid} from './uml-activity-policy'
@@ -19,7 +20,7 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
  'uml-object':['uml-object','uml-class','uml-package'],
  'uml-component':COMPONENT_TYPES,
  'uml-composite':['uml-class','uml-part','uml-reference-role','uml-port','uml-collaboration','uml-interface'],
- 'uml-deployment':['uml-node','uml-device','uml-execution','uml-artifact'],
+ 'uml-deployment':DEPLOYMENT_TYPES,
  'uml-package':['uml-package','uml-subpackage','uml-model','uml-profile'],
  'uml-profile':['uml-profile','uml-stereotype','uml-metaclass','uml-package'],
  'uml-usecase':USECASE_TYPES,
@@ -35,7 +36,7 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
  'uml-object':['link','dependency'],
  'uml-component':COMPONENT_RELATIONS,
  'uml-composite':['connector','assembly'],
- 'uml-deployment':['communication-path','deployment'],
+ 'uml-deployment':DEPLOYMENT_RELATIONS,
  'uml-package':['dependency','import','merge'],
  'uml-profile':['extension','apply','reference','generalization'],
  'uml-usecase':USECASE_RELATIONS,
@@ -110,11 +111,7 @@ export const umlRelationLabel=(kind:string)=>UML_RELATION_LABELS[kind]||kind.rep
 export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:ElementType,target:ElementType):boolean{
  if(diagram==='uml-class')return classEndpointValid(kind,source,target)
  if(diagram==='uml-activity')return activityEndpointTypeValid(kind,source,target)
- if(diagram==='uml-deployment'){
-  const location=(t:ElementType)=>['uml-node','uml-device','uml-execution'].includes(t)
-  if(kind==='communication-path')return location(source)&&location(target)
-  if(kind==='deployment')return source==='uml-artifact'&&location(target)
- }
+ if(diagram==='uml-deployment')return deploymentEndpointValid(kind,source,target)
  if(diagram==='uml-package'){
   const pkg=(t:ElementType)=>['uml-package','uml-subpackage','uml-model','uml-profile'].includes(t)
   return pkg(source)&&pkg(target)

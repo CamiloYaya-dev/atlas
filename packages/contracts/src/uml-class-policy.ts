@@ -1,3 +1,4 @@
+import {deploymentEndpointValid} from './uml-deployment-catalog'
 import {componentEndpointValid} from './uml-component-catalog'
 /** ATLAS class-diagram policy. IDs refer to shared catalog elements, not labels. */
 import type {Diagram,DiagramEdge,ElementType,ModelElement,ProjectDocument,UmlAssociationEnd} from './index'
@@ -175,7 +176,7 @@ export function classDocumentIssues(doc:ProjectDocument):ClassIssue[]{
 
  for(const e of Object.values(doc.elements)){
   if(classIds.has(e.id))add(`element:${e.id}`,classDetailErrors(e,doc))
-  if(e.semanticOwnerId){const parent=doc.elements[e.semanticOwnerId];if(!parent||!classEndpointValid('containment',parent.type,e.type)&&!((e.uml?.component||e.type==='component'||e.type==='uml-artifact')&&componentEndpointValid('containment',parent.type,e.type)))add(`owner:${e.id}`,['Propietario incompatible']);ownership.set(e.id,new Set([e.semanticOwnerId]))}
+  if(e.semanticOwnerId){const parent=doc.elements[e.semanticOwnerId];if(!parent||!classEndpointValid('containment',parent.type,e.type)&&!((e.uml?.component||e.type==='component'||e.type==='uml-artifact')&&componentEndpointValid('containment',parent.type,e.type))&&!(e.uml?.deployment&&deploymentEndpointValid('containment',parent.type,e.type)))add(`owner:${e.id}`,['Propietario incompatible']);ownership.set(e.id,new Set([e.semanticOwnerId]))}
  }
  for(const [id,parents] of ownership)for(const parent of parents)if(cyclic(id,parent,ownership))add(`owner:${id}`,['Ciclo de propiedad'])
  for(const d of doc.diagrams.filter(d=>d.type==='uml-class'))for(const e of d.edges){

@@ -20,8 +20,9 @@ export function umlContainerAllows(diagram:DiagramType,parent:ElementType,child:
  if(diagram==='uml-sequence')return (parent==='uml-lifeline'||parent==='actor')&&['uml-activation','uml-destruction'].includes(child)||parent==='uml-activation'&&child==='uml-destruction'
  if(diagram==='uml-activity')return parent==='uml-action'&&child==='uml-activity-pin'||['uml-partition','uml-activity-interruptible-region'].includes(parent)&&['uml-partition','uml-start','uml-end','uml-flow-final','uml-action','uml-decision','uml-fork','uml-object-node','uml-activity-parameter','uml-comment','uml-constraint'].includes(child)
  if(diagram==='uml-deployment'){
-  if(parent==='uml-node'||parent==='uml-device')return ['uml-node','uml-execution','uml-artifact'].includes(child)
-  if(parent==='uml-execution')return child==='uml-artifact'
+  if(['uml-node','uml-device','uml-execution','uml-object','uml-part'].includes(parent))return ['uml-node','uml-device','uml-execution','uml-artifact','uml-object','uml-part'].includes(child)
+  if(parent==='uml-artifact')return child==='uml-artifact'
+  if(parent==='uml-package')return !['uml-object','uml-part'].includes(child)
   return false
  }
  if(diagram==='uml-package')return ['uml-package','uml-subpackage','uml-model','uml-profile'].includes(parent)&&['uml-package','uml-subpackage','uml-model','uml-profile'].includes(child)

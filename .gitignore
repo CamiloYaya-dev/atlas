@@ -17,9 +17,9 @@ test-results/
 coverage/
 .playwright/
 
-# Evidencias generadas por QA UML
-qa/uml-*-evidence/
-
 # Test coverage artifacts
 coverage/
 .coverage/
+
+# Evidencia generada de QA UML
+/qa/uml-*-evidence/

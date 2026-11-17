@@ -470,8 +470,8 @@ test('UML estructura compuesta: puerto encajado en borde y jerarquía de dos niv
 })
 
 test('UML despliegue: dispositivos y entornos son semánticamente diferentes y tienen iconos válidos',()=>{
- assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-deployment']],['uml-node','uml-device','uml-execution','uml-artifact'])
- assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-deployment']],['communication-path','deployment'])
+ assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-deployment']],['uml-node','uml-device','uml-execution','uml-artifact','uml-object','uml-part','component','uml-class','uml-interface','uml-datatype','uml-package','uml-comment','uml-constraint'])
+ assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-deployment']],['communication-path','deployment','manifestation','dependency','usage','generalization','composition','containment','annotation'])
  assert.equal(uml.umlElementCreatable('uml-deployment','database'),false)
  assert.equal(uml.umlElementAllowed('uml-deployment','database'),true)
  assert.equal(uml.umlRelationEndpointValid('uml-deployment','communication-path','uml-device','uml-node'),true)
@@ -554,7 +554,9 @@ test('UML despliegue: nodo contiene Docker y artefacto sin perder posición abso
   {id:'dev',elementId:'dev',x:100,y:200},{id:'runtime',elementId:'runtime',x:180,y:315},{id:'artifact',elementId:'artifact',x:240,y:400}
  ],[])]
  const a=commands.setNodePackage(v,'deployment','runtime','dev')
- const b=commands.setNodePackage(a,'deployment','artifact','runtime')
+ assert.throws(()=>commands.setNodePackage(a,'deployment','artifact','runtime'));
+ const assigned=actualContracts.createNestedDeployment(a,'deployment','artifact','runtime');
+ const b=commands.setNodePackage(assigned,'deployment','artifact','runtime')
  assert.equal(b.diagrams[0].nodes.find(n=>n.id==='runtime').parentNodeId,'dev')
  assert.equal(b.diagrams[0].nodes.find(n=>n.id==='artifact').parentNodeId,'runtime')
  assert.equal(umlContainers.umlAbsolutePosition(b.diagrams[0],b.diagrams[0].nodes.find(n=>n.id==='artifact')).x,240);assert.equal(umlContainers.umlAbsolutePosition(b.diagrams[0],b.diagrams[0].nodes.find(n=>n.id==='artifact')).y,400)
