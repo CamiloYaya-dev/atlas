@@ -1,0 +1,7 @@
+PASS UI 1: dirección y rollback
+PASS UI 2: reuse
+PASS UI 3: edición sin aparición
+PASS UI 4: filtro de ancestro compatible
+PASS UI 5: valor discriminado e histórico
+PASS UI 6: catálogo global y confirmación
+EXIT=0

@@ -1,0 +1,24 @@
+
+> atlas-monorepo@4.8.1 qa:uml:componentes
+> node scripts/qa-uml.mjs componentes --list
+
+{
+  "slug": "componentes",
+  "type": "uml-component",
+  "units": [
+    "apps/api/src/domain/uml-component-persistence.unit.test.ts",
+    "packages/contracts/src/uml-component-policy.unit.test.ts"
+  ],
+  "dedicatedUI": [],
+  "mixedUI": [
+    [
+      "src/components/organisms/uml-render.browser.test.tsx",
+      "\\[uml-component\\]|uml-component:"
+    ],
+    [
+      "src/features/editor/AtlasEditor.behavior.browser.test.tsx",
+      "QA10 establece dependencia UML de componente"
+    ]
+  ],
+  "graph": "UML componentes|UML clases, objetos|ensamblaje UML"
+}

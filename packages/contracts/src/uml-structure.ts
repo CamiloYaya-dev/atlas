@@ -1,3 +1,5 @@
+import {validComponentDetail} from './uml-component-policy'
+import type {ComponentDetail} from './uml-component-policy'
 /** UML structural detail is attached to the shared element; semantic ownership is stored on the shared element; visual nesting belongs to an occurrence. */
 export type UmlVisibility='public'|'private'|'protected'|'package'
 export interface UmlAttribute {id:string;name:string;type:string;visibility:UmlVisibility;multiplicity?:string;length?:number;defaultValue?:string;typeId?:string;readOnly?:boolean;derived?:boolean;static?:boolean;ordered?:boolean;unique?:boolean}
@@ -6,7 +8,7 @@ export interface UmlOperation {id:string;name:string;visibility:UmlVisibility;re
 export interface UmlSlot {id:string;name:string;type?:string;value:string}
 export type UmlDeviceIcon='server'|'desktop'|'android'|'mobile'|'network'|'storage'|'generic'
 export type UmlRuntimeIcon='docker'|'jvm'|'nodejs'|'database'|'generic'
-export interface UmlElementDetail {visibility?:UmlVisibility;deviceIcon?:UmlDeviceIcon;runtimeIcon?:UmlRuntimeIcon;attributes?:UmlAttribute[];operations?:UmlOperation[];classifier?:string;slots?:UmlSlot[];abstract?:boolean;leaf?:boolean;literals?:{id:string;name:string}[];templateParameters?:{id:string;name:string;typeId?:string;constraint?:string}[];note?:string;expression?:string}
+export interface UmlElementDetail {component?:ComponentDetail;visibility?:UmlVisibility;deviceIcon?:UmlDeviceIcon;runtimeIcon?:UmlRuntimeIcon;attributes?:UmlAttribute[];operations?:UmlOperation[];classifier?:string;slots?:UmlSlot[];abstract?:boolean;leaf?:boolean;literals?:{id:string;name:string}[];templateParameters?:{id:string;name:string;typeId?:string;constraint?:string}[];note?:string;expression?:string}
 export const UML_VISIBILITY_SYMBOL:Record<UmlVisibility,string>={public:'+',private:'-',protected:'#',package:'~'}
 export function umlAttributeText(item:UmlAttribute,clean=false,names?:Readonly<Record<string,string>>):string{
  const length=!clean&&item.length&&item.length>0?`(${item.length})`:''
@@ -22,6 +24,7 @@ export function validUmlDetail(value:unknown):value is UmlElementDetail{
  if(value===undefined)return true
  if(!value||typeof value!=='object'||Array.isArray(value))return false
  const x=value as Record<string,unknown>
+ if(!validComponentDetail(x.component))return false
  const text=(v:unknown,max=160)=>typeof v==='string'&&v.length<=max
  const entry=(v:unknown)=>!!v&&typeof v==='object'&&!Array.isArray(v)
  const validName=(v:unknown)=>text(v)&&!!(v as string).trim()

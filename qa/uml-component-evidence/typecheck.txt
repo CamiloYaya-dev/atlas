@@ -1,0 +1,12 @@
+
+> atlas-monorepo@4.8.1 typecheck
+> npm run typecheck -w @atlas/api && npm run typecheck -w @atlas/web
+
+
+> @atlas/api@4.8.1 typecheck
+> tsc --noEmit
+
+
+> @atlas/web@4.8.1 typecheck
+> tsc --noEmit
+

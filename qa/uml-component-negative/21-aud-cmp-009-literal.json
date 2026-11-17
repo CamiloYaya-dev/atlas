@@ -1,0 +1,1362 @@
+{
+  "schema": 1,
+  "elements": {
+    "ipay": {
+      "id": "ipay",
+      "type": "uml-interface",
+      "name": "IPago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "ipay-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "ipro": {
+      "id": "ipro",
+      "type": "uml-interface",
+      "name": "IPagoPremium",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "ipro-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "irepo": {
+      "id": "irepo",
+      "type": "uml-interface",
+      "name": "IRepo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "irepo-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "iother": {
+      "id": "iother",
+      "type": "uml-interface",
+      "name": "IOtro",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "iother-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "web": {
+      "id": "web",
+      "type": "component",
+      "name": "Web",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        }
+      }
+    },
+    "payments": {
+      "id": "payments",
+      "type": "component",
+      "name": "Pagos",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        },
+        "operations": [
+          {
+            "id": "payments-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "other": {
+      "id": "other",
+      "type": "component",
+      "name": "Otro",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        }
+      }
+    },
+    "parent": {
+      "id": "parent",
+      "type": "component",
+      "name": "Componente base",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        }
+      }
+    },
+    "impl": {
+      "id": "impl",
+      "type": "uml-class",
+      "name": "ServicioPago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "impl-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "artifact": {
+      "id": "artifact",
+      "type": "uml-artifact",
+      "name": "pagos.jar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "artifact",
+          "fileName": "pagos.jar"
+        }
+      }
+    },
+    "pkg": {
+      "id": "pkg",
+      "type": "uml-package",
+      "name": "Aplicación",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "pkg2": {
+      "id": "pkg2",
+      "type": "uml-package",
+      "name": "Bibliotecas",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "data": {
+      "id": "data",
+      "type": "uml-datatype",
+      "name": "Importe",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "note": {
+      "id": "note",
+      "type": "uml-comment",
+      "name": "Nota de cableado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "note": "Contrato por identidad"
+      }
+    },
+    "constraint": {
+      "id": "constraint",
+      "type": "uml-constraint",
+      "name": "saldo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "expression": "saldo >= 0"
+      }
+    },
+    "web-port": {
+      "id": "web-port",
+      "type": "uml-port",
+      "name": "pago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "ipay",
+          "isConjugated": true,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "web"
+    },
+    "pay-port": {
+      "id": "pay-port",
+      "type": "uml-port",
+      "name": "api",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "ipro",
+          "isConjugated": false,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "payments"
+    },
+    "other-port": {
+      "id": "other-port",
+      "type": "uml-port",
+      "name": "otro",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "iother",
+          "isConjugated": false,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "other"
+    },
+    "orchestrator": {
+      "id": "orchestrator",
+      "type": "component",
+      "name": "Orquestador",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        }
+      }
+    },
+    "api-type": {
+      "id": "api-type",
+      "type": "component",
+      "name": "Api",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        }
+      }
+    },
+    "repo-type": {
+      "id": "repo-type",
+      "type": "component",
+      "name": "Repo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component",
+          "isIndirectlyInstantiated": true
+        },
+        "operations": [
+          {
+            "id": "repo-type-op",
+            "name": "ejecutar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "entry": {
+      "id": "entry",
+      "type": "uml-port",
+      "name": "entrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "ipay",
+          "isConjugated": false,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "orchestrator"
+    },
+    "api-in": {
+      "id": "api-in",
+      "type": "uml-port",
+      "name": "entrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "ipay",
+          "isConjugated": false,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "api-type"
+    },
+    "api-out": {
+      "id": "api-out",
+      "type": "uml-port",
+      "name": "repo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "irepo",
+          "isConjugated": true,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "api-type"
+    },
+    "repo-in": {
+      "id": "repo-in",
+      "type": "uml-port",
+      "name": "consulta",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "port",
+          "typeId": "irepo",
+          "isConjugated": false,
+          "isService": true,
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "repo-type"
+    },
+    "api-role": {
+      "id": "api-role",
+      "type": "uml-part",
+      "name": "api",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "role",
+          "typeId": "api-type",
+          "multiplicity": "1",
+          "initialValue": {
+            "kind": "literal",
+            "value": false
+          }
+        }
+      },
+      "semanticOwnerId": "orchestrator"
+    },
+    "repo-role": {
+      "id": "repo-role",
+      "type": "uml-part",
+      "name": "repo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "role",
+          "typeId": "repo-type",
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "orchestrator"
+    },
+    "cache-role": {
+      "id": "cache-role",
+      "type": "uml-reference-role",
+      "name": "cache",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "role",
+          "typeId": "repo-type",
+          "multiplicity": "1"
+        }
+      },
+      "semanticOwnerId": "orchestrator"
+    }
+  },
+  "diagrams": [
+    {
+      "id": "external",
+      "type": "uml-component",
+      "name": "Componentes · Vista externa",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "web",
+          "elementId": "web",
+          "x": 50,
+          "y": 80,
+          "width": 270,
+          "height": 150
+        },
+        {
+          "id": "payments",
+          "elementId": "payments",
+          "x": 680,
+          "y": 80,
+          "width": 270,
+          "height": 150
+        },
+        {
+          "id": "web-port",
+          "elementId": "web-port",
+          "x": 262,
+          "y": 66,
+          "parentNodeId": "web"
+        },
+        {
+          "id": "pay-port",
+          "elementId": "pay-port",
+          "x": -8,
+          "y": 66,
+          "parentNodeId": "payments"
+        },
+        {
+          "id": "ipay",
+          "elementId": "ipay",
+          "x": 390,
+          "y": 360,
+          "width": 290,
+          "height": 150
+        },
+        {
+          "id": "ipro",
+          "elementId": "ipro",
+          "x": 800,
+          "y": 360,
+          "width": 290,
+          "height": 150
+        },
+        {
+          "id": "iother",
+          "elementId": "iother",
+          "x": 1220,
+          "y": 360,
+          "width": 290,
+          "height": 150
+        },
+        {
+          "id": "other",
+          "elementId": "other",
+          "x": 1220,
+          "y": 80,
+          "width": 270,
+          "height": 150
+        },
+        {
+          "id": "other-port",
+          "elementId": "other-port",
+          "x": -8,
+          "y": 66,
+          "parentNodeId": "other"
+        },
+        {
+          "id": "parent",
+          "elementId": "parent",
+          "x": 680,
+          "y": 640,
+          "width": 270,
+          "height": 135
+        },
+        {
+          "id": "impl",
+          "elementId": "impl",
+          "x": 1100,
+          "y": 640,
+          "width": 290,
+          "height": 145
+        },
+        {
+          "id": "artifact",
+          "elementId": "artifact",
+          "x": 60,
+          "y": 640,
+          "width": 290,
+          "height": 145
+        },
+        {
+          "id": "pkg",
+          "elementId": "pkg",
+          "x": 60,
+          "y": 870,
+          "width": 330,
+          "height": 220
+        },
+        {
+          "id": "pkg2",
+          "elementId": "pkg2",
+          "x": 590,
+          "y": 870,
+          "width": 330,
+          "height": 220
+        },
+        {
+          "id": "data",
+          "elementId": "data",
+          "x": 1020,
+          "y": 870,
+          "width": 290,
+          "height": 145
+        },
+        {
+          "id": "note",
+          "elementId": "note",
+          "x": 60,
+          "y": 360,
+          "width": 230,
+          "height": 110
+        },
+        {
+          "id": "constraint",
+          "elementId": "constraint",
+          "x": 1200,
+          "y": 1080,
+          "width": 300,
+          "height": 110
+        }
+      ],
+      "edges": [
+        {
+          "id": "use",
+          "source": "web",
+          "target": "ipay",
+          "relationKind": "usage",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-use"
+        },
+        {
+          "id": "real",
+          "source": "payments",
+          "target": "ipro",
+          "relationKind": "realization",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-real"
+        },
+        {
+          "id": "spec",
+          "source": "ipro",
+          "target": "ipay",
+          "relationKind": "generalization",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-spec"
+        },
+        {
+          "id": "wire",
+          "source": "web-port",
+          "target": "pay-port",
+          "relationKind": "assembly",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-wire"
+        },
+        {
+          "id": "dep",
+          "source": "web",
+          "target": "payments",
+          "relationKind": "dependency",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-dep",
+          "label": "referencia"
+        },
+        {
+          "id": "provided",
+          "source": "pay-port",
+          "target": "ipro",
+          "relationKind": "provided-interface",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-provided"
+        },
+        {
+          "id": "required",
+          "source": "web-port",
+          "target": "ipay",
+          "relationKind": "required-interface",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-required"
+        },
+        {
+          "id": "gen",
+          "source": "payments",
+          "target": "parent",
+          "relationKind": "generalization",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "top-2",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-gen"
+        },
+        {
+          "id": "implrel",
+          "source": "impl",
+          "target": "payments",
+          "relationKind": "component-realization",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-implrel"
+        },
+        {
+          "id": "manifest",
+          "source": "artifact",
+          "target": "payments",
+          "relationKind": "manifestation",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-manifest"
+        },
+        {
+          "id": "pimport",
+          "source": "pkg",
+          "target": "pkg2",
+          "relationKind": "packageImport",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-pimport"
+        },
+        {
+          "id": "eaccess",
+          "source": "pkg2",
+          "target": "data",
+          "relationKind": "elementAccess",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-eaccess"
+        },
+        {
+          "id": "merge",
+          "source": "pkg2",
+          "target": "pkg",
+          "relationKind": "merge",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-merge"
+        },
+        {
+          "id": "comment",
+          "source": "note",
+          "target": "ipay",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight"
+        },
+        {
+          "id": "constraintlink",
+          "source": "constraint",
+          "target": "data",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight"
+        }
+      ]
+    },
+    {
+      "id": "internal",
+      "type": "uml-component",
+      "name": "Componentes · Estructura interna",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "orchestrator",
+          "elementId": "orchestrator",
+          "x": 60,
+          "y": 70,
+          "width": 1250,
+          "height": 530
+        },
+        {
+          "id": "api-role",
+          "elementId": "api-role",
+          "x": 120,
+          "y": 105,
+          "width": 260,
+          "height": 118,
+          "parentNodeId": "orchestrator"
+        },
+        {
+          "id": "repo-role",
+          "elementId": "repo-role",
+          "x": 760,
+          "y": 105,
+          "width": 260,
+          "height": 118,
+          "parentNodeId": "orchestrator"
+        },
+        {
+          "id": "cache-role",
+          "elementId": "cache-role",
+          "x": 760,
+          "y": 320,
+          "width": 260,
+          "height": 118,
+          "parentNodeId": "orchestrator"
+        },
+        {
+          "id": "entry",
+          "elementId": "entry",
+          "x": -8,
+          "y": 155,
+          "parentNodeId": "orchestrator"
+        },
+        {
+          "id": "api-in",
+          "elementId": "api-in",
+          "x": -8,
+          "y": 50,
+          "parentNodeId": "api-role"
+        },
+        {
+          "id": "api-out",
+          "elementId": "api-out",
+          "x": 252,
+          "y": 50,
+          "parentNodeId": "api-role"
+        },
+        {
+          "id": "repo-in",
+          "elementId": "repo-in",
+          "x": -8,
+          "y": 50,
+          "parentNodeId": "repo-role"
+        },
+        {
+          "id": "cache-in",
+          "elementId": "repo-in",
+          "x": -8,
+          "y": 50,
+          "parentNodeId": "cache-role"
+        },
+        {
+          "id": "api-type",
+          "elementId": "api-type",
+          "x": 60,
+          "y": 690,
+          "width": 270,
+          "height": 145
+        },
+        {
+          "id": "repo-type",
+          "elementId": "repo-type",
+          "x": 430,
+          "y": 690,
+          "width": 270,
+          "height": 145
+        },
+        {
+          "id": "irepo",
+          "elementId": "irepo",
+          "x": 800,
+          "y": 690,
+          "width": 290,
+          "height": 145
+        },
+        {
+          "id": "ipay-2",
+          "elementId": "ipay",
+          "x": 1180,
+          "y": 690,
+          "width": 290,
+          "height": 145
+        }
+      ],
+      "edges": [
+        {
+          "id": "delegate",
+          "source": "entry",
+          "target": "api-in",
+          "relationKind": "delegation",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentEnds": [
+            {
+              "id": "delegate-end-0",
+              "nodeId": "entry"
+            },
+            {
+              "id": "delegate-end-1",
+              "nodeId": "api-in"
+            }
+          ],
+          "componentRelationId": "rel-delegate"
+        },
+        {
+          "id": "internal-assembly",
+          "source": "api-out",
+          "target": "repo-in",
+          "relationKind": "assembly",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentEnds": [
+            {
+              "id": "internal-assembly-end-0",
+              "nodeId": "api-out"
+            },
+            {
+              "id": "internal-assembly-end-1",
+              "nodeId": "repo-in"
+            }
+          ],
+          "componentRelationId": "rel-internal-assembly"
+        },
+        {
+          "id": "nary",
+          "source": "api-out",
+          "target": "repo-in",
+          "relationKind": "connector",
+          "direction": "none",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentEnds": [
+            {
+              "id": "nary-end-0",
+              "nodeId": "api-out"
+            },
+            {
+              "id": "nary-end-1",
+              "nodeId": "repo-in"
+            },
+            {
+              "id": "nary-end-2",
+              "nodeId": "cache-in"
+            }
+          ],
+          "componentRelationId": "rel-nary"
+        },
+        {
+          "id": "repo-real",
+          "source": "repo-type",
+          "target": "irepo",
+          "relationKind": "realization",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-repo-real"
+        },
+        {
+          "id": "api-use",
+          "source": "api-type",
+          "target": "irepo",
+          "relationKind": "usage",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "pathStyle": "straight",
+          "componentRelationId": "rel-api-use"
+        }
+      ]
+    }
+  ],
+  "fieldDefinitions": [],
+  "componentRelations": {
+    "rel-use": {
+      "id": "rel-use",
+      "kind": "usage",
+      "sourceElementId": "web",
+      "targetElementId": "ipay"
+    },
+    "rel-real": {
+      "id": "rel-real",
+      "kind": "realization",
+      "sourceElementId": "payments",
+      "targetElementId": "ipro",
+      "featureBindings": [
+        {
+          "contractOwnerId": "ipro",
+          "contractFeatureId": "ipro-op",
+          "implementationOwnerId": "payments",
+          "implementationFeatureId": "payments-op"
+        },
+        {
+          "contractOwnerId": "ipay",
+          "contractFeatureId": "ipay-op",
+          "implementationOwnerId": "payments",
+          "implementationFeatureId": "payments-op"
+        }
+      ]
+    },
+    "rel-spec": {
+      "id": "rel-spec",
+      "kind": "generalization",
+      "sourceElementId": "ipro",
+      "targetElementId": "ipay",
+      "featureBindings": [
+        {
+          "contractOwnerId": "ipay",
+          "contractFeatureId": "ipay-op",
+          "implementationOwnerId": "ipro",
+          "implementationFeatureId": "ipro-op"
+        }
+      ]
+    },
+    "rel-wire": {
+      "id": "rel-wire",
+      "kind": "assembly",
+      "sourceElementId": "web-port",
+      "targetElementId": "pay-port",
+      "wiring": {
+        "clientId": "web-port",
+        "requiredInterfaceId": "ipay",
+        "providedInterfaceId": "ipro"
+      }
+    },
+    "rel-dep": {
+      "id": "rel-dep",
+      "kind": "dependency",
+      "sourceElementId": "web",
+      "targetElementId": "payments",
+      "name": "referencia"
+    },
+    "rel-provided": {
+      "id": "rel-provided",
+      "kind": "provided-interface",
+      "sourceElementId": "pay-port",
+      "targetElementId": "ipro"
+    },
+    "rel-required": {
+      "id": "rel-required",
+      "kind": "required-interface",
+      "sourceElementId": "web-port",
+      "targetElementId": "ipay"
+    },
+    "rel-gen": {
+      "id": "rel-gen",
+      "kind": "generalization",
+      "sourceElementId": "payments",
+      "targetElementId": "parent"
+    },
+    "rel-implrel": {
+      "id": "rel-implrel",
+      "kind": "component-realization",
+      "sourceElementId": "impl",
+      "targetElementId": "payments",
+      "featureBindings": [
+        {
+          "contractOwnerId": "payments",
+          "contractFeatureId": "payments-op",
+          "implementationOwnerId": "impl",
+          "implementationFeatureId": "impl-op"
+        }
+      ]
+    },
+    "rel-manifest": {
+      "id": "rel-manifest",
+      "kind": "manifestation",
+      "sourceElementId": "artifact",
+      "targetElementId": "payments"
+    },
+    "rel-pimport": {
+      "id": "rel-pimport",
+      "kind": "packageImport",
+      "sourceElementId": "pkg",
+      "targetElementId": "pkg2"
+    },
+    "rel-eaccess": {
+      "id": "rel-eaccess",
+      "kind": "elementAccess",
+      "sourceElementId": "pkg2",
+      "targetElementId": "data",
+      "importAlias": "Monto"
+    },
+    "rel-merge": {
+      "id": "rel-merge",
+      "kind": "merge",
+      "sourceElementId": "pkg2",
+      "targetElementId": "pkg"
+    },
+    "rel-delegate": {
+      "id": "rel-delegate",
+      "kind": "delegation",
+      "sourceElementId": "entry",
+      "targetElementId": "api-in",
+      "connector": {
+        "ownerId": "orchestrator",
+        "kind": "delegation",
+        "ends": [
+          {
+            "id": "delegate-end-0",
+            "roleId": "entry"
+          },
+          {
+            "id": "delegate-end-1",
+            "roleId": "api-in",
+            "partWithPortId": "api-role"
+          }
+        ]
+      }
+    },
+    "rel-internal-assembly": {
+      "id": "rel-internal-assembly",
+      "kind": "assembly",
+      "sourceElementId": "api-out",
+      "targetElementId": "repo-in",
+      "connector": {
+        "ownerId": "orchestrator",
+        "kind": "assembly",
+        "ends": [
+          {
+            "id": "internal-assembly-end-0",
+            "roleId": "api-out",
+            "partWithPortId": "api-role"
+          },
+          {
+            "id": "internal-assembly-end-1",
+            "roleId": "repo-in",
+            "partWithPortId": "repo-role"
+          }
+        ]
+      }
+    },
+    "rel-nary": {
+      "id": "rel-nary",
+      "kind": "connector",
+      "sourceElementId": "api-out",
+      "targetElementId": "repo-in",
+      "connector": {
+        "ownerId": "orchestrator",
+        "kind": "assembly",
+        "ends": [
+          {
+            "id": "nary-end-0",
+            "roleId": "api-out",
+            "partWithPortId": "api-role"
+          },
+          {
+            "id": "nary-end-1",
+            "roleId": "repo-in",
+            "partWithPortId": "repo-role"
+          },
+          {
+            "id": "nary-end-2",
+            "roleId": "repo-in",
+            "partWithPortId": "cache-role"
+          }
+        ]
+      }
+    },
+    "rel-repo-real": {
+      "id": "rel-repo-real",
+      "kind": "realization",
+      "sourceElementId": "repo-type",
+      "targetElementId": "irepo",
+      "featureBindings": [
+        {
+          "contractOwnerId": "irepo",
+          "contractFeatureId": "irepo-op",
+          "implementationOwnerId": "repo-type",
+          "implementationFeatureId": "repo-type-op"
+        }
+      ]
+    },
+    "rel-api-use": {
+      "id": "rel-api-use",
+      "kind": "usage",
+      "sourceElementId": "api-type",
+      "targetElementId": "irepo"
+    }
+  }
+}

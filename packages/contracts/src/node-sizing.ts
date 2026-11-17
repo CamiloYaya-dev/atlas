@@ -1,9 +1,11 @@
+import {COMPONENT_PORT_SIZE} from './uml-component-catalog'
 import {sequenceFragmentSize} from './uml-sequence-geometry'
 import {activityActionSize,activityPinSize} from './uml-activity-layout'
 /** Node dimensions belong to each appearance in a diagram, not to the shared element. */
 import type {DiagramType,ElementType,DiagramNode,ModelElement} from './index'
 import {umlContainerSize} from './uml-containers'
 export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
+ if(diagram==='uml-component'&&type==='uml-port')return COMPONENT_PORT_SIZE
  if(diagram==='uml-activity'&&type==='uml-activity-pin')return {width:24,height:24}
  if(diagram==='uml-activity'&&type==='uml-activity-parameter')return {width:95,height:48}
  if(diagram==='uml-activity'&&type==='uml-activity-interruptible-region')return {width:250,height:180}
@@ -31,6 +33,7 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
 export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pick<DiagramNode,'width'|'height'>,depth=0,hasChildren=false){
  let width=250,height=125
  const type=element.type
+ if(diagram==='uml-component'&&type==='uml-port')return COMPONENT_PORT_SIZE
  if(diagram==='uml-sequence'&&['uml-frame','uml-interaction'].includes(type))return sequenceFragmentSize(type,node)
  if(diagram==='uml-usecase'&&['actor','usecase'].includes(type)){
   const detail=element.useCaseDetail||{},rectangular=detail.presentation==='rectangle',actor=type==='actor'&&!rectangular,points=detail.extensionPoints||[],members=rectangular?(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0):0
@@ -56,7 +59,9 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
   else if(type==='uml-execution'){width=hasChildren?360:260;height=hasChildren?235:128}
   else{width=260;height=128}
  }else if(diagram==='uml-composite'&&type==='uml-collaboration'){width=205;height=110}
- else if(diagram==='uml-component'&&type==='component'){width=270;height=115}
+ else if(diagram==='uml-component'&&type==='component'){width=270;height=Math.max(115,85+((element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0))*21)}
+ else if(diagram==='uml-component'&&['uml-part','uml-reference-role'].includes(type)){width=260;height=118}
+ else if(diagram==='uml-component'&&['uml-class','uml-interface','uml-datatype','uml-artifact'].includes(type)){width=290;height=Math.max(145,95+((element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0))*21)}
  else if(['uml-class','uml-object'].includes(diagram)){
   const lines=(element.uml?.attributes?.length||0)+(element.uml?.operations?.length||0)+(element.uml?.slots?.length||0)+(element.uml?.literals?.length||0)
   width=290;height=Math.max(145,95+lines*21)

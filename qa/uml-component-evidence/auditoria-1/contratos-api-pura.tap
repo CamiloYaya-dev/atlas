@@ -1,0 +1,449 @@
+TAP version 13
+# Subtest: CMP-T07 alta, roundtrip, actualización y export SVG especializado
+ok 1 - CMP-T07 alta, roundtrip, actualización y export SVG especializado
+  ---
+  duration_ms: 192.594711
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 01-tipo-paquete.json
+ok 2 - CMP-T08 API pura rechaza 01-tipo-paquete.json
+  ---
+  duration_ms: 39.059721
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 02-dos-proveedores.json
+ok 3 - CMP-T08 API pura rechaza 02-dos-proveedores.json
+  ---
+  duration_ms: 22.520137
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 03-contrato-incompatible.json
+ok 4 - CMP-T08 API pura rechaza 03-contrato-incompatible.json
+  ---
+  duration_ms: 8.724433
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 04-propietario-ajeno.json
+ok 5 - CMP-T08 API pura rechaza 04-propietario-ajeno.json
+  ---
+  duration_ms: 18.476414
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 05-puerto-rol-ajeno.json
+ok 6 - CMP-T08 API pura rechaza 05-puerto-rol-ajeno.json
+  ---
+  duration_ms: 7.223392
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 06-extremo-inexistente.json
+ok 7 - CMP-T08 API pura rechaza 06-extremo-inexistente.json
+  ---
+  duration_ms: 10.830093
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 07-borde.json
+ok 8 - CMP-T08 API pura rechaza 07-borde.json
+  ---
+  duration_ms: 6.333468
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 08-padre-final.json
+ok 9 - CMP-T08 API pura rechaza 08-padre-final.json
+  ---
+  duration_ms: 34.068078
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 09-nombre-reservado.json
+ok 10 - CMP-T08 API pura rechaza 09-nombre-reservado.json
+  ---
+  duration_ms: 20.115031
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 10-multiplicidad.json
+ok 11 - CMP-T08 API pura rechaza 10-multiplicidad.json
+  ---
+  duration_ms: 10.398752
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 11-campo-ajeno.json
+ok 12 - CMP-T08 API pura rechaza 11-campo-ajeno.json
+  ---
+  duration_ms: 12.671703
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 12-cableado-nary-incompleto.json
+ok 13 - CMP-T08 API pura rechaza 12-cableado-nary-incompleto.json
+  ---
+  duration_ms: 11.181982
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 13-aud-cmp-001.json
+ok 14 - CMP-T08 API pura rechaza 13-aud-cmp-001.json
+  ---
+  duration_ms: 12.517523
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 14-aud-cmp-002.json
+ok 15 - CMP-T08 API pura rechaza 14-aud-cmp-002.json
+  ---
+  duration_ms: 40.94888
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 15-aud-cmp-003.json
+ok 16 - CMP-T08 API pura rechaza 15-aud-cmp-003.json
+  ---
+  duration_ms: 18.190629
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 16-aud-cmp-004.json
+ok 17 - CMP-T08 API pura rechaza 16-aud-cmp-004.json
+  ---
+  duration_ms: 26.641395
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 17-aud-cmp-005.json
+ok 18 - CMP-T08 API pura rechaza 17-aud-cmp-005.json
+  ---
+  duration_ms: 19.446406
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 18-aud-cmp-006.json
+ok 19 - CMP-T08 API pura rechaza 18-aud-cmp-006.json
+  ---
+  duration_ms: 35.58231
+  type: 'test'
+  ...
+# Subtest: CMP-T07 importación aislada remapea relaciones, roles y extremos
+ok 20 - CMP-T07 importación aislada remapea relaciones, roles y extremos
+  ---
+  duration_ms: 31.364628
+  type: 'test'
+  ...
+# Subtest: CMP-T08 proyección sin técnico oculta contrato y lector no modifica, modelo original intacto
+ok 21 - CMP-T08 proyección sin técnico oculta contrato y lector no modifica, modelo original intacto
+  ---
+  duration_ms: 10.731217
+  type: 'test'
+  ...
+# Subtest: CMP-T05 comandos mueven puerto y resize del dueño, rollback
+ok 22 - CMP-T05 comandos mueven puerto y resize del dueño, rollback
+  ---
+  duration_ms: 7.010875
+  type: 'test'
+  ...
+# Subtest: CMP-T07 quitar aparición no elimina contrato registrado
+ok 23 - CMP-T07 quitar aparición no elimina contrato registrado
+  ---
+  duration_ms: 10.20241
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-001 identidad no reasignable y legado intacto legible, edición exige reparación
+ok 24 - AUD-CMP-001 identidad no reasignable y legado intacto legible, edición exige reparación
+  ---
+  duration_ms: 47.229479
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-003 inversión visual de cableado mantiene identidad y cliente en API
+ok 25 - AUD-CMP-003 inversión visual de cableado mantiene identidad y cliente en API
+  ---
+  duration_ms: 10.392634
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-006 anotación de relación y actualización por causa específica
+ok 26 - AUD-CMP-006 anotación de relación y actualización por causa específica
+  ---
+  duration_ms: 11.700698
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-001 API alta, PUT e importación por razón exacta
+ok 27 - AUD-CMP-001 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 9.532895
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-002 API alta, PUT e importación por razón exacta
+ok 28 - AUD-CMP-002 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 46.261448
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-003 API alta, PUT e importación por razón exacta
+ok 29 - AUD-CMP-003 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 15.526778
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-004 API alta, PUT e importación por razón exacta
+ok 30 - AUD-CMP-004 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 13.77257
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-005 API alta, PUT e importación por razón exacta
+ok 31 - AUD-CMP-005 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 7.470689
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-006 API alta, PUT e importación por razón exacta
+ok 32 - AUD-CMP-006 API alta, PUT e importación por razón exacta
+  ---
+  duration_ms: 7.83404
+  type: 'test'
+  ...
+# Subtest: CMP-T02 correspondencia de característica se revalida al cambiar tipo en catálogo
+ok 33 - CMP-T02 correspondencia de característica se revalida al cambiar tipo en catálogo
+  ---
+  duration_ms: 4.96989
+  type: 'test'
+  ...
+# Subtest: CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES.json
+ok 34 - CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES.json
+  ---
+  duration_ms: 88.712988
+  type: 'test'
+  ...
+# Subtest: CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json
+ok 35 - CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json
+  ---
+  duration_ms: 26.852057
+  type: 'test'
+  ...
+# Subtest: CMP negativo 01-tipo-paquete.json
+ok 36 - CMP negativo 01-tipo-paquete.json
+  ---
+  duration_ms: 6.171773
+  type: 'test'
+  ...
+# Subtest: CMP negativo 02-dos-proveedores.json
+ok 37 - CMP negativo 02-dos-proveedores.json
+  ---
+  duration_ms: 1.415156
+  type: 'test'
+  ...
+# Subtest: CMP negativo 03-contrato-incompatible.json
+ok 38 - CMP negativo 03-contrato-incompatible.json
+  ---
+  duration_ms: 0.935121
+  type: 'test'
+  ...
+# Subtest: CMP negativo 04-propietario-ajeno.json
+ok 39 - CMP negativo 04-propietario-ajeno.json
+  ---
+  duration_ms: 16.991244
+  type: 'test'
+  ...
+# Subtest: CMP negativo 05-puerto-rol-ajeno.json
+ok 40 - CMP negativo 05-puerto-rol-ajeno.json
+  ---
+  duration_ms: 1.28325
+  type: 'test'
+  ...
+# Subtest: CMP negativo 06-extremo-inexistente.json
+ok 41 - CMP negativo 06-extremo-inexistente.json
+  ---
+  duration_ms: 0.830826
+  type: 'test'
+  ...
+# Subtest: CMP negativo 07-borde.json
+ok 42 - CMP negativo 07-borde.json
+  ---
+  duration_ms: 1.04829
+  type: 'test'
+  ...
+# Subtest: CMP negativo 08-padre-final.json
+ok 43 - CMP negativo 08-padre-final.json
+  ---
+  duration_ms: 1.129891
+  type: 'test'
+  ...
+# Subtest: CMP negativo 09-nombre-reservado.json
+ok 44 - CMP negativo 09-nombre-reservado.json
+  ---
+  duration_ms: 7.460562
+  type: 'test'
+  ...
+# Subtest: CMP negativo 10-multiplicidad.json
+ok 45 - CMP negativo 10-multiplicidad.json
+  ---
+  duration_ms: 1.004595
+  type: 'test'
+  ...
+# Subtest: CMP negativo 11-campo-ajeno.json
+ok 46 - CMP negativo 11-campo-ajeno.json
+  ---
+  duration_ms: 0.781103
+  type: 'test'
+  ...
+# Subtest: CMP negativo 12-cableado-nary-incompleto.json
+ok 47 - CMP negativo 12-cableado-nary-incompleto.json
+  ---
+  duration_ms: 10.592832
+  type: 'test'
+  ...
+# Subtest: CMP negativo 13-aud-cmp-001.json
+ok 48 - CMP negativo 13-aud-cmp-001.json
+  ---
+  duration_ms: 7.128968
+  type: 'test'
+  ...
+# Subtest: CMP negativo 14-aud-cmp-002.json
+ok 49 - CMP negativo 14-aud-cmp-002.json
+  ---
+  duration_ms: 2.74848
+  type: 'test'
+  ...
+# Subtest: CMP negativo 15-aud-cmp-003.json
+ok 50 - CMP negativo 15-aud-cmp-003.json
+  ---
+  duration_ms: 6.86815
+  type: 'test'
+  ...
+# Subtest: CMP negativo 16-aud-cmp-004.json
+ok 51 - CMP negativo 16-aud-cmp-004.json
+  ---
+  duration_ms: 7.495795
+  type: 'test'
+  ...
+# Subtest: CMP negativo 17-aud-cmp-005.json
+ok 52 - CMP negativo 17-aud-cmp-005.json
+  ---
+  duration_ms: 3.492116
+  type: 'test'
+  ...
+# Subtest: CMP negativo 18-aud-cmp-006.json
+ok 53 - CMP negativo 18-aud-cmp-006.json
+  ---
+  duration_ms: 1.066067
+  type: 'test'
+  ...
+# Subtest: CMP-T02 contratos heredados por identidad, conjugación y especialización
+ok 54 - CMP-T02 contratos heredados por identidad, conjugación y especialización
+  ---
+  duration_ms: 0.851186
+  type: 'test'
+  ...
+# Subtest: CMP-T03 bola apunta a proveedor con inversión de extremos
+ok 55 - CMP-T03 bola apunta a proveedor con inversión de extremos
+  ---
+  duration_ms: 5.894642
+  type: 'test'
+  ...
+# Subtest: CMP-T04 delegación y n-ario conservan extremos semánticos distintos
+ok 56 - CMP-T04 delegación y n-ario conservan extremos semánticos distintos
+  ---
+  duration_ms: 7.189007
+  type: 'test'
+  ...
+# Subtest: CMP-T05 puerto cuadrado y resize preservan lado y offset
+ok 57 - CMP-T05 puerto cuadrado y resize preservan lado y offset
+  ---
+  duration_ms: 0.235621
+  type: 'test'
+  ...
+# Subtest: CMP-T06 comando rechaza cableado incompatible y no modifica documento
+ok 58 - CMP-T06 comando rechaza cableado incompatible y no modifica documento
+  ---
+  duration_ms: 32.340654
+  type: 'test'
+  ...
+# Subtest: CMP-T07 significado y aparición independientes
+ok 59 - CMP-T07 significado y aparición independientes
+  ---
+  duration_ms: 2.794248
+  type: 'test'
+  ...
+# Subtest: CMP-T08 merge independiente y conflicto de registro
+ok 60 - CMP-T08 merge independiente y conflicto de registro
+  ---
+  duration_ms: 7.437857
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta relation-required
+ok 61 - AUD-CMP reproducción exacta relation-required
+  ---
+  duration_ms: 5.193779
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta port-contract
+ok 62 - AUD-CMP reproducción exacta port-contract
+  ---
+  duration_ms: 1.500722
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta wiring-contract
+ok 63 - AUD-CMP reproducción exacta wiring-contract
+  ---
+  duration_ms: 1.238883
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta foreign-edge-fields
+ok 64 - AUD-CMP reproducción exacta foreign-edge-fields
+  ---
+  duration_ms: 7.377278
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta import-alias-conflict
+ok 65 - AUD-CMP reproducción exacta import-alias-conflict
+  ---
+  duration_ms: 1.285363
+  type: 'test'
+  ...
+# Subtest: AUD-CMP reproducción exacta annotation
+ok 66 - AUD-CMP reproducción exacta annotation
+  ---
+  duration_ms: 1.348817
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-001 registro reutilizado y metadatos compartidos, sin duplicar identidad
+ok 67 - AUD-CMP-001 registro reutilizado y metadatos compartidos, sin duplicar identidad
+  ---
+  duration_ms: 12.43247
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-003 sentido de cliente incluso sin contrato explícito; inversión visual conserva contrato
+ok 68 - AUD-CMP-003 sentido de cliente incluso sin contrato explícito; inversión visual conserva contrato
+  ---
+  duration_ms: 10.553174
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-004 campos de asociación y otras familias se rechazan incluso vacíos
+ok 69 - AUD-CMP-004 campos de asociación y otras familias se rechazan incluso vacíos
+  ---
+  duration_ms: 9.811579
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-005 alias distinto y anotación de extremo real aceptados
+ok 70 - AUD-CMP-005 alias distinto y anotación de extremo real aceptados
+  ---
+  duration_ms: 0.908041
+  type: 'test'
+  ...
+# Subtest: CMP-T02 correspondencia de características por identidad y firma incompatible, sin equivalencia por nombre
+ok 71 - CMP-T02 correspondencia de características por identidad y firma incompatible, sin equivalencia por nombre
+  ---
+  duration_ms: 8.209906
+  type: 'test'
+  ...
+# Subtest: CMP-T02 redefinición incompatible de firma invalida especialización
+ok 72 - CMP-T02 redefinición incompatible de firma invalida especialización
+  ---
+  duration_ms: 18.646117
+  type: 'test'
+  ...
+# Subtest: AUD-CMP-007 multiplicidad de asociación tipificadora, extremo fuera de sus límites
+ok 73 - AUD-CMP-007 multiplicidad de asociación tipificadora, extremo fuera de sus límites
+  ---
+  duration_ms: 4.680445
+  type: 'test'
+  ...
+1..73
+# tests 73
+# suites 0
+# pass 73
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4117.534655
+EXIT=0

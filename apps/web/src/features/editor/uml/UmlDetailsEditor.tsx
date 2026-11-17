@@ -4,7 +4,7 @@ import {Plus,Trash2} from 'lucide-react'
 import {useEffect,useState,useId} from 'react'
 import type {ReactNode} from 'react'
 
-type Props={element:ModelElement;catalog?:Record<string,ModelElement>;disabled:boolean;onChange:(uml:NonNullable<ModelElement['uml']>)=>void}
+type Props={componentContext?:boolean;element:ModelElement;catalog?:Record<string,ModelElement>;disabled:boolean;onChange:(uml:NonNullable<ModelElement['uml']>)=>void}
 const visibilities:UmlVisibility[]=['public','private','protected','package']
 const names:Record<UmlVisibility,string>={public:'+ Público',private:'− Privado',protected:'# Protegido',package:'~ Paquete'}
 const nextId=()=>crypto.randomUUID()
@@ -20,12 +20,13 @@ function ValidatedText({label,value,disabled,validate,message,onChange,placehold
 const multiplicityMessage='Multiplicidad inválida. Usa 1, 0..1, 1..*, * o vacío.'
 const nextParameterName=(parameters:UmlParameter[])=>{let i=1;while(parameters.some(p=>p.name===(i===1?'parametro':`parametro${i}`)))i++;return i===1?'parametro':`parametro${i}`}
 const validMemberName=(v:string)=>!!v.trim()&&v.length<=160
-export default function UmlDetailsEditor({element,disabled,onChange,catalog={}}:Props){
+export default function UmlDetailsEditor({element,disabled,onChange,catalog={},componentContext}:Props){
  const uml=element.uml||{}
  const set=(patch:Partial<NonNullable<ModelElement['uml']>>)=>onChange({...uml,...patch})
  const ucClassifier=element.type==='actor'||element.type==='usecase'
- const classType=ucClassifier||isClassType(element.type)||element.type==='uml-stereotype'
- const capabilities=classCapabilities(element.type),attrsAllowed=ucClassifier||capabilities.attributes||element.type==='uml-stereotype',opsAllowed=ucClassifier||capabilities.operations||element.type==='uml-stereotype'
+ const component=componentContext&&['component','uml-artifact'].includes(element.type)
+ const classType=component||ucClassifier||isClassType(element.type)||element.type==='uml-stereotype'
+ const capabilities=classCapabilities(element.type),attrsAllowed=component||ucClassifier||capabilities.attributes||element.type==='uml-stereotype',opsAllowed=component||ucClassifier||capabilities.operations||element.type==='uml-stereotype'
  const choices=element.type==='uml-interface'?(['public'] as const):visibilities
  const types=Object.values(catalog).filter(e=>classTypeReferenceAllowed(e.type))
  const typeChoices=<><option value="">Tipo externo (texto)</option>{types.map(e=><option value={e.id} key={e.id}>{e.name}</option>)}</>

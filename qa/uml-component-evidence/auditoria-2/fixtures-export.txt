@@ -1,0 +1,6 @@
+ATLAS_QA_UML_COMPONENTES shape OK, cero issues, alta por política OK 28 fichas 2 vistas
+external SVG generado
+internal SVG generado
+ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO shape OK, cero issues, alta por política OK 30 fichas 1 vistas
+componentes-manual SVG generado
+EXIT=0

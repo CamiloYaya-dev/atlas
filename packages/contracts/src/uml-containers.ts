@@ -31,7 +31,8 @@ export function umlContainerAllows(diagram:DiagramType,parent:ElementType,child:
   return false
  }
  if(diagram==='uml-usecase')return parent==='uml-subject'&&child==='usecase' 
- if(['uml-class','uml-object','uml-component'].includes(diagram))return parent==='uml-package'&&child!=='uml-package'
+ if(diagram==='uml-component'){if(parent==='uml-package')return ['component','uml-interface','uml-package','uml-artifact','uml-class','uml-datatype','uml-comment','uml-constraint'].includes(child);if(parent==='component'||parent==='uml-class')return ['uml-port','uml-part','uml-reference-role'].includes(child);if(parent==='uml-part'||parent==='uml-reference-role')return child==='uml-port';return parent==='uml-artifact'&&child==='uml-artifact'}
+ if(['uml-class','uml-object'].includes(diagram))return parent==='uml-package'&&child!=='uml-package'
  return false
 }
 export function umlContainerSize(kind:ElementType,depth=0){

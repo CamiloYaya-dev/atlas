@@ -1,0 +1,4 @@
+PASS UI 1: dirección y rollback
+PASS UI 2: reuse
+PASS UI 3: edición sin aparición
+EXIT=0

@@ -1,0 +1,292 @@
+
+> atlas-monorepo@4.8.1 qa:uml:componentes
+> node scripts/qa-uml.mjs componentes
+
+[QA UML] componentes (uml-component) · --all · no certifica cobertura global
+
+[QA UML] Reglas dirigidas
+TAP version 13
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# Error [TransformError]: 
+# You installed esbuild for another platform than the one you're currently using.
+# This won't work because esbuild is written with native code and needs to
+# install a platform-specific binary executable.
+# Specifically the "@esbuild/win32-x64" package is present but this platform
+# needs the "@esbuild/linux-x64" package instead. People often get into this
+# situation by installing esbuild on Windows or macOS and copying "node_modules"
+# into a Docker image that runs Linux, or by copying "node_modules" between
+# Windows and WSL environments.
+# If you are installing with npm, you can try not copying the "node_modules"
+# directory when you copy the files over, and running "npm ci" or "npm install"
+# on the destination platform after the copy. Or you could consider using yarn
+# instead of npm which has built-in support for installing a package on multiple
+# platforms simultaneously.
+# If you are installing with yarn, you can try listing both this platform and the
+# other platform in your ".yarnrc.yml" file using the "supportedArchitectures"
+# feature: https://yarnpkg.com/configuration/yarnrc/\#supportedArchitectures
+# Keep in mind that this means multiple copies of esbuild will be present.
+# Another alternative is to use the "esbuild-wasm" package instead, which works
+# the same way on all platforms. But it comes with a heavy performance cost and
+# can sometimes be 10x slower than the "esbuild" package, so you may also not
+# want to do that.
+#     at generateBinPath (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2033:17)
+#     at esbuildCommandAndArgs (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2114:33)
+#     at ensureServiceIsRunning (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2271:25)
+#     at transform (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2172:37)
+#     at file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4115
+#     at applyTransformers (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:1220)
+#     at transform (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4062)
+#     at load (file:///tmp/cmp3/atlas/node_modules/tsx/dist/register-nyXW-TH3.mjs:2:5368)
+#     at async nextLoad (node:internal/modules/esm/hooks:748:22)
+#     at async Hooks.load (node:internal/modules/esm/hooks:385:20)
+# Node.js v22.16.0
+# Subtest: apps/api/src/domain/uml-scoped.unit.test.ts
+not ok 1 - apps/api/src/domain/uml-scoped.unit.test.ts
+  ---
+  duration_ms: 489.389799
+  type: 'test'
+  location: '/tmp/cmp3/atlas/apps/api/src/domain/uml-scoped.unit.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 521.217284
+[QA UML] Reglas dirigidas: código 1
+
+[QA UML] Reglas dedicadas uml-component
+TAP version 13
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# Error [TransformError]: 
+# You installed esbuild for another platform than the one you're currently using.
+# This won't work because esbuild is written with native code and needs to
+# install a platform-specific binary executable.
+# Specifically the "@esbuild/win32-x64" package is present but this platform
+# needs the "@esbuild/linux-x64" package instead. People often get into this
+# situation by installing esbuild on Windows or macOS and copying "node_modules"
+# into a Docker image that runs Linux, or by copying "node_modules" between
+# Windows and WSL environments.
+# If you are installing with npm, you can try not copying the "node_modules"
+# directory when you copy the files over, and running "npm ci" or "npm install"
+# on the destination platform after the copy. Or you could consider using yarn
+# instead of npm which has built-in support for installing a package on multiple
+# platforms simultaneously.
+# If you are installing with yarn, you can try listing both this platform and the
+# other platform in your ".yarnrc.yml" file using the "supportedArchitectures"
+# feature: https://yarnpkg.com/configuration/yarnrc/\#supportedArchitectures
+# Keep in mind that this means multiple copies of esbuild will be present.
+# Another alternative is to use the "esbuild-wasm" package instead, which works
+# the same way on all platforms. But it comes with a heavy performance cost and
+# can sometimes be 10x slower than the "esbuild" package, so you may also not
+# want to do that.
+#     at generateBinPath (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2033:17)
+#     at esbuildCommandAndArgs (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2114:33)
+#     at ensureServiceIsRunning (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2271:25)
+#     at transform (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2172:37)
+#     at file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4115
+#     at applyTransformers (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:1220)
+#     at transform (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4062)
+#     at load (file:///tmp/cmp3/atlas/node_modules/tsx/dist/register-nyXW-TH3.mjs:2:5368)
+#     at async nextLoad (node:internal/modules/esm/hooks:748:22)
+#     at async Hooks.load (node:internal/modules/esm/hooks:385:20)
+# Node.js v22.16.0
+# Subtest: apps/api/src/domain/uml-component-persistence.unit.test.ts
+not ok 1 - apps/api/src/domain/uml-component-persistence.unit.test.ts
+  ---
+  duration_ms: 663.262438
+  type: 'test'
+  location: '/tmp/cmp3/atlas/apps/api/src/domain/uml-component-persistence.unit.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# Error [TransformError]: 
+# You installed esbuild for another platform than the one you're currently using.
+# This won't work because esbuild is written with native code and needs to
+# install a platform-specific binary executable.
+# Specifically the "@esbuild/win32-x64" package is present but this platform
+# needs the "@esbuild/linux-x64" package instead. People often get into this
+# situation by installing esbuild on Windows or macOS and copying "node_modules"
+# into a Docker image that runs Linux, or by copying "node_modules" between
+# Windows and WSL environments.
+# If you are installing with npm, you can try not copying the "node_modules"
+# directory when you copy the files over, and running "npm ci" or "npm install"
+# on the destination platform after the copy. Or you could consider using yarn
+# instead of npm which has built-in support for installing a package on multiple
+# platforms simultaneously.
+# If you are installing with yarn, you can try listing both this platform and the
+# other platform in your ".yarnrc.yml" file using the "supportedArchitectures"
+# feature: https://yarnpkg.com/configuration/yarnrc/\#supportedArchitectures
+# Keep in mind that this means multiple copies of esbuild will be present.
+# Another alternative is to use the "esbuild-wasm" package instead, which works
+# the same way on all platforms. But it comes with a heavy performance cost and
+# can sometimes be 10x slower than the "esbuild" package, so you may also not
+# want to do that.
+#     at generateBinPath (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2033:17)
+#     at esbuildCommandAndArgs (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2114:33)
+#     at ensureServiceIsRunning (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2271:25)
+#     at transform (/tmp/cmp3/atlas/node_modules/tsx/node_modules/esbuild/lib/main.js:2172:37)
+#     at file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4115
+#     at applyTransformers (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:1220)
+#     at transform (file:///tmp/cmp3/atlas/node_modules/tsx/dist/index-DE3OBZuV.mjs:14:4062)
+#     at load (file:///tmp/cmp3/atlas/node_modules/tsx/dist/register-nyXW-TH3.mjs:2:5368)
+#     at async nextLoad (node:internal/modules/esm/hooks:748:22)
+#     at async Hooks.load (node:internal/modules/esm/hooks:385:20)
+# Node.js v22.16.0
+# Subtest: packages/contracts/src/uml-component-policy.unit.test.ts
+not ok 2 - packages/contracts/src/uml-component-policy.unit.test.ts
+  ---
+  duration_ms: 960.898173
+  type: 'test'
+  location: '/tmp/cmp3/atlas/packages/contracts/src/uml-component-policy.unit.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1002.539649
+[QA UML] Reglas dedicadas uml-component: código 1
+
+[QA UML] Regresión de grafo
+TAP version 13
+# Subtest: UML clases, objetos y componentes usan compartimentos, valores y símbolo propio
+ok 1 - UML clases, objetos y componentes usan compartimentos, valores y símbolo propio
+  ---
+  duration_ms: 161.777812
+  type: 'test'
+  ...
+# Subtest: UML componentes: formas de marcador SVG para generalización y composición
+ok 2 - UML componentes: formas de marcador SVG para generalización y composición
+  ---
+  duration_ms: 53.563086
+  type: 'test'
+  ...
+# Subtest: ensamblaje UML: la concavidad del socket mira a la bola, sobre tramos horizontales y verticales
+ok 3 - ensamblaje UML: la concavidad del socket mira a la bola, sobre tramos horizontales y verticales
+  ---
+  duration_ms: 35.207186
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2570.888201
+
+[QA UML] UI dedicada
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Startup Error [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯⎯[39m
+Error: Cannot find module @rollup/rollup-linux-x64-gnu. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+    at requireWithFriendlyError (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:126:9)
+    at Object.<anonymous> (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:135:22)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at cjsLoader (node:internal/modules/esm/translators:266:5)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:200:7) {
+  [cause]: Error: Cannot find module '@rollup/rollup-linux-x64-gnu'
+  Require stack:
+  - /tmp/cmp3/atlas/node_modules/rollup/dist/native.js
+      at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+      at Function._load (node:internal/modules/cjs/loader:1211:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+      at Module.require (node:internal/modules/cjs/loader:1487:12)
+      at require (node:internal/modules/helpers:135:16)
+      at requireWithFriendlyError (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:104:10)
+      at Object.<anonymous> (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:135:22) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/tmp/cmp3/atlas/node_modules/rollup/dist/native.js' ]
+  }
+}
+
+
+
+[QA UML] UI dedicada: código 1
+
+[QA UML] UI compartida, casos dirigidos
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Startup Error [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯⎯[39m
+Error: Cannot find module @rollup/rollup-linux-x64-gnu. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+    at requireWithFriendlyError (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:126:9)
+    at Object.<anonymous> (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:135:22)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at cjsLoader (node:internal/modules/esm/translators:266:5)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:200:7) {
+  [cause]: Error: Cannot find module '@rollup/rollup-linux-x64-gnu'
+  Require stack:
+  - /tmp/cmp3/atlas/node_modules/rollup/dist/native.js
+      at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+      at Function._load (node:internal/modules/cjs/loader:1211:37)
+      at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+      at Module.require (node:internal/modules/cjs/loader:1487:12)
+      at require (node:internal/modules/helpers:135:16)
+      at requireWithFriendlyError (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:104:10)
+      at Object.<anonymous> (/tmp/cmp3/atlas/node_modules/rollup/dist/native.js:135:22) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [ '/tmp/cmp3/atlas/node_modules/rollup/dist/native.js' ]
+  }
+}
+
+
+
+[QA UML] UI compartida, casos dirigidos: código 1
+
+[QA UML] PostgreSQL QA exclusivo
+[QA UML] spawnSync docker ENOENT
+┌─────────┬───────────────────────────────────────────┬─────────┐
+│ (index) │ fase                                      │ estado  │
+├─────────┼───────────────────────────────────────────┼─────────┤
+│ 0       │ 'Contratos, comandos, política API y SVG' │ 'FALLÓ' │
+│ 1       │ 'Reglas dedicadas uml-component'          │ 'FALLÓ' │
+│ 2       │ 'Grafo y regresión específica'            │ 'OK'    │
+│ 3       │ 'UI dedicada'                             │ 'FALLÓ' │
+│ 4       │ 'UI compartida dirigida'                  │ 'FALLÓ' │
+│ 5       │ 'API real y PostgreSQL QA'                │ 'FALLÓ' │
+└─────────┴───────────────────────────────────────────┴─────────┘
+Diagnóstico dirigido. Para certificación, ejecutar npm run qa:integral. No se generan ni sobrescriben informes de cobertura.
+EXIT=1

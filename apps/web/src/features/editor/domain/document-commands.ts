@@ -1,3 +1,4 @@
+import {setComponentRelation,newComponentIssues,componentPortSnap,componentPortResize,componentClassifier,componentRole} from '@atlas/contracts'
 import {newSequenceIssues,pruneSequenceOccurrences,sequenceDefaults,SEQUENCE_TYPES,sequenceBox,sequenceLifeline,validSequenceRoot} from '@atlas/contracts'
 import {activityDefaults,newActivityIssues,activitySnapPin,retainActivityCatalog,activityCatalogReferenced} from '@atlas/contracts'
 import {adaptUseCaseDocument,canonicalSubjectId,diagramCreationEnabled,newUseCaseIssues,replaceUseCaseRelation,repairStoredUseCaseAnnotations,isUseCaseCatalogType,useCaseElementIsReferenced,retainUseCaseCatalog} from '@atlas/contracts'
@@ -8,6 +9,7 @@ import {umlElementCreatable,umlElementReusable,umlContainerAllows,umlAbsolutePos
 
 function validatedActivityRemoval(before:ProjectDocument,after:ProjectDocument,diagramId:string){
  if(before.diagrams.find(d=>d.id===diagramId)?.type==='uml-sequence')return pruneSequenceOccurrences(before,after,diagramId);
+ if(before.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){const issue=newComponentIssues(before,after)[0];if(issue)throw Error(issue.message);return after}
  if(before.diagrams.find(d=>d.id===diagramId)?.type!=='uml-activity')return after;
  const next=retainActivityCatalog(before,after),issues=newActivityIssues(before,next);if(issues.length)throw new Error('Desvincula primero las referencias de actividad: '+issues[0].message);return next
 }
@@ -56,7 +58,7 @@ export function deleteDetachedUseCaseElement(doc:ProjectDocument,id:string):Proj
 /** Remove view references atomically; keep shared catalog records. */
 function pruneRelations(d:Diagram,removedNodes:Set<string>,removedEdges:Set<string>){
  const dropped=new Set(removedEdges)
- for(const e of d.edges)if(removedNodes.has(e.source)||removedNodes.has(e.target)||e.associationEnds?.some(end=>removedNodes.has(end.nodeId)))dropped.add(e.id)
+ for(const e of d.edges)if(removedNodes.has(e.source)||removedNodes.has(e.target)||e.associationEnds?.some(end=>removedNodes.has(end.nodeId))||e.componentEnds?.some(end=>removedNodes.has(end.nodeId)))dropped.add(e.id)
  let count=-1;while(count!==dropped.size){count=dropped.size;for(const e of d.edges)if(e.annotationTargetEdgeId&&dropped.has(e.annotationTargetEdgeId))dropped.add(e.id)}
  const removedElements=new Set(d.nodes.filter(n=>removedNodes.has(n.id)&&!d.nodes.some(other=>other.elementId===n.elementId&&!removedNodes.has(other.id))).map(n=>n.elementId))
  return d.edges.filter(e=>!dropped.has(e.id)).map(e=>e.associationClassId&&removedElements.has(e.associationClassId)?{...e,associationClassId:undefined}:e)
@@ -65,10 +67,12 @@ export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId
  doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  const target=doc.diagrams.find(d=>d.id===diagramId)
  const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId&&(!nodeId||n.id===nodeId)).map(n=>n.id)||[])
+ if(target?.type==='uml-component'){for(let count=-1;count!==removed.size;){count=removed.size;for(const n of target.nodes)if(n.parentNodeId&&removed.has(n.parentNodeId)&&doc.elements[n.elementId]?.type==='uml-port')removed.add(n.id)}}
  const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,parentNodeId:undefined,...umlAbsolutePosition(d,n)}:n),edges:pruneRelations(d,removed,new Set())}))
  return validatedActivityRemoval(doc,retainUseCaseCatalog(doc,{...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}),diagramId)
 }
 export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){if(doc.diagrams.find(d=>d.id===diagramId)?.edges.some(e=>e.id===edge.id))throw Error('ID de relación duplicado');return setComponentRelation(doc,diagramId,edge)}
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-activity'){const next=withDiagram(doc,diagramId,d=>{if(d.edges.some(e=>e.id===edge.id))throw Error('ID de relación duplicado');if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw Error('Extremos inexistentes');return {...d,edges:[...d.edges,edge]}});const issues=newActivityIssues(doc,next);if(issues.length)throw Error(issues[0].message);return next}
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-usecase'){const d=doc.diagrams.find(d=>d.id===diagramId)!;if(d.edges.some(e=>e.id===edge.id))throw Error('ID de relación duplicado');if(!d.nodes.some(n=>n.id===edge.source)||!d.nodes.some(n=>n.id===edge.target))throw Error('Extremos inexistentes');const next=replaceUseCaseRelation(doc,diagramId,edge);const issues=newUseCaseIssues(doc,next);if(issues.length)throw Error(issues[0].message);return next}
  const next=withDiagram(doc,diagramId,d=>{
@@ -80,9 +84,11 @@ export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEd
   return {...d,edges:[...d.edges,edge]}
  })
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-sequence'){const issue=newSequenceIssues(doc,next)[0];if(issue)throw Error(issue.message)}
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){const issue=newComponentIssues(doc,next)[0];if(issue)throw Error(issue.message)}
  return next
 }
 export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,changes:Partial<DiagramEdge>):ProjectDocument{
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){const e=doc.diagrams.find(d=>d.id===diagramId)?.edges.find(e=>e.id===edgeId);if(!e)throw Error('Relación inexistente');return setComponentRelation(doc,diagramId,{...e,...changes,id:edgeId})}
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-activity'){const next=withDiagram(doc,diagramId,d=>{if(!d.edges.some(e=>e.id===edgeId))throw Error('Relación inexistente');return {...d,edges:d.edges.map(e=>e.id===edgeId?{...e,...changes,id:e.id}:e)}});const issues=newActivityIssues(doc,next);if(issues.length)throw Error(issues[0].message);return next}
  const next=withDiagram(doc,diagramId,d=>{
   if(!d.edges.some(e=>e.id===edgeId))throw new Error('Relación inexistente')
@@ -90,6 +96,7 @@ export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,
   return {...d,edges:d.edges.map(e=>e.id===edgeId?{...e,...changes}:e)}
  })
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-sequence'){const issue=newSequenceIssues(doc,next)[0];if(issue)throw Error(issue.message)}
+ if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){const issue=newComponentIssues(doc,next)[0];if(issue)throw Error(issue.message)}
  return next
 }
 export function removeRelation(doc:ProjectDocument,diagramId:string,edgeId:string):ProjectDocument{
@@ -107,6 +114,7 @@ export function resizeNode(doc:ProjectDocument,diagramId:string,nodeId:string,wi
   if(!node)throw new Error('Caja no encontrada')
   const element=doc.elements[node.elementId]
   if(!element)throw new Error('Elemento inexistente')
+  if(d.type==='uml-component'&&element.type==='uml-port')throw Error('El puerto UML tiene tamaño fijo; mueve el símbolo por el borde')
   if(sequencePositionLocked(doc,d,node))throw Error('El tamaño de este símbolo depende de sus ocurrencias; ajusta sus propiedades de secuencia')
   const minimum=d.type==='uml-activity'&&element.type==='uml-fork'&&element.activityDetail?.orientation==='vertical'?{width:48,height:90}:atlasNodeMinimum(d.type,element.type)
   if(width<minimum.width||height<minimum.height)throw new Error(`Tamaño mínimo: ${minimum.width} × ${minimum.height} px`)
@@ -121,6 +129,7 @@ export function resizeNode(doc:ProjectDocument,diagramId:string,nodeId:string,wi
    if(d.type==='uml-sequence'&&sequenceIsAttachment(childElement.type)){
     adjustedChildren.set(child.id,sequenceSnapChild(element.type,childElement.type,{width,height},size,child.y))
    }else if(d.type==='uml-activity'&&childElement.type==='uml-activity-pin'){adjustedChildren.set(child.id,activitySnapPin({width,height},size,childElement.activityDetail?.role,child.y))
+   }else if(d.type==='uml-component'&&childElement.type==='uml-port'){adjustedChildren.set(child.id,componentPortResize(child.x,child.y,original,{width,height}))
    }else if(d.type==='uml-composite'&&childElement.type==='uml-port'){
     // Mantener la cara del borde al ampliar/reducir el clasificador.
     const pw=size.width,ph=size.height
@@ -181,6 +190,7 @@ export function moveNode(doc:ProjectDocument,diagramId:string,nodeId:string,x:nu
   return {...d,nodes:d.nodes.map(n=>{
    if(n.id!==nodeId)return n
    const element=doc.elements[n.elementId]
+   if(d.type==='uml-component'&&element?.type==='uml-port'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent){const size=atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),true);return {...n,...componentPortSnap(x,y,size.width,size.height)}}}
    if(d.type==='uml-activity'&&element?.type==='uml-activity-pin'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent)return {...n,...activitySnapPin(atlasNodeSize(d.type,doc.elements[parent.elementId],parent),atlasNodeSize(d.type,element,n),element.activityDetail?.role,y)}}
    if(d.type==='uml-sequence'&&n.parentNodeId&&element&&sequenceIsAttachment(element.type)){
     const parent=d.nodes.find(item=>item.id===n.parentNodeId)
@@ -200,7 +210,7 @@ export function editElement(doc:ProjectDocument,id:string,partial:Partial<ModelE
  if('id' in partial&&partial.id!==id)throw new Error('No se cambia identidad del elemento')
  const element={...doc.elements[id],...partial,id,updatedAt:date};let next={...doc,elements:{...doc.elements,[id]:element}}
  if(partial.activityDetail){next={...next,diagrams:next.diagrams.map(d=>{if(d.type!=='uml-activity')return d;return {...d,nodes:d.nodes.map(n=>{if(n.elementId!==id)return n;const old=doc.elements[id].activityDetail,detail=element.activityDetail;if(element.type==='uml-fork'&&(old?.orientation||'horizontal')!==(detail?.orientation||'horizontal')){const size=atlasNodeSize(d.type,doc.elements[id],n);return {...n,width:Math.max(48,size.height),height:Math.max(48,size.width)}}if(element.type==='uml-activity-pin'&&detail?.ownerActionId){const parent=d.nodes.find(p=>p.elementId===detail.ownerActionId);if(parent){const size=atlasNodeSize(d.type,next.elements[parent.elementId],parent),pin=atlasNodeSize(d.type,element,n);return {...n,parentNodeId:parent.id,...activitySnapPin(size,pin,detail.role,n.y)}}}return n})}})}}
- const issues=[...newActivityIssues(doc,next),...newSequenceIssues(doc,next)];if(issues.length)throw Error(issues[0].message);return next
+ const issues=[...newActivityIssues(doc,next),...newSequenceIssues(doc,next),...newComponentIssues(doc,next)];if(issues.length)throw Error(issues[0].message);return next
 }
 export function addFieldDefinition(doc:ProjectDocument,field:FieldDefinition):ProjectDocument{
  if(field.label.trim().length<2)throw new Error('Etiqueta de campo inválida')
@@ -244,6 +254,7 @@ export function removeDiagramSelection(doc:ProjectDocument,diagramId:string,node
  const removed=new Set(nodeIds),removedEdges=new Set(edgeIds)
  if([...removed].some(id=>!diagram.nodes.some(n=>n.id===id)))throw new Error('Caja no encontrada')
  if([...removedEdges].some(id=>!diagram.edges.some(e=>e.id===id)))throw new Error('Relación no encontrada')
+ if(diagram.type==='uml-component'){for(let count=-1;count!==removed.size;){count=removed.size;for(const n of diagram.nodes)if(n.parentNodeId&&removed.has(n.parentNodeId)&&doc.elements[n.elementId]?.type==='uml-port')removed.add(n.id)}}
  const updated=withDiagram(doc,diagramId,d=>({
   ...d,
   nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,...umlAbsolutePosition(d,n),parentNodeId:undefined}:n),
@@ -266,7 +277,7 @@ export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:strin
   const parent=parentNodeId?d.nodes.find(n=>n.id===parentNodeId):undefined
   const element=doc.elements[node.elementId]
   if(parentNodeId&&(!parent||!umlContainerAllows(d.type,doc.elements[parent.elementId]?.type,element.type)))throw new Error('Contenedor UML incompatible')
-  if(parent&&node.parentNodeId===parent.id&&!(d.type==='uml-activity'&&element.type==='uml-activity-pin')&&!(d.type==='uml-composite'&&element.type==='uml-port')&&!(d.type==='uml-sequence'&&sequenceIsAttachment(element.type)))return d
+  if(parent&&node.parentNodeId===parent.id&&!(d.type==='uml-activity'&&element.type==='uml-activity-pin')&&!(['uml-composite','uml-component'].includes(d.type)&&element.type==='uml-port')&&!(d.type==='uml-sequence'&&sequenceIsAttachment(element.type)))return d
   const absolute=umlAbsolutePosition(d,node)
   const targetPosition=parent?umlAbsolutePosition(d,parent):{x:0,y:0}
   const size=parent?atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id)):null
@@ -276,7 +287,9 @@ export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:strin
     const childSize=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),false)
     ;({x,y}=sequenceSnapChild(doc.elements[parent!.elementId].type,element.type,size,childSize,y))
    }else if(d.type==='uml-activity'&&element.type==='uml-activity-pin'){const pin=atlasNodeSize(d.type,element,node);const snapped=activitySnapPin(size,pin,element.activityDetail?.role,y);x=snapped.x;y=snapped.y}
+   else if(d.type==='uml-component'&&element.type==='uml-port')({x,y}=componentPortSnap(x,y,size.width,size.height))
    else if(d.type==='uml-composite'&&element.type==='uml-port')({x,y}=umlSnapPort(x,y,size.width,size.height))
+   else if(d.type==='uml-component'){const child=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),false);if(child.width>size.width||child.height>size.height)throw Error('Amplía primero el contenedor para alojar el elemento');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}
    else if(d.type==='uml-usecase'){const child=atlasNodeSize(d.type,element,node);if(child.width>size.width||child.height>size.height)throw Error('El sujeto no tiene espacio para el caso');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}else{x=Math.max(0,Math.min(size.width-60,x));y=Math.max(0,Math.min(size.height-40,y))}
   }
   const changed={...node,parentNodeId:parent?.id,x:Math.round(x),y:Math.round(y)}
@@ -285,6 +298,7 @@ export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:strin
   return candidate
  })
  if(view?.type==='uml-activity'){const node=view.nodes.find(n=>n.id===nodeId),parent=view.nodes.find(n=>n.id===parentNodeId),e=node&&updated.elements[node.elementId];if(e?.type==='uml-activity-pin'&&parent){const next={...updated,elements:{...updated.elements,[e.id]:{...e,activityDetail:{...e.activityDetail,ownerActionId:parent.elementId}}}};return next}}
+ if(view?.type==='uml-component'){const n=view.nodes.find(n=>n.id===nodeId),e=n&&doc.elements[n.elementId],parent=view.nodes.find(n=>n.id===parentNodeId),pe=parent&&doc.elements[parent.elementId];if(e?.type==='uml-port'&&e.uml?.component?.kind!=='port'&&pe&&componentClassifier(pe.type)){throw Error('Resuelve primero el propietario del puerto histórico antes de moverlo')}if(e&&componentRole(e.type)&&e.semanticOwnerId&&pe&&pe.id!==e.semanticOwnerId)throw Error('Mover una aparición no modifica su propietario semántico');const issue=newComponentIssues(original,updated)[0];if(issue)throw Error(issue.message);return updated}
  if(view?.type==='uml-usecase'){const issues=newUseCaseIssues(original,updated);if(issues.length)throw Error(issues[0].message)}return updated
 }
 

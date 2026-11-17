@@ -1,3 +1,4 @@
+import {componentEndpointValid} from './uml-component-catalog'
 /** ATLAS class-diagram policy. IDs refer to shared catalog elements, not labels. */
 import type {Diagram,DiagramEdge,ElementType,ModelElement,ProjectDocument,UmlAssociationEnd} from './index'
 import {validUmlDetail} from './uml-structure'
@@ -134,18 +135,19 @@ export type ClassIssue={key:string;message:string;fingerprint?:string}
  * reported rather than silently accepting the ambiguous model. Only public imports
  * participate in the finite re-export closure. No labels or diagram-local IDs define identity.
  */
-export function classImportResolution(doc:ProjectDocument):{issues:ClassIssue[];members:{namespaceId:string;name:string;memberId?:string;preferredMemberId?:string;ambiguous:boolean}[]}{
+export function classImportResolution(doc:ProjectDocument,includeComponents=false):{issues:ClassIssue[];members:{namespaceId:string;name:string;memberId?:string;preferredMemberId?:string;ambiguous:boolean}[]}{
  type Entry={source:string;target:string;name:string;kind:'element'|'package';public:boolean;key:string}
  type Candidate={id:string;name:string;key:string;priority:number}
  const imports:Entry[]=[],locals=new Map<string,Candidate[]>(),visible=new Map<string,Map<string,Candidate>>()
  const effectivePublic=(id:string)=>{const seen=new Set<string>();let e:ModelElement|undefined=doc.elements[id];while(e){if(seen.has(e.id)||e.uml?.visibility&&e.uml.visibility!=='public')return false;seen.add(e.id);e=e.semanticOwnerId?doc.elements[e.semanticOwnerId]:undefined}return true}
  const push=(owner:string,c:Candidate)=>{let m=visible.get(owner);if(!m)visible.set(owner,m=new Map());const token=JSON.stringify([c.id,c.name]);if(m.has(token))return false;m.set(token,c);return true}
- for(const e of Object.values(doc.elements)){if(!e.semanticOwnerId||!isClassType(e.type)||auxiliary(e.type))continue;const c={id:e.id,name:e.name.trim(),key:'',priority:2};const list=locals.get(e.semanticOwnerId)||[];list.push(c);locals.set(e.semanticOwnerId,list);if(effectivePublic(e.id))push(e.semanticOwnerId,c)}
+ for(const e of Object.values(doc.elements)){if(!e.semanticOwnerId||(!isClassType(e.type)&&!(includeComponents&&['component','uml-artifact'].includes(e.type)))||auxiliary(e.type))continue;const c={id:e.id,name:e.name.trim(),key:'',priority:2};const list=locals.get(e.semanticOwnerId)||[];list.push(c);locals.set(e.semanticOwnerId,list);if(effectivePublic(e.id))push(e.semanticOwnerId,c)}
  for(const d of doc.diagrams.filter(x=>x.type==='uml-class'))for(const e of d.edges){const k=e.relationKind||'';if(!isClassImport(k))continue;const source=d.nodes.find(n=>n.id===e.source)?.elementId,target=d.nodes.find(n=>n.id===e.target)?.elementId;if(!source||!target||!doc.elements[source]||!doc.elements[target]||source===target||doc.elements[target].semanticOwnerId===source||!effectivePublic(target)||!classEndpointValid(k,doc.elements[source].type,doc.elements[target].type))continue;
   // Ambiguous legacy package destinations are diagnosed separately; for read-only
   // analysis retain their previous package-import interpretation, never mutate them.
   const kind=k==='packageImport'||k==='packageAccess'||(k==='import'||k==='access')&&pkg(doc.elements[target].type)&&!e.importAlias?'package':'element';const entry:Entry={source,target,kind,public:!['access','elementAccess','packageAccess'].includes(k),name:(kind==='element'?e.importAlias?.trim():undefined)||doc.elements[target].name.trim(),key:`edge:${d.id}:${e.id}`};imports.push(entry);if(kind==='element'&&entry.public)push(source,{id:target,name:entry.name,key:entry.key,priority:1})
  }
+ if(includeComponents)for(const r of Object.values(doc.componentRelations||{})){const k=r.kind,source=r.sourceElementId,target=r.targetElementId;if(!isClassImport(k)||!doc.elements[source]||!doc.elements[target]||source===target||doc.elements[target].semanticOwnerId===source||!effectivePublic(target)||!componentEndpointValid(k,doc.elements[source].type,doc.elements[target].type))continue;const kind=k==='packageImport'||k==='packageAccess'||(k==='import'||k==='access')&&pkg(doc.elements[target].type)&&!r.importAlias?'package':'element';const entry:Entry={source,target,kind,public:!['access','elementAccess','packageAccess'].includes(k),name:(kind==='element'?r.importAlias?.trim():undefined)||doc.elements[target].name.trim(),key:`record:${r.id}`};imports.push(entry);if(kind==='element'&&entry.public)push(source,{id:target,name:entry.name,key:entry.key,priority:1})}
  // A work queue visits each (namespace, member ID, imported name) at most once.
  // Local and explicit element names are statically known, including private imports.
  // A package import cannot re-export a member shadowed by a higher-precedence name.
@@ -173,7 +175,7 @@ export function classDocumentIssues(doc:ProjectDocument):ClassIssue[]{
 
  for(const e of Object.values(doc.elements)){
   if(classIds.has(e.id))add(`element:${e.id}`,classDetailErrors(e,doc))
-  if(e.semanticOwnerId){const parent=doc.elements[e.semanticOwnerId];if(!parent||!classEndpointValid('containment',parent.type,e.type))add(`owner:${e.id}`,['Propietario incompatible']);ownership.set(e.id,new Set([e.semanticOwnerId]))}
+  if(e.semanticOwnerId){const parent=doc.elements[e.semanticOwnerId];if(!parent||!classEndpointValid('containment',parent.type,e.type)&&!((e.uml?.component||e.type==='component'||e.type==='uml-artifact')&&componentEndpointValid('containment',parent.type,e.type)))add(`owner:${e.id}`,['Propietario incompatible']);ownership.set(e.id,new Set([e.semanticOwnerId]))}
  }
  for(const [id,parents] of ownership)for(const parent of parents)if(cyclic(id,parent,ownership))add(`owner:${id}`,['Ciclo de propiedad'])
  for(const d of doc.diagrams.filter(d=>d.type==='uml-class'))for(const e of d.edges){

@@ -1,0 +1,238 @@
+TAP version 13
+# Subtest: CMP-T07 alta, roundtrip, actualización y export SVG especializado
+ok 1 - CMP-T07 alta, roundtrip, actualización y export SVG especializado
+  ---
+  duration_ms: 69.766934
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 01-tipo-paquete.json
+ok 2 - CMP-T08 API pura rechaza 01-tipo-paquete.json
+  ---
+  duration_ms: 10.220202
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 02-dos-proveedores.json
+ok 3 - CMP-T08 API pura rechaza 02-dos-proveedores.json
+  ---
+  duration_ms: 7.236495
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 03-contrato-incompatible.json
+ok 4 - CMP-T08 API pura rechaza 03-contrato-incompatible.json
+  ---
+  duration_ms: 7.401079
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 04-propietario-ajeno.json
+ok 5 - CMP-T08 API pura rechaza 04-propietario-ajeno.json
+  ---
+  duration_ms: 7.522319
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 05-puerto-rol-ajeno.json
+ok 6 - CMP-T08 API pura rechaza 05-puerto-rol-ajeno.json
+  ---
+  duration_ms: 6.415563
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 06-extremo-inexistente.json
+ok 7 - CMP-T08 API pura rechaza 06-extremo-inexistente.json
+  ---
+  duration_ms: 4.803635
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 07-borde.json
+ok 8 - CMP-T08 API pura rechaza 07-borde.json
+  ---
+  duration_ms: 13.479599
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 08-padre-final.json
+ok 9 - CMP-T08 API pura rechaza 08-padre-final.json
+  ---
+  duration_ms: 8.290441
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 09-nombre-reservado.json
+ok 10 - CMP-T08 API pura rechaza 09-nombre-reservado.json
+  ---
+  duration_ms: 5.73466
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 10-multiplicidad.json
+ok 11 - CMP-T08 API pura rechaza 10-multiplicidad.json
+  ---
+  duration_ms: 9.522714
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 11-campo-ajeno.json
+ok 12 - CMP-T08 API pura rechaza 11-campo-ajeno.json
+  ---
+  duration_ms: 11.189745
+  type: 'test'
+  ...
+# Subtest: CMP-T08 API pura rechaza 12-cableado-nary-incompleto.json
+ok 13 - CMP-T08 API pura rechaza 12-cableado-nary-incompleto.json
+  ---
+  duration_ms: 7.19342
+  type: 'test'
+  ...
+# Subtest: CMP-T07 importación aislada remapea relaciones, roles y extremos
+ok 14 - CMP-T07 importación aislada remapea relaciones, roles y extremos
+  ---
+  duration_ms: 7.506816
+  type: 'test'
+  ...
+# Subtest: CMP-T08 proyección sin técnico oculta contrato y lector no modifica, modelo original intacto
+ok 15 - CMP-T08 proyección sin técnico oculta contrato y lector no modifica, modelo original intacto
+  ---
+  duration_ms: 2.283156
+  type: 'test'
+  ...
+# Subtest: CMP-T05 comandos mueven puerto y resize del dueño, rollback
+ok 16 - CMP-T05 comandos mueven puerto y resize del dueño, rollback
+  ---
+  duration_ms: 2.834747
+  type: 'test'
+  ...
+# Subtest: CMP-T07 quitar aparición no elimina contrato registrado
+ok 17 - CMP-T07 quitar aparición no elimina contrato registrado
+  ---
+  duration_ms: 11.593635
+  type: 'test'
+  ...
+# Subtest: CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES.json
+ok 18 - CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES.json
+  ---
+  duration_ms: 35.299896
+  type: 'test'
+  ...
+# Subtest: CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json
+ok 19 - CMP-T01/T09 fixture ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json
+  ---
+  duration_ms: 7.93282
+  type: 'test'
+  ...
+# Subtest: CMP negativo 01-tipo-paquete.json
+ok 20 - CMP negativo 01-tipo-paquete.json
+  ---
+  duration_ms: 1.921288
+  type: 'test'
+  ...
+# Subtest: CMP negativo 02-dos-proveedores.json
+ok 21 - CMP negativo 02-dos-proveedores.json
+  ---
+  duration_ms: 1.389327
+  type: 'test'
+  ...
+# Subtest: CMP negativo 03-contrato-incompatible.json
+ok 22 - CMP negativo 03-contrato-incompatible.json
+  ---
+  duration_ms: 1.462615
+  type: 'test'
+  ...
+# Subtest: CMP negativo 04-propietario-ajeno.json
+ok 23 - CMP negativo 04-propietario-ajeno.json
+  ---
+  duration_ms: 0.844446
+  type: 'test'
+  ...
+# Subtest: CMP negativo 05-puerto-rol-ajeno.json
+ok 24 - CMP negativo 05-puerto-rol-ajeno.json
+  ---
+  duration_ms: 1.958213
+  type: 'test'
+  ...
+# Subtest: CMP negativo 06-extremo-inexistente.json
+ok 25 - CMP negativo 06-extremo-inexistente.json
+  ---
+  duration_ms: 0.92127
+  type: 'test'
+  ...
+# Subtest: CMP negativo 07-borde.json
+ok 26 - CMP negativo 07-borde.json
+  ---
+  duration_ms: 1.30485
+  type: 'test'
+  ...
+# Subtest: CMP negativo 08-padre-final.json
+ok 27 - CMP negativo 08-padre-final.json
+  ---
+  duration_ms: 5.171326
+  type: 'test'
+  ...
+# Subtest: CMP negativo 09-nombre-reservado.json
+ok 28 - CMP negativo 09-nombre-reservado.json
+  ---
+  duration_ms: 1.043733
+  type: 'test'
+  ...
+# Subtest: CMP negativo 10-multiplicidad.json
+ok 29 - CMP negativo 10-multiplicidad.json
+  ---
+  duration_ms: 6.159532
+  type: 'test'
+  ...
+# Subtest: CMP negativo 11-campo-ajeno.json
+ok 30 - CMP negativo 11-campo-ajeno.json
+  ---
+  duration_ms: 4.796204
+  type: 'test'
+  ...
+# Subtest: CMP negativo 12-cableado-nary-incompleto.json
+ok 31 - CMP negativo 12-cableado-nary-incompleto.json
+  ---
+  duration_ms: 2.453815
+  type: 'test'
+  ...
+# Subtest: CMP-T02 contratos heredados por identidad, conjugación y especialización
+ok 32 - CMP-T02 contratos heredados por identidad, conjugación y especialización
+  ---
+  duration_ms: 0.521466
+  type: 'test'
+  ...
+# Subtest: CMP-T03 bola apunta a proveedor con inversión de extremos
+ok 33 - CMP-T03 bola apunta a proveedor con inversión de extremos
+  ---
+  duration_ms: 0.435588
+  type: 'test'
+  ...
+# Subtest: CMP-T04 delegación y n-ario conservan extremos semánticos distintos
+ok 34 - CMP-T04 delegación y n-ario conservan extremos semánticos distintos
+  ---
+  duration_ms: 0.643668
+  type: 'test'
+  ...
+# Subtest: CMP-T05 puerto cuadrado y resize preservan lado y offset
+ok 35 - CMP-T05 puerto cuadrado y resize preservan lado y offset
+  ---
+  duration_ms: 0.143563
+  type: 'test'
+  ...
+# Subtest: CMP-T06 comando rechaza cableado incompatible y no modifica documento
+ok 36 - CMP-T06 comando rechaza cableado incompatible y no modifica documento
+  ---
+  duration_ms: 3.533586
+  type: 'test'
+  ...
+# Subtest: CMP-T07 significado y aparición independientes
+ok 37 - CMP-T07 significado y aparición independientes
+  ---
+  duration_ms: 2.640026
+  type: 'test'
+  ...
+# Subtest: CMP-T08 merge independiente y conflicto de registro
+ok 38 - CMP-T08 merge independiente y conflicto de registro
+  ---
+  duration_ms: 5.52625
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2695.643968

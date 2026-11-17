@@ -24,8 +24,8 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
   const read=await send('GET',base+'/document');assert.equal(read.statusCode,200,read.body);assert.equal(read.json().version,2);assert.deepEqual(read.json().document,doc)
   const invalid=structuredClone(doc);invalid.diagrams[0].edges[0].target='missing';const rejected=await send('PUT',base+'/document',{document:invalid,expectedVersion:2});assert.ok([400,403,409,422].includes(rejected.statusCode),rejected.body)
   const unchanged=await send('GET',base+'/document');assert.equal(unchanged.json().version,2);assert.deepEqual(unchanged.json().document,doc)
-  if(type==='uml-sequence'){
-   const dir=new URL('../../../../qa/uml-sequence-negative/',import.meta.url)
+  if(type==='uml-sequence'||type==='uml-component'){
+   const dir=new URL(type==='uml-component'?'../../../../qa/uml-component-negative/':'../../../../qa/uml-sequence-negative/',import.meta.url)
    const names=readdirSync(dir).filter(n=>n.endsWith('.json')).sort()
    // Three requests per fixture; isolate batches without weakening actual limits.
    for(const [index,name] of names.entries()){

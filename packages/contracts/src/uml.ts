@@ -1,3 +1,4 @@
+import {COMPONENT_TYPES,COMPONENT_RELATIONS,componentEndpointValid} from './uml-component-catalog'
 import {SEQUENCE_TYPES,SEQUENCE_RELATIONS,sequenceEndpointTypeValid} from './uml-sequence-policy'
 import {ACTIVITY_TYPES,ACTIVITY_RELATIONS,activityEndpointTypeValid} from './uml-activity-policy'
 import {USECASE_CREATION_TYPES,USECASE_TYPES,USECASE_RELATIONS,useCaseEndpointValid} from './uml-usecase-catalog'
@@ -16,7 +17,7 @@ export const UML_DIAGRAMS=UML_DIAGRAM_GROUPS.flatMap(group=>group.types) as Diag
 export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly ElementType[]>>={
  'uml-class':CLASS_TYPES,
  'uml-object':['uml-object','uml-class','uml-package'],
- 'uml-component':['component','uml-interface','uml-port','uml-artifact','uml-package'],
+ 'uml-component':COMPONENT_TYPES,
  'uml-composite':['uml-class','uml-part','uml-reference-role','uml-port','uml-collaboration','uml-interface'],
  'uml-deployment':['uml-node','uml-device','uml-execution','uml-artifact'],
  'uml-package':['uml-package','uml-subpackage','uml-model','uml-profile'],
@@ -32,7 +33,7 @@ export const UML_ELEMENTS_BY_DIAGRAM:Partial<Record<DiagramType,readonly Element
 export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string[]>>={
  'uml-class':CLASS_RELATIONS,
  'uml-object':['link','dependency'],
- 'uml-component':['assembly','provided-interface','required-interface','dependency','realization'],
+ 'uml-component':COMPONENT_RELATIONS,
  'uml-composite':['connector','assembly'],
  'uml-deployment':['communication-path','deployment'],
  'uml-package':['dependency','import','merge'],
@@ -80,6 +81,7 @@ export const UML_RELATION_LABELS:Record<string,string>={
  aggregation:'Agregación — rombo blanco',composition:'Composición — rombo negro',
  elementImport:'Importación pública de elemento — «import»',elementAccess:'Importación privada de elemento — «access»',packageImport:'Importación pública de miembros de paquete — «import»',packageAccess:'Importación privada de miembros de paquete — «access»',
  dependency:'Dependencia — línea discontinua y flecha abierta',
+ wiring:'Cableado externo — contrato requerido/provisto', 'component-realization':'Realización de componente — triángulo discontinuo', usage:'Uso — «use»', annotation:'Anotación — línea discontinua sin punta',
  assembly:'Ensamblaje de interfaces — bola y encaje',
  'provided-interface':'Interfaz proporcionada — círculo (lollipop)',
  'required-interface':'Interfaz requerida — semicírculo (socket)',
@@ -145,13 +147,7 @@ export function umlRelationEndpointValid(diagram:DiagramType,kind:string,source:
   // Delegación histórica: sólo lectura, no se ofrece al crear.
   if(kind==='delegation')return connectable(source)&&connectable(target)
  }
- if(diagram==='uml-component'){
-  const connector=(t:ElementType)=>['component','uml-port'].includes(t)
-  if(kind==='assembly')return connector(source)&&connector(target)
-  if(kind==='provided-interface'||kind==='required-interface')
-   return connector(source)&&['uml-interface','uml-port'].includes(target)
-  if(kind==='realization')return source==='component'&&target==='uml-interface'
- }
+ if(diagram==='uml-component')return componentEndpointValid(kind,source,target)
  return true
 }
 

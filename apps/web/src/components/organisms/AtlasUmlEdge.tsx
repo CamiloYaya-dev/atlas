@@ -9,7 +9,7 @@ import type {EdgePathStyle,UmlTerminal,DiagramType,ElementType} from '@atlas/con
 import {umlRelationNotation,classRelationRoute,activityInterruptPath,activityExceptionRoute,classEndTerminal,classEndLabel} from '@atlas/contracts'
 import {parallelRoute} from '../../features/editor/domain/parallel-edges'
 import {assemblyAnchor} from './uml-assembly'
-export type UmlEdgeData={sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
+export type UmlEdgeData={componentAssembly?:'forward'|'reverse';sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
 const INK='#506986'
 export function terminalAngle(side:string|undefined,x:number,y:number,otherX:number,otherY:number):number{
  // Vector hacia AFUERA del nodo. En izquierda/derecha se mantiene horizontal;
@@ -51,7 +51,7 @@ export function AtlasUmlEdge(props:EdgeProps){
  const displayLabel=n.label?(data.semanticDisplayLabel?.startsWith(n.label)?data.semanticDisplayLabel:n.label):props.label
  const input={sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,sourcePosition:props.sourcePosition,targetPosition:props.targetPosition,offset:data.parallelOffset||0,pathStyle:data.parallelPath||'straight' as const}
  const exception=data.diagramType==='uml-activity'&&data.relationKind==='exception-handler'
- const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
+ const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity','uml-component'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
  const terminal=(side:'source'|'target'):UmlTerminal=>['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndTerminal(data,side):side==='source'?n.start:n.end
  const sourceLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.sourceX,y:props.sourceY},props.sourcePosition):{x:props.sourceX+20,y:props.sourceY-15}
  const targetLabel=['uml-class','uml-usecase'].includes(data.diagramType||'')?classEndLabel({x:props.targetX,y:props.targetY},props.targetPosition):{x:props.targetX-20,y:props.targetY-15}
@@ -61,7 +61,7 @@ export function AtlasUmlEdge(props:EdgeProps){
  const ta=terminalAngle(props.targetPosition,props.targetX,props.targetY,props.sourceX,props.sourceY)
  const style={stroke:INK,strokeWidth:1.7,strokeDasharray:n.stroke==='dashed'?'7 5':n.stroke==='dotted'?'2 5':undefined,fill:'none'}
  // Ensamblaje: bola conectada a socket en la zona central, no en forma de flecha.
- const assembly=n.end==='assembly'?assemblyAnchor(route.path):null
+ const assembly=n.end==='assembly'&&(data.diagramType!=='uml-component'||data.componentAssembly)?assemblyAnchor(route.path):null; if(assembly&&data.componentAssembly==='reverse')assembly.angle+=180
  const assemblyLabel=assembly?{x:assembly.x+Math.sin(assembly.angle*Math.PI/180)*30,y:assembly.y-Math.cos(assembly.angle*Math.PI/180)*30}:null
  const composite=data.diagramType==='uml-composite'
  const hasSquares=composite&&['connector','delegation'].includes(data.relationKind||'')
@@ -75,7 +75,7 @@ export function AtlasUmlEdge(props:EdgeProps){
   <BaseEdge id={props.id} path={actualPath} style={{...style,...(assembly?{mask:`url(#atlas-assembly-gap-${props.id})`}:{})}} interactionWidth={28}/>
   {data.activityInterrupted&&!exception&&<path data-activity-interrupt="true" d={activityInterruptPath(route.labelX,route.labelY)} fill="none" stroke={INK} strokeWidth="2"/>}
   {squareStart&&<rect data-uml-terminal="port-square" x={props.sourceX-5.5} y={props.sourceY-5.5} width="11" height="11" fill="white" stroke={INK} strokeWidth="1.8" pointerEvents="none"/>}
-  {nary&&<><polygon points={`${hub.x},${hub.y-10} ${hub.x+14},${hub.y} ${hub.x},${hub.y+10} ${hub.x-14},${hub.y}`} fill="white" stroke={INK}/>{data.extraEnds?.map(p=><g key={p.id}><path d={`M ${hub.x} ${hub.y} L ${p.x} ${p.y}`} stroke={INK} fill="none"/><Terminal kind={p.navigability==='navigable'?'open-arrow':p.navigability==='non-navigable'?'cross':'none'} x={p.x} y={p.y} angle={terminalAngle(p.side,p.x,p.y,hub.x,hub.y)}/><text x={p.x+8} y={p.y-8} fontSize="10" fill={INK}>{p.label}</text></g>)}</>}
+  {nary&&<>{data.diagramType==='uml-component'?<circle cx={hub.x} cy={hub.y} r={4} fill={INK}/>:<polygon points={`${hub.x},${hub.y-10} ${hub.x+14},${hub.y} ${hub.x},${hub.y+10} ${hub.x-14},${hub.y}`} fill="white" stroke={INK}/>}{data.extraEnds?.map(p=><g key={p.id}><path d={`M ${hub.x} ${hub.y} L ${p.x} ${p.y}`} stroke={INK} fill="none"/><Terminal kind={p.navigability==='navigable'?'open-arrow':p.navigability==='non-navigable'?'cross':'none'} x={p.x} y={p.y} angle={terminalAngle(p.side,p.x,p.y,hub.x,hub.y)}/><text x={p.x+8} y={p.y-8} fontSize="10" fill={INK}>{p.label}</text></g>)}</>}
   {data.associationClassPoint&&<path data-uml-association-class="true" d={`M ${hub.x} ${hub.y} L ${data.associationClassPoint.x} ${data.associationClassPoint.y}`} stroke={INK} strokeDasharray="7 5" fill="none"/>}
   {!data.annotationPoint&&<Terminal kind={terminal('source')} x={props.sourceX} y={props.sourceY} angle={sa}/>}
   {squareEnd&&<rect data-uml-terminal="port-square" x={props.targetX-5.5} y={props.targetY-5.5} width="11" height="11" fill="white" stroke={INK} strokeWidth="1.8" pointerEvents="none"/>}

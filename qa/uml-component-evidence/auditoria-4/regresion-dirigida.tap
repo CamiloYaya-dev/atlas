@@ -1,0 +1,2253 @@
+TAP version 13
+# (node:14904) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: IMP alcance explícito y retrocompatibilidad
+ok 1 - IMP alcance explícito y retrocompatibilidad
+  ---
+  duration_ms: 2.183881
+  type: 'test'
+  ...
+# Subtest: IMP importar casos de uso sustituye solo destino, remapea identidad, extensiones y anotaciones
+ok 2 - IMP importar casos de uso sustituye solo destino, remapea identidad, extensiones y anotaciones
+  ---
+  duration_ms: 139.280441
+  type: 'test'
+  ...
+# Subtest: IMP clase no sustituye casos de uso y no toca documento
+ok 3 - IMP clase no sustituye casos de uso y no toca documento
+  ---
+  duration_ms: 30.148053
+  type: 'test'
+  ...
+# Subtest: IMP reemplazo de proyecto elimina contenido anterior y conserva IDs del archivo
+ok 4 - IMP reemplazo de proyecto elimina contenido anterior y conserva IDs del archivo
+  ---
+  duration_ms: 8.806799
+  type: 'test'
+  ...
+# Subtest: IMP lector, diagrama ausente, vista parcial y enlace granular no se sobrescriben
+ok 5 - IMP lector, diagrama ausente, vista parcial y enlace granular no se sobrescriben
+  ---
+  duration_ms: 5.854484
+  type: 'test'
+  ...
+# Subtest: IMP actividad con llamada ausente exige importar proyecto; actividad autónoma se copia con IDs remapeados
+ok 6 - IMP actividad con llamada ausente exige importar proyecto; actividad autónoma se copia con IDs remapeados
+  ---
+  duration_ms: 29.449173
+  type: 'test'
+  ...
+# Subtest: IMP JSON adversarial no cambia proyecto aun con owner
+ok 7 - IMP JSON adversarial no cambia proyecto aun con owner
+  ---
+  duration_ms: 24.311827
+  type: 'test'
+  ...
+# Subtest: IMP clases mantiene tipos, asociaciones n-arias y plantillas; proyecto actividades conserva ambas vistas
+ok 8 - IMP clases mantiene tipos, asociaciones n-arias y plantillas; proyecto actividades conserva ambas vistas
+  ---
+  duration_ms: 145.026234
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-008 IMP copiar Activity integral conserva referencias externas, remapea parámetros, pines, grupos, fases y anotaciones
+ok 9 - AUD-ACT-008 IMP copiar Activity integral conserva referencias externas, remapea parámetros, pines, grupos, fases y anotaciones
+  ---
+  duration_ms: 100.982106
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-008 IMP llamada recursiva remapea argumento a la nueva firma local
+ok 10 - AUD-ACT-008 IMP llamada recursiva remapea argumento a la nueva firma local
+  ---
+  duration_ms: 47.19718
+  type: 'test'
+  ...
+# (node:14905) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: SEQ-T08 owner alta, proyección y roundtrip íntegros; lector no modifica
+ok 11 - SEQ-T08 owner alta, proyección y roundtrip íntegros; lector no modifica
+  ---
+  duration_ms: 147.675957
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 01-ascendente.json
+ok 12 - SEQ-T08 API puro PUT/import 01-ascendente.json
+  ---
+  duration_ms: 69.415351
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 02-self-sin-avance.json
+ok 13 - SEQ-T08 API puro PUT/import 02-self-sin-avance.json
+  ---
+  duration_ms: 7.582977
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 03-ocurrencia-ausente.json
+ok 14 - SEQ-T08 API puro PUT/import 03-ocurrencia-ausente.json
+  ---
+  duration_ms: 11.917538
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 04-ciclo.json
+ok 15 - SEQ-T08 API puro PUT/import 04-ciclo.json
+  ---
+  duration_ms: 15.066816
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 05-else-previo.json
+ok 16 - SEQ-T08 API puro PUT/import 05-else-previo.json
+  ---
+  duration_ms: 35.788219
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 06-loop-invertido.json
+ok 17 - SEQ-T08 API puro PUT/import 06-loop-invertido.json
+  ---
+  duration_ms: 7.10841
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 07-operando-ajeno.json
+ok 18 - SEQ-T08 API puro PUT/import 07-operando-ajeno.json
+  ---
+  duration_ms: 4.905732
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 08-despues-delete.json
+ok 19 - SEQ-T08 API puro PUT/import 08-despues-delete.json
+  ---
+  duration_ms: 5.832151
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 09-firma-invalida.json
+ok 20 - SEQ-T08 API puro PUT/import 09-firma-invalida.json
+  ---
+  duration_ms: 5.628368
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 10-multiplicidad.json
+ok 21 - SEQ-T08 API puro PUT/import 10-multiplicidad.json
+  ---
+  duration_ms: 6.059219
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 11-gate-propietario.json
+ok 22 - SEQ-T08 API puro PUT/import 11-gate-propietario.json
+  ---
+  duration_ms: 5.06579
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 12-intervalo-invertido.json
+ok 23 - SEQ-T08 API puro PUT/import 12-intervalo-invertido.json
+  ---
+  duration_ms: 8.435146
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 13-reply-invalido.json
+ok 24 - SEQ-T08 API puro PUT/import 13-reply-invalido.json
+  ---
+  duration_ms: 4.147894
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 14-clave-no-admitida.json
+ok 25 - SEQ-T08 API puro PUT/import 14-clave-no-admitida.json
+  ---
+  duration_ms: 1.508976
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 15-A-argumento-signal-ajeno.json
+ok 26 - SEQ-T08 API puro PUT/import 15-A-argumento-signal-ajeno.json
+  ---
+  duration_ms: 4.158179
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 16-B-reply-firma-distinta.json
+ok 27 - SEQ-T08 API puro PUT/import 16-B-reply-firma-distinta.json
+  ---
+  duration_ms: 5.491974
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 17-C-gate-actual-en-fragmento.json
+ok 28 - SEQ-T08 API puro PUT/import 17-C-gate-actual-en-fragmento.json
+  ---
+  duration_ms: 11.117619
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 18-D-gate-auto-match.json
+ok 29 - SEQ-T08 API puro PUT/import 18-D-gate-auto-match.json
+  ---
+  duration_ms: 30.58656
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 19-E-ref-mapping-comentario.json
+ok 30 - SEQ-T08 API puro PUT/import 19-E-ref-mapping-comentario.json
+  ---
+  duration_ms: 12.36202
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 20-F-ref-parametro-ajeno.json
+ok 31 - SEQ-T08 API puro PUT/import 20-F-ref-parametro-ajeno.json
+  ---
+  duration_ms: 13.795605
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 21-G-evento-posterior-X.json
+ok 32 - SEQ-T08 API puro PUT/import 21-G-evento-posterior-X.json
+  ---
+  duration_ms: 23.93117
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 22-H-contexto-paquete.json
+ok 33 - SEQ-T08 API puro PUT/import 22-H-contexto-paquete.json
+  ---
+  duration_ms: 6.617449
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 23-rol-comentario.json
+ok 34 - SEQ-T08 API puro PUT/import 23-rol-comentario.json
+  ---
+  duration_ms: 12.092188
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 24-continuacion-lifeline-inexistente.json
+ok 35 - SEQ-T08 API puro PUT/import 24-continuacion-lifeline-inexistente.json
+  ---
+  duration_ms: 5.533016
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 25-mensaje-fuera-activacion.json
+ok 36 - SEQ-T08 API puro PUT/import 25-mensaje-fuera-activacion.json
+  ---
+  duration_ms: 27.893808
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 26-consider-propietario.json
+ok 37 - SEQ-T08 API puro PUT/import 26-consider-propietario.json
+  ---
+  duration_ms: 7.572151
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 27-consider-operacion-inexistente.json
+ok 38 - SEQ-T08 API puro PUT/import 27-consider-operacion-inexistente.json
+  ---
+  duration_ms: 7.442988
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 28-consider-duplicada.json
+ok 39 - SEQ-T08 API puro PUT/import 28-consider-duplicada.json
+  ---
+  duration_ms: 6.505603
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 29-consider-tipo-incompatible.json
+ok 40 - SEQ-T08 API puro PUT/import 29-consider-tipo-incompatible.json
+  ---
+  duration_ms: 4.093924
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 30-firma-fuera-consider.json
+ok 41 - SEQ-T08 API puro PUT/import 30-firma-fuera-consider.json
+  ---
+  duration_ms: 15.863852
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 31-reply-cardinalidad.json
+ok 42 - SEQ-T08 API puro PUT/import 31-reply-cardinalidad.json
+  ---
+  duration_ms: 10.627589
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 32-call-asignacion-invalida.json
+ok 43 - SEQ-T08 API puro PUT/import 32-call-asignacion-invalida.json
+  ---
+  duration_ms: 12.716538
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 33-ref-retorno-inexistente.json
+ok 44 - SEQ-T08 API puro PUT/import 33-ref-retorno-inexistente.json
+  ---
+  duration_ms: 8.319213
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 34-fragmentos-superpuestos.json
+ok 45 - SEQ-T08 API puro PUT/import 34-fragmentos-superpuestos.json
+  ---
+  duration_ms: 29.026625
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 35-gate-dos-mensajes.json
+ok 46 - SEQ-T08 API puro PUT/import 35-gate-dos-mensajes.json
+  ---
+  duration_ms: 12.541257
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 API puro PUT/import 36-tiempo-exceso-ocurrencias.json
+ok 47 - SEQ-T08 API puro PUT/import 36-tiempo-exceso-ocurrencias.json
+  ---
+  duration_ms: 10.48759
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 importación aislada remapea ocurrencias, operandos, ref, gate, X, argumentos y reply
+ok 48 - SEQ-T08 importación aislada remapea ocurrencias, operandos, ref, gate, X, argumentos y reply
+  ---
+  duration_ms: 14.207367
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 proyección restringida no revela ocurrencias, firmas ni mensajes
+ok 49 - SEQ-T08 proyección restringida no revela ocurrencias, firmas ni mensajes
+  ---
+  duration_ms: 3.327863
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-002 gate formal/actual atraviesa interacciones autorizadas; importación de proyecto conserva el par
+ok 50 - AUD-SEQ-002 gate formal/actual atraviesa interacciones autorizadas; importación de proyecto conserva el par
+  ---
+  duration_ms: 8.323539
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 fixture manual autocontenido: una Interaction, tipos, args, gates y remapeo de ref recursiva
+ok 51 - SEQ-T08 fixture manual autocontenido: una Interaction, tipos, args, gates y remapeo de ref recursiva
+  ---
+  duration_ms: 60.481834
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-007–009 importación de proyecto y actualización rechazan por su causa
+ok 52 - AUD-SEQ-007–009 importación de proyecto y actualización rechazan por su causa
+  ---
+  duration_ms: 82.356863
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-007 rol tipado por propietario y miembro preservado en copia y proyección
+ok 53 - AUD-SEQ-007 rol tipado por propietario y miembro preservado en copia y proyección
+  ---
+  duration_ms: 18.590001
+  type: 'test'
+  ...
+# Subtest: SEQ-T03 mover fragmento con hijos seleccionados desplaza ocurrencias una sola vez y conserva IDs; guarda autorizado
+ok 54 - SEQ-T03 mover fragmento con hijos seleccionados desplaza ocurrencias una sola vez y conserva IDs; guarda autorizado
+  ---
+  duration_ms: 688.265336
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 firma concreta y retorno: alta, actualización, importación proyecto y rechazo de los ocho negativos nuevos
+ok 55 - AUD-SEQ-006 firma concreta y retorno: alta, actualización, importación proyecto y rechazo de los ocho negativos nuevos
+  ---
+  duration_ms: 247.29479
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 fixture multivista de firmas y resultado: persistencia, roundtrip y permisos de proyección
+ok 56 - AUD-SEQ-006 fixture multivista de firmas y resultado: persistencia, roundtrip y permisos de proyección
+  ---
+  duration_ms: 13.644639
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 adaptación explícita de actor histórico conserva catálogo e identidad de aparición, create/delete inequívocos, snapshot e idempotencia
+ok 57 - SEQ-T08 adaptación explícita de actor histórico conserva catálogo e identidad de aparición, create/delete inequívocos, snapshot e idempotencia
+  ---
+  duration_ms: 36.765414
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-010 el cruce se rechaza en alta, actualización e importación de proyecto sin tocar el original
+ok 58 - AUD-SEQ-010 el cruce se rechaza en alta, actualización e importación de proyecto sin tocar el original
+  ---
+  duration_ms: 17.940112
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-010 mover y redimensionar fragmentos rechazan el cruce con rollback
+ok 59 - AUD-SEQ-010 mover y redimensionar fragmentos rechazan el cruce con rollback
+  ---
+  duration_ms: 1712.733552
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 Gate ocupado rechaza alta, PUT e importación de proyecto/diagrama por su causa; original intacto
+ok 60 - AUD-SEQ-012 Gate ocupado rechaza alta, PUT e importación de proyecto/diagrama por su causa; original intacto
+  ---
+  duration_ms: 72.0955
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 reconexión y reparación explícita en comandos; no pierde mensaje original ni ocurrencias
+ok 61 - AUD-SEQ-012 reconexión y reparación explícita en comandos; no pierde mensaje original ni ocurrencias
+  ---
+  duration_ms: 145.21156
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 T05 exceso de referencias de instante se rechaza por política en alta, PUT e importación
+ok 62 - AUD-SEQ-006 T05 exceso de referencias de instante se rechaza por política en alta, PUT e importación
+  ---
+  duration_ms: 51.025398
+  type: 'test'
+  ...
+# (node:14909) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ACT-07 fixture integral alta, proyección y roundtrip owner; rechazo lector
+ok 63 - ACT-07 fixture integral alta, proyección y roundtrip owner; rechazo lector
+  ---
+  duration_ms: 199.987039
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 01-inicio-receptor.json
+ok 64 - ACT-07 negativo JSON y PUT 01-inicio-receptor.json
+  ---
+  duration_ms: 102.459926
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 02-final-emisor.json
+ok 65 - ACT-07 negativo JSON y PUT 02-final-emisor.json
+  ---
+  duration_ms: 64.447987
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 03-segunda-entrada-fork.json
+ok 66 - ACT-07 negativo JSON y PUT 03-segunda-entrada-fork.json
+  ---
+  duration_ms: 36.791713
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 04-segundo-else.json
+ok 67 - ACT-07 negativo JSON y PUT 04-segundo-else.json
+  ---
+  duration_ms: 61.589071
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 05-flujo-datos-a-cuerpo.json
+ok 68 - ACT-07 negativo JSON y PUT 05-flujo-datos-a-cuerpo.json
+  ---
+  duration_ms: 29.083239
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 06-multicast-conflict.json
+ok 69 - ACT-07 negativo JSON y PUT 06-multicast-conflict.json
+  ---
+  duration_ms: 10.871821
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 07-pin-propietario-invalido.json
+ok 70 - ACT-07 negativo JSON y PUT 07-pin-propietario-invalido.json
+  ---
+  duration_ms: 40.386239
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 08-interruptor-invalido.json
+ok 71 - ACT-07 negativo JSON y PUT 08-interruptor-invalido.json
+  ---
+  duration_ms: 85.825466
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 09-tipo-paquete.json
+ok 72 - ACT-07 negativo JSON y PUT 09-tipo-paquete.json
+  ---
+  duration_ms: 26.298564
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 10-atributo-incompatible.json
+ok 73 - ACT-07 negativo JSON y PUT 10-atributo-incompatible.json
+  ---
+  duration_ms: 18.369242
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 11-anotacion-destino-ajeno.json
+ok 74 - ACT-07 negativo JSON y PUT 11-anotacion-destino-ajeno.json
+  ---
+  duration_ms: 10.299811
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 12-peso-invalido.json
+ok 75 - ACT-07 negativo JSON y PUT 12-peso-invalido.json
+  ---
+  duration_ms: 17.403995
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 13-handle-no-cardinal.json
+ok 76 - ACT-07 negativo JSON y PUT 13-handle-no-cardinal.json
+  ---
+  duration_ms: 31.554987
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 14-excepcion-tipo-incompatible.json
+ok 77 - ACT-07 negativo JSON y PUT 14-excepcion-tipo-incompatible.json
+  ---
+  duration_ms: 24.780585
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 15-parametro-direccion-repetida.json
+ok 78 - ACT-07 negativo JSON y PUT 15-parametro-direccion-repetida.json
+  ---
+  duration_ms: 29.213623
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 16-evento-clase-invalida.json
+ok 79 - ACT-07 negativo JSON y PUT 16-evento-clase-invalida.json
+  ---
+  duration_ms: 46.082391
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 17-pin-separado.json
+ok 80 - ACT-07 negativo JSON y PUT 17-pin-separado.json
+  ---
+  duration_ms: 37.137027
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 18-argumento-tipo-incompatible.json
+ok 81 - ACT-07 negativo JSON y PUT 18-argumento-tipo-incompatible.json
+  ---
+  duration_ms: 25.339116
+  type: 'test'
+  ...
+# Subtest: ACT-07 negativo JSON y PUT 19-decision-tipo-transformado.json
+ok 82 - ACT-07 negativo JSON y PUT 19-decision-tipo-transformado.json
+  ---
+  duration_ms: 32.628195
+  type: 'test'
+  ...
+# Subtest: ACT-07 permisos funcional y referencias técnicas ocultas conservadas
+ok 83 - ACT-07 permisos funcional y referencias técnicas ocultas conservadas
+  ---
+  duration_ms: 9.390537
+  type: 'test'
+  ...
+# Subtest: ACT-02 rotación mantiene identidad y anclajes; pines conservan owner
+ok 84 - ACT-02 rotación mantiene identidad y anclajes; pines conservan owner
+  ---
+  duration_ms: 8.079546
+  type: 'test'
+  ...
+# Subtest: ACT-03 comando y política aceptan bucle paralelo; bloquean final emisor y reutilización entre actividades
+ok 85 - ACT-03 comando y política aceptan bucle paralelo; bloquean final emisor y reutilización entre actividades
+  ---
+  duration_ms: 15.28526
+  type: 'test'
+  ...
+# Subtest: ACT-07 modelo mantiene catálogo de anotación al quitar arista; merge no pisa cambios
+ok 86 - ACT-07 modelo mantiene catálogo de anotación al quitar arista; merge no pisa cambios
+  ---
+  duration_ms: 6.290533
+  type: 'test'
+  ...
+# Subtest: ACT-07 functional crea y edita acción nativa sin permiso técnico global
+ok 87 - ACT-07 functional crea y edita acción nativa sin permiso técnico global
+  ---
+  duration_ms: 4.254994
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-001 excepción por igualdad, subtipo y pin no tipado; salida incompatible
+ok 88 - AUD-ACT-001 excepción por igualdad, subtipo y pin no tipado; salida incompatible
+  ---
+  duration_ms: 14.151514
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-002 parámetro inout no duplica dirección, falta advertida y edición de raíz bloqueada
+ok 89 - AUD-ACT-002 parámetro inout no duplica dirección, falta advertida y edición de raíz bloqueada
+  ---
+  duration_ms: 69.227793
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-003 clase no es evento; señal modelada y texto externo son excluyentes
+ok 90 - AUD-ACT-003 clase no es evento; señal modelada y texto externo son excluyentes
+  ---
+  duration_ms: 43.743119
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-004 pin directo rechazado; drag y resize ajustan geometría sin alterar owner
+ok 91 - AUD-ACT-004 pin directo rechazado; drag y resize ajustan geometría sin alterar owner
+  ---
+  duration_ms: 69.268203
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-005 llamada incompleta es advertencia, firma incorrecta rechazada, parámetro oculto no se revela
+ok 92 - AUD-ACT-005 llamada incompleta es advertencia, firma incorrecta rechazada, parámetro oculto no se revela
+  ---
+  duration_ms: 35.838132
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006 quitar entrada primaria conserva borrador y advierte en decisión exacta
+ok 93 - AUD-ACT-006 quitar entrada primaria conserva borrador y advierte en decisión exacta
+  ---
+  duration_ms: 5.412957
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006 topología combinada: identidades internas estables, fases y arista interna
+ok 94 - AUD-ACT-006 topología combinada: identidades internas estables, fases y arista interna
+  ---
+  duration_ms: 0.854462
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006 comportamiento selection requiere bag; decisión modelada valida su firma
+ok 95 - AUD-ACT-006 comportamiento selection requiere bag; decisión modelada valida su firma
+  ---
+  duration_ms: 44.633125
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-007 parámetro centra su glifo en borde del marco compartido
+ok 96 - AUD-ACT-007 parámetro centra su glifo en borde del marco compartido
+  ---
+  duration_ms: 0.885969
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A auxiliar transformado Orden→Boolean rechaza firma Orden
+ok 97 - AUD-ACT-006A auxiliar transformado Orden→Boolean rechaza firma Orden
+  ---
+  duration_ms: 33.716786
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A auxiliar transformado Orden→Boolean acepta firma Boolean y borrador de parámetros
+ok 98 - AUD-ACT-006A auxiliar transformado Orden→Boolean acepta firma Boolean y borrador de parámetros
+  ---
+  duration_ms: 38.761744
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-007 SVG distingue Handler de flujo interruptor
+ok 99 - AUD-ACT-007 SVG distingue Handler de flujo interruptor
+  ---
+  duration_ms: 12.635682
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-008 retirar ficha local, recargar, reutilizar en misma Activity y eliminar explícitamente
+ok 100 - AUD-ACT-008 retirar ficha local, recargar, reutilizar en misma Activity y eliminar explícitamente
+  ---
+  duration_ms: 48.674274
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-008 retirar auxiliar o acción con pin requiere desvinculación; original intacto
+ok 101 - AUD-ACT-008 retirar auxiliar o acción con pin requiere desvinculación; original intacto
+  ---
+  duration_ms: 8.932986
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-008 señal histórica preserva clasificador y requiere conversión explícita de aparición
+ok 102 - AUD-ACT-008 señal histórica preserva clasificador y requiere conversión explícita de aparición
+  ---
+  duration_ms: 40.748663
+  type: 'test'
+  ...
+# (node:15139) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: T02 API documento nuevo: no bypass de matriz mediante alta de vista
+ok 103 - T02 API documento nuevo: no bypass de matriz mediante alta de vista
+  ---
+  duration_ms: 18.606188
+  type: 'test'
+  ...
+# Subtest: T02 API cambio de documento: bloquea composición de valores
+ok 104 - T02 API cambio de documento: bloquea composición de valores
+  ---
+  duration_ms: 1.540091
+  type: 'test'
+  ...
+# Subtest: T03 API guarda y proyecta dos autorrelaciones distintas
+ok 105 - T03 API guarda y proyecta dos autorrelaciones distintas
+  ---
+  duration_ms: 2.861607
+  type: 'test'
+  ...
+# Subtest: T03 API rechaza cambio leaf de padre ya referenciado
+ok 106 - T03 API rechaza cambio leaf de padre ya referenciado
+  ---
+  duration_ms: 2.970088
+  type: 'test'
+  ...
+# Subtest: T04 API inversión mantiene ID, roles y extremo todo
+ok 107 - T04 API inversión mantiene ID, roles y extremo todo
+  ---
+  duration_ms: 2.741128
+  type: 'test'
+  ...
+# Subtest: T05 API rechaza nombre libre reservado
+ok 108 - T05 API rechaza nombre libre reservado
+  ---
+  duration_ms: 1.089541
+  type: 'test'
+  ...
+# Subtest: T06 ownership no cambia con layout y no se permite ciclo
+ok 109 - T06 ownership no cambia con layout y no se permite ciclo
+  ---
+  duration_ms: 3.547297
+  type: 'test'
+  ...
+# Subtest: T07 API rechaza extremo n-ario inexistente y plantilla incompleta
+ok 110 - T07 API rechaza extremo n-ario inexistente y plantilla incompleta
+  ---
+  duration_ms: 2.066634
+  type: 'test'
+  ...
+# Subtest: T08 histórico incompatible intacto permite una edición independiente
+ok 111 - T08 histórico incompatible intacto permite una edición independiente
+  ---
+  duration_ms: 1.065165
+  type: 'test'
+  ...
+# Subtest: T09 viewer no escribe; nuevo permiso no se concede a custom
+ok 112 - T09 viewer no escribe; nuevo permiso no se concede a custom
+  ---
+  duration_ms: 1.680279
+  type: 'test'
+  ...
+# Subtest: T09 proyección oculta referencias semánticas y conserva datos al mover
+ok 113 - T09 proyección oculta referencias semánticas y conserva datos al mover
+  ---
+  duration_ms: 1.141037
+  type: 'test'
+  ...
+# Subtest: T09 API bloquea referencia oculta inyectada
+ok 114 - T09 API bloquea referencia oculta inyectada
+  ---
+  duration_ms: 0.850855
+  type: 'test'
+  ...
+# Subtest: T10 JSON roundtrip conserva los IDs y el permiso owner
+ok 115 - T10 JSON roundtrip conserva los IDs y el permiso owner
+  ---
+  duration_ms: 1.168818
+  type: 'test'
+  ...
+# Subtest: AUD-CL-001/003 API rechaza tipo paquete y slots desde creación y edición
+ok 116 - AUD-CL-001/003 API rechaza tipo paquete y slots desde creación y edición
+  ---
+  duration_ms: 3.615578
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 API bloquea navegabilidad y orden en dependencia incluso false
+ok 117 - AUD-CL-002 API bloquea navegabilidad y orden en dependencia incluso false
+  ---
+  duration_ms: 3.672674
+  type: 'test'
+  ...
+# Subtest: AUD-CL-005 API binding exige argumento conforme al formal, no paquete ni clase ajena
+ok 118 - AUD-CL-005 API binding exige argumento conforme al formal, no paquete ni clase ajena
+  ---
+  duration_ms: 2.448603
+  type: 'test'
+  ...
+# Subtest: AUD-CL-004 API no permite segunda identidad de clase de asociación, ni por diagrama nuevo
+ok 119 - AUD-CL-004 API no permite segunda identidad de clase de asociación, ni por diagrama nuevo
+  ---
+  duration_ms: 3.234862
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 política API rechaza importación no pública y alias en conflicto
+ok 120 - AUD-CL-009 política API rechaza importación no pública y alias en conflicto
+  ---
+  duration_ms: 3.969845
+  type: 'test'
+  ...
+# Subtest: AUD-CL-010 política API rechaza datos anidados arbitrarios sin descartar históricos
+ok 121 - AUD-CL-010 política API rechaza datos anidados arbitrarios sin descartar históricos
+  ---
+  duration_ms: 2.23891
+  type: 'test'
+  ...
+# Subtest: AUD-CL-011 política API guarda asociación compartida atómica, bloquea divergencia y desvinculación parcial
+ok 122 - AUD-CL-011 política API guarda asociación compartida atómica, bloquea divergencia y desvinculación parcial
+  ---
+  duration_ms: 13.228539
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 API import y edición rechazan alias público transitivo; aceptan privado y nombre de paquete
+ok 123 - AUD-CL-012 API import y edición rechazan alias público transitivo; aceptan privado y nombre de paquete
+  ---
+  duration_ms: 29.606721
+  type: 'test'
+  ...
+# Subtest: AUD-CL-013 API rechaza descripción unilateral; sincronización preserva IDs, recorridos y puertos
+ok 124 - AUD-CL-013 API rechaza descripción unilateral; sincronización preserva IDs, recorridos y puertos
+  ---
+  duration_ms: 7.429842
+  type: 'test'
+  ...
+# (node:15169) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: T07 API acepta funcional sin permisos técnicos y bloquea lector
+ok 125 - T07 API acepta funcional sin permisos técnicos y bloquea lector
+  ---
+  duration_ms: 27.329114
+  type: 'test'
+  ...
+# Subtest: T07 API bloquea alta completa, PUT y punto inexistente
+ok 126 - T07 API bloquea alta completa, PUT y punto inexistente
+  ---
+  duration_ms: 14.598826
+  type: 'test'
+  ...
+# Subtest: T05 contención, salida y eliminación por ocurrencia sin borrar catálogo
+ok 127 - T05 contención, salida y eliminación por ocurrencia sin borrar catálogo
+  ---
+  duration_ms: 6.578596
+  type: 'test'
+  ...
+# Subtest: T07 API sincroniza descripción y rechaza unilateral
+ok 128 - T07 API sincroniza descripción y rechaza unilateral
+  ---
+  duration_ms: 7.364255
+  type: 'test'
+  ...
+# Subtest: T07 proyección no divulga sujeto de vista oculta
+ok 129 - T07 proyección no divulga sujeto de vista oculta
+  ---
+  duration_ms: 1.50552
+  type: 'test'
+  ...
+# Subtest: AUD-UC-001 quitar última aparición, roundtrip y reutilizar identidad
+ok 130 - AUD-UC-001 quitar última aparición, roundtrip y reutilizar identidad
+  ---
+  duration_ms: 1.751876
+  type: 'test'
+  ...
+# Subtest: AUD-UC-001 eliminar nodo, selección y diagrama conserva significado y catálogo
+ok 131 - AUD-UC-001 eliminar nodo, selección y diagrama conserva significado y catálogo
+  ---
+  duration_ms: 3.36148
+  type: 'test'
+  ...
+# Subtest: AUD-UC-001 punto referenciado por relación sin arista no puede borrarse
+ok 132 - AUD-UC-001 punto referenciado por relación sin arista no puede borrarse
+  ---
+  duration_ms: 2.234434
+  type: 'test'
+  ...
+# Subtest: AUD-UC-004 sustitución multivista de punto conserva identidad y geometría
+ok 133 - AUD-UC-004 sustitución multivista de punto conserva identidad y geometría
+  ---
+  duration_ms: 1.360094
+  type: 'test'
+  ...
+# Subtest: AUD-UC-001 eliminar del modelo borra todas las apariciones y notas, no fichas; ACL bloquea lector
+ok 134 - AUD-UC-001 eliminar del modelo borra todas las apariciones y notas, no fichas; ACL bloquea lector
+  ---
+  duration_ms: 14.133123
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 API rechaza alta de arista sin identidad aunque sustituya otra
+ok 135 - AUD-UC-002 API rechaza alta de arista sin identidad aunque sustituya otra
+  ---
+  duration_ms: 0.515607
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 reserva de ID impide secuestro y divergencia de registro
+ok 136 - AUD-UC-002 reserva de ID impide secuestro y divergencia de registro
+  ---
+  duration_ms: 1.565499
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 ciclos include dormidos no se pueden cerrar en otra vista
+ok 137 - AUD-UC-002 ciclos include dormidos no se pueden cerrar en otra vista
+  ---
+  duration_ms: 1.542254
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 merge independiente conserva registro dormido y detecta cambios enfrentados
+ok 138 - AUD-UC-002 merge independiente conserva registro dormido y detecta cambios enfrentados
+  ---
+  duration_ms: 1.580491
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 ocultar endpoints impide leer, modificar o adivinar registro
+ok 139 - AUD-UC-002 ocultar endpoints impide leer, modificar o adivinar registro
+  ---
+  duration_ms: 2.932983
+  type: 'test'
+  ...
+# Subtest: UC casos de uso: comando de alta bloquea contexto nuevo; reutilización y roundtrip preservan identidad
+ok 140 - UC casos de uso: comando de alta bloquea contexto nuevo; reutilización y roundtrip preservan identidad
+  ---
+  duration_ms: 1.210491
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 actor: alta, última aparición, recarga, reutilización y eliminación explícita
+ok 141 - AUD-UC-005 actor: alta, última aparición, recarga, reutilización y eliminación explícita
+  ---
+  duration_ms: 4.480996
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 usecase: alta, última aparición, recarga, reutilización y eliminación explícita
+ok 142 - AUD-UC-005 usecase: alta, última aparición, recarga, reutilización y eliminación explícita
+  ---
+  duration_ms: 2.895788
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 uml-subject: alta, última aparición, recarga, reutilización y eliminación explícita
+ok 143 - AUD-UC-005 uml-subject: alta, última aparición, recarga, reutilización y eliminación explícita
+  ---
+  duration_ms: 3.220661
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 conservar procedencia incluso si el alta y retirada llegan en un único guardado; importar/exportar ficha aislada
+ok 144 - AUD-UC-005 conservar procedencia incluso si el alta y retirada llegan en un único guardado; importar/exportar ficha aislada
+  ---
+  duration_ms: 7.458855
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 eliminar selección o vista conserva fichas aisladas; fusión independiente no pierde procedencia
+ok 145 - AUD-UC-005 eliminar selección o vista conserva fichas aisladas; fusión independiente no pierde procedencia
+  ---
+  duration_ms: 4.662305
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 ACL: solo catálogo permitido, sin filtrar tipos/ocultos ni permitir inferir procedencia desde el cliente
+ok 146 - AUD-UC-005 ACL: solo catálogo permitido, sin filtrar tipos/ocultos ni permitir inferir procedencia desde el cliente
+  ---
+  duration_ms: 8.201841
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 eliminación de ficha aislada pero referenciada por sujeto o registro permanece bloqueada
+ok 147 - AUD-UC-005 eliminación de ficha aislada pero referenciada por sujeto o registro permanece bloqueada
+  ---
+  duration_ms: 1.948949
+  type: 'test'
+  ...
+# Subtest: AUD-UC-006 anotación a arista canónica; nuevo destino ajeno rechazado en alta, cambio y comando
+ok 148 - AUD-UC-006 anotación a arista canónica; nuevo destino ajeno rechazado en alta, cambio y comando
+  ---
+  duration_ms: 4.03997
+  type: 'test'
+  ...
+# Subtest: AUD-UC-006 reparación idempotente de legado conserva identidad/texto e instantánea original
+ok 149 - AUD-UC-006 reparación idempotente de legado conserva identidad/texto e instantánea original
+  ---
+  duration_ms: 2.929748
+  type: 'test'
+  ...
+# Subtest: AUD-UC-006 una arista anotada oculta no se revela ni se puede usar por ID
+ok 150 - AUD-UC-006 una arista anotada oculta no se revela ni se puede usar por ID
+  ---
+  duration_ms: 4.735224
+  type: 'test'
+  ...
+# Subtest: AUD-UC-005 backend deriva procedencia aunque PUT no envíe metadato; no acepta procedencia inventada de ficha existente
+ok 151 - AUD-UC-005 backend deriva procedencia aunque PUT no envíe metadato; no acepta procedencia inventada de ficha existente
+  ---
+  duration_ms: 1.337059
+  type: 'test'
+  ...
+# (node:15192) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ACT-01 catálogo exacto, dos familias de flujo y auxiliares, discriminantes
+ok 152 - ACT-01 catálogo exacto, dos familias de flujo y auxiliares, discriminantes
+  ---
+  duration_ms: 2.796921
+  type: 'test'
+  ...
+# Subtest: ACT-01 variantes de acción y referencias específicas; no inferir por nombre
+ok 153 - ACT-01 variantes de acción y referencias específicas; no inferir por nombre
+  ---
+  duration_ms: 9.341496
+  type: 'test'
+  ...
+# Subtest: ACT-01 no campos de clase, slots ni propiedades de otros roles
+ok 154 - ACT-01 no campos de clase, slots ni propiedades de otros roles
+  ---
+  duration_ms: 0.794993
+  type: 'test'
+  ...
+# Subtest: ACT-02 cuatro anclas cardinales, ocho rotadas conservando IDs
+ok 155 - ACT-02 cuatro anclas cardinales, ocho rotadas conservando IDs
+  ---
+  duration_ms: 8.33543
+  type: 'test'
+  ...
+# Subtest: ACT-03 matriz de extremos control y objeto; pin input/output/value
+ok 156 - ACT-03 matriz de extremos control y objeto; pin input/output/value
+  ---
+  duration_ms: 0.579281
+  type: 'test'
+  ...
+# Subtest: ACT-03 lazos de negocio y paralelas permitidos, fin sin salida bloqueado
+ok 157 - ACT-03 lazos de negocio y paralelas permitidos, fin sin salida bloqueado
+  ---
+  duration_ms: 0.842714
+  type: 'test'
+  ...
+# Subtest: ACT-04 inicio múltiple, borrador y límite de entradas de decisión/fork
+ok 158 - ACT-04 inicio múltiple, borrador y límite de entradas de decisión/fork
+  ---
+  duration_ms: 1.71449
+  type: 'test'
+  ...
+# Subtest: ACT-04 decisionInput auxiliar y else único; guardas de fork permitidas
+ok 159 - ACT-04 decisionInput auxiliar y else único; guardas de fork permitidas
+  ---
+  duration_ms: 2.579126
+  type: 'test'
+  ...
+# Subtest: ACT-04 combinación mergeDecision y joinFork más join mixto
+ok 160 - ACT-04 combinación mergeDecision y joinFork más join mixto
+  ---
+  duration_ms: 1.934608
+  type: 'test'
+  ...
+# Subtest: ACT-04 merge/join no admiten dos salidas y fork no mezcla tipo
+ok 161 - ACT-04 merge/join no admiten dos salidas y fork no mezcla tipo
+  ---
+  duration_ms: 1.627281
+  type: 'test'
+  ...
+# Subtest: ACT-05 compatibilidad de tipos a través de controles y capacidad/peso
+ok 162 - ACT-05 compatibilidad de tipos a través de controles y capacidad/peso
+  ---
+  duration_ms: 3.329653
+  type: 'test'
+  ...
+# Subtest: ACT-05 selection y multicast/multireceive restringidos
+ok 163 - ACT-05 selection y multicast/multireceive restringidos
+  ---
+  duration_ms: 0.715604
+  type: 'test'
+  ...
+# Subtest: ACT-05 parámetros inout, pines adheridos, ValuePin y multiplicidad
+ok 164 - ACT-05 parámetros inout, pines adheridos, ValuePin y multiplicidad
+  ---
+  duration_ms: 0.971826
+  type: 'test'
+  ...
+# Subtest: ACT-06 región interruptible, anotación y pertenencia no son flujos
+ok 165 - ACT-06 región interruptible, anotación y pertenencia no son flujos
+  ---
+  duration_ms: 0.636937
+  type: 'test'
+  ...
+# Subtest: ACT-06 excepción con pin del handler, no aristas directas
+ok 166 - ACT-06 excepción con pin del handler, no aristas directas
+  ---
+  duration_ms: 0.701183
+  type: 'test'
+  ...
+# Subtest: ACT-06 particiones multidimensionales y ciclo inválido
+ok 167 - ACT-06 particiones multidimensionales y ciclo inválido
+  ---
+  duration_ms: 0.303482
+  type: 'test'
+  ...
+# Subtest: ACT-07 actividad local, no compartir nodo semántico entre ámbitos
+ok 168 - ACT-07 actividad local, no compartir nodo semántico entre ámbitos
+  ---
+  duration_ms: 0.244464
+  type: 'test'
+  ...
+# Subtest: ACT-07 lectura histórica inferencia inequívoca, ambigua no inventa rol
+ok 169 - ACT-07 lectura histórica inferencia inequívoca, ambigua no inventa rol
+  ---
+  duration_ms: 0.848352
+  type: 'test'
+  ...
+# Subtest: ACT-07 legado inválido intacto conserva lectura, no empeorar ni alterar semántica
+ok 170 - ACT-07 legado inválido intacto conserva lectura, no empeorar ni alterar semántica
+  ---
+  duration_ms: 0.771809
+  type: 'test'
+  ...
+# Subtest: ACT-08 escena exportada glifos, datos, guardas, sin handles e inyección
+ok 171 - ACT-08 escena exportada glifos, datos, guardas, sin handles e inyección
+  ---
+  duration_ms: 4.83354
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A transformaciones consecutivas antes y después de control, auxiliar no se propaga
+ok 172 - AUD-ACT-006A transformaciones consecutivas antes y después de control, auxiliar no se propaga
+  ---
+  duration_ms: 1.503226
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A decisión combinada comprueba todas las entradas primarias de objeto y auxiliar por separado
+ok 173 - AUD-ACT-006A decisión combinada comprueba todas las entradas primarias de objeto y auxiliar por separado
+  ---
+  duration_ms: 0.613463
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A ciclo de objetos termina con estado visitado y detecta transformación incompatible en vuelta
+ok 174 - AUD-ACT-006A ciclo de objetos termina con estado visitado y detecta transformación incompatible en vuelta
+  ---
+  duration_ms: 1.000037
+  type: 'test'
+  ...
+# Subtest: AUD-ACT-006A expresión externa de transformación advierte sin inventar conformidad
+ok 175 - AUD-ACT-006A expresión externa de transformación advierte sin inventar conformidad
+  ---
+  duration_ms: 0.446684
+  type: 'test'
+  ...
+# (node:15205) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: AUD-CL-001 attribute: solo clasificadores existentes
+ok 176 - AUD-CL-001 attribute: solo clasificadores existentes
+  ---
+  duration_ms: 5.452652
+  type: 'test'
+  ...
+# Subtest: AUD-CL-001 return: solo clasificadores existentes
+ok 177 - AUD-CL-001 return: solo clasificadores existentes
+  ---
+  duration_ms: 1.729793
+  type: 'test'
+  ...
+# Subtest: AUD-CL-001 parameter: solo clasificadores existentes
+ok 178 - AUD-CL-001 parameter: solo clasificadores existentes
+  ---
+  duration_ms: 0.479873
+  type: 'test'
+  ...
+# Subtest: AUD-CL-001 formal: solo clasificadores existentes
+ok 179 - AUD-CL-001 formal: solo clasificadores existentes
+  ---
+  duration_ms: 0.335018
+  type: 'test'
+  ...
+# Subtest: AUD-CL-001 cambiar tipo referenciado invalida la ficha que lo utiliza en otra vista
+ok 180 - AUD-CL-001 cambiar tipo referenciado invalida la ficha que lo utiliza en otra vista
+  ---
+  duration_ms: 2.061596
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza sourceNavigability
+ok 181 - AUD-CL-002 dependencia rechaza sourceNavigability
+  ---
+  duration_ms: 1.926235
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza targetNavigability
+ok 182 - AUD-CL-002 dependencia rechaza targetNavigability
+  ---
+  duration_ms: 0.163102
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza sourceOrdered
+ok 183 - AUD-CL-002 dependencia rechaza sourceOrdered
+  ---
+  duration_ms: 0.136853
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza targetOrdered
+ok 184 - AUD-CL-002 dependencia rechaza targetOrdered
+  ---
+  duration_ms: 0.595936
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza sourceUnique
+ok 185 - AUD-CL-002 dependencia rechaza sourceUnique
+  ---
+  duration_ms: 0.364812
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza targetUnique
+ok 186 - AUD-CL-002 dependencia rechaza targetUnique
+  ---
+  duration_ms: 0.284393
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza sourceRole
+ok 187 - AUD-CL-002 dependencia rechaza sourceRole
+  ---
+  duration_ms: 0.13416
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza targetRole
+ok 188 - AUD-CL-002 dependencia rechaza targetRole
+  ---
+  duration_ms: 0.094951
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza sourceMultiplicity
+ok 189 - AUD-CL-002 dependencia rechaza sourceMultiplicity
+  ---
+  duration_ms: 0.149092
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza targetMultiplicity
+ok 190 - AUD-CL-002 dependencia rechaza targetMultiplicity
+  ---
+  duration_ms: 0.105988
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza wholeEnd
+ok 191 - AUD-CL-002 dependencia rechaza wholeEnd
+  ---
+  duration_ms: 0.118026
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza associationEnds
+ok 192 - AUD-CL-002 dependencia rechaza associationEnds
+  ---
+  duration_ms: 0.108772
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza associationClassId
+ok 193 - AUD-CL-002 dependencia rechaza associationClassId
+  ---
+  duration_ms: 0.230463
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza templateBindings
+ok 194 - AUD-CL-002 dependencia rechaza templateBindings
+  ---
+  duration_ms: 0.124926
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza annotationTargetEdgeId
+ok 195 - AUD-CL-002 dependencia rechaza annotationTargetEdgeId
+  ---
+  duration_ms: 0.142803
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 dependencia rechaza importAlias
+ok 196 - AUD-CL-002 dependencia rechaza importAlias
+  ---
+  duration_ms: 0.125246
+  type: 'test'
+  ...
+# Subtest: AUD-CL-002 asociación admite propiedades de extremo y detecta contradicciones n-arias
+ok 197 - AUD-CL-002 asociación admite propiedades de extremo y detecta contradicciones n-arias
+  ---
+  duration_ms: 1.046967
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 a rechaza slots, classifier e iconos de despliegue
+ok 198 - AUD-CL-003 a rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.265164
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 i rechaza slots, classifier e iconos de despliegue
+ok 199 - AUD-CL-003 i rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.131786
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 e rechaza slots, classifier e iconos de despliegue
+ok 200 - AUD-CL-003 e rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.175672
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 p rechaza slots, classifier e iconos de despliegue
+ok 201 - AUD-CL-003 p rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.110564
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 v rechaza slots, classifier e iconos de despliegue
+ok 202 - AUD-CL-003 v rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.091536
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 n rechaza slots, classifier e iconos de despliegue
+ok 203 - AUD-CL-003 n rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.083784
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 s rechaza slots, classifier e iconos de despliegue
+ok 204 - AUD-CL-003 s rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.081141
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 ac rechaza slots, classifier e iconos de despliegue
+ok 205 - AUD-CL-003 ac rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.114911
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 comment rechaza slots, classifier e iconos de despliegue
+ok 206 - AUD-CL-003 comment rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.137785
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 constraint rechaza slots, classifier e iconos de despliegue
+ok 207 - AUD-CL-003 constraint rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.132487
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 m rechaza slots, classifier e iconos de despliegue
+ok 208 - AUD-CL-003 m rechaza slots, classifier e iconos de despliegue
+  ---
+  duration_ms: 0.08772
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 membresía específica: no atributos primitive, operaciones Signal, literals Class, flags Package
+ok 209 - AUD-CL-003 membresía específica: no atributos primitive, operaciones Signal, literals Class, flags Package
+  ---
+  duration_ms: 0.237243
+  type: 'test'
+  ...
+# Subtest: AUD-CL-003 valida estructura, propiedades de miembros y retorno único
+ok 210 - AUD-CL-003 valida estructura, propiedades de miembros y retorno único
+  ---
+  duration_ms: 0.218916
+  type: 'test'
+  ...
+# Subtest: AUD-CL-004 reuso multivista admite geometría independiente, no otra asociación
+ok 211 - AUD-CL-004 reuso multivista admite geometría independiente, no otra asociación
+  ---
+  duration_ms: 1.631907
+  type: 'test'
+  ...
+# Subtest: AUD-CL-004 diagnostica clase de asociación sin vínculo y conserva borrador
+ok 212 - AUD-CL-004 diagnostica clase de asociación sin vínculo y conserva borrador
+  ---
+  duration_ms: 0.375799
+  type: 'test'
+  ...
+# Subtest: AUD-CL-005 formal restringido admite identidad y subtipo, no paquete ni tipo ajeno
+ok 213 - AUD-CL-005 formal restringido admite identidad y subtipo, no paquete ni tipo ajeno
+  ---
+  duration_ms: 0.835112
+  type: 'test'
+  ...
+# Subtest: AUD-CL-005 formal duplicado y argumentos faltantes no son válidos
+ok 214 - AUD-CL-005 formal duplicado y argumentos faltantes no son válidos
+  ---
+  duration_ms: 0.333896
+  type: 'test'
+  ...
+# Subtest: AUD-CL-005/006 palabras y sustituciones derivadas no modifican nombres almacenados
+ok 215 - AUD-CL-005/006 palabras y sustituciones derivadas no modifican nombres almacenados
+  ---
+  duration_ms: 5.184673
+  type: 'test'
+  ...
+# Subtest: AUD-CL-007 cuatro estilos de recorrido y bucles tienen geometría común y SVG equivalente
+ok 216 - AUD-CL-007 cuatro estilos de recorrido y bucles tienen geometría común y SVG equivalente
+  ---
+  duration_ms: 11.934363
+  type: 'test'
+  ...
+# Subtest: AUD-CL-007 n-aria dibuja roles, multiplicidades, tercer extremo y marcador no navegable
+ok 217 - AUD-CL-007 n-aria dibuja roles, multiplicidades, tercer extremo y marcador no navegable
+  ---
+  duration_ms: 0.725839
+  type: 'test'
+  ...
+# Subtest: AUD-CL-008 histórico anterior queda intacto y cambios nuevos son rechazados
+ok 218 - AUD-CL-008 histórico anterior queda intacto y cambios nuevos son rechazados
+  ---
+  duration_ms: 1.261857
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 importación rechaza visibilidad efectiva protected
+ok 219 - AUD-CL-009 importación rechaza visibilidad efectiva protected
+  ---
+  duration_ms: 0.611459
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 importación rechaza visibilidad efectiva package
+ok 220 - AUD-CL-009 importación rechaza visibilidad efectiva package
+  ---
+  duration_ms: 0.910455
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 importación rechaza visibilidad efectiva private
+ok 221 - AUD-CL-009 importación rechaza visibilidad efectiva private
+  ---
+  duration_ms: 0.298784
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 el propietario no público bloquea acceso al miembro público
+ok 222 - AUD-CL-009 el propietario no público bloquea acceso al miembro público
+  ---
+  duration_ms: 0.443189
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 alias duplicados y nombres locales ambiguos; alias distinto y repetición válida
+ok 223 - AUD-CL-009 alias duplicados y nombres locales ambiguos; alias distinto y repetición válida
+  ---
+  duration_ms: 4.397451
+  type: 'test'
+  ...
+# Subtest: AUD-CL-009 importación de dos paquetes detecta colisión de miembros públicos y omite privados
+ok 224 - AUD-CL-009 importación de dos paquetes detecta colisión de miembros públicos y omite privados
+  ---
+  duration_ms: 0.456639
+  type: 'test'
+  ...
+# Subtest: AUD-CL-010 extremos n-arios rechazan campos ajenos, preservan lectura histórica
+ok 225 - AUD-CL-010 extremos n-arios rechazan campos ajenos, preservan lectura histórica
+  ---
+  duration_ms: 1.837093
+  type: 'test'
+  ...
+# Subtest: AUD-CL-010 sustitución anidada permite solo parámetro y argumento
+ok 226 - AUD-CL-010 sustitución anidada permite solo parámetro y argumento
+  ---
+  duration_ms: 0.547905
+  type: 'test'
+  ...
+# Subtest: AUD-CL-011 edición atómica de roles y multiplicidades entre vistas conserva IDs y geometría
+ok 227 - AUD-CL-011 edición atómica de roles y multiplicidades entre vistas conserva IDs y geometría
+  ---
+  duration_ms: 1.186616
+  type: 'test'
+  ...
+# Subtest: AUD-CL-011 añade tercer extremo usando identidad y rechaza si no está disponible
+ok 228 - AUD-CL-011 añade tercer extremo usando identidad y rechaza si no está disponible
+  ---
+  duration_ms: 1.985163
+  type: 'test'
+  ...
+# Subtest: AUD-CL-011 desvinculación explícita retira vínculo en todas las apariciones y conserva borrador
+ok 229 - AUD-CL-011 desvinculación explícita retira vínculo en todas las apariciones y conserva borrador
+  ---
+  duration_ms: 0.702355
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 A alias público transitivo; ElementImport precede pero la política exige resolver colisión
+ok 230 - AUD-CL-012 A alias público transitivo; ElementImport precede pero la política exige resolver colisión
+  ---
+  duration_ms: 0.936093
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 B alias de importación privada de elemento y no reexportación
+ok 231 - AUD-CL-012 B alias de importación privada de elemento y no reexportación
+  ---
+  duration_ms: 1.524117
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 C importar nombre de paquete no incluye sus miembros; variantes explícitas
+ok 232 - AUD-CL-012 C importar nombre de paquete no incluye sus miembros; variantes explícitas
+  ---
+  duration_ms: 3.655348
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 PackageAccess es privado; ciclos públicos y repetición multivista por ID son finitos
+ok 233 - AUD-CL-012 PackageAccess es privado; ciclos públicos y repetición multivista por ID son finitos
+  ---
+  duration_ms: 6.858222
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 nombres calificados por identidad: alias distintos, colisión local y precedencia privada
+ok 234 - AUD-CL-012 nombres calificados por identidad: alias distintos, colisión local y precedencia privada
+  ---
+  duration_ms: 1.029441
+  type: 'test'
+  ...
+# Subtest: AUD-CL-012 histórico paquete ambiguo permanece intacto y exige elegir semántica al editar
+ok 235 - AUD-CL-012 histórico paquete ambiguo permanece intacto y exige elegir semántica al editar
+  ---
+  duration_ms: 1.009922
+  type: 'test'
+  ...
+# Subtest: AUD-CL-013 descripción compartida forma parte de identidad y geometría permanece local
+ok 236 - AUD-CL-013 descripción compartida forma parte de identidad y geometría permanece local
+  ---
+  duration_ms: 0.859458
+  type: 'test'
+  ...
+# (node:15217) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: T01 catálogo completo, roundtrip de cada tipo y capacidades específicas
+ok 237 - T01 catálogo completo, roundtrip de cada tipo y capacidades específicas
+  ---
+  duration_ms: 15.742341
+  type: 'test'
+  ...
+# Subtest: T01 restricción 1: público
+ok 238 - T01 restricción 1: público
+  ---
+  duration_ms: 1.10199
+  type: 'test'
+  ...
+# Subtest: T01 restricción 1: pública
+ok 239 - T01 restricción 1: pública
+  ---
+  duration_ms: 0.901662
+  type: 'test'
+  ...
+# Subtest: T01 restricción 2: solo lectura
+ok 240 - T01 restricción 2: solo lectura
+  ---
+  duration_ms: 0.815083
+  type: 'test'
+  ...
+# Subtest: T01 restricción 4: Atributos no permitidos
+ok 241 - T01 restricción 4: Atributos no permitidos
+  ---
+  duration_ms: 0.916975
+  type: 'test'
+  ...
+# Subtest: T01 restricción 5: Operaciones no permitidas
+ok 242 - T01 restricción 5: Operaciones no permitidas
+  ---
+  duration_ms: 0.941761
+  type: 'test'
+  ...
+# Subtest: T01 restricción 0: Literales no permitidos
+ok 243 - T01 restricción 0: Literales no permitidos
+  ---
+  duration_ms: 0.534285
+  type: 'test'
+  ...
+# Subtest: T01 restricción 6: Operaciones no permitidas
+ok 244 - T01 restricción 6: Operaciones no permitidas
+  ---
+  duration_ms: 0.4571
+  type: 'test'
+  ...
+# Subtest: T01 restricción 2: Literal duplicado
+ok 245 - T01 restricción 2: Literal duplicado
+  ---
+  duration_ms: 0.667434
+  type: 'test'
+  ...
+# Subtest: T01 restricción 0: ID duplicado
+ok 246 - T01 restricción 0: ID duplicado
+  ---
+  duration_ms: 1.090243
+  type: 'test'
+  ...
+# Subtest: T01 restricción 0: Firma
+ok 247 - T01 restricción 0: Firma
+  ---
+  duration_ms: 0.763076
+  type: 'test'
+  ...
+# Subtest: T01 restricción 0: incompatibles
+ok 248 - T01 restricción 0: incompatibles
+  ---
+  duration_ms: 6.579573
+  type: 'test'
+  ...
+# Subtest: T01 restricción 0: inexistente
+ok 249 - T01 restricción 0: inexistente
+  ---
+  duration_ms: 0.703326
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-class
+ok 250 - T02 matriz completa desde uml-class
+  ---
+  duration_ms: 2.594242
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-interface
+ok 251 - T02 matriz completa desde uml-interface
+  ---
+  duration_ms: 0.229942
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-enumeration
+ok 252 - T02 matriz completa desde uml-enumeration
+  ---
+  duration_ms: 0.22855
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-datatype
+ok 253 - T02 matriz completa desde uml-datatype
+  ---
+  duration_ms: 0.165407
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-primitive
+ok 254 - T02 matriz completa desde uml-primitive
+  ---
+  duration_ms: 0.15422
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-signal
+ok 255 - T02 matriz completa desde uml-signal
+  ---
+  duration_ms: 0.149262
+  type: 'test'
+  ...
+# Subtest: T02 matriz completa desde uml-package
+ok 256 - T02 matriz completa desde uml-package
+  ---
+  duration_ms: 0.142893
+  type: 'test'
+  ...
+# Subtest: T03 autorrelación, paralelo y composición recursiva de tipos
+ok 257 - T03 autorrelación, paralelo y composición recursiva de tipos
+  ---
+  duration_ms: 2.420723
+  type: 'test'
+  ...
+# Subtest: T03 padre final, herencia propia y ciclo de vistas
+ok 258 - T03 padre final, herencia propia y ciclo de vistas
+  ---
+  duration_ms: 1.284712
+  type: 'test'
+  ...
+# Subtest: T04 multiplicidades y extremo todo invertido
+ok 259 - T04 multiplicidades y extremo todo invertido
+  ---
+  duration_ms: 0.682666
+  type: 'test'
+  ...
+# Subtest: T04 dependencia circular y realización incompleta solamente advertencias
+ok 260 - T04 dependencia circular y realización incompleta solamente advertencias
+  ---
+  duration_ms: 0.943374
+  type: 'test'
+  ...
+# Subtest: T05 palabras fijas y conservación de texto, sin inferir subtipo
+ok 261 - T05 palabras fijas y conservación de texto, sin inferir subtipo
+  ---
+  duration_ms: 0.271864
+  type: 'test'
+  ...
+# Subtest: T05 importación privada, alias y miembro propio
+ok 262 - T05 importación privada, alias y miembro propio
+  ---
+  duration_ms: 0.774754
+  type: 'test'
+  ...
+# Subtest: T06 ownership independiente del layout y ciclos
+ok 263 - T06 ownership independiente del layout y ciclos
+  ---
+  duration_ms: 0.367947
+  type: 'test'
+  ...
+# Subtest: T07 asociación n-aria, clase de asociación, nota y bind por ID
+ok 264 - T07 asociación n-aria, clase de asociación, nota y bind por ID
+  ---
+  duration_ms: 3.017942
+  type: 'test'
+  ...
+# Subtest: T08 adaptador idempotente no modifica instantánea, enum ni semántica desconocida
+ok 265 - T08 adaptador idempotente no modifica instantánea, enum ni semántica desconocida
+  ---
+  duration_ms: 2.545198
+  type: 'test'
+  ...
+# Subtest: T10 identificadores discretos, nombres referenciados y SVG sin inyección ni handles
+ok 266 - T10 identificadores discretos, nombres referenciados y SVG sin inyección ni handles
+  ---
+  duration_ms: 4.373329
+  type: 'test'
+  ...
+# (node:15229) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: dimensiones de los símbolos, contenedores y cajas conservan sus mínimos y tamaños explícitos
+ok 267 - dimensiones de los símbolos, contenedores y cajas conservan sus mínimos y tamaños explícitos
+  ---
+  duration_ms: 7.549567
+  type: 'test'
+  ...
+# Subtest: contención respeta el tipo de vista y no es una relación libre
+ok 268 - contención respeta el tipo de vista y no es una relación libre
+  ---
+  duration_ms: 0.344653
+  type: 'test'
+  ...
+# Subtest: jerarquía local, coordenadas absolutas, ciclos, referencias ausentes y límite de profundidad
+ok 269 - jerarquía local, coordenadas absolutas, ciclos, referencias ausentes y límite de profundidad
+  ---
+  duration_ms: 0.433395
+  type: 'test'
+  ...
+# Subtest: puertos de estructura compuesta se acoplan a los cuatro bordes del contenedor
+ok 270 - puertos de estructura compuesta se acoplan a los cuatro bordes del contenedor
+  ---
+  duration_ms: 0.175
+  type: 'test'
+  ...
+# Subtest: activación y destrucción permanecen centradas y se rechaza una línea de vida insuficiente
+ok 271 - activación y destrucción permanecen centradas y se rechaza una línea de vida insuficiente
+  ---
+  duration_ms: 0.343321
+  type: 'test'
+  ...
+# Subtest: mensajes de ida y retorno: anclajes únicos laterales, capacidad creciente y selección temporal
+ok 272 - mensajes de ida y retorno: anclajes únicos laterales, capacidad creciente y selección temporal
+  ---
+  duration_ms: 1.19576
+  type: 'test'
+  ...
+# Subtest: reglas de extremos UML: matriz de relaciones válidas e inválidas
+not ok 273 - reglas de extremos UML: matriz de relaciones válidas e inválidas
+  ---
+  duration_ms: 1.097023
+  type: 'test'
+  location: '/tmp/cmp4/atlas/packages/contracts/src/uml-quality.unit.test.ts:100:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    uml-activity/control-flow/uml-action/uml-object-node
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/cmp4/atlas/packages/contracts/src/uml-quality.unit.test.ts:101:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: catálogo histórico no se ofrece para creación y la notación deriva de su semántica
+ok 274 - catálogo histórico no se ofrece para creación y la notación deriva de su semántica
+  ---
+  duration_ms: 0.335149
+  type: 'test'
+  ...
+# Subtest: estructura UML conserva atributos, operaciones, tipos y valores; rechaza metadatos inválidos
+ok 275 - estructura UML conserva atributos, operaciones, tipos y valores; rechaza metadatos inválidos
+  ---
+  duration_ms: 0.752279
+  type: 'test'
+  ...
+# (node:15241) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: SEQ-T01 catálogo nativo exacto, sin caja de mensaje ni actor duplicado
+ok 276 - SEQ-T01 catálogo nativo exacto, sin caja de mensaje ni actor duplicado
+  ---
+  duration_ms: 1.956553
+  type: 'test'
+  ...
+# Subtest: SEQ-T02 fixture tipado, todos los sorts y los tres kinds
+ok 277 - SEQ-T02 fixture tipado, todos los sorts y los tres kinds
+  ---
+  duration_ms: 13.335358
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 01-ascendente.json
+ok 278 - SEQ negativos 01-ascendente.json
+  ---
+  duration_ms: 3.302075
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 02-self-sin-avance.json
+ok 279 - SEQ negativos 02-self-sin-avance.json
+  ---
+  duration_ms: 2.733519
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 03-ocurrencia-ausente.json
+ok 280 - SEQ negativos 03-ocurrencia-ausente.json
+  ---
+  duration_ms: 2.471749
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 04-ciclo.json
+ok 281 - SEQ negativos 04-ciclo.json
+  ---
+  duration_ms: 2.911834
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 05-else-previo.json
+ok 282 - SEQ negativos 05-else-previo.json
+  ---
+  duration_ms: 2.816732
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 06-loop-invertido.json
+ok 283 - SEQ negativos 06-loop-invertido.json
+  ---
+  duration_ms: 5.785531
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 07-operando-ajeno.json
+ok 284 - SEQ negativos 07-operando-ajeno.json
+  ---
+  duration_ms: 2.852966
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 08-despues-delete.json
+ok 285 - SEQ negativos 08-despues-delete.json
+  ---
+  duration_ms: 3.029299
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 09-firma-invalida.json
+ok 286 - SEQ negativos 09-firma-invalida.json
+  ---
+  duration_ms: 1.023032
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 10-multiplicidad.json
+ok 287 - SEQ negativos 10-multiplicidad.json
+  ---
+  duration_ms: 1.084273
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 11-gate-propietario.json
+ok 288 - SEQ negativos 11-gate-propietario.json
+  ---
+  duration_ms: 1.45097
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 12-intervalo-invertido.json
+ok 289 - SEQ negativos 12-intervalo-invertido.json
+  ---
+  duration_ms: 1.347776
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 13-reply-invalido.json
+ok 290 - SEQ negativos 13-reply-invalido.json
+  ---
+  duration_ms: 0.918648
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 14-clave-no-admitida.json
+ok 291 - SEQ negativos 14-clave-no-admitida.json
+  ---
+  duration_ms: 0.339075
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 15-A-argumento-signal-ajeno.json
+ok 292 - SEQ negativos 15-A-argumento-signal-ajeno.json
+  ---
+  duration_ms: 1.362688
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 16-B-reply-firma-distinta.json
+ok 293 - SEQ negativos 16-B-reply-firma-distinta.json
+  ---
+  duration_ms: 0.931747
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 17-C-gate-actual-en-fragmento.json
+ok 294 - SEQ negativos 17-C-gate-actual-en-fragmento.json
+  ---
+  duration_ms: 0.975272
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 18-D-gate-auto-match.json
+ok 295 - SEQ negativos 18-D-gate-auto-match.json
+  ---
+  duration_ms: 1.517969
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 19-E-ref-mapping-comentario.json
+ok 296 - SEQ negativos 19-E-ref-mapping-comentario.json
+  ---
+  duration_ms: 2.616544
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 20-F-ref-parametro-ajeno.json
+ok 297 - SEQ negativos 20-F-ref-parametro-ajeno.json
+  ---
+  duration_ms: 1.139375
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 21-G-evento-posterior-X.json
+ok 298 - SEQ negativos 21-G-evento-posterior-X.json
+  ---
+  duration_ms: 2.046767
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 22-H-contexto-paquete.json
+ok 299 - SEQ negativos 22-H-contexto-paquete.json
+  ---
+  duration_ms: 0.992467
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 23-rol-comentario.json
+ok 300 - SEQ negativos 23-rol-comentario.json
+  ---
+  duration_ms: 1.151624
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 24-continuacion-lifeline-inexistente.json
+ok 301 - SEQ negativos 24-continuacion-lifeline-inexistente.json
+  ---
+  duration_ms: 1.395598
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 25-mensaje-fuera-activacion.json
+ok 302 - SEQ negativos 25-mensaje-fuera-activacion.json
+  ---
+  duration_ms: 1.337821
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 26-consider-propietario.json
+ok 303 - SEQ negativos 26-consider-propietario.json
+  ---
+  duration_ms: 1.090654
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 27-consider-operacion-inexistente.json
+ok 304 - SEQ negativos 27-consider-operacion-inexistente.json
+  ---
+  duration_ms: 1.497269
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 28-consider-duplicada.json
+ok 305 - SEQ negativos 28-consider-duplicada.json
+  ---
+  duration_ms: 3.546349
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 29-consider-tipo-incompatible.json
+ok 306 - SEQ negativos 29-consider-tipo-incompatible.json
+  ---
+  duration_ms: 0.959759
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 30-firma-fuera-consider.json
+ok 307 - SEQ negativos 30-firma-fuera-consider.json
+  ---
+  duration_ms: 0.974751
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 31-reply-cardinalidad.json
+ok 308 - SEQ negativos 31-reply-cardinalidad.json
+  ---
+  duration_ms: 1.363189
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 32-call-asignacion-invalida.json
+ok 309 - SEQ negativos 32-call-asignacion-invalida.json
+  ---
+  duration_ms: 0.90021
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 33-ref-retorno-inexistente.json
+ok 310 - SEQ negativos 33-ref-retorno-inexistente.json
+  ---
+  duration_ms: 0.88006
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 34-fragmentos-superpuestos.json
+ok 311 - SEQ negativos 34-fragmentos-superpuestos.json
+  ---
+  duration_ms: 1.16227
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 35-gate-dos-mensajes.json
+ok 312 - SEQ negativos 35-gate-dos-mensajes.json
+  ---
+  duration_ms: 1.013018
+  type: 'test'
+  ...
+# Subtest: SEQ negativos 36-tiempo-exceso-ocurrencias.json
+ok 313 - SEQ negativos 36-tiempo-exceso-ocurrencias.json
+  ---
+  duration_ms: 3.308675
+  type: 'test'
+  ...
+# Subtest: SEQ-T03 la edición temporal conserva IDs; merge independiente y conflicto
+ok 314 - SEQ-T03 la edición temporal conserva IDs; merge independiente y conflicto
+  ---
+  duration_ms: 13.256802
+  type: 'test'
+  ...
+# Subtest: SEQ-T04 los doce operadores conservan la identidad de operandos
+ok 315 - SEQ-T04 los doce operadores conservan la identidad de operandos
+  ---
+  duration_ms: 1.775543
+  type: 'test'
+  ...
+# Subtest: SEQ-T07 escena de self, lost/found, X, guardas y marco sd
+ok 316 - SEQ-T07 escena de self, lost/found, X, guardas y marco sd
+  ---
+  duration_ms: 7.88104
+  type: 'test'
+  ...
+# Subtest: SEQ-T08 adaptación de mensaje histórico es determinista e idempotente
+ok 317 - SEQ-T08 adaptación de mensaje histórico es determinista e idempotente
+  ---
+  duration_ms: 2.637436
+  type: 'test'
+  ...
+# Subtest: SEQ-T07 gate lateral comparte el anclaje exacto del mensaje
+ok 318 - SEQ-T07 gate lateral comparte el anclaje exacto del mensaje
+  ---
+  duration_ms: 0.450741
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ A–H: cada reproducción falla por su causa y no por shape
+ok 319 - AUD-SEQ A–H: cada reproducción falla por su causa y no por shape
+  ---
+  duration_ms: 44.656456
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-001 Signal con atributo tipado, argumento nombrado y comodín omitido válidos
+ok 320 - AUD-SEQ-001 Signal con atributo tipado, argumento nombrado y comodín omitido válidos
+  ---
+  duration_ms: 2.959625
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-003 ref firma conocida y contexto de clasificador válido
+ok 321 - AUD-SEQ-003 ref firma conocida y contexto de clasificador válido
+  ---
+  duration_ms: 3.351258
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-004 X independiente recorta lifeline y admite eventos anteriores
+ok 322 - AUD-SEQ-004 X independiente recorta lifeline y admite eventos anteriores
+  ---
+  duration_ms: 3.947195
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-002 roles inner/outer y actual/formal entre interacciones
+ok 323 - AUD-SEQ-002 roles inner/outer y actual/formal entre interacciones
+  ---
+  duration_ms: 2.036762
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-007–009 reproducciones exactas con shape válido y error específico
+ok 324 - AUD-SEQ-007–009 reproducciones exactas con shape válido y error específico
+  ---
+  duration_ms: 5.399847
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-007 rol por Property ID, escalar, colección, selector y compatibilidad de tipo
+ok 325 - AUD-SEQ-007 rol por Property ID, escalar, colección, selector y compatibilidad de tipo
+  ---
+  duration_ms: 5.412877
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-008 cobertura única, scope y posición de continuación
+ok 326 - AUD-SEQ-008 cobertura única, scope y posición de continuación
+  ---
+  duration_ms: 6.602577
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-009 límites exactos y trayectoria de activación; lifeline posterior independiente
+ok 327 - AUD-SEQ-009 límites exactos y trayectoria de activación; lifeline posterior independiente
+  ---
+  duration_ms: 28.441722
+  type: 'test'
+  ...
+# Subtest: SEQ-T01 enlace de ejecución a Action y Behavior discriminado
+ok 328 - SEQ-T01 enlace de ejecución a Action y Behavior discriminado
+  ---
+  duration_ms: 5.857048
+  type: 'test'
+  ...
+# Subtest: SEQ-T03 seq débil por lifeline, critical impide intercalado externo; otro participante permitido
+ok 329 - SEQ-T03 seq débil por lifeline, critical impide intercalado externo; otro participante permitido
+  ---
+  duration_ms: 60.418526
+  type: 'test'
+  ...
+# Subtest: SEQ-T04 límites y cobertura de fragmento anidado
+ok 330 - SEQ-T04 límites y cobertura de fragmento anidado
+  ---
+  duration_ms: 32.447615
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 consider/ignore identifica dos Operation del mismo propietario y Signal, jamás la clase
+ok 331 - AUD-SEQ-006 consider/ignore identifica dos Operation del mismo propietario y Signal, jamás la clase
+  ---
+  duration_ms: 4.784861
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 reply retorno y cardinalidad explícita; comodín histórico sigue permitido
+ok 332 - AUD-SEQ-006 reply retorno y cardinalidad explícita; comodín histórico sigue permitido
+  ---
+  duration_ms: 3.711324
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 ref entrada y salida diferenciadas, multiplicidad y retorno
+ok 333 - AUD-SEQ-006 ref entrada y salida diferenciadas, multiplicidad y retorno
+  ---
+  duration_ms: 2.397298
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 correspondencia explícita de continuaciones, identidad y cobertura
+ok 334 - AUD-SEQ-006 correspondencia explícita de continuaciones, identidad y cobertura
+  ---
+  duration_ms: 16.126392
+  type: 'test'
+  ...
+# Subtest: SEQ-T04 gate exterior de alt corresponde a un interior por operando, conserva borrador parcial y rechaza duplicado de rama
+ok 335 - SEQ-T04 gate exterior de alt corresponde a un interior por operando, conserva borrador parcial y rechaza duplicado de rama
+  ---
+  duration_ms: 6.500225
+  type: 'test'
+  ...
+# Subtest: SEQ-T03 destrucción en alt recorta su propia rama sin cortar la alternativa
+ok 336 - SEQ-T03 destrucción en alt recorta su propia rama sin cortar la alternativa
+  ---
+  duration_ms: 3.868889
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-010 superposición por ámbito y cobertura; anidación explícita
+ok 337 - AUD-SEQ-010 superposición por ámbito y cobertura; anidación explícita
+  ---
+  duration_ms: 4.156676
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-011 ajuste temporal atómico preserva IDs, mensajes, rollback y merge
+ok 338 - AUD-SEQ-011 ajuste temporal atómico preserva IDs, mensajes, rollback y merge
+  ---
+  duration_ms: 9.214485
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 reordenación de par conserva IDs y mueve solamente ocurrencias de cada operando
+ok 339 - AUD-SEQ-006 reordenación de par conserva IDs y mueve solamente ocurrencias de cada operando
+  ---
+  duration_ms: 3.214314
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 Gate 0..1 mensaje: envío, recepción, combinación, rollback y segundo gate
+ok 340 - AUD-SEQ-012 Gate 0..1 mensaje: envío, recepción, combinación, rollback y segundo gate
+  ---
+  duration_ms: 65.053054
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 found/lost cuentan una vez; anotación y correspondencia no consumen el mensaje
+ok 341 - AUD-SEQ-012 found/lost cuentan una vez; anotación y correspondencia no consumen el mensaje
+  ---
+  duration_ms: 29.97893
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 históricos ambiguos se conservan sin inferir y permiten reparación incremental
+ok 342 - AUD-SEQ-012 históricos ambiguos se conservan sin inferir y permiten reparación incremental
+  ---
+  duration_ms: 9.585116
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-012 adaptación histórica no asigna ocurrencias a gate ambiguo ni impide adaptar mensajes independientes
+ok 343 - AUD-SEQ-012 adaptación histórica no asigna ocurrencias a gate ambiguo ni impide adaptar mensajes independientes
+  ---
+  duration_ms: 5.88535
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 T05 cuatro variantes temporales, cardinalidad, borrador y referencias
+ok 344 - AUD-SEQ-006 T05 cuatro variantes temporales, cardinalidad, borrador y referencias
+  ---
+  duration_ms: 282.214183
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 T04/T05 matching formal/actual, inner/outer y alt por rama; no admitir nombre, dirección ni sort incompatibles
+ok 345 - AUD-SEQ-006 T04/T05 matching formal/actual, inner/outer y alt por rama; no admitir nombre, dirección ni sort incompatibles
+  ---
+  duration_ms: 131.370891
+  type: 'test'
+  ...
+# Subtest: AUD-SEQ-006 T03 recorte en alt anidado conserva alternativas internas y externas y rechaza eventos posteriores compatibles
+ok 346 - AUD-SEQ-006 T03 recorte en alt anidado conserva alternativas internas y externas y rechaza eventos posteriores compatibles
+  ---
+  duration_ms: 95.016812
+  type: 'test'
+  ...
+# (node:15277) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./qa/uml-component-evidence/auditoria-4/diagnostic-loader.mjs", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: T01 creación solo seis UML y diagramas ATLAS; catálogo histórico conserva tipos
+ok 347 - T01 creación solo seis UML y diagramas ATLAS; catálogo histórico conserva tipos
+  ---
+  duration_ms: 6.537606
+  type: 'test'
+  ...
+# Subtest: T01 detalle funcional, flags, slots y literales incompatibles
+ok 348 - T01 detalle funcional, flags, slots y literales incompatibles
+  ---
+  duration_ms: 6.331163
+  type: 'test'
+  ...
+# Subtest: T01 puntos únicos, shape estricta y referencia de sujeto
+ok 349 - T01 puntos únicos, shape estricta y referencia de sujeto
+  ---
+  duration_ms: 0.606531
+  type: 'test'
+  ...
+# Subtest: T02 matriz permite actor-caso, no actor-actor ni límite, sujetos disjuntos
+ok 350 - T02 matriz permite actor-caso, no actor-actor ni límite, sujetos disjuntos
+  ---
+  duration_ms: 2.80076
+  type: 'test'
+  ...
+# Subtest: T02 multiplicidad, propiedades prohibidas y contexto explícito
+ok 351 - T02 multiplicidad, propiedades prohibidas y contexto explícito
+  ---
+  duration_ms: 0.618719
+  type: 'test'
+  ...
+# Subtest: T03 generalización final y mezcla de tipos
+ok 352 - T03 generalización final y mezcla de tipos
+  ---
+  duration_ms: 0.480073
+  type: 'test'
+  ...
+# Subtest: T03 include acíclico, ciclos entre vistas y autorrelación por identidad
+ok 353 - T03 include acíclico, ciclos entre vistas y autorrelación por identidad
+  ---
+  duration_ms: 3.68933
+  type: 'test'
+  ...
+# Subtest: T04 extend orden, rename, condición y eliminación de punto referenciado
+ok 354 - T04 extend orden, rename, condición y eliminación de punto referenciado
+  ---
+  duration_ms: 1.048827
+  type: 'test'
+  ...
+# Subtest: T04 extend vacío, ajeno y condición incompatible con include
+ok 355 - T04 extend vacío, ajeno y condición incompatible con include
+  ---
+  duration_ms: 0.864995
+  type: 'test'
+  ...
+# Subtest: T05 aplicabilidad por identidad canónica, no por ownership
+ok 356 - T05 aplicabilidad por identidad canónica, no por ownership
+  ---
+  duration_ms: 0.574954
+  type: 'test'
+  ...
+# Subtest: T05 relación compartida conserva geometría y rechaza divergencia unilateral
+ok 357 - T05 relación compartida conserva geometría y rechaza divergencia unilateral
+  ---
+  duration_ms: 4.114602
+  type: 'test'
+  ...
+# Subtest: T06 etiquetas reservadas, notas y SVG sin código inyectable
+ok 358 - T06 etiquetas reservadas, notas y SVG sin código inyectable
+  ---
+  duration_ms: 3.256316
+  type: 'test'
+  ...
+# Subtest: T08 histórico extend incompleto se conserva en edición independiente
+ok 359 - T08 histórico extend incompleto se conserva en edición independiente
+  ---
+  duration_ms: 1.616651
+  type: 'test'
+  ...
+# Subtest: T04 ciclos extend / include combinados son advertencias y no bloquean
+ok 360 - T04 ciclos extend / include combinados son advertencias y no bloquean
+  ---
+  duration_ms: 0.542065
+  type: 'test'
+  ...
+# Subtest: AUD-UC-002 migración de legado es estable, conserva paralelas y no altera snapshot
+ok 361 - AUD-UC-002 migración de legado es estable, conserva paralelas y no altera snapshot
+  ---
+  duration_ms: 1.5285
+  type: 'test'
+  ...
+# Subtest: AUD-UC-003 geometría actor: puertos tocan brazos; óvalo cardinal e intersección real
+ok 362 - AUD-UC-003 geometría actor: puertos tocan brazos; óvalo cardinal e intersección real
+  ---
+  duration_ms: 0.41065
+  type: 'test'
+  ...
+# Subtest: AUD-UC-003 SVG centra nombre, ancla nota, compartimentos y estereotipo; texto escapado
+ok 363 - AUD-UC-003 SVG centra nombre, ancla nota, compartimentos y estereotipo; texto escapado
+  ---
+  duration_ms: 2.21546
+  type: 'test'
+  ...
+# Subtest: AUD-UC-004 matriz exhaustiva de tipos de contexto y variantes
+ok 364 - AUD-UC-004 matriz exhaustiva de tipos de contexto y variantes
+  ---
+  duration_ms: 1.146754
+  type: 'test'
+  ...
+# Subtest: UC catálogo de casos de uso: solo cinco tipos nativos se crean; contexto se reutiliza
+ok 365 - UC catálogo de casos de uso: solo cinco tipos nativos se crean; contexto se reutiliza
+  ---
+  duration_ms: 2.173058
+  type: 'test'
+  ...
+1..365
+# tests 365
+# suites 0
+# pass 364
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18891.112937
