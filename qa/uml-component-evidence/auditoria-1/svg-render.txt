@@ -1,7 +1,0 @@
-Chromium standalone CLI: timeout de 15 s; no se certifica navegador. Raster diagnóstico alternativo CairoSVG.
-componentes-manual.svg {'width': '1690', 'height': '2525', 'font-family': 'Arial, Helvetica, sans-serif'}
-Raster OK componentes-manual.svg
-external.svg {'width': '1690', 'height': '1480', 'font-family': 'Arial, Helvetica, sans-serif'}
-Raster OK external.svg
-internal.svg {'width': '1650', 'height': '1125', 'font-family': 'Arial, Helvetica, sans-serif'}
-Raster OK internal.svg
