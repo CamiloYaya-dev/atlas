@@ -6,7 +6,7 @@ import {DomainError} from '../../domain/errors'
 import {validateField} from './functional.policy'
 import type {FunctionalKind,TemplateElement} from './functional.policy'
 
-const builtinKeys=new Set(['code','title','createdAt','updatedAt','reviewDate','module','feature','scenario','steps','expected','obtained','functionalState','findingType','impact','environment','reviewerId','findingStatus','observations','jira','description','priority','status','acceptanceCriteria','businessValue','role','goal','benefit'])
+const builtinKeys=new Set(['code','title','createdAt','updatedAt','reviewDate','module','feature','scenario','steps','expected','obtained','functionalState','findingType','impact','environment','reviewerId','findingStatus','observations','jira','description','priority','status','acceptanceCriteria','businessValue','role','goal','benefit','processName','assessmentDate','scope','observedBehavior','assessmentResult'])
 export const BOUND_KINDS=new Set(['field','image','table','list','checkbox','text'])
 export type NewTemplateField={clientId:string;name:string;fieldType:string;required?:boolean;options?:string[]}
 export function templateFieldsPayload(value:unknown):NewTemplateField[]{

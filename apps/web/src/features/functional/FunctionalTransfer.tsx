@@ -6,7 +6,7 @@ import type {FunctionalKind,TransferSelection,TransferScope} from './api'
 type Props={projectId:string;activeKind:FunctionalKind;canExport:boolean;canFields:boolean;canTemplates:boolean;onClose:()=>void;onImported:()=>Promise<void>}
 const options:{value:TransferScope;label:string}[]=[{value:'none',label:'No incluir'},{value:'form',label:'Solo formulario'},{value:'template',label:'Solo plantilla(s)'},{value:'both',label:'Formulario + plantilla(s)'}]
 export default function FunctionalTransfer({projectId,activeKind,canExport,canFields,canTemplates,onClose,onImported}:Props){
- const [selection,setSelection]=useState<TransferSelection>({finding:activeKind==='finding'?'both':'none',rf:activeKind==='rf'?'both':'none',rnf:activeKind==='rnf'?'both':'none',story:activeKind==='story'?'both':'none'})
+ const [selection,setSelection]=useState<TransferSelection>({finding:activeKind==='finding'?'both':'none',rf:activeKind==='rf'?'both':'none',rnf:activeKind==='rnf'?'both':'none',story:activeKind==='story'?'both':'none',asis:activeKind==='asis'?'both':'none'})
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('')
  const file=useRef<HTMLInputElement>(null)
  const choose=(kind:FunctionalKind,value:TransferScope)=>setSelection(old=>({...old,[kind]:value}))
@@ -23,7 +23,7 @@ export default function FunctionalTransfer({projectId,activeKind,canExport,canFi
   await onImported()
   setMessage(`${result.addedFields} campos creados, ${result.reusedFields} reutilizados y ${result.addedTemplates} plantillas importadas. No se reemplazó información existente.`)
  }catch(e){setError((e as Error).message)}finally{setBusy(false)}}
- return <section className="functional-transfer"><div className="functional-transfer-head"><button className="ghost" onClick={onClose}><ArrowLeft size={15}/> Volver</button><div><h2>Importar y exportar formularios y plantillas</h2><p>Combina los cuatro tipos documentales. Una plantilla exportada incluye las definiciones de los campos que utiliza para poder importarse de manera independiente.</p></div></div>
+ return <section className="functional-transfer"><div className="functional-transfer-head"><button className="ghost" onClick={onClose}><ArrowLeft size={15}/> Volver</button><div><h2>Importar y exportar formularios y plantillas</h2><p>Combina los tipos documentales. Una plantilla exportada incluye las definiciones de los campos que utiliza para poder importarse de manera independiente.</p></div></div>
   <div className="functional-transfer-card"><h3>Exportar a JSON</h3><p>Selecciona qué compartir de cada tipo. Los registros y datos diligenciados no se incluyen.</p>
    {FUNCTIONAL_KINDS.map(kind=><label className="functional-transfer-option" key={kind}><strong>{KIND_LABELS[kind]}</strong><select aria-label={`Exportación de ${KIND_LABELS[kind]}`} value={selection[kind]} onChange={e=>choose(kind,e.target.value as TransferScope)}>{options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select></label>)}
    <button className="primary" disabled={!canExport||busy||Object.values(selection).every(v=>v==='none')} onClick={()=>void exportNow()}><Download size={16}/> Descargar JSON combinado</button>

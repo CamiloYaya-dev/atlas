@@ -17,7 +17,7 @@ export function fieldValue(item:Item,name:string):string{
 }
 const dimensions=(t?:Template)=>{const w=t?.paper==='LETTER'?215.9:210,h=t?.paper==='LETTER'?279.4:297;return t?.orientation==='landscape'?{width:h,height:w}:{width:w,height:h}}
 const pageCount=(t?:Template)=>Math.max(1,Math.min(20,Math.round(t?.page_count??t?.pageCount??1)))
-const allElements=(t:Template|undefined,kind:string)=>t?.layout??defaultTemplateLayout(kind as 'finding'|'rf'|'rnf'|'story')
+const allElements=(t:Template|undefined,kind:string)=>t?.layout??defaultTemplateLayout(kind as 'finding'|'rf'|'rnf'|'story'|'asis')
 const elementsForPage=(t:Template|undefined,kind:string,page:number)=>allElements(t,kind).filter(x=>(x.page??0)===page)
 const rows=(e:TemplateElement)=>Math.max(1,Math.min(20,e.rows??3)),cols=(e:TemplateElement)=>Math.max(1,Math.min(12,e.cols??3))
 const rawValue=(item:Item,name:string):unknown=>name==='code'?item.code:name==='title'?item.title:name==='createdAt'?item.created_at:name==='updatedAt'?item.updated_at:name.startsWith('custom:')?(item.payload.custom as Record<string,unknown>|undefined)?.[name.slice(7)]:item.payload[name]
