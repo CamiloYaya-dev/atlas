@@ -306,6 +306,10 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     }
     requirePermission(a,`relation.edit.${edgeKind(oldE,old,original)}`)
     requirePermission(a,`relation.edit.${edgeKind(e,d,full)}`)
+    if(d.type==='uml-deployment'&&oldE.deploymentRelationId&&(oldE.source!==e.source||oldE.target!==e.target)){
+     const isPathFlip=oldE.relationKind==='communication-path'&&e.relationKind==='communication-path'&&e.source===oldE.target&&e.target===oldE.source
+     if(!isPathFlip)throw new DomainError('Para cambiar extremos, elimina y recrea la relación',403)
+    }
     if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
     if(isUmlDiagram(d.type)&&d.type!=='uml-activity'&&!(d.type==='uml-sequence'&&e.sequenceEdge)&&e.relationKind){
      const src=d.nodes.find(n=>n.id===e.source),dst=d.nodes.find(n=>n.id===e.target)

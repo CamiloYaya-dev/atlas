@@ -6,8 +6,8 @@ import {resolve} from 'node:path'
 import {planE2eBatches,assertBatchSelection,assertBatchRun,selectE2eBatches} from './e2e-batches.mjs'
 const root=fileURLToPath(new URL('..',import.meta.url))
 const env={...process.env,
- DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
- MIGRATIONS_DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
+ DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
+ MIGRATIONS_DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
  NODE_ENV:'test',AUTH_MODE:'local',NOVZI_ALLOW_DB_TESTS:'true',
  NOVZI_CSRF_SECRET:'novzi-qa-local-csrf-for-automated-tests-only-2026',
  E2E_ADMIN_EMAIL:'qa-admin@novzi.test',E2E_ADMIN_PASSWORD:randomBytes(20).toString('base64url')+'!A',

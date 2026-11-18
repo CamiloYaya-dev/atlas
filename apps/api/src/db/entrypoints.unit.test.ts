@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
 const fixture=fileURLToPath(new URL('../../../../scripts/qa-db-entrypoint-fixture.mjs',import.meta.url))
-for(const scenario of ['migration-new','migration-legacy-checksum','migration-checksum-mismatch','migration-rollback','admin-absent','admin-new','admin-rollback','seed-new','seed-rollback','seed-production','e2e-workspace-absent','e2e-forbidden','pool-tls'])test('CLI QA aislado: '+scenario,{timeout:25000},()=>{
+for(const scenario of ['migration-new','migration-legacy-checksum','migration-checksum-mismatch','migration-rollback','admin-absent','admin-new','admin-rollback','seed-new','seed-rollback','seed-production','e2e-workspace-absent','e2e-forbidden','e2e-wrong-db','pool-tls'])test('CLI QA aislado: '+scenario,{timeout:25000},()=>{
  // Inherit the same TS loader as this process, including the platform-specific
  // tsx registration, without re-running node:test inside the fixture.
  const run=spawnSync(process.execPath,[...process.execArgv.filter(x=>x!=='--test'),fixture,scenario],{encoding:'utf8',timeout:20000,windowsHide:true})

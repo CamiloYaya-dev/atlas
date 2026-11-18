@@ -11,7 +11,7 @@ if(!['unit','full'].includes(mode))throw new Error('Uso: coverage-local.mjs unit
 // backend/frontend de diagnóstico ni otros archivos del usuario.
 for(const name of ['coverage-summary.json','coverage-layers.json','index.html','lcov.info'])
  rmSync(resolve(root,'coverage',name),{force:true})
-const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
+const qaUrl='postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test'
 const env={...process.env,NOVZI_QA_COVERAGE_TS:'1',NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
  MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',NOVZI_ALLOW_DB_TESTS:'true',
  NOVZI_CSRF_SECRET:'novzi-local-qa-coverage-only-2026-not-production',

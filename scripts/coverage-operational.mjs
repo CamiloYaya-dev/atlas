@@ -18,7 +18,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url'
 const root=fileURLToPath(new URL('..',import.meta.url))
 const api=resolve(root,'apps/api')
 const tsx=resolve(root,'node_modules/tsx/dist/cli.mjs')
-const qa=/^postgresql:\/\/[^\s]*@127\.0\.0\.1:5433\/atlas_test(?:\?.*)?$/
+const qa=/^postgresql:\/\/[^\s]*@127\.0\.0\.1:5433\/novzi_test(?:\?.*)?$/
 if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||!qa.test(process.env.DATABASE_URL||'')||!qa.test(process.env.MIGRATIONS_DATABASE_URL||'')){
  throw Error('QA OPERACIONAL BLOQUEADO: solo novzi_test en 127.0.0.1:5433 y NODE_ENV=test')
 }
