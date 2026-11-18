@@ -1,4 +1,4 @@
-import type {Diagram,DiagramFilter,DiagramNode,ProjectDocument} from '@atlas/contracts'
+import type {Diagram,DiagramFilter,DiagramNode,ProjectDocument} from '@novzi/contracts'
 /** The model's filters belong to the DIAGRAM, not the globally reusable element.
  * Historical process diagrams used ModelElement.group; preserve them without
  * adding any default categories to new diagrams. */
@@ -19,7 +19,7 @@ export function nodeFilterIds(node:DiagramNode,diagram:Diagram,doc:ProjectDocume
  const legacy=diagram.type==='process'?doc.elements[node.elementId]?.group?.trim():undefined
  return legacy?[legacy]:[]
 }
-/** Returns visible node/edge IDs for every type of ATLAS diagram, with optional
+/** Returns visible node/edge IDs for every type of NOVZI diagram, with optional
  * one-hop dependency context. Without diagram filters ALL nodes remain visible. */
 export function graphSelection(diagram:Diagram,doc:ProjectDocument,groups:readonly string[],dependencies:boolean,includeUntagged=true){
  const configured=diagramFilters(diagram,doc)

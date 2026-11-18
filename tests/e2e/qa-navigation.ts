@@ -5,7 +5,7 @@ export function observeQaHttp(context:BrowserContext){
  context.on('response',response=>{
   const status=response.status(),path=new URL(response.url()).pathname
   if(path.startsWith('/api/v1/')&&(status===429||status>=500||path==='/api/v1/workspaces'&&status>=400))
-   console.error(`[ATLAS E2E HTTP] ${response.request().method()} ${path} -> ${status}`)
+   console.error(`[NOVZI E2E HTTP] ${response.request().method()} ${path} -> ${status}`)
  })
 }
 /** Select the seeded project through its actual UI and avoid resetting an already selected workspace. */

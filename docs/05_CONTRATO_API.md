@@ -1,4 +1,4 @@
-# API ATLAS V4.2 — Resumen de endpoints
+# API NOVZI V4.2 — Resumen de endpoints
 
 Todas las rutas llevan prefijo `/api/v1`. API JSON; escrituras autenticadas requieren `X-CSRF-Token` salvo `/auth/login`. Cookies `credentials:'include'`.
 

@@ -1,4 +1,4 @@
-# ADR — ATLAS V4.2
+# ADR — NOVZI V4.2
 
 ## ADR-001: Monorepo, frontend/API/DB independientes
 

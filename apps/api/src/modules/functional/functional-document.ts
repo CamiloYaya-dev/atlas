@@ -139,7 +139,7 @@ async function docxFromLayout(item:Item,t?:Template){const page=dimensions(t),me
  return zip([{name:'[Content_Types].xml',data:types},{name:'_rels/.rels',data:relationships},{name:'word/document.xml',data:document},{name:'word/_rels/document.xml.rels',data:imageRels},...media.map(m=>({name:`word/media/${m.name}`,data:m.data}))])
 }
 export async function renderFunctionalFile(item:Item,t:Template|undefined,format:'html'|'pdf'|'docx'){
- const name=`ATLAS_${item.code.replace(/[^\w-]/g,'_')}`
+ const name=`NOVZI_${item.code.replace(/[^\w-]/g,'_')}`
  if(format==='html')return {name:name+'.html',mime:'text/html; charset=utf-8',data:Buffer.from(layoutHTML(item,t))}
  if(format==='docx')return {name:name+'.docx',mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',data:await docxFromLayout(item,t)}
  const pages=[];for(let i=0;i<pageCount(t);i++){const svg=layoutSVG(item,t,i);const jpg=await sharp(Buffer.from(svg.svg)).resize({width:1400}).flatten({background:'#fff'}).jpeg({quality:88}).toBuffer({resolveWithObject:true});pages.push({jpeg:jpg.data,width:jpg.info.width,height:jpg.info.height})}

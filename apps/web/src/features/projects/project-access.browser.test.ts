@@ -4,7 +4,7 @@ import {projectAccess,deleteProject,projectMembers,projectCandidates,assignProje
 import {renameWorkspace,deleteWorkspace} from '../workspaces/api'
 vi.mock('../../shared/api/http',()=>({request:vi.fn()}))
 beforeEach(()=>vi.mocked(request).mockResolvedValue({ok:true} as never))
-describe('ATLAS 4.7 permisos separados de espacios y proyectos',()=>{
+describe('NOVZI 4.7 permisos separados de espacios y proyectos',()=>{
  it('la política individual se consulta en el proyecto',async()=>{
   await projectAccess('p/1');expect(request).toHaveBeenCalledWith('/projects/p%2F1/access')
  })

@@ -1,6 +1,6 @@
 import {useState} from 'react'
-import {deploymentNode,deploymentRegistry,deploymentRefs,deploymentEndpointValid,deploymentDerivedElements,DEPLOYMENT_RELATIONS,setDeploymentRelation,removeDeploymentRecord,umlRelationNameLocked,validDeploymentSlotValue,deploymentInstancePropertyOwners,deploymentSlotWarnings,deploymentConfiguration,deploymentPathEnds,updateDeploymentRecord,newDeploymentIssues} from '@atlas/contracts'
-import type {DeploymentDetail,DeploymentRecord,DeploymentEnd,Diagram,DiagramEdge,ModelElement,ProjectDocument} from '@atlas/contracts'
+import {deploymentNode,deploymentRegistry,deploymentRefs,deploymentEndpointValid,deploymentDerivedElements,DEPLOYMENT_RELATIONS,setDeploymentRelation,removeDeploymentRecord,umlRelationNameLocked,validDeploymentSlotValue,deploymentInstancePropertyOwners,deploymentSlotWarnings,deploymentConfiguration,deploymentPathEnds,updateDeploymentRecord,newDeploymentIssues} from '@novzi/contracts'
+import type {DeploymentDetail,DeploymentRecord,DeploymentEnd,Diagram,DiagramEdge,ModelElement,ProjectDocument} from '@novzi/contracts'
 import {Overlay,Field} from '../../../components/molecules/Overlay'
 const selectedValues=(e:React.ChangeEvent<HTMLSelectElement>)=>Array.from(e.target.selectedOptions,o=>o.value)
 const options=(items:ModelElement[])=>items.map(e=><option key={e.id} value={e.id}>{e.name} ({e.type})</option>)

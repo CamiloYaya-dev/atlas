@@ -2,11 +2,11 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 // @ts-expect-error jsdom is provided by the local test runner without a declaration package
 import {JSDOM} from 'jsdom'
-import {createElement as element,emptyDoc} from '@atlas/contracts'
+import {createElement as element,emptyDoc} from '@novzi/contracts'
 import {createElement} from 'react'
 import {render,fireEvent,cleanup} from '@testing-library/react'
 import ClassRelationDialog from './ClassRelationDialog'
-import type {ProjectDocument} from '@atlas/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 
 const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'http://localhost/'})
 Object.assign(globalThis,{window:dom.window,document:dom.window.document,HTMLElement:dom.window.HTMLElement,Element:dom.window.Element,Node:dom.window.Node})
@@ -24,7 +24,7 @@ test('modal UML permite cambiar destino sin borrar relación, con control accesi
  assert.equal(dest.value,'b')
  fireEvent.change(dest,{target:{value:'c'}})
  assert.equal(dest.value,'c')
- assert.match(container.querySelector('.atlas-class-relation > p')?.textContent||'',/Política → Pasarela/)
+ assert.match(container.querySelector('.novzi-class-relation > p')?.textContent||'',/Política → Pasarela/)
  assert.equal(doc.diagrams[0].edges[0].target,'b')
  unmount();cleanup()
 })

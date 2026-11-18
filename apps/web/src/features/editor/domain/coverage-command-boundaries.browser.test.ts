@@ -1,10 +1,10 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,umlAbsolutePosition} from '@atlas/contracts'
-import type {ProjectDocument,Diagram} from '@atlas/contracts'
+import {emptyDoc,createElement,umlAbsolutePosition} from '@novzi/contracts'
+import type {ProjectDocument,Diagram} from '@novzi/contracts'
 import {createDiagram,addFieldDefinition,removeFieldDefinition,deleteDiagram,setNodePackage,convertLegacyActivitySignal} from './document-commands'
-import activities from '../../../../../../qa/ATLAS_QA_UML_ACTIVIDADES.json'
-import usecases from '../../../../../../qa/ATLAS_QA_UML_CASOS_DE_USO.json'
+import activities from '../../../../../../qa/NOVZI_QA_UML_ACTIVIDADES.json'
+import usecases from '../../../../../../qa/NOVZI_QA_UML_CASOS_DE_USO.json'
 const copied=(v:unknown)=>structuredClone(v) as ProjectDocument
 const date='2026-11-16'
 

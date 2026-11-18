@@ -1,8 +1,8 @@
-import {ExecutionTimeAction} from '../../../components/organisms/AtlasNode'
+import {ExecutionTimeAction} from '../../../components/organisms/NovziNode'
 import {it,expect,vi} from 'vitest'
 import {render,screen,fireEvent,within} from '@testing-library/react'
-import {emptyDoc,createElement,SEQUENCE_OPERATORS,sequenceDefaults} from '@atlas/contracts'
-import type {ElementType} from '@atlas/contracts'
+import {emptyDoc,createElement,SEQUENCE_OPERATORS,sequenceDefaults} from '@novzi/contracts'
+import type {ElementType} from '@novzi/contracts'
 import SequenceRelationDialog from './SequenceRelationDialog'
 import SequenceDetailsEditor from './SequenceDetailsEditor'
 const model=(types:ElementType[]=['uml-lifeline','uml-lifeline'])=>{const d=emptyDoc();types.forEach((type,i)=>{const id=`e${i}`;d.elements[id]={...createElement(id,type),id,sequenceDetail:sequenceDefaults(type,id)}});d.diagrams=[{id:'d',name:'Secuencia QA',type:'uml-sequence',description:'',createdAt:'2026-11-16',nodes:types.map((_,i)=>({id:`n${i}`,elementId:`e${i}`,x:i*300,y:100})),edges:[],interaction:{id:'d',occurrences:[]}}];return d}

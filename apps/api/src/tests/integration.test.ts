@@ -4,10 +4,10 @@ import {randomUUID} from 'node:crypto'
 import {pool} from '../db/pool'
 import {WorkspacesService} from '../modules/workspaces/application/workspaces.service'
 import {ProjectsService} from '../modules/projects/application/projects.service'
-import {emptyDoc} from '@atlas/contracts'
+import {emptyDoc} from '@novzi/contracts'
 
-if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'){
- throw new Error('Pruebas de BD bloqueadas. Usa NODE_ENV=test y ATLAS_ALLOW_DB_TESTS=true con una BD EXCLUSIVA de pruebas.')
+if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'){
+ throw new Error('Pruebas de BD bloqueadas. Usa NODE_ENV=test y NOVZI_ALLOW_DB_TESTS=true con una BD EXCLUSIVA de pruebas.')
 }
 const w=new WorkspacesService(),p=new ProjectsService()
 test('aislamiento multi-tenant, permisos de lector y concurrencia optimista',async()=>{

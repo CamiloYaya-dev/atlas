@@ -53,7 +53,7 @@ export function availableExportFields(doc:ProjectDocument,diagram:Diagram,elemen
   umlFields.splice(0,umlFields.length)
   const cap=classCapabilities(element.type),names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name]))
   if(cap.attributes)umlFields.push({key:'uml.attributes',label:'Atributos UML',value:(uml.attributes||[]).map(a=>umlAttributeText(a,true,names)).join('\n')})
-  if(cap.attributes&&(uml.attributes||[]).some(a=>a.length!==undefined))umlFields.push({key:'uml.attributeLengths',label:'Longitud técnica ATLAS',value:(uml.attributes||[]).filter(a=>a.length!==undefined).map(a=>`${a.name}: ${a.length}`).join('\n')})
+  if(cap.attributes&&(uml.attributes||[]).some(a=>a.length!==undefined))umlFields.push({key:'uml.attributeLengths',label:'Longitud técnica NOVZI',value:(uml.attributes||[]).filter(a=>a.length!==undefined).map(a=>`${a.name}: ${a.length}`).join('\n')})
   if(cap.operations)umlFields.push({key:'uml.operations',label:'Operaciones UML',value:(uml.operations||[]).map(o=>umlOperationTextResolved(o,names)).join('\n')})
   if(cap.literals)umlFields.push({key:'uml.literals',label:'Literales UML',value:(uml.literals||[]).map(l=>l.name).join('\n')})
   if(cap.note)umlFields.push({key:'uml.note',label:'Anotación UML',value:uml.expression||uml.note||''})

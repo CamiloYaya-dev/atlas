@@ -3,14 +3,14 @@ import assert from 'node:assert/strict'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {ReactFlowProvider} from '@xyflow/react'
 import type {NodeProps} from '@xyflow/react'
-import {createElement,activityDefaults} from '@atlas/contracts'
-import type {DiagramType,ElementType,ModelElement,Perspective} from '@atlas/contracts'
-import {AtlasNode,IconFor,nodeTypes} from './AtlasNode'
+import {createElement,activityDefaults} from '@novzi/contracts'
+import type {DiagramType,ElementType,ModelElement,Perspective} from '@novzi/contracts'
+import {NovziNode,IconFor,nodeTypes} from './NovziNode'
 
 const renderNode=(graphType:DiagramType,element:ModelElement,extra:Record<string,unknown>={},selected=false)=>{
  const data={element,graphType,mode:'mixed' as Perspective,canResize:false,...extra}
  const props={id:'qa',data,selected} as unknown as NodeProps
- return renderToStaticMarkup(<ReactFlowProvider><AtlasNode {...props}/></ReactFlowProvider>)
+ return renderToStaticMarkup(<ReactFlowProvider><NovziNode {...props}/></ReactFlowProvider>)
 }
 const item=(name:string,type:ElementType):ModelElement=>({...createElement(name,type),id:name.toLowerCase().replaceAll(' ','-')})
 
@@ -37,11 +37,11 @@ it('UML actividades y estados: glifos de control preservan tipo y no se conviert
  for(const type of ['uml-start','uml-end','uml-decision','uml-fork','uml-flow-final'] as const){
   const e=item(type,type);e.activityDetail=activityDefaults(type)
   const html=renderNode('uml-activity',e)
-  assert.match(html,/atlas-uml-control/);assert.ok(html.includes(`kind-${type}`));assert.doesNotMatch(html,/class="atlas-node/)
+  assert.match(html,/novzi-uml-control/);assert.ok(html.includes(`kind-${type}`));assert.doesNotMatch(html,/class="novzi-node/)
  }
  for(const type of ['uml-history-shallow','uml-history-deep','uml-entry-point','uml-exit-point','uml-terminate','uml-start','uml-end','uml-decision','uml-fork'] as const){
   const html=renderNode('uml-state',item(type,type))
-  assert.match(html,/atlas-uml-control/);assert.doesNotMatch(html,/class="atlas-node/)
+  assert.match(html,/novzi-uml-control/);assert.doesNotMatch(html,/class="novzi-node/)
  }
 })
 it('UML semántico: componente y despliegue mantienen el SVG propio y puertos de cubo',()=>{
@@ -54,7 +54,7 @@ it('UML semántico: componente y despliegue mantienen el SVG propio y puertos de
  assert.match(port,/data-port="true"/);assert.match(port,/top-2/);assert.doesNotMatch(port,/top-3/)
 })
 it('UML secuencia: símbolo de ejecución, destrucción y línea de vida usan conexiones laterales',()=>{
- for(const type of ['uml-activation','uml-destruction'] as const){const html=renderNode('uml-sequence',item(type,type));assert.match(html,/atlas-uml-control/);assert.ok(html.includes(`kind-${type}`))}
+ for(const type of ['uml-activation','uml-destruction'] as const){const html=renderNode('uml-sequence',item(type,type));assert.match(html,/novzi-uml-control/);assert.ok(html.includes(`kind-${type}`))}
  const lifeline=renderNode('uml-sequence',item('Servicio IA','uml-lifeline'),{sequenceGlyph:'<line data-lifeline="true" x1="20" y1="0" x2="20" y2="200"/>',sequenceSize:{width:48,height:260}})
  assert.match(lifeline,/data-lifeline="true"/);assert.match(lifeline,/Ocurrencia left/)
  const activation=renderNode('uml-sequence',item('Activación','uml-activation'),{sequenceGlyph:'<rect data-activation="true"/>',sequenceSize:{width:48,height:260}})

@@ -1,4 +1,4 @@
-import type {Diagram,DiagramType,ElementType,ModelElement,ProjectDocument} from '@atlas/contracts'
+import type {Diagram,DiagramType,ElementType,ModelElement,ProjectDocument} from '@novzi/contracts'
 
 /** An academy badge is derived from the saved model, never from a click counter. */
 export type AcademyCheck={id:string;title:string;description:string;done:boolean;diagramType?:DiagramType}
@@ -84,7 +84,7 @@ export function assessAcademy(doc:ProjectDocument|null,saved:boolean,mode:'funct
 }
 
 export type AcademyLabIdentity={workspaceId:string;projectId?:string}
-export const academyStorageKey=(accountId:string)=>`atlas.academy.lab.v1.${accountId}`
+export const academyStorageKey=(accountId:string)=>`novzi.academy.lab.v1.${accountId}`
 export function readAcademyLab(accountId:string):AcademyLabIdentity|null{
  try{const saved=JSON.parse(window.localStorage.getItem(academyStorageKey(accountId))||'null') as unknown
   if(saved&&typeof saved==='object'&&typeof (saved as AcademyLabIdentity).workspaceId==='string'){

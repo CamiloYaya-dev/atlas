@@ -4,7 +4,7 @@ import { npm } from './process-utils.mjs';
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const ask = (prompt) => new Promise(resolve => rl.question(prompt, resolve));
 const email = (await ask('Correo del administrador: ')).trim().toLowerCase();
-const name = (await ask('Nombre [Administrador ATLAS]: ')).trim() || 'Administrador ATLAS';
+const name = (await ask('Nombre [Administrador NOVZI]: ')).trim() || 'Administrador NOVZI';
 rl.close();
 
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -64,9 +64,9 @@ try {
   if (password.length < 12 || password.length > 128) throw new Error('La contraseña debe tener entre 12 y 128 caracteres.');
   if (password !== confirm) throw new Error('Las contraseñas no coinciden.');
   const code = await npm(['run', 'admin:create'], {
-    ATLAS_ADMIN_EMAIL: email,
-    ATLAS_ADMIN_NAME: name,
-    ATLAS_BOOTSTRAP_PASSWORD: password,
+    NOVZI_ADMIN_EMAIL: email,
+    NOVZI_ADMIN_NAME: name,
+    NOVZI_BOOTSTRAP_PASSWORD: password,
   });
   if (code !== 0) process.exitCode = code || 1;
 } catch (error) {

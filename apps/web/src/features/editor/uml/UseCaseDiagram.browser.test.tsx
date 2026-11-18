@@ -1,8 +1,8 @@
 import {it,expect,vi} from 'vitest'
 import {render,screen,fireEvent,within} from '@testing-library/react'
 import {useState} from 'react'
-import {emptyDoc,createElement,canonicalUmlEdge,replaceUseCaseRelation} from '@atlas/contracts'
-import type {DiagramEdge,ProjectDocument} from '@atlas/contracts'
+import {emptyDoc,createElement,canonicalUmlEdge,replaceUseCaseRelation} from '@novzi/contracts'
+import type {DiagramEdge,ProjectDocument} from '@novzi/contracts'
 import UseCaseRelationDialog from './UseCaseRelationDialog'
 import UseCaseDetailsEditor from './UseCaseDetailsEditor'
 const model=()=>{const d=emptyDoc();d.elements.a={...createElement('Reservar','usecase'),id:'a',useCaseDetail:{extensionPoints:[{id:'p',name:'Antes del pago'},{id:'q',name:'Confirmación'}]}};d.elements.b={...createElement('Cupón','usecase'),id:'b'};d.elements.actor={...createElement('Cliente','actor'),id:'actor'};d.diagrams=[{id:'d',name:'QA',type:'uml-usecase',description:'',createdAt:'2026-11-16',nodes:Object.keys(d.elements).map((elementId,i)=>({id:'n'+elementId,elementId,x:i*300,y:100})),edges:[]}];return d}

@@ -1,4 +1,4 @@
-import type {ProjectDocument} from '@atlas/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 export type RevisionChange={kind:'Diagrama'|'Elemento'|'Campo';action:'Agregado'|'Eliminado'|'Modificado';name:string;fields?:string[]}
 /** Only compares data returned by the API after current ACL filtering. */
 export function compareVersions(before:ProjectDocument,after:ProjectDocument):RevisionChange[]{

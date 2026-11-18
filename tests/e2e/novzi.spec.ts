@@ -17,7 +17,7 @@ async function signIn(page:import('@playwright/test').Page){
  await expect(page.getByRole('heading',{name:'Iniciar sesión'})).toBeVisible()
  await page.getByLabel('Correo electrónico').fill(email)
  await page.getByLabel('Contraseña').fill(password)
- await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
+ await page.getByRole('button',{name:/Entrar a NOVZI/}).click()
  await expect(page.getByText('API · PostgreSQL · Acceso cerrado')).toBeVisible()
  adminCookies=await page.context().cookies()
 }
@@ -34,7 +34,7 @@ test('acceso cerrado: no hay registro público y rechaza password incorrecto',as
  await expect(page.getByText('Acceso cerrado. No existe registro público.')).toBeVisible()
  await page.getByLabel('Correo electrónico').fill(email)
  await page.getByLabel('Contraseña').fill('incorrecta-2026!')
- await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
+ await page.getByRole('button',{name:/Entrar a NOVZI/}).click()
  await expect(page.getByRole('alert')).toContainText('Credenciales incorrectas')
 })
 test('login válido, C1 y navegación entre vistas ya guardadas',async({page})=>{
@@ -85,7 +85,7 @@ test('lector tiene solo las vistas y operaciones autorizadas',async({page})=>{
  await page.goto('/')
  await page.getByLabel('Correo electrónico').fill(viewerEmail)
  await page.getByLabel('Contraseña').fill(viewerPassword)
- await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
+ await page.getByRole('button',{name:/Entrar a NOVZI/}).click()
  await expect(page.getByText('API · PostgreSQL · Acceso cerrado')).toBeVisible()
  await openQaDemo(page)
  await expect(page.getByRole('button',{name:'Exportar'})).toHaveCount(0)
@@ -108,7 +108,7 @@ test('UML en Chromium: mensajes laterales múltiples, persistencia y símbolos d
  await projectDialog.getByRole('button',{name:'Crear',exact:true}).click()
  await expect(page.getByRole('heading',{name:'Elige un diagrama'})).toBeVisible()
  const date='2026-11-14',elements:Record<string,unknown>={}
- function element(id:string,type:string){elements[id]={id,name:id,type,summary:'',description:'',owner:'',author:'ATLAS QA',status:'Borrador',createdAt:date,updatedAt:date,links:[],fields:{}}}
+ function element(id:string,type:string){elements[id]={id,name:id,type,summary:'',description:'',owner:'',author:'NOVZI QA',status:'Borrador',createdAt:date,updatedAt:date,links:[],fields:{}}}
  for(const [id,type] of [['pa','uml-lifeline'],['pb','uml-lifeline'],['aa','uml-activation'],['ab','uml-activation'],['start','uml-start'],['choice','uml-decision'],['end','uml-end'],['history','uml-history-shallow'],['deep','uml-history-deep'],['entry','uml-entry-point'],['exit','uml-exit-point'],['termination','uml-terminate']])element(id,type)
  const document={schema:1,elements,fieldDefinitions:[],diagrams:[
   {id:'seq',name:'Secuencia QA real',type:'uml-sequence',description:'',createdAt:date,nodes:[
@@ -152,7 +152,7 @@ test('UML en Chromium: mensajes laterales múltiples, persistencia y símbolos d
  await page.getByRole('button',{name:/Secuencia QA real/}).click()
  await expect(page.locator('.react-flow__edge')).toHaveCount(3)
  await page.getByRole('button',{name:/Estados QA real/}).click()
- await expect(page.locator('.react-flow__node .atlas-uml-control')).toHaveCount(8)
+ await expect(page.locator('.react-flow__node .novzi-uml-control')).toHaveCount(8)
  await expect(page.locator('.react-flow__node[data-id="choice"] polygon')).toHaveCount(1)
  await expect(page.locator('.react-flow__node[data-id="history"] svg text')).toHaveText('H')
  await expect(page.locator('.react-flow__node[data-id="deep"] svg text')).toHaveCount(2)

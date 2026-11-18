@@ -13,6 +13,6 @@ for(const scenario of ['migration-new','migration-legacy-checksum','migration-ch
  if(scenario.endsWith('-rollback'))assert.match(run.stderr,/QA simulated SQL failure/)
  if(scenario==='migration-checksum-mismatch')assert.match(run.stderr,/MIGRACION MODIFICADA/)
  if(scenario==='seed-production')assert.match(run.stderr,/SEED DEMO PROHIBIDO/)
- if(scenario==='e2e-workspace-absent')assert.match(run.stderr,/Ejecuta db:seed contra atlas_test/)
- if(scenario==='admin-absent')assert.match(run.stderr,/ATLAS sin administrador/)
+ if(scenario==='e2e-workspace-absent')assert.match(run.stderr,/Ejecuta db:seed contra novzi_test/)
+ if(scenario==='admin-absent')assert.match(run.stderr,/NOVZI sin administrador/)
 })

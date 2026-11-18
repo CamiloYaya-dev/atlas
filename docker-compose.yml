@@ -1,3 +1,7 @@
+# Mantiene identificadores físicos históricos de PostgreSQL para reutilizar los datos existentes.
+# El nombre de marca, API, tablas y paquetes ya es NOVZI; NO eliminar el volumen.
+# Evita que un director renombrado cree por accidente otra BD y parezca que perdió los datos.
+name: atlas
 services:
   db:
     image: postgres:16-alpine

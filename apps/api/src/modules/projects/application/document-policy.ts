@@ -1,13 +1,13 @@
-import {newDeploymentIssues,deploymentRegistry,deploymentRefs,deploymentDetailRefs,validDeploymentRegistry} from '@atlas/contracts'
-import {newComponentIssues,componentReferences,componentRegistry,componentRelationRefs,componentRelationDependencies,validComponentRegistry,validComponentEdgeShape} from '@atlas/contracts'
-import {newSequenceIssues,validSequenceRoot,validSequenceDetail,validSequenceEdgeDetail,sequenceReferences,sequenceGatePair,sequenceGateMatchIds} from '@atlas/contracts'
-import {newActivityIssues,retainActivityCatalog,activityCatalogReferenced,ACTIVITY_TYPES,activityReferences,validActivityRoot,validActivityDetail,validActivityEdgeDetail} from '@atlas/contracts'
-import {newUseCaseIssues,adaptUseCaseDocument,useCaseRegistry,validUseCaseRegistry,repairStoredUseCaseAnnotations,retainUseCaseCatalog,isUseCaseCatalogType,useCaseElementIsReferenced} from '@atlas/contracts'
-import {newClassIssues,classSelfAllowed,umlRelationNameLocked} from '@atlas/contracts'
+import {newDeploymentIssues,deploymentRegistry,deploymentRefs,deploymentDetailRefs,validDeploymentRegistry} from '@novzi/contracts'
+import {newComponentIssues,componentReferences,componentRegistry,componentRelationRefs,componentRelationDependencies,validComponentRegistry,validComponentEdgeShape} from '@novzi/contracts'
+import {newSequenceIssues,validSequenceRoot,validSequenceDetail,validSequenceEdgeDetail,sequenceReferences,sequenceGatePair,sequenceGateMatchIds} from '@novzi/contracts'
+import {newActivityIssues,retainActivityCatalog,activityCatalogReferenced,ACTIVITY_TYPES,activityReferences,validActivityRoot,validActivityDetail,validActivityEdgeDetail} from '@novzi/contracts'
+import {newUseCaseIssues,adaptUseCaseDocument,useCaseRegistry,validUseCaseRegistry,repairStoredUseCaseAnnotations,retainUseCaseCatalog,isUseCaseCatalogType,useCaseElementIsReferenced} from '@novzi/contracts'
+import {newClassIssues,classSelfAllowed,umlRelationNameLocked} from '@novzi/contracts'
 import {isDeepStrictEqual} from 'node:util'
-import type {Diagram,DiagramNode,DiagramEdge,ModelElement,ProjectDocument,FieldDefinition} from '@atlas/contracts'
-import {sequenceSnapChild,sequenceActivationHandleValid,isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,atlasNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@atlas/contracts'
-import {relationScope,umlElementAllowed,umlRelationAllowed,validUmlDetail} from '@atlas/contracts'
+import type {Diagram,DiagramNode,DiagramEdge,ModelElement,ProjectDocument,FieldDefinition} from '@novzi/contracts'
+import {sequenceSnapChild,sequenceActivationHandleValid,isUmlDiagram,validUmlEdgeNotation,umlAncestryValid,novziNodeSize,validNodeDimension,umlNodeDepth,umlRelationEndpointValid} from '@novzi/contracts'
+import {relationScope,umlElementAllowed,umlRelationAllowed,validUmlDetail} from '@novzi/contracts'
 import type {Access} from '../../../security/roles'
 import {allowed,requirePermission} from '../../../security/roles'
 import {DomainError} from '../../../domain/errors'
@@ -101,22 +101,22 @@ export function ensureUniqueIds(doc:ProjectDocument){
     if(!umlAncestryValid(d,n,doc.elements))throw new DomainError('Contención UML inválida: jerarquía o ciclo',400)
     const parent=d.nodes.find(p=>p.id===n.parentNodeId)!
     const parentKind=doc.elements[parent.elementId].type
-    const size=atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id))
+    const size=novziNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id))
     const port=['uml-port','uml-activity-pin'].includes(doc.elements[n.elementId].type)
     const destruction=d.type==='uml-sequence'&&doc.elements[n.elementId].type==='uml-destruction'
     // A destruction occurrence is centered on the endpoint and intentionally
     // straddles the lower edge of the participant or activation.
-    const anchor=destruction?sequenceSnapChild(parentKind,'uml-destruction',size,atlasNodeSize(d.type,doc.elements[n.elementId],n),n.y):undefined
+    const anchor=destruction?sequenceSnapChild(parentKind,'uml-destruction',size,novziNodeSize(d.type,doc.elements[n.elementId],n),n.y):undefined
     const anchored=!!anchor&&n.x===anchor.x&&n.y===anchor.y
     if(!anchored&&(n.x<(port?-100:0)||n.y<(port?-45:0)||n.x>size.width+(port?0:-20)||n.y>size.height+(port?0:-20)))throw new DomainError('Caja fuera de contenedor UML',400)
    }
    const element=doc.elements[n.elementId]
    if((n.width!==undefined||n.height!==undefined)&&d.nodes.some(child=>child.parentNodeId===n.id)&&element){
-    const size=atlasNodeSize(d.type,element,n,umlNodeDepth(d,n),true)
+    const size=novziNodeSize(d.type,element,n,umlNodeDepth(d,n),true)
     for(const child of d.nodes.filter(child=>child.parentNodeId===n.id)){
      const childElement=doc.elements[child.elementId]
      if(!childElement||['uml-port','uml-activity-pin'].includes(childElement.type))continue
-     const childSize=atlasNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
+     const childSize=novziNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
      if(d.type==='uml-sequence'&&childElement.type==='uml-destruction'){
       const anchor=sequenceSnapChild(element.type,childElement.type,size,childSize,child.y)
       if(child.x===anchor.x&&child.y===anchor.y)continue

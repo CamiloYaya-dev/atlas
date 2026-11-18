@@ -35,7 +35,7 @@ export const saveTemplate=(p:string,data:FunctionalTemplate,newFields:TemplateFi
 export const deleteTemplate=(p:string,id:string)=>request<{ok:boolean}>(root(p)+`/templates/${encodeURIComponent(id)}`,{method:'DELETE'})
 export type TransferScope='none'|'form'|'template'|'both'
 export type TransferSelection=Record<FunctionalKind,TransferScope>
-export const TRANSFER_FORMAT='ATLAS-FUNCTIONAL-SCHEMAS'
+export const TRANSFER_FORMAT='NOVZI-FUNCTIONAL-SCHEMAS'
 export type FunctionalSchemaBundle={format:string;version:number;exportedAt:string;selections:TransferSelection;kinds:Record<string,unknown>}
 export const exportFunctionalSchemas=(p:string,selections:TransferSelection,templateIds?:Partial<Record<FunctionalKind,string[]>>)=>request<FunctionalSchemaBundle>(root(p)+'/transfer/export',json({selections,templateIds}))
 export const importFunctionalSchemas=(p:string,bundle:unknown)=>request<{addedFields:number;reusedFields:number;addedTemplates:number}>(root(p)+'/transfer/import',json({bundle}))

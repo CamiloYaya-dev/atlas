@@ -1,10 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {inflateRawSync} from 'node:zlib'
-import {availableExportFields,validateAdvancedExport,exportFieldsFor} from '@atlas/contracts'
-import type {ProjectDocument} from '@atlas/contracts'
+import {availableExportFields,validateAdvancedExport,exportFieldsFor} from '@novzi/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import {buildDiagramDictionary,zipFiles} from './advanced-document'
-const document:ProjectDocument={schema:1,fieldDefinitions:[{id:'channel',label:'Canal',forType:'actor',kind:'text'}],elements:{a:{id:'a',name:'Usuario <final>',type:'actor',summary:'Solicitud & pago',description:'',owner:'Camilo',author:'ATLAS',status:'Activo',createdAt:'2026-11-13',updatedAt:'2026-11-13',links:[],fields:{channel:'Web'}},b:{id:'b',name:'Plataforma',type:'system',summary:'',description:'',owner:'',author:'',status:'',createdAt:'',updatedAt:'',links:[],fields:{}}},diagrams:[{id:'c1',name:'C1 test',description:'Contexto',type:'c1',createdAt:'2026-11-13',nodes:[{id:'na',elementId:'a',x:0,y:0},{id:'nb',elementId:'b',x:230,y:0}],edges:[{id:'r1',source:'na',target:'nb',label:'Usa',direction:'forward'}]}]}
+const document:ProjectDocument={schema:1,fieldDefinitions:[{id:'channel',label:'Canal',forType:'actor',kind:'text'}],elements:{a:{id:'a',name:'Usuario <final>',type:'actor',summary:'Solicitud & pago',description:'',owner:'Camilo',author:'NOVZI',status:'Activo',createdAt:'2026-11-13',updatedAt:'2026-11-13',links:[],fields:{channel:'Web'}},b:{id:'b',name:'Plataforma',type:'system',summary:'',description:'',owner:'',author:'',status:'',createdAt:'',updatedAt:'',links:[],fields:{}}},diagrams:[{id:'c1',name:'C1 test',description:'Contexto',type:'c1',createdAt:'2026-11-13',nodes:[{id:'na',elementId:'a',x:0,y:0},{id:'nb',elementId:'b',x:230,y:0}],edges:[{id:'r1',source:'na',target:'nb',label:'Usa',direction:'forward'}]}]}
 const diagram=document.diagrams[0]
 test('campos exportables incluyen relaciones e inspector personalizado del documento persistido',()=>{
  const fields=availableExportFields(document,diagram,'a')
@@ -32,10 +32,10 @@ test('diccionario no ejecuta HTML de campos y presenta las fichas elegidas',()=>
 })
 test('el ZIP contiene dos entradas íntegras (imagen y HTML) sin librerías extra',()=>{
  const image=Buffer.from('imagen\n'),dictionary=Buffer.from('<h1>Ejemplo</h1>')
- const zip=zipFiles([{name:'ATLAS_Diagrama.png',bytes:image},{name:'ATLAS_Diccionario.html',bytes:dictionary}])
+ const zip=zipFiles([{name:'NOVZI_Diagrama.png',bytes:image},{name:'NOVZI_Diccionario.html',bytes:dictionary}])
  const entries=readLocalEntries(zip)
  assert.equal(entries.length,2)
- assert.deepEqual(entries.map(entry=>entry.name),['ATLAS_Diagrama.png','ATLAS_Diccionario.html'])
+ assert.deepEqual(entries.map(entry=>entry.name),['NOVZI_Diagrama.png','NOVZI_Diccionario.html'])
  assert.deepEqual(entries.map(entry=>entry.method),[0,8])
  assert.deepEqual(entries[0].body,image)
  assert.deepEqual(entries[1].body,dictionary)

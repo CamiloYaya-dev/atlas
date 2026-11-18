@@ -103,7 +103,7 @@ export default function TemplateDesigner({projectId,kind,items,fields,canManage,
  const exportTemplateJSON=async()=>{if(!draft?.id||dirty||!canExport)return;setBusy(true);setError('');try{
   const selection={finding:'none',rf:'none',rnf:'none',story:'none',[kind]:'template'} as TransferSelection
   const payload=await exportFunctionalSchemas(projectId,selection,{[kind]:[draft.id]})
-  downloadJSON(`ATLAS_plantilla_${draft.name.replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`,payload)
+  downloadJSON(`NOVZI_plantilla_${draft.name.replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`,payload)
   setNotice('Plantilla exportada con sus campos dependientes')
  }catch(e){setError((e as Error).message)}finally{setBusy(false)}}
  const importTemplateJSON=async(file:File)=>{if(dirty){setError('Guarda o descarta los cambios antes de importar');return}if(file.size>10000000){setError('El JSON no puede superar 10 MB');return}setBusy(true);setError('');try{

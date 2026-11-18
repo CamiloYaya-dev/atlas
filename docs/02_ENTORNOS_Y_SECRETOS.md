@@ -1,8 +1,8 @@
-# Matriz de variables y secretos — ATLAS V4.2
+# Matriz de variables y secretos — NOVZI V4.2
 
 ## Backend `apps/api/.env` (LOCAL solamente)
 
-La plantilla de desarrollo incluye `AUTH_MODE=local`, puerto 3001, `DATABASE_URL` de Docker local y un `ATLAS_CSRF_SECRET` **de desarrollo**, jamás publicarlo.
+La plantilla de desarrollo incluye `AUTH_MODE=local`, puerto 3001, `DATABASE_URL` de Docker local y un `NOVZI_CSRF_SECRET` **de desarrollo**, jamás publicarlo.
 
 ## Backend PROD (secretos en el proveedor, no en repositorio)
 
@@ -10,7 +10,7 @@ La plantilla de desarrollo incluye `AUTH_MODE=local`, puerto 3001, `DATABASE_URL
 - `AUTH_MODE=local`
 - `DATABASE_URL`: credenciales limitadas para la base de datos PROD administrada, con host privado cuando sea posible.
 - `DB_SSL=true`: certificado válido y verificación TLS.
-- `ATLAS_CSRF_SECRET`: secreto aleatorio de al menos 32 caracteres, propio de PROD; rotarlo invalida CSRF de sesiones existentes.
+- `NOVZI_CSRF_SECRET`: secreto aleatorio de al menos 32 caracteres, propio de PROD; rotarlo invalida CSRF de sesiones existentes.
 - `CORS_ORIGINS=https://app.tudominio.com`: solo los orígenes autorizados, separados por comas.
 - `TRUST_PROXY=true` cuando hay proxy de confianza delante del servicio.
 - `PORT`, `HOST`, `DB_POOL_MAX` según servicio.

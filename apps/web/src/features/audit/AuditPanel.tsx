@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react'
 import {Overlay,Field} from '../../components/molecules/Overlay'
 import {listAuditEvents} from './api'
 import {listProjects} from '../projects/api'
-import type {Project} from '@atlas/contracts'
+import type {Project} from '@novzi/contracts'
 import type {AuditEvent,AuditFilters} from './api'
 const eventNames:Record<string,string>={
  'project.created':'Proyecto creado','project.renamed':'Proyecto renombrado','project.deleted':'Proyecto eliminado',

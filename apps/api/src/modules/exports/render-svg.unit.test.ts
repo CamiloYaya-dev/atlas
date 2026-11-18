@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {Diagram,DiagramEdge} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {Diagram,DiagramEdge} from '@novzi/contracts'
 import {esc,renderDiagramSVG} from './render-svg'
 function sample(){
  const doc=emptyDoc(),a=createElement('Nombre muy largo para comprobar que el texto se divide de forma segura <script>','actor'),b=createElement('Destino','uml-class')
@@ -34,6 +34,6 @@ test('SVG auxiliar rechaza coordenadas inválidas, tamaño y cantidad excesivos'
 
 test('SVG de respaldo incluye marca de agua, flecha doble y omite nodos sin elemento',()=>{
  const {doc,d}=sample();d.nodes.push({id:'orphan',elementId:'missing',x:300,y:200});d.edges=[{id:'both',source:'a',target:'b',direction:'both',sourceHandle:'right',targetHandle:'left'}]
- const {svg}=renderDiagramSVG(doc,d,true);assert.match(svg,/ATLAS · USO NO COMERCIAL/);assert.match(svg,/marker-start="url\(#arrow\)" marker-end="url\(#arrow\)"/);assert.doesNotMatch(svg,/orphan/)
+ const {svg}=renderDiagramSVG(doc,d,true);assert.match(svg,/NOVZI · USO NO COMERCIAL/);assert.match(svg,/marker-start="url\(#arrow\)" marker-end="url\(#arrow\)"/);assert.doesNotMatch(svg,/orphan/)
 })
 

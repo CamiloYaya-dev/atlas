@@ -4,7 +4,7 @@
 import {pool} from './pool'
 import {provisionUserDemo} from './demo-provision'
 async function main(){
- const users=await pool.query<{id:string}>('SELECT id FROM atlas_users WHERE active=true ORDER BY created_at')
+ const users=await pool.query<{id:string}>('SELECT id FROM novzi_users WHERE active=true ORDER BY created_at')
  let created=0,already=0
  for(const user of users.rows){
   const client=await pool.connect()
@@ -15,6 +15,6 @@ async function main(){
    if(result.created)created++;else already++
   }catch(error){await client.query('ROLLBACK');throw error}finally{client.release()}
  }
- console.log(`[ATLAS] DEMO: ${created} proyectos creados, ${already} existentes respetados`)
+ console.log(`[NOVZI] DEMO: ${created} proyectos creados, ${already} existentes respetados`)
 }
-main().catch(error=>{console.error('[ATLAS] Demo no instalado:',error instanceof Error?error.message:error);process.exitCode=1}).finally(()=>pool.end())
+main().catch(error=>{console.error('[NOVZI] Demo no instalado:',error instanceof Error?error.message:error);process.exitCode=1}).finally(()=>pool.end())

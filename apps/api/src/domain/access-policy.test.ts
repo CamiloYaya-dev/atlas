@@ -1,8 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc,ROLE_PRESETS} from '@atlas/contracts'
+import {createElement,emptyDoc,ROLE_PRESETS} from '@novzi/contracts'
 import {projectVisible,applyAuthorizedChange} from '../modules/projects/application/document-policy'
-import type {ProjectDocument} from '@atlas/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import type {Access} from '../security/roles'
 const mk=(key:string):Access=>({roleId:'role',roleKey:key,roleName:key,permissions:new Set(ROLE_PRESETS.find(x=>x.key===key)!.permissions)})
 function fixture():ProjectDocument{

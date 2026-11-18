@@ -1,13 +1,13 @@
 import {BaseEdge,EdgeLabelRenderer} from '@xyflow/react'
 import type {EdgeProps} from '@xyflow/react'
-import type {EdgePathStyle} from '@atlas/contracts'
+import type {EdgePathStyle} from '@novzi/contracts'
 import {parallelRoute} from '../../features/editor/domain/parallel-edges'
 import {needsDetour,obstacleRoute,distinctEdgeRoute} from '../../features/editor/domain/diagram-beautify'
 import type {Rectangle} from '../../features/editor/domain/diagram-beautify'
 
 type ParallelEdgeData={parallelOffset:number;parallelPath:EdgePathStyle;routeObstacles?:Rectangle[];routeLane?:number}
 /** Ruta individual para cada relación del mismo par. Nunca modifica el grafo. */
-export function AtlasParallelEdge(props:EdgeProps){
+export function NovziParallelEdge(props:EdgeProps){
  const data=props.data as ParallelEdgeData|undefined
  const route=parallelRoute({sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,
   offset:data?.parallelOffset||0,pathStyle:data?.parallelPath||'bezier',
@@ -20,8 +20,8 @@ export function AtlasParallelEdge(props:EdgeProps){
  return <>
   <BaseEdge id={props.id} path={visual.path} style={props.style} markerStart={props.markerStart} markerEnd={props.markerEnd} interactionWidth={26}/>
   {props.label!==undefined&&String(props.label).trim()!==''&&<EdgeLabelRenderer>
-   <div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${visual.labelX}px,${visual.labelY}px)`}}>{props.label}</div>
+   <div className="novzi-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${visual.labelX}px,${visual.labelY}px)`}}>{props.label}</div>
   </EdgeLabelRenderer>}
  </>
 }
-export const edgeTypes={ 'atlas-parallel':AtlasParallelEdge }
+export const edgeTypes={ 'novzi-parallel':NovziParallelEdge }

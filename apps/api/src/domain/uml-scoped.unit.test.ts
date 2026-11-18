@@ -1,8 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {emptyDoc,createElement,canonicalUmlEdge,isProjectDocument,ROLE_PRESETS,umlElementCreatable,umlRelationCreatable,umlRelationEndpointValid,UML_ELEMENTS_BY_DIAGRAM} from '@atlas/contracts'
-import type {ProjectDocument} from '@atlas/contracts'
+import {emptyDoc,createElement,canonicalUmlEdge,isProjectDocument,ROLE_PRESETS,umlElementCreatable,umlRelationCreatable,umlRelationEndpointValid,UML_ELEMENTS_BY_DIAGRAM} from '@novzi/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import {applyAuthorizedChange,projectVisible} from '../modules/projects/application/document-policy'
 import {renderDiagramSVG} from '../modules/exports/render-svg'
 import type {Access} from '../security/roles'
@@ -25,7 +25,7 @@ for(const [type,a,b,kind] of examples){
  })
 }
 test('[uml-class] fixture integral de clases: contrato, policy, exportación y roundtrip',()=>{
- const doc=JSON.parse(readFileSync(new URL('../../../../qa/ATLAS_QA_UML_CLASES.json',import.meta.url),'utf8')) as ProjectDocument
+ const doc=JSON.parse(readFileSync(new URL('../../../../qa/NOVZI_QA_UML_CLASES.json',import.meta.url),'utf8')) as ProjectDocument
  // The fixture is a plain project document, not an import wrapper.
  assert.ok(isProjectDocument(doc));assert.equal(doc.diagrams.length,1);assert.equal(doc.diagrams[0].type,'uml-class')
  const stored=applyAuthorizedChange(emptyDoc(),doc,access('owner'));assert.deepEqual(stored,doc)

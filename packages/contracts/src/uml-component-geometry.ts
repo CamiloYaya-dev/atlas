@@ -1,4 +1,4 @@
-/** Calcula el punto y la tangente real a media longitud de una ruta SVG de ATLAS.
+/** Calcula el punto y la tangente real a media longitud de una ruta SVG de NOVZI.
  * No usa el vector directo entre cajas: ese vector falla en enlaces ortogonales. */
 export interface AssemblyAnchor {x:number;y:number;angle:number}
 interface Point {x:number;y:number}
@@ -42,7 +42,7 @@ export function assemblyAnchor(path:string):AssemblyAnchor{
 }
 import type {Diagram,DiagramEdge,ModelElement,ProjectDocument} from './index'
 import {componentContract,componentInterfaceCompatible,componentRegistry,componentTitle} from './uml-component-policy'
-import {atlasNodeSize} from './node-sizing'
+import {novziNodeSize} from './node-sizing'
 import {umlAbsolutePosition,umlNodeDepth} from './uml-containers'
 import {umlAttributeText,umlOperationTextResolved} from './uml-structure'
 import {umlTypeIdentifier} from './uml-class-policy'
@@ -68,7 +68,7 @@ export function componentAssemblyDirection(doc:ProjectDocument,d:Diagram,e:Diagr
 export function componentAssemblyMarkup(){return `<path d="M -23,0 H -12 M 15,0 H 23"/><circle cx="-5" cy="0" r="7" fill="white"/><path d="M 3,-11 Q 25,0 3,11"/>`}
 export function componentHandle(handle:string|undefined,port:boolean):string|undefined{return port&&handle?.startsWith('top-')?'top-2':port&&handle?.startsWith('bottom-')?'bottom-2':handle}
 export function componentSvgScene(doc:ProjectDocument,d:Diagram){
- const names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name])),bounds=new Map(d.nodes.flatMap(n=>{const e=doc.elements[n.elementId];if(!e)return [];const children=d.nodes.some(x=>x.parentNodeId===n.id);return [[n.id,{...umlAbsolutePosition(d,n),...atlasNodeSize(d.type,e,n,umlNodeDepth(d,n),children),e,children,internal:d.nodes.some(x=>x.parentNodeId===n.id&&doc.elements[x.elementId]?.type!=='uml-port')}] as const]})),offsets=parallelOffsets(d.edges)
+ const names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name])),bounds=new Map(d.nodes.flatMap(n=>{const e=doc.elements[n.elementId];if(!e)return [];const children=d.nodes.some(x=>x.parentNodeId===n.id);return [[n.id,{...umlAbsolutePosition(d,n),...novziNodeSize(d.type,e,n,umlNodeDepth(d,n),children),e,children,internal:d.nodes.some(x=>x.parentNodeId===n.id&&doc.elements[x.elementId]?.type!=='uml-port')}] as const]})),offsets=parallelOffsets(d.edges)
  const maskX=Math.min(0,...[...bounds.values()].map(b=>b.x))-200,maskY=Math.min(0,...[...bounds.values()].map(b=>b.y))-200,maskW=Math.max(100,...[...bounds.values()].map(b=>b.x+b.width))+200-maskX,maskH=Math.max(100,...[...bounds.values()].map(b=>b.y+b.height))+200-maskY
  const route=(e:DiagramEdge)=>{const a=bounds.get(e.source),b=bounds.get(e.target);if(!a||!b)return;const p=classPort(a,componentHandle(e.sourceHandle,a.e.type==='uml-port'),true),q=classPort(b,componentHandle(e.targetHandle,b.e.type==='uml-port'),false),r=classRelationRoute({sourceX:p.x,sourceY:p.y,targetX:q.x,targetY:q.y,sourcePosition:p.side,targetPosition:q.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||'smoothstep'},false);return {p,q,r}}
  const terminal=(kind:string,p:ReturnType<typeof classPort>)=>{const symbol=kind==='triangle'?'<path d="M 0 0 L 18 -10 L 18 10 Z" fill="white"/>':kind==='open-arrow'?'<path d="M 13 -7 L 0 0 L 13 7"/>':kind==='ball'?'<circle cx="7" cy="0" r="7" fill="white"/>':kind==='socket'?'<path d="M 3 -10 Q 24 0 3 10"/>':'';return symbol?`<g transform="translate(${p.x} ${p.y}) rotate(${classPortAngle(p.side)})" stroke="${ink}" fill="none" stroke-width="1.6">${symbol}</g>`:''}

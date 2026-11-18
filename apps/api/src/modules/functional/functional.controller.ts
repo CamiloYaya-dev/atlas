@@ -34,7 +34,7 @@ async function selectedTemplate(projectId:string,kind:FunctionalKind,value:unkno
 async function validateReviewer(projectId:string,kind:FunctionalKind,reviewerId:string|undefined){
  if(kind!=='finding')return
  const uid=uuid(reviewerId)
- const r=await pool.query(`SELECT u.id FROM projects p JOIN workspace_members wm ON wm.workspace_id=p.workspace_id JOIN workspace_roles wr ON wr.id=wm.role_id LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=wm.user_id JOIN atlas_users u ON u.id=wm.user_id AND u.active=true WHERE p.id=$1 AND u.id=$2 AND (pm.user_id IS NOT NULL OR wr.role_key='owner')`,[projectId,uid])
+ const r=await pool.query(`SELECT u.id FROM projects p JOIN workspace_members wm ON wm.workspace_id=p.workspace_id JOIN workspace_roles wr ON wr.id=wm.role_id LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=wm.user_id JOIN novzi_users u ON u.id=wm.user_id AND u.active=true WHERE p.id=$1 AND u.id=$2 AND (pm.user_id IS NOT NULL OR wr.role_key='owner')`,[projectId,uid])
  if(!r.rows[0])throw new DomainError('El responsable debe ser un usuario activo con acceso al proyecto',400)
 }
 async function validateLink(projectId:string,targetType:string,targetId:string,diagramId:string|null,userId:string){
@@ -48,7 +48,7 @@ export async function registerFunctionalController(app:FastifyInstance){
  type P={projectId:string};type I=P&{itemId:string};type ID=P&{id:string}
  app.get<{Params:P}>('/api/v1/projects/:projectId/functional/reviewers',async req=>{
   const p=uuid(req.params.projectId);await check(req,p,'functional.read')
-  const r=await pool.query<{id:string;name:string;email:string}>(`SELECT DISTINCT u.id,u.display_name AS name,u.email FROM projects p JOIN workspace_members wm ON wm.workspace_id=p.workspace_id JOIN workspace_roles wr ON wr.id=wm.role_id LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=wm.user_id JOIN atlas_users u ON u.id=wm.user_id AND u.active=true WHERE p.id=$1 AND (pm.user_id IS NOT NULL OR wr.role_key='owner') ORDER BY name`,[p])
+  const r=await pool.query<{id:string;name:string;email:string}>(`SELECT DISTINCT u.id,u.display_name AS name,u.email FROM projects p JOIN workspace_members wm ON wm.workspace_id=p.workspace_id JOIN workspace_roles wr ON wr.id=wm.role_id LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=wm.user_id JOIN novzi_users u ON u.id=wm.user_id AND u.active=true WHERE p.id=$1 AND (pm.user_id IS NOT NULL OR wr.role_key='owner') ORDER BY name`,[p])
   return r.rows
  })
  app.get<{Params:P;Querystring:{kind?:string}}>( '/api/v1/projects/:projectId/functional/items',async req=>{

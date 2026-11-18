@@ -1,4 +1,4 @@
-# Plan de despliegue — ATLAS V4.2
+# Plan de despliegue — NOVZI V4.2
 
 Este documento define el destino de despliegue, **no afirma que ya esté desplegado**.
 
@@ -14,7 +14,7 @@ Este documento define el destino de despliegue, **no afirma que ya esté despleg
 
 1. Reservar y configurar DNS/TLS para front/API en DEV, y producir después de validación.
 2. Provisionar **dos PostgreSQL independientes**; desactivar acceso indiscriminado por internet. Aplicar mínimos privilegios y backups, verificando restauración.
-3. Configurar secretos por entorno en el proveedor de API (`DATABASE_URL`, `ATLAS_CSRF_SECRET`, `CORS_ORIGINS`, `DB_SSL`). No copiarlos entre ambientes.
+3. Configurar secretos por entorno en el proveedor de API (`DATABASE_URL`, `NOVZI_CSRF_SECRET`, `CORS_ORIGINS`, `DB_SSL`). No copiarlos entre ambientes.
 4. Ejecutar migraciones en DEV con una identidad de DB restringida antes de levantar la API; luego correr `admin:create` **por única vez** con credenciales nuevas. Sin seed ficticio en PROD.
 5. Desplegar API Fastify, publicar `/ready` y validar inicio sesión con cookie `Secure` y cabeceras CSRF.
 6. Desplegar React configurando `VITE_API_BASE_URL=https://api.tudominio.com` (en DEV la variante dev). Si un reverse proxy sirve ambos en un solo origen, adaptar la configuración.

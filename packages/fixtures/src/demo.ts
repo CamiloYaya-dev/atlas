@@ -1,7 +1,7 @@
-import {type Diagram, type DiagramType, type ElementType, type ModelElement, type ProjectDocument, emptyDoc} from '@atlas/contracts'
+import {type Diagram, type DiagramType, type ElementType, type ModelElement, type ProjectDocument, emptyDoc} from '@novzi/contracts'
 const date='2026-11-11'
 function element(id:string,name:string,type:ElementType,summary:string,technical='',group=''):ModelElement{
- return {id,name,type,summary,description:summary,owner: type==='requirement'?'Producto': 'Equipo ATLAS',author:'Equipo de demostración',status:'Validado',createdAt:'2026-11-01',updatedAt:date,group,technical,links: type==='requirement'?[{id:`link-${id}`,label:'Jira (ejemplo)',url:'https://www.atlassian.com/software/jira'}]:[],fields:{}}
+ return {id,name,type,summary,description:summary,owner: type==='requirement'?'Producto': 'Equipo NOVZI',author:'Equipo de demostración',status:'Validado',createdAt:'2026-11-01',updatedAt:date,group,technical,links: type==='requirement'?[{id:`link-${id}`,label:'Jira (ejemplo)',url:'https://www.novzisian.com/software/jira'}]:[],fields:{}}
 }
 const E:ModelElement[]=[
  element('actor','Usuario final','actor','Persona que utiliza la aplicación'),

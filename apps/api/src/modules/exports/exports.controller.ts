@@ -12,8 +12,8 @@ import {embedProvenance,readProvenance,sha256,signature,signaturesMatch} from '.
 import type {Provenance} from './provenance'
 import {buildDiagramDictionary,zipFiles} from './advanced-document'
 import {buildDiagramDocx,buildDiagramPdf} from './diagram-documents'
-import {validateAdvancedExport} from '@atlas/contracts'
-import type {AdvancedExportRequest} from '@atlas/contracts'
+import {validateAdvancedExport} from '@novzi/contracts'
+import type {AdvancedExportRequest} from '@novzi/contracts'
 
 const projects=new ProjectsService()
 const bodyObject=(x:unknown)=>{if(!x||typeof x!=='object'||Array.isArray(x))throw new DomainError('Se requiere objeto JSON',400);return x as Record<string,unknown>}
@@ -48,7 +48,7 @@ export async function registerExportsController(app:FastifyInstance){
   }
   // Captura del navegador: la firma certifica emisión e integridad de píxeles, no equivalencia semántica con el modelo.
   // Solo el servidor decide y aplica la marca, la firma y la auditoría.
-  if(typeof body.imageBase64!=='string')throw new DomainError('Captura visual requerida; actualiza ATLAS para exportar fielmente',400)
+  if(typeof body.imageBase64!=='string')throw new DomainError('Captura visual requerida; actualiza NOVZI para exportar fielmente',400)
   const raw=await encodeCapturedDiagram(body.imageBase64,fmt,watermarkApplied)
   const createdAt=new Date().toISOString(),exportId=randomUUID()
   const proof:Provenance={version:1,exportId,workspaceId,projectId:req.params.projectId,diagramId:d.id,actorId:user.id,documentVersion:saved.version,format:fmt,planCode:rights.planCode,licenseActive:rights.licenseActive,watermarkApplied,exportedAt:createdAt,imageSha256:sha256(raw)}
@@ -66,12 +66,12 @@ export async function registerExportsController(app:FastifyInstance){
    const documentFormat=advanced.documentFormat||'html'
    const documentBytes=documentFormat==='docx'?buildDiagramDocx(saved.document,d,advanced):documentFormat==='pdf'?buildDiagramPdf(saved.document,d,advanced):Buffer.from(buildDiagramDictionary(saved.document,d,advanced,exportId),'utf8')
    const zip=zipFiles([
-    {name:`ATLAS_${safeFile(d.name)}.${fmt}`,bytes:finalImage},
-    {name:`ATLAS_${safeFile(d.name)}_Fichas.${documentFormat}`,bytes:documentBytes}
+    {name:`NOVZI_${safeFile(d.name)}.${fmt}`,bytes:finalImage},
+    {name:`NOVZI_${safeFile(d.name)}_Fichas.${documentFormat}`,bytes:documentBytes}
    ])
-   return reply.header('X-ATLAS-Export-Id',exportId).header('Content-Disposition',`attachment; filename="ATLAS_${safeFile(d.name)}_Fichas.zip"`).type('application/zip').send(zip)
+   return reply.header('X-NOVZI-Export-Id',exportId).header('Content-Disposition',`attachment; filename="NOVZI_${safeFile(d.name)}_Fichas.zip"`).type('application/zip').send(zip)
   }
-  return reply.header('X-ATLAS-Export-Id',exportId).header('Content-Disposition',`attachment; filename="ATLAS_${safeFile(d.name)}.${fmt}"`).type(fmt==='png'?'image/png':'image/jpeg').send(finalImage)
+  return reply.header('X-NOVZI-Export-Id',exportId).header('Content-Disposition',`attachment; filename="NOVZI_${safeFile(d.name)}.${fmt}"`).type(fmt==='png'?'image/png':'image/jpeg').send(finalImage)
  })
  // Verifica integridad binaria, firma criptográfica y emisión registrada; ediciones invalidan la firma.
  app.post('/api/v1/exports/verify',{bodyLimit:19_000_000},async(req)=>{
@@ -80,7 +80,7 @@ export async function registerExportsController(app:FastifyInstance){
   const bytes=Buffer.from(body.imageBase64,'base64')
   if(bytes.length>13_500_000)throw new DomainError('Imagen demasiado grande para verificación por API',413)
   const parsed=readProvenance(bytes)
-  if(!parsed)return {verified:false,reason:'sin_firma_atlas'}
+  if(!parsed)return {verified:false,reason:'sin_firma_novzi'}
   const proof=parsed.proof
   if(typeof proof.exportId!=='string'||!/^[a-f0-9-]{36}$/i.test(proof.exportId))return {verified:false,reason:'firma_invalida'}
   const rows=await pool.query<{workspace_id:string;image_sha256:string;signature:string;watermark_applied:boolean;license_active:boolean}>('SELECT workspace_id,image_sha256,signature,watermark_applied,license_active FROM export_audit_logs WHERE id=$1',[proof.exportId])

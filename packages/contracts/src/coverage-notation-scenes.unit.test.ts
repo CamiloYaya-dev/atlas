@@ -8,7 +8,7 @@ import {deploymentEndpointValid} from './uml-deployment-catalog'
 import {componentEndpointValid} from './uml-component-catalog'
 import {classPort,classFacingPort,classRelationRoute,classEndTerminal,classEndLabel,classTemplateFormalText,useCaseEllipseIntersection,useCasePort} from './uml-class-geometry'
 import {deploymentFacingPort,deploymentGlyph,deploymentPort,deploymentSvgScene} from './uml-deployment-geometry'
-const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/ATLAS_QA_UML_${name}.json`,import.meta.url),'utf8'))
+const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/NOVZI_QA_UML_${name}.json`,import.meta.url),'utf8'))
 const r={x:0,y:0,width:200,height:100}
 const close=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`)
 

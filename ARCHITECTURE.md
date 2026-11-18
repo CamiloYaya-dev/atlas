@@ -1,4 +1,4 @@
-# ATLAS V4.2 · Arquitectura y seguridad
+# NOVZI V4.2 · Arquitectura y seguridad
 
 ```mermaid
 flowchart TD
@@ -20,9 +20,9 @@ flowchart TD
 ## Autenticación
 
 - Solo acceso cerrado (`AUTH_MODE=local`), primer administrador creado desde CLI; otros usuarios creados por ese administrador.
-- `atlas_users` almacena email y hashes `scrypt`; no hay contraseñas de demostración.
-- `atlas_sessions` guarda hashes de tokens opacos, validez de 12 horas y revocaciones.
-- Cookie host-only `atlas_session`, `HttpOnly`, `SameSite=Lax`, `Secure` cuando NODE_ENV=production; Path `/api/v1`.
+- `novzi_users` almacena email y hashes `scrypt`; no hay contraseñas de demostración.
+- `novzi_sessions` guarda hashes de tokens opacos, validez de 12 horas y revocaciones.
+- Cookie host-only `novzi_session`, `HttpOnly`, `SameSite=Lax`, `Secure` cuando NODE_ENV=production; Path `/api/v1`.
 - Todas las escrituras requieren CSRF excepto `/auth/login`; petición `Origin` no autorizada se rechaza.
 
 ## Autorización
@@ -39,7 +39,7 @@ flowchart TD
 
 ## Modelo de datos
 
-Migración 003 agrega `atlas_users`, `atlas_sessions`, `workspace_roles`, `role_permissions`, y `workspace_members.role_id`. La migración es incremental sobre 001/002, sin borrar documentos. Los diagramas siguen en JSONB versionado para compatibilidad; normalización profunda es una evolución posterior.
+Migración 003 agrega `novzi_users`, `novzi_sessions`, `workspace_roles`, `role_permissions`, y `workspace_members.role_id`. La migración es incremental sobre 001/002, sin borrar documentos. Los diagramas siguen en JSONB versionado para compatibilidad; normalización profunda es una evolución posterior.
 
 ## Pendientes para producción
 

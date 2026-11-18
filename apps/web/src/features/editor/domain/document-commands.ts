@@ -1,12 +1,12 @@
-import {setDeploymentRelation,newDeploymentIssues,deploymentRegistry} from '@atlas/contracts'
-import {setComponentRelation,newComponentIssues,componentPortSnap,componentPortResize,componentClassifier,componentRole} from '@atlas/contracts'
-import {newSequenceIssues,pruneSequenceOccurrences,sequenceDefaults,SEQUENCE_TYPES,sequenceBox,sequenceLifeline,validSequenceRoot} from '@atlas/contracts'
-import {activityDefaults,newActivityIssues,activitySnapPin,retainActivityCatalog,activityCatalogReferenced} from '@atlas/contracts'
-import {adaptUseCaseDocument,canonicalSubjectId,diagramCreationEnabled,newUseCaseIssues,replaceUseCaseRelation,repairStoredUseCaseAnnotations,isUseCaseCatalogType,useCaseElementIsReferenced,retainUseCaseCatalog} from '@atlas/contracts'
-import {classSelfAllowed,newClassIssues,replaceClassRelationAcrossViews,umlRelationEndpointValid,isUmlDiagram} from '@atlas/contracts'
+import {setDeploymentRelation,newDeploymentIssues,deploymentRegistry} from '@novzi/contracts'
+import {setComponentRelation,newComponentIssues,componentPortSnap,componentPortResize,componentClassifier,componentRole} from '@novzi/contracts'
+import {newSequenceIssues,pruneSequenceOccurrences,sequenceDefaults,SEQUENCE_TYPES,sequenceBox,sequenceLifeline,validSequenceRoot} from '@novzi/contracts'
+import {activityDefaults,newActivityIssues,activitySnapPin,retainActivityCatalog,activityCatalogReferenced} from '@novzi/contracts'
+import {adaptUseCaseDocument,canonicalSubjectId,diagramCreationEnabled,newUseCaseIssues,replaceUseCaseRelation,repairStoredUseCaseAnnotations,isUseCaseCatalogType,useCaseElementIsReferenced,retainUseCaseCatalog} from '@novzi/contracts'
+import {classSelfAllowed,newClassIssues,replaceClassRelationAcrossViews,umlRelationEndpointValid,isUmlDiagram} from '@novzi/contracts'
 /** Pure model operations used by the editor. Backend policy remains the authority. */
-import type {Diagram,DiagramEdge,DiagramType,FieldDefinition,ModelElement,ProjectDocument} from '@atlas/contracts'
-import {umlElementCreatable,umlElementReusable,umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,atlasNodeSize,atlasNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment,sequencePositionLocked} from '@atlas/contracts'
+import type {Diagram,DiagramEdge,DiagramType,FieldDefinition,ModelElement,ProjectDocument} from '@novzi/contracts'
+import {umlElementCreatable,umlElementReusable,umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,novziNodeSize,novziNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment,sequencePositionLocked} from '@novzi/contracts'
 
 function validatedActivityRemoval(before:ProjectDocument,after:ProjectDocument,diagramId:string){
  if(before.diagrams.find(d=>d.id===diagramId)?.type==='uml-sequence')return pruneSequenceOccurrences(before,after,diagramId);
@@ -168,16 +168,16 @@ export function resizeNode(doc:ProjectDocument,diagramId:string,nodeId:string,wi
   if(!element)throw new Error('Elemento inexistente')
   if(d.type==='uml-component'&&element.type==='uml-port')throw Error('El puerto UML tiene tamaño fijo; mueve el símbolo por el borde')
   if(sequencePositionLocked(doc,d,node))throw Error('El tamaño de este símbolo depende de sus ocurrencias; ajusta sus propiedades de secuencia')
-  const minimum=d.type==='uml-activity'&&element.type==='uml-fork'&&element.activityDetail?.orientation==='vertical'?{width:48,height:90}:atlasNodeMinimum(d.type,element.type)
+  const minimum=d.type==='uml-activity'&&element.type==='uml-fork'&&element.activityDetail?.orientation==='vertical'?{width:48,height:90}:novziNodeMinimum(d.type,element.type)
   if(width<minimum.width||height<minimum.height)throw new Error(`Tamaño mínimo: ${minimum.width} × ${minimum.height} px`)
   if(x!==undefined&&(!Number.isFinite(x)||x<-4000||x>100000)||y!==undefined&&(!Number.isFinite(y)||y<-4000||y>100000))throw new Error('Posición inválida')
   const children=d.nodes.filter(n=>n.parentNodeId===nodeId)
-  const original=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),children.length>0)
+  const original=novziNodeSize(d.type,element,node,umlNodeDepth(d,node),children.length>0)
   const adjustedChildren=new Map<string,{x:number;y:number}>()
   for(const child of children){
    const childElement=doc.elements[child.elementId]
    if(!childElement)continue
-   const size=atlasNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
+   const size=novziNodeSize(d.type,childElement,child,umlNodeDepth(d,child),d.nodes.some(x=>x.parentNodeId===child.id))
    if(d.type==='uml-sequence'&&sequenceIsAttachment(childElement.type)){
     adjustedChildren.set(child.id,sequenceSnapChild(element.type,childElement.type,{width,height},size,child.y))
    }else if(d.type==='uml-activity'&&childElement.type==='uml-activity-pin'){adjustedChildren.set(child.id,activitySnapPin({width,height},size,childElement.activityDetail?.role,child.y))
@@ -200,8 +200,8 @@ export function resizeNode(doc:ProjectDocument,diagramId:string,nodeId:string,wi
    }
   }
   const draftParent=d.type==='uml-sequence'&&sequenceIsAttachment(element.type)&&node.parentNodeId?d.nodes.find(n=>n.id===node.parentNodeId):undefined
-  const draftSnap=draftParent?sequenceSnapChild(doc.elements[draftParent.elementId].type,element.type,atlasNodeSize(d.type,doc.elements[draftParent.elementId],draftParent),{width,height},y??node.y):undefined
-  return {...d,nodes:d.nodes.map(n=>n.id===nodeId?{...n,width,height,...(x===undefined?{}:{x:Math.round(x)}),...(y===undefined?{}:{y:Math.round(y)}),...draftSnap,...(d.type==='uml-activity'&&element.type==='uml-activity-pin'&&n.parentNodeId?(()=>{const parent=d.nodes.find(p=>p.id===n.parentNodeId);return parent?activitySnapPin(atlasNodeSize(d.type,doc.elements[parent.elementId],parent),{width,height},element.activityDetail?.role,y??n.y):{}})():{})}:adjustedChildren.has(n.id)?{...n,...adjustedChildren.get(n.id)!}:n)}
+  const draftSnap=draftParent?sequenceSnapChild(doc.elements[draftParent.elementId].type,element.type,novziNodeSize(d.type,doc.elements[draftParent.elementId],draftParent),{width,height},y??node.y):undefined
+  return {...d,nodes:d.nodes.map(n=>n.id===nodeId?{...n,width,height,...(x===undefined?{}:{x:Math.round(x)}),...(y===undefined?{}:{y:Math.round(y)}),...draftSnap,...(d.type==='uml-activity'&&element.type==='uml-activity-pin'&&n.parentNodeId?(()=>{const parent=d.nodes.find(p=>p.id===n.parentNodeId);return parent?activitySnapPin(novziNodeSize(d.type,doc.elements[parent.elementId],parent),{width,height},element.activityDetail?.role,y??n.y):{}})():{})}:adjustedChildren.has(n.id)?{...n,...adjustedChildren.get(n.id)!}:n)}
  })
  const d=doc.diagrams.find(d=>d.id===diagramId);if(d?.interaction){const issue=newSequenceIssues(doc,next)[0];if(issue)throw Error(issue.message)}return next
 }
@@ -218,7 +218,7 @@ export function moveTypedSequenceSelection(doc:ProjectDocument,diagramId:string,
   const n=ns.get(id)!,e=doc.elements[n.elementId];if([...ancestors(id)].some(a=>a!==id&&selected.has(a)))continue;
   if(sequencePositionLocked(doc,d,n))throw Error('Ajusta las ocurrencias o el propietario en las propiedades de secuencia');
   const parent=n.parentNodeId&&ns.get(n.parentNodeId);if(parent&&sequenceIsAttachment(e.type)){
-   const change=selected.get(id)!,snap=sequenceSnapChild(doc.elements[parent.elementId].type,e.type,atlasNodeSize(d.type,doc.elements[parent.elementId],parent),atlasNodeSize(d.type,e,n),n.y+change.y);
+   const change=selected.get(id)!,snap=sequenceSnapChild(doc.elements[parent.elementId].type,e.type,novziNodeSize(d.type,doc.elements[parent.elementId],parent),novziNodeSize(d.type,e,n),n.y+change.y);
    selected.set(id,{x:snap.x-n.x,y:snap.y-n.y});
   }
  }
@@ -242,14 +242,14 @@ export function moveNode(doc:ProjectDocument,diagramId:string,nodeId:string,x:nu
   return {...d,nodes:d.nodes.map(n=>{
    if(n.id!==nodeId)return n
    const element=doc.elements[n.elementId]
-   if(d.type==='uml-component'&&element?.type==='uml-port'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent){const size=atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),true);return {...n,...componentPortSnap(x,y,size.width,size.height)}}}
-   if(d.type==='uml-activity'&&element?.type==='uml-activity-pin'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent)return {...n,...activitySnapPin(atlasNodeSize(d.type,doc.elements[parent.elementId],parent),atlasNodeSize(d.type,element,n),element.activityDetail?.role,y)}}
+   if(d.type==='uml-component'&&element?.type==='uml-port'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent){const size=novziNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),true);return {...n,...componentPortSnap(x,y,size.width,size.height)}}}
+   if(d.type==='uml-activity'&&element?.type==='uml-activity-pin'&&n.parentNodeId){const parent=d.nodes.find(p=>p.id===n.parentNodeId);if(parent)return {...n,...activitySnapPin(novziNodeSize(d.type,doc.elements[parent.elementId],parent),novziNodeSize(d.type,element,n),element.activityDetail?.role,y)}}
    if(d.type==='uml-sequence'&&n.parentNodeId&&element&&sequenceIsAttachment(element.type)){
     const parent=d.nodes.find(item=>item.id===n.parentNodeId)
     const pe=parent?doc.elements[parent.elementId]:undefined
     if(parent&&pe){
-     const psize=atlasNodeSize(d.type,pe,parent,umlNodeDepth(d,parent),true)
-     const csize=atlasNodeSize(d.type,element,n,umlNodeDepth(d,n),false)
+     const psize=novziNodeSize(d.type,pe,parent,umlNodeDepth(d,parent),true)
+     const csize=novziNodeSize(d.type,element,n,umlNodeDepth(d,n),false)
      return {...n,...sequenceSnapChild(pe.type,element.type,psize,csize,y)}
     }
    }
@@ -261,7 +261,7 @@ export function editElement(doc:ProjectDocument,id:string,partial:Partial<ModelE
  if(!doc.elements[id])throw new Error('Elemento no encontrado')
  if('id' in partial&&partial.id!==id)throw new Error('No se cambia identidad del elemento')
  const element={...doc.elements[id],...partial,id,updatedAt:date};let next={...doc,elements:{...doc.elements,[id]:element}}
- if(partial.activityDetail){next={...next,diagrams:next.diagrams.map(d=>{if(d.type!=='uml-activity')return d;return {...d,nodes:d.nodes.map(n=>{if(n.elementId!==id)return n;const old=doc.elements[id].activityDetail,detail=element.activityDetail;if(element.type==='uml-fork'&&(old?.orientation||'horizontal')!==(detail?.orientation||'horizontal')){const size=atlasNodeSize(d.type,doc.elements[id],n);return {...n,width:Math.max(48,size.height),height:Math.max(48,size.width)}}if(element.type==='uml-activity-pin'&&detail?.ownerActionId){const parent=d.nodes.find(p=>p.elementId===detail.ownerActionId);if(parent){const size=atlasNodeSize(d.type,next.elements[parent.elementId],parent),pin=atlasNodeSize(d.type,element,n);return {...n,parentNodeId:parent.id,...activitySnapPin(size,pin,detail.role,n.y)}}}return n})}})}}
+ if(partial.activityDetail){next={...next,diagrams:next.diagrams.map(d=>{if(d.type!=='uml-activity')return d;return {...d,nodes:d.nodes.map(n=>{if(n.elementId!==id)return n;const old=doc.elements[id].activityDetail,detail=element.activityDetail;if(element.type==='uml-fork'&&(old?.orientation||'horizontal')!==(detail?.orientation||'horizontal')){const size=novziNodeSize(d.type,doc.elements[id],n);return {...n,width:Math.max(48,size.height),height:Math.max(48,size.width)}}if(element.type==='uml-activity-pin'&&detail?.ownerActionId){const parent=d.nodes.find(p=>p.elementId===detail.ownerActionId);if(parent){const size=novziNodeSize(d.type,next.elements[parent.elementId],parent),pin=novziNodeSize(d.type,element,n);return {...n,parentNodeId:parent.id,...activitySnapPin(size,pin,detail.role,n.y)}}}return n})}})}}
  const issues=[...newActivityIssues(doc,next),...newSequenceIssues(doc,next),...newComponentIssues(doc,next),...newDeploymentIssues(doc,next)];if(issues.length)throw Error(issues[0].message);return next
 }
 export function addFieldDefinition(doc:ProjectDocument,field:FieldDefinition):ProjectDocument{
@@ -332,17 +332,17 @@ export function setNodePackage(doc:ProjectDocument,diagramId:string,nodeId:strin
   if(parent&&node.parentNodeId===parent.id&&!(d.type==='uml-activity'&&element.type==='uml-activity-pin')&&!(['uml-composite','uml-component'].includes(d.type)&&element.type==='uml-port')&&!(d.type==='uml-sequence'&&sequenceIsAttachment(element.type)))return d
   const absolute=umlAbsolutePosition(d,node)
   const targetPosition=parent?umlAbsolutePosition(d,parent):{x:0,y:0}
-  const size=parent?atlasNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id)):null
+  const size=parent?novziNodeSize(d.type,doc.elements[parent.elementId],parent,umlNodeDepth(d,parent),d.nodes.some(x=>x.parentNodeId===parent.id)):null
   let x=absolute.x-targetPosition.x,y=absolute.y-targetPosition.y
   if(size){
    if(d.type==='uml-sequence'&&sequenceIsAttachment(element.type)){
-    const childSize=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),false)
+    const childSize=novziNodeSize(d.type,element,node,umlNodeDepth(d,node),false)
     ;({x,y}=sequenceSnapChild(doc.elements[parent!.elementId].type,element.type,size,childSize,y))
-   }else if(d.type==='uml-activity'&&element.type==='uml-activity-pin'){const pin=atlasNodeSize(d.type,element,node);const snapped=activitySnapPin(size,pin,element.activityDetail?.role,y);x=snapped.x;y=snapped.y}
+   }else if(d.type==='uml-activity'&&element.type==='uml-activity-pin'){const pin=novziNodeSize(d.type,element,node);const snapped=activitySnapPin(size,pin,element.activityDetail?.role,y);x=snapped.x;y=snapped.y}
    else if(d.type==='uml-component'&&element.type==='uml-port')({x,y}=componentPortSnap(x,y,size.width,size.height))
    else if(d.type==='uml-composite'&&element.type==='uml-port')({x,y}=umlSnapPort(x,y,size.width,size.height))
-   else if(d.type==='uml-component'){const child=atlasNodeSize(d.type,element,node,umlNodeDepth(d,node),false);if(child.width>size.width||child.height>size.height)throw Error('Amplía primero el contenedor para alojar el elemento');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}
-   else if(d.type==='uml-usecase'){const child=atlasNodeSize(d.type,element,node);if(child.width>size.width||child.height>size.height)throw Error('El sujeto no tiene espacio para el caso');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}else{x=Math.max(0,Math.min(size.width-60,x));y=Math.max(0,Math.min(size.height-40,y))}
+   else if(d.type==='uml-component'){const child=novziNodeSize(d.type,element,node,umlNodeDepth(d,node),false);if(child.width>size.width||child.height>size.height)throw Error('Amplía primero el contenedor para alojar el elemento');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}
+   else if(d.type==='uml-usecase'){const child=novziNodeSize(d.type,element,node);if(child.width>size.width||child.height>size.height)throw Error('El sujeto no tiene espacio para el caso');x=Math.max(0,Math.min(size.width-child.width,x));y=Math.max(0,Math.min(size.height-child.height,y))}else{x=Math.max(0,Math.min(size.width-60,x));y=Math.max(0,Math.min(size.height-40,y))}
   }
   const changed={...node,parentNodeId:parent?.id,x:Math.round(x),y:Math.round(y)}
   const candidate={...d,nodes:d.nodes.map(n=>n.id===nodeId?changed:n)}

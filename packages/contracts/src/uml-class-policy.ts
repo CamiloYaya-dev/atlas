@@ -1,6 +1,6 @@
 import {deploymentEndpointValid} from './uml-deployment-catalog'
 import {componentEndpointValid} from './uml-component-catalog'
-/** ATLAS class-diagram policy. IDs refer to shared catalog elements, not labels. */
+/** NOVZI class-diagram policy. IDs refer to shared catalog elements, not labels. */
 import type {Diagram,DiagramEdge,ElementType,ModelElement,ProjectDocument,UmlAssociationEnd} from './index'
 import {validUmlDetail} from './uml-structure'
 import {umlRelationNameLocked,validUmlEdgeNotation,umlRelationNotation} from './uml-notation'
@@ -131,7 +131,7 @@ export function classEdgeErrors(doc:ProjectDocument,d:Diagram,e:DiagramEdge):str
 }
 const cyclic=(from:string,to:string,arcs:Map<string,Set<string>>):boolean=>{const seen=new Set<string>(),stack=[to];while(stack.length){const n=stack.pop()!;if(n===from)return true;if(seen.has(n))continue;seen.add(n);stack.push(...arcs.get(n)||[])}return false}
 export type ClassIssue={key:string;message:string;fingerprint?:string}
-/** ATLAS strict policy: a colliding unqualified imported name must be resolved explicitly.
+/** NOVZI strict policy: a colliding unqualified imported name must be resolved explicitly.
  * Direct ElementImport takes precedence in lookup, but a shadowed different member is
  * reported rather than silently accepting the ambiguous model. Only public imports
  * participate in the finite re-export closure. No labels or diagram-local IDs define identity.

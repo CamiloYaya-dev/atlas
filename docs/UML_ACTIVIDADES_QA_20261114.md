@@ -1,4 +1,4 @@
-# ATLAS V4.8.1 — UML Actividades (parche)
+# NOVZI V4.8.1 — UML Actividades (parche)
 
 ## Cambios
 - Nodos UML con forma real: inicio (círculo sólido), final de actividad (diana), final de flujo (círculo con X), decisión/fusión (rombo), bifurcación/unión (barra), acción (rectángulo redondeado), objeto (rectángulo) y partición (carril contenedor).
@@ -9,7 +9,7 @@
 - Despliegue sigue ofreciendo relación de comunicación y despliegue; el editor muestra además el nombre «Dependencia / Despliegue / Manifestación» para tipos heredados.
 
 ## Instalación
-Aplicar ZIP sobre ATLAS V4.8.1 previo. Ejecutar `npm run db:migrate` por la migración 008 (permisos de nuevos elementos), luego `npm run typecheck` y `npm run test:graph`.
+Aplicar ZIP sobre NOVZI V4.8.1 previo. Ejecutar `npm run db:migrate` por la migración 008 (permisos de nuevos elementos), luego `npm run typecheck` y `npm run test:graph`.
 
 ## Alcance no certificado
 La suite completa UI y el umbral de cobertura 90% deben ejecutarse en el Windows de destino. No se alteran umbrales ni exclusiones.

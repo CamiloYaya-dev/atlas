@@ -9,5 +9,5 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   splitting: false,
-  noExternal: ['@atlas/contracts','@atlas/fixtures']
+  noExternal: ['@novzi/contracts','@novzi/fixtures']
 })

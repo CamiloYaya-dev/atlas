@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest'
-import {emptyDoc,createElement} from '@atlas/contracts'
+import {emptyDoc,createElement} from '@novzi/contracts'
 import {compareVersions} from './version-diff'
 describe('Comparación visual de revisiones',()=>{
  it('diferencia la creación, modificación y eliminación de datos del modelo',()=>{

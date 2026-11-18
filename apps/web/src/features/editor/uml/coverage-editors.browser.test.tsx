@@ -2,13 +2,13 @@ import {it,afterEach} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup,within} from '@testing-library/react'
 import {useState} from 'react'
-import {emptyDoc,createElement,sequenceDefaults} from '@atlas/contracts'
-import type {ElementType,ProjectDocument,SequenceRoot,DiagramEdge} from '@atlas/contracts'
+import {emptyDoc,createElement,sequenceDefaults} from '@novzi/contracts'
+import type {ElementType,ProjectDocument,SequenceRoot,DiagramEdge} from '@novzi/contracts'
 import SequenceDetailsEditor,{SequenceRootEditor} from './SequenceDetailsEditor'
 import UseCaseDetailsEditor from './UseCaseDetailsEditor'
 import UseCaseRelationDialog from './UseCaseRelationDialog'
 import {DeploymentCatalog,DeploymentDetails} from './DeploymentEditors'
-import data from '../../../../../../qa/ATLAS_QA_UML_DESPLIEGUE.json'
+import data from '../../../../../../qa/NOVZI_QA_UML_DESPLIEGUE.json'
 afterEach(cleanup)
 const click=(name:string)=>fireEvent.click(screen.getByRole('button',{name}))
 const change=(name:string,value:string)=>fireEvent.change(screen.getByLabelText(name,{exact:true}),{target:{value}})

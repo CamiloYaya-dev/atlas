@@ -1,5 +1,5 @@
 import {request,requestFile} from '../../shared/api/http'
-import type {ProjectDocument,Project,AdvancedExportRequest} from '@atlas/contracts'
+import type {ProjectDocument,Project,AdvancedExportRequest} from '@novzi/contracts'
 export const listProjects=(workspaceId:string)=>request<Project[]>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`)
 export const createProject=(workspaceId:string,name:string,document:ProjectDocument)=>request<Project>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`,{method:'POST',body:JSON.stringify({name,document})})
 export const loadDocument=(projectId:string)=>request<{document:ProjectDocument,version:number}|null>(`/projects/${encodeURIComponent(projectId)}/document`)

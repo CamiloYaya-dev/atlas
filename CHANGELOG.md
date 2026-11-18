@@ -1,3 +1,11 @@
+## NOVZI — migración de identidad y restauración de migraciones (2026-11-18)
+
+- Renombramiento de interfaz, paquetes, referencias de código, archivos, campos de entorno y exportaciones a NOVZI.
+- Restauración byte a byte de las migraciones 001–014 originales (desde el Git proporcionado); `001_core.sql` había sufrido conversión LF→CRLF sin cambio semántico de SQL.
+- Migración aditiva `015_rebrand_novzi.sql` para renombrar tablas de autenticación, índices y función de auditoría sin borrar datos.
+- Diagnóstico `npm run db:migrations:status` y verificación de exportaciones con firmas históricas.
+- Conservación deliberada de los identificadores físicos de PostgreSQL por seguridad; consultar guía de migración.
+
 ## 2026-11-14 — Corrección incremental UML: ensamble, paquetes, casos de uso y perfiles
 
 - Corrige orientación ball/socket y ubicación en tramos rectos.
@@ -21,7 +29,7 @@
 - Fichas de exportación avanzadas incluyen estructura UML (se mantiene la autorización premium).
 - Contrato/validación compatibles con documentos anteriores, sin migraciones; 35 pruebas de grafo específicas y ejemplo importable de tres vistas UML más trazabilidad.
 
-## ATLAS V4.8.1 — Editor de relaciones y navegación precisa (13 noviembre 2026)
+## NOVZI V4.8.1 — Editor de relaciones y navegación precisa (13 noviembre 2026)
 
 - Corregida validación de conexiones del laboratorio técnico C2 para reconocer relaciones correctas independientemente del sentido de dibujo.
 - Modal de relación: edición de flechas, tipos de trazo y recorrido; eliminación con confirmación, separación de permisos ACL y persistencia en historial.
@@ -39,7 +47,7 @@
 - Pausa de ayuda durante modales, guardados, errores y actividad; soporte de movimiento reducido.
 - Sin migraciones, cambios API o dependencias nuevas. TypeScript y pruebas aisladas React/jsdom verificadas; Vitest general pendiente en Windows.
 
-## V4.8.1 — ATLAS Academy: laboratorio con insignias (2026-11-12)
+## V4.8.1 — NOVZI Academy: laboratorio con insignias (2026-11-12)
 
 - Nuevo acceso «Misiones» sin eliminar el recorrido explicativo de 18 lecciones.
 - Creación explícita de workspace de formación y proyecto de práctica mediante APIs existentes; sin tocar proyectos personales o clientes.
@@ -73,7 +81,7 @@
 - Protección contra traducción automática del DOM React y mejoras en diagnóstico.
 - Migración aditiva 005_restore_branches.sql; sin dependencias nuevas.
 
-## ATLAS V4.8.0 — Hallazgos de la prueba funcional (12/11/2026)
+## NOVZI V4.8.0 — Hallazgos de la prueba funcional (12/11/2026)
 
 - Presencia por usuario único, no por pestaña/conexión; caducidad de sesiones SSE.
 - Restauración de versiones con modal propio y confirmación explícita, sin ventanas nativas.
@@ -85,7 +93,7 @@
 
 ---
 
-# Historial ATLAS
+# Historial NOVZI
 
 ## V4.3.0 — Calidad automatizada
 
@@ -160,20 +168,20 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 
 **Candidato a validación**: no declarar QA completo hasta ejecutar `typecheck`, pruebas unitarias, React, PostgreSQL y E2E en Windows.
 
-### V4.8.1 — ATLAS Academy (tutorial interactivo)
-- Botón «Aprender ATLAS» en barra superior y barra lateral; guía de 18 pasos orientada a negocio y tecnología.
+### V4.8.1 — NOVZI Academy (tutorial interactivo)
+- Botón «Aprender NOVZI» en barra superior y barra lateral; guía de 18 pasos orientada a negocio y tecnología.
 - Resaltado contextual de controles reales, navegación por temario, ejercicios simulados, cierre y progreso local.
 - Tutorial no destructivo y disponible para lectores, proyectos vacíos y móviles; pausa ante modales, soporte fullscreen.
 - Pruebas de comportamiento y manual de uso: `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.
 
-### V4.8.1 — ATLAS Academy: identidad y responsive (2026-11-12)
-- Se retiran todos los ejemplos y referencias a un cliente específico de las 18 lecciones y ejercicios; ATLAS se explica mediante su propio ecosistema y casos de uso. No se renombran espacios ni proyectos persistidos.
+### V4.8.1 — NOVZI Academy: identidad y responsive (2026-11-12)
+- Se retiran todos los ejemplos y referencias a un cliente específico de las 18 lecciones y ejercicios; NOVZI se explica mediante su propio ecosistema y casos de uso. No se renombran espacios ni proyectos persistidos.
 - Cálculo de posición del panel a partir de su altura real y del control señalado; se mantiene dentro del viewport en pantallas de escritorio.
 - Vista inferior centrada para tablet y móvil; cabecera y botones de navegación siempre visibles, y contenido/temario desplazables por separado.
 - Pruebas de regresión de identidad y posicionamiento, más verificación en nueve tamaños de Chromium.
 - Sin migraciones, sin API adicional y sin modificaciones de ACL o documentos de proyectos.
 
-## ATLAS V4.8.1 — Relaciones paralelas y guía C1–C4 (2026-11-13)
+## NOVZI V4.8.1 — Relaciones paralelas y guía C1–C4 (2026-11-13)
 
 - Corrige el bloqueo en frontend, comandos de dominio y backend que impedía varias relaciones entre las mismas cajas.
 - Añade representación de carriles independientes (rectos, curvos y ortogonales), sin perder dirección, flechas, etiquetas ni edición individual.
@@ -190,16 +198,16 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Nuevo modal Exportar mantiene JSON y añade PNG/JPG, consulta derechos y bloquea exportaciones con cambios no guardados.
 - Migración aditiva 006. Dependencia `sharp` para Windows/Linux. Véase docs/LICENCIAS_EXPORTACION_IMAGEN_V4_8_1.md.
 
-## ATLAS V4.8.1 — exportación fiel, control de licencias y corrección QA (13/11/2026)
+## NOVZI V4.8.1 — exportación fiel, control de licencias y corrección QA (13/11/2026)
 - Captura visual directa del viewport real de React Flow para exportar PNG/JPG; conserva conexiones y estilos visuales en vez de dibujar rutas aproximadas. El backend nunca acepta el estado de licencia desde el navegador: watermark, codificación, firma y auditoría siguen siendo tareas del servidor.
-- Pantalla «Licencia y suscripción ATLAS» por organización: FREE/PRO y operaciones administrativas de activación o revocación de prueba. Utiliza los endpoints existentes GET /workspaces/:id/license y PUT /admin/workspaces/:id/license y requiere platformAdmin para cambios.
+- Pantalla «Licencia y suscripción NOVZI» por organización: FREE/PRO y operaciones administrativas de activación o revocación de prueba. Utiliza los endpoints existentes GET /workspaces/:id/license y PUT /admin/workspaces/:id/license y requiere platformAdmin para cambios.
 - Corrige 68 regresiones encadenadas de UI por mocks de React Flow sin useReactFlow, además de actualizar aserciones obsoletas sobre relaciones paralelas.
 - Añade pruebas unitarias de captura procesada PNG/JPG, exclusión de marca con licencia y rechazo de payloads; pruebas UI del panel de licencias.
 - Mantiene las puertas QA 90%+ global y por capa y 95% por archivo, sin exclusiones artificiosas. La cobertura completa debe re-medida en Windows con PostgreSQL QA aislado; no se afirma haberla alcanzado en esta entrega.
 
 ### Hotfix QA: `test:ui` y `test:coverage` (2026-11-12)
 - Se añaden al mock de React Flow los símbolos `ConnectionMode` en los dos conjuntos de pruebas del editor, y `useReactFlow` en el mock de autenticación, que ya utiliza `AppInner`.
-- El test operativo de cobertura genera una credencial temporal independiente del editor de QA al poblar exclusivamente `atlas_test`, evitando el fallo «Faltan credenciales editor QA».
+- El test operativo de cobertura genera una credencial temporal independiente del editor de QA al poblar exclusivamente `novzi_test`, evitando el fallo «Faltan credenciales editor QA».
 - Se mantienen todas las pruebas, las métricas y el umbral >=90% sin exclusiones nuevas; el estado del umbral se debe verificar con la ejecución completa en Windows.
 
 ## V4.8.1 — Parche exportación avanzada premium y conectores (13/11/2026)
@@ -211,13 +219,13 @@ Limitaciones y pruebas pendientes documentadas en `ESTADO_Y_LIMITACIONES.md`.
 - Exportación HTML autónoma de diccionario en ZIP junto con PNG/JPG firmados. Sin migraciones ni nuevas dependencias.
 - Nuevas pruebas unitarias, de UI y regresión independientes de binarios nativos.
 
-## 2026-11-13 · ATLAS V4.8.1 — UML y fichas exportables
+## 2026-11-13 · NOVZI V4.8.1 — UML y fichas exportables
 - Corrección de fichas de Inspector fuera de la geometría del grafo en imágenes; rutas, nodos y puertos conservan su render real.
 - Nueva elección de PDF, Word (.docx) o HTML para fichas documentales de exportación PRO; «Diccionario» pasa a «Fichas de elementos».
-- Retirado acceso superior redundante «Aprender ATLAS»; sigue en menú lateral.
+- Retirado acceso superior redundante «Aprender NOVZI»; sigue en menú lateral.
 - Catálogo agrupado de 14 vistas UML con paletas y tipos de relaciones específicos; diagrama de casos de uso con actor representado como persona y óvalo; elementos reutilizables y navegación a caja concreta desde trazabilidad.
 - Validaciones de compatibilidad y permisos en backend, sin migraciones.
-- Véase `docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md` para alcance y limitaciones del soporte UML.
+- Véase `docs/NOVZI_UML_Y_EXPORTACION_FICHAS_2026-11-13.md` para alcance y limitaciones del soporte UML.
 
 ### 13/11/2026 · UML 2.5.1, conectores normativos y QA tutorial
 - Registro único de relaciones UML de las 14 vistas con dirección, trazo y terminales SVG según tipo.

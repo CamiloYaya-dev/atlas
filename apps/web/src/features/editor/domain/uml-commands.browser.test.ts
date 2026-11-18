@@ -1,7 +1,7 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument,diagramCreationEnabled,initializeSequenceNode,sequenceBox,sequencePositionLocked} from '@atlas/contracts'
-import type {DiagramType,ElementType,ProjectDocument} from '@atlas/contracts'
+import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument,diagramCreationEnabled,initializeSequenceNode,sequenceBox,sequencePositionLocked} from '@novzi/contracts'
+import type {DiagramType,ElementType,ProjectDocument} from '@novzi/contracts'
 import {addElementNode,createDiagram,resizeNode,moveNode,setNodePackage,moveDiagramSelection,removeDiagramSelection,connectNodes,editElement,removeElementNode} from './document-commands'
 const fixture=(type:DiagramType,items:[string,ElementType,number,number][])=>{
  const meta={id:'d',name:'Vista QA',type,date:'2026-11-14'}

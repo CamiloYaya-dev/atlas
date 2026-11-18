@@ -1,12 +1,12 @@
-import {newDeploymentIssues} from '@atlas/contracts'
+import {newDeploymentIssues} from '@novzi/contracts'
 import {applyScopedImport} from '../application/import-scope'
 import type {ImportScope} from '../application/import-scope'
 import {pool} from '../../../db/pool'
-import type {Project,ProjectDocument} from '@atlas/contracts'
+import type {Project,ProjectDocument} from '@novzi/contracts'
 import {projectAccess,requirePermission} from '../../../security/roles'
 import {applyAuthorizedChange,ensureUniqueIds} from '../application/document-policy'
 import {notFound,DomainError} from '../../../domain/errors'
-import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,newUseCaseIssues,newActivityIssues,newSequenceIssues,newComponentIssues,adaptClassDocument,adaptUseCaseDocument,repairStoredUseCaseAnnotations,retainUseCaseCatalog} from '@atlas/contracts'
+import {mergeProjectDocuments,previewProjectMerge,MergeConflict,isProjectDocument,newClassIssues,newUseCaseIssues,newActivityIssues,newSequenceIssues,newComponentIssues,adaptClassDocument,adaptUseCaseDocument,repairStoredUseCaseAnnotations,retainUseCaseCatalog} from '@novzi/contracts'
 import {projectVisible} from '../application/document-policy'
 export class ProjectsRepository {
  async list(workspaceId:string,userId:string):Promise<Project[]>{const {rows}=await pool.query<Project>(`SELECT DISTINCT p.id,p.workspace_id,p.name,p.description FROM projects p
@@ -61,12 +61,12 @@ export class ProjectsRepository {
  }
  async listVersions(projectId:string):Promise<{version:number;created_at:string;updated_by:string;editor_name:string|null}[]>{
   const {rows}=await pool.query<{version:number;created_at:string;updated_by:string;editor_name:string|null}>(`SELECT v.version,v.created_at,v.updated_by,u.display_name AS editor_name
-   FROM project_document_versions v LEFT JOIN atlas_users u ON u.id=v.updated_by
+   FROM project_document_versions v LEFT JOIN novzi_users u ON u.id=v.updated_by
    WHERE v.project_id=$1 ORDER BY v.version DESC LIMIT 50`,[projectId]);return rows
  }
  async loadVersion(projectId:string,version:number):Promise<{document:ProjectDocument;version:number;created_at:string;updated_by:string;editor_name:string|null}|null>{
   const {rows}=await pool.query<{document:ProjectDocument;version:number;created_at:string;updated_by:string;editor_name:string|null}>(`SELECT v.document,v.version,v.created_at,v.updated_by,u.display_name AS editor_name
-   FROM project_document_versions v LEFT JOIN atlas_users u ON u.id=v.updated_by
+   FROM project_document_versions v LEFT JOIN novzi_users u ON u.id=v.updated_by
    WHERE v.project_id=$1 AND v.version=$2`,[projectId,version]);return rows[0]||null
  }
  async loadDocument(projectId:string):Promise<{document:ProjectDocument,version:number}|null>{const {rows}=await pool.query<{document:ProjectDocument,version:number}>('SELECT document,version FROM project_documents WHERE project_id=$1',[projectId]);return rows[0]||null}
@@ -127,7 +127,7 @@ export class ProjectsRepository {
  async listRestoreBranches(projectId:string,userId:string){
   const ac=await projectAccess(projectId,userId);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede revisar ramas de restauración',403)
   const {rows}=await pool.query<{id:string;source_version:number;base_version:number;created_at:string;status:string;creator_name:string|null}>(`SELECT b.id,b.source_version,b.base_version,b.created_at,b.status,u.display_name AS creator_name
-   FROM project_restore_branches b LEFT JOIN atlas_users u ON u.id=b.created_by
+   FROM project_restore_branches b LEFT JOIN novzi_users u ON u.id=b.created_by
    WHERE b.project_id=$1 ORDER BY b.created_at DESC LIMIT 40`,[projectId]);return rows
  }
  async createRestoreBranch(projectId:string,sourceVersion:number,userId:string){

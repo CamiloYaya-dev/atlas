@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {beautifyDiagram,distinctEdgeRoute,needsDetour} from './diagram-beautify'
-import type {ProjectDocument,ModelElement} from '@atlas/contracts'
+import type {ProjectDocument,ModelElement} from '@novzi/contracts'
 
 test('rutas que compiten por el mismo corredor siguen siendo independientes',()=>{
  const from={x:220,y:120},to={x:750,y:120}

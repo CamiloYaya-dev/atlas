@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {inflateRawSync} from 'node:zlib'
-import {createElement,validateAdvancedExport} from '@atlas/contracts'
-import type {ProjectDocument,Diagram} from '@atlas/contracts'
+import {createElement,validateAdvancedExport} from '@novzi/contracts'
+import type {ProjectDocument,Diagram} from '@novzi/contracts'
 import {buildDiagramDocx,buildDiagramPdf,exportDocumentSheets} from './diagram-documents'
 function fixture(){
  const a={...createElement('Usuario <QA> & "prueba"','actor'),summary:'Solicitud (QA) \\ pago',description:'No exportar',owner:'Responsable interno'}

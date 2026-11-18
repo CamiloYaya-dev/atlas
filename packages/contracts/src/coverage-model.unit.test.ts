@@ -1,14 +1,14 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {atlasNodeSize,createElement,emptyDoc} from './index'
+import {novziNodeSize,createElement,emptyDoc} from './index'
 import type {Diagram,DiagramNode,ProjectDocument} from './index'
 import {deploymentCube,deploymentPort,deploymentFacingPort,deploymentGlyph,deploymentSvgScene} from './uml-deployment-geometry'
 import {activityFrameBounds,activityDisplayPosition,activityParameterLabel,activityMembershipLabel,activityPorts,activityPort,activitySymbol,activityExceptionRoute,activitySvgScene} from './uml-activity-geometry'
 import {sequenceSnapChild,sequencePositionLocked} from './uml-sequence-layout'
 import {useCaseExtensionNote,useCaseRelationKinds,useCaseSubjects,validUseCaseDetail,validUseCaseEdgeShape,useCaseElementIsReferenced} from './uml-usecase-policy'
 import {umlAbsolutePosition} from './uml-containers'
-const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/ATLAS_QA_UML_${name}.json`,import.meta.url),'utf8'))
+const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/NOVZI_QA_UML_${name}.json`,import.meta.url),'utf8'))
 
 test('Deployment: recursos de tipo e instancia conservan anclajes definidos por el contorno visible',()=>{
  const d=fixture('DESPLIEGUE'),r={x:20,y:40,width:200,height:100}
@@ -35,8 +35,8 @@ test('Activity: los símbolos de control y los pines tienen anclas distintas; pu
 test('Activity: parámetros se fijan a lados opuestos de la actividad y el pin al borde de su acción',()=>{
  const d=fixture('ACTIVIDADES'),v=d.diagrams[0],frame=activityFrameBounds(d,v)!,input=v.nodes.find(n=>n.id==='param-in')!,output=v.nodes.find(n=>n.id==='param-out')!,pin=v.nodes.find(n=>n.id==='outpin')!,owner=v.nodes.find(n=>n.id==='prepare')!
  const a=activityDisplayPosition(d,v,input,frame),b=activityDisplayPosition(d,v,output,frame)
- assert.equal(a.x+atlasNodeSize(v.type,d.elements[input.elementId],input).width/2,frame.x);assert.equal(b.x+atlasNodeSize(v.type,d.elements[output.elementId],output).width/2,frame.x+frame.width)
- const p=activityDisplayPosition(d,v,pin,frame);assert.equal(p.x+atlasNodeSize(v.type,d.elements[pin.elementId],pin).width/2,umlAbsolutePosition(v,owner).x+atlasNodeSize(v.type,d.elements[owner.elementId],owner).width)
+ assert.equal(a.x+novziNodeSize(v.type,d.elements[input.elementId],input).width/2,frame.x);assert.equal(b.x+novziNodeSize(v.type,d.elements[output.elementId],output).width/2,frame.x+frame.width)
+ const p=activityDisplayPosition(d,v,pin,frame);assert.equal(p.x+novziNodeSize(v.type,d.elements[pin.elementId],pin).width/2,umlAbsolutePosition(v,owner).x+novziNodeSize(v.type,d.elements[owner.elementId],owner).width)
  const parameter=v.activity!.parameters!.find(p=>p.id==='param-order')!;assert.ok(activityParameterLabel(d,v,d.elements['param-in']).startsWith(parameter.name));assert.equal(activityParameterLabel(d,v,d.elements.validate),d.elements.validate.name)
  assert.equal(activityMembershipLabel(d,{...d.elements.validate,activityDetail:{...d.elements.validate.activityDetail,partitionIds:['lane','missing']}}),d.elements.lane.name)
 })

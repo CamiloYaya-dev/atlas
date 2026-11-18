@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement} from '@atlas/contracts'
+import {emptyDoc,createElement} from '@novzi/contracts'
 import {ProjectsService} from './projects.service'
 import {ProjectsRepository} from '../infrastructure/projects.repository'
 import {pool} from '../../../db/pool'

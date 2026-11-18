@@ -18,7 +18,7 @@ function load(rel,stubs={}){
  const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText
  const mod={exports:{}}
  vm.runInNewContext(code,{module:mod,exports:mod.exports,Buffer,console,require:(id)=>{
-  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@atlas/contracts'?{...actualContracts,...stubs[id]}:stubs[id]
+  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@novzi/contracts'?{...actualContracts,...stubs[id]}:stubs[id]
   if(id.startsWith('node:'))return require(id)
   throw Error('Dependencia no prevista '+id)
  }},{filename,timeout:5000})
@@ -29,11 +29,11 @@ const classPolicy=load('packages/contracts/src/uml-class-policy.ts')
 const uml=load('packages/contracts/src/uml.ts',{'./uml-class-policy':classPolicy})
 const notation=load('packages/contracts/src/uml-notation.ts',{'./uml':uml})
 const fields=load('packages/contracts/src/export-fields.ts',{'./uml-structure':structure,'./uml-class-policy':classPolicy,'./uml-notation':notation})
-const docs=load('apps/api/src/modules/exports/advanced-document.ts',{'@atlas/contracts':fields})
+const docs=load('apps/api/src/modules/exports/advanced-document.ts',{'@novzi/contracts':fields})
 const licensing=load('apps/api/src/modules/licensing/licensing-policy.ts')
-const documentFormats=load('apps/api/src/modules/exports/diagram-documents.ts',{'@atlas/contracts':fields,'./advanced-document':docs})
+const documentFormats=load('apps/api/src/modules/exports/diagram-documents.ts',{'@novzi/contracts':fields,'./advanced-document':docs})
 const document={schema:1,elements:{
- a:{id:'a',name:'Usuario <final>',type:'actor',summary:'Solicitud & pago',description:'',owner:'Camilo',author:'ATLAS',status:'Activo',createdAt:'2026-11-13',updatedAt:'2026-11-13',links:[],fields:{channel:'Web'}},
+ a:{id:'a',name:'Usuario <final>',type:'actor',summary:'Solicitud & pago',description:'',owner:'Camilo',author:'NOVZI',status:'Activo',createdAt:'2026-11-13',updatedAt:'2026-11-13',links:[],fields:{channel:'Web'}},
  b:{id:'b',name:'Plataforma',type:'system',summary:'',description:'',owner:'',author:'',status:'',createdAt:'',updatedAt:'',links:[],fields:{}}
  },fieldDefinitions:[{id:'channel',label:'Canal',forType:'actor',kind:'text'}],diagrams:[{id:'c1',name:'C1 test',description:'Contexto',type:'c1',createdAt:'2026-11-13',nodes:[{id:'na',elementId:'a',x:0,y:0},{id:'nb',elementId:'b',x:230,y:0}],edges:[{id:'r1',source:'na',target:'nb',label:'Usa',direction:'forward'}]}]}
 const diagram=document.diagrams[0]
@@ -60,9 +60,9 @@ test('HTML queda escapado y ZIP es extraíble con CRC correcto',()=>{
  const req=fields.validateAdvancedExport(document,diagram,{mode:'dictionary',fields:{na:{summary:'dictionary','custom:channel':'dictionary','@relations':'dictionary'}}})
  const html=docs.buildDiagramDictionary(document,diagram,req,'a-1')
  assert.match(html,/Usuario &lt;final&gt;/);assert.match(html,/Solicitud &amp; pago/)
- const img=Buffer.from('notreallyanimage'),zip=docs.zipFiles([{name:'ATLAS_C1.png',bytes:img},{name:'ATLAS_Diccionario.html',bytes:Buffer.from(html)}])
+ const img=Buffer.from('notreallyanimage'),zip=docs.zipFiles([{name:'NOVZI_C1.png',bytes:img},{name:'NOVZI_Diccionario.html',bytes:Buffer.from(html)}])
  assert.equal(zip.subarray(0,4).toString('hex'),'504b0304')
- const name=Buffer.from('ATLAS_Diccionario.html'),start=zip.indexOf(name)
+ const name=Buffer.from('NOVZI_Diccionario.html'),start=zip.indexOf(name)
  const header=start-30,len=zip.readUInt32LE(header+18),compressed=zip.subarray(start+name.length,start+name.length+len)
  assert.equal(inflateRawSync(compressed).toString('utf8'),html)
 })

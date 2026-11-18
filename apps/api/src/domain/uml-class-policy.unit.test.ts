@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,ROLE_PRESETS,canonicalUmlEdge,isProjectDocument,replaceClassRelationAcrossViews} from '@atlas/contracts'
-import type {ProjectDocument,ElementType,DiagramEdge} from '@atlas/contracts'
+import {emptyDoc,createElement,ROLE_PRESETS,canonicalUmlEdge,isProjectDocument,replaceClassRelationAcrossViews} from '@novzi/contracts'
+import type {ProjectDocument,ElementType,DiagramEdge} from '@novzi/contracts'
 import {applyAuthorizedChange,projectVisible} from '../modules/projects/application/document-policy'
 import type {Access} from '../security/roles'
 const role=(key='owner'):Access=>({roleId:key,roleName:key,roleKey:key,permissions:new Set(ROLE_PRESETS.find(r=>r.key===key)!.permissions)})

@@ -1,17 +1,17 @@
 import {needsDetour} from '../domain/diagram-beautify'
-import {deploymentGlyph,deploymentEdgePresentation,deploymentCube,deploymentPort,deploymentFacingPort} from '@atlas/contracts'
-import {componentGlyph,componentContract,componentAssemblyDirection,componentHandle} from '@atlas/contracts'
-import {sequenceBox,sequenceGlyphMarkup,sequenceEdgeGeometry,sequenceFrameBounds,sequencePositionLocked} from '@atlas/contracts'
-import {activityEdgeLabel,activityExceptionRoute,activityPort,activityFrameBounds,activityDisplayPosition,activityParameterLabel,activityMembershipLabel} from '@atlas/contracts'
-import {useCaseExtensionNote} from '@atlas/contracts'
-import {umlDisplayLabel,classPort,classFacingPort,classRelationRoute,classEndProperties,useCasePort} from '@atlas/contracts'
+import {deploymentGlyph,deploymentEdgePresentation,deploymentCube,deploymentPort,deploymentFacingPort} from '@novzi/contracts'
+import {componentGlyph,componentContract,componentAssemblyDirection,componentHandle} from '@novzi/contracts'
+import {sequenceBox,sequenceGlyphMarkup,sequenceEdgeGeometry,sequenceFrameBounds,sequencePositionLocked} from '@novzi/contracts'
+import {activityEdgeLabel,activityExceptionRoute,activityPort,activityFrameBounds,activityDisplayPosition,activityParameterLabel,activityMembershipLabel} from '@novzi/contracts'
+import {useCaseExtensionNote} from '@novzi/contracts'
+import {umlDisplayLabel,classPort,classFacingPort,classRelationRoute,classEndProperties,useCasePort} from '@novzi/contracts'
 import {graphSelection} from '../domain/graph-selection'
 import {parallelOffsets} from '../domain/parallel-edges'
 import {useMemo} from 'react'
 import {MarkerType} from '@xyflow/react'
-import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,atlasNodeSize,sequenceActivationPorts,sequenceRenderedHandle,sequenceActivationSide} from '@atlas/contracts'
+import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,novziNodeSize,sequenceActivationPorts,sequenceRenderedHandle,sequenceActivationSide} from '@novzi/contracts'
 import type {Node,Edge} from '@xyflow/react'
-import type {Diagram,ProjectDocument,Perspective} from '@atlas/contracts'
+import type {Diagram,ProjectDocument,Perspective} from '@novzi/contracts'
 export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;includeUntagged?:boolean;mode:Perspective;selectedId:string|null;selectedNodeId?:string;canEdit:boolean;onAdjustExecution?:(id:string,start:number,finish:number,expected:{start:number;finish:number})=>void;onResize?: (nodeId:string,width:number,height:number,x?:number,y?:number)=>void}){
  const {diagram,doc,groups,dependencies,includeUntagged=true,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution}=input
  return useMemo(()=>{
@@ -41,7 +41,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const seqBox=sequenceTyped?sequenceBox(doc,diagram,n):undefined;const absolute=seqBox?{x:seqBox.x,y:seqBox.y}:diagram.type==='uml-activity'?activityDisplayPosition(doc,diagram,n,activityFrame):umlAbsolutePosition(diagram,n);const parent=n.parentNodeId?diagram.nodes.find(p=>p.id===n.parentNodeId):undefined;const base=parent&&umlAbsolutePosition(diagram,parent);const position=visibleParent&&base?{x:absolute.x-base.x,y:absolute.y-base.y}:absolute
    const element=doc.elements[n.elementId]
    const depth=umlNodeDepth(diagram,n)
-   const size=seqBox||atlasNodeSize(diagram.type,element,n,depth,visibleNodes.some(x=>x.parentNodeId===n.id))
+   const size=seqBox||novziNodeSize(diagram.type,element,n,depth,visibleNodes.some(x=>x.parentNodeId===n.id))
    // UML: a lifeline terminates where its destruction marker is attached,
    // including when that marker belongs to the end of an activation.
    const sequenceEndY=diagram.type==='uml-sequence'&&['uml-lifeline','actor'].includes(element.type)?(()=>{
@@ -53,10 +53,10 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
     if(!destruction)return undefined
     const parent=visibleNodes.find(item=>item.id===destruction.parentNodeId)
     const top=parent?.id===n.id?destruction.y:(parent?.y||0)+destruction.y
-    return Math.max(38,top+atlasNodeSize(diagram.type,doc.elements[destruction.elementId],destruction).height/2)
+    return Math.max(38,top+novziNodeSize(diagram.type,doc.elements[destruction.elementId],destruction).height/2)
    })():undefined
    return {
-    id:n.id,type:'atlas',position,style:{width:size.width,height:size.height},
+    id:n.id,type:'novzi',position,style:{width:size.width,height:size.height},
     data:{element,typeNames,elementId:n.elementId,...(diagram.type==='uml-deployment'?{componentGlyph:deploymentGlyph(doc,element,size,visibleNodes.some(x=>x.parentNodeId===n.id)),componentSize:size,deploymentCube:deploymentCube(doc,element)}:{}),...(diagram.type==='uml-component'?{componentGlyph:componentGlyph(element,size,typeNames||{},visibleNodes.some(x=>x.parentNodeId===n.id&&doc.elements[x.elementId]?.type!=='uml-port'),element.type==='component'?componentContract(doc,element.id):undefined),componentSize:size}:{}),...(seqBox?{sequenceGlyph:sequenceGlyphMarkup(doc,diagram,n,seqBox),sequenceSize:{width:seqBox.width,height:seqBox.height},sequencePositionLocked:sequencePositionLocked(doc,diagram,n),...(element.type==='uml-activation'&&element.sequenceDetail?.startOccurrenceId&&element.sequenceDetail?.finishOccurrenceId?{executionTimes:{start:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.startOccurrenceId)?.time,finish:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.finishOccurrenceId)?.time},onAdjustExecution}:{})}:{}),...(diagram.type==='uml-activity'?{activityMembership:activityMembershipLabel(doc,element),activityParameterLabel:element.type==='uml-activity-parameter'?activityParameterLabel(doc,diagram,element):undefined,activityParameter:element.type==='uml-activity-parameter'?diagram.activity?.parameters?.find(p=>p.id===element.activityDetail?.parameterId):undefined}:{}),ucAnnotationTarget:diagram.type==='uml-usecase'&&element.type==='uml-subject'&&diagram.edges.some(e=>allowedEdges.has(e.id)&&e.relationKind==='annotation'&&e.target===n.id),mode:isUmlDiagram(diagram.type)?'mixed':mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,sequenceEndY,sequenceActivationHeight:diagram.type==='uml-sequence'&&element.type==='uml-activation'?size.height:undefined,linkedDiagramType:doc.diagrams.find(d=>d.id===element.childDiagramId)?.type,canResize:canEdit,onResize,minWidth:80,minHeight:60},
     ...(visibleParent?{parentId:n.parentNodeId,...((diagram.type==='uml-usecase'||diagram.type==='uml-activity'&&element.type==='uml-activity-pin'||['uml-composite','uml-component'].includes(diagram.type)&&element.type==='uml-port'||diagram.type==='uml-sequence'&&element.type==='uml-destruction')?{}:{extent:'parent' as const})}:{}),
     zIndex:sequenceTyped?(['uml-frame','uml-interaction'].includes(element.type)?0:element.type==='uml-lifeline'?1:3):['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject','uml-partition','uml-activity-interruptible-region'].includes(element.type)||diagram.type==='uml-component'&&visibleNodes.some(x=>x.parentNodeId===n.id)||diagram.type==='uml-composite'&&element.type==='uml-class'?depth*10:depth*10+2,
@@ -90,7 +90,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const node=activationNodes.get(nodeId)
    if(diagram.type==='uml-component')return componentHandle(handle,doc.elements[diagram.nodes.find(n=>n.id===nodeId)?.elementId||'']?.type==='uml-port')||(role==='source'?'right':'left');if(diagram.type!=='uml-sequence'||!node)return activityTipHandle(nodeId,handle|| (role==='source'?'right':'left'))
    const fallback=sequenceRenderedHandle(handle,role)
-   const size=atlasNodeSize(diagram.type,doc.elements[node.elementId],node)
+   const size=novziNodeSize(diagram.type,doc.elements[node.elementId],node)
    const side=sequenceActivationSide(fallback,role)
    const ports=sequenceActivationPorts(size.height).filter(p=>p.side===side)
    if(fallback.startsWith('seq-'))return ports.some(p=>p.id===fallback)?fallback:ports[ports.length-1]?.id||side
@@ -104,7 +104,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
   const offsets=parallelOffsets(visibleEdges)
   const counts=new Map<string,number>()
   for(const e of visibleEdges){const key=[e.source,e.target].sort().join('\u0000');counts.set(key,(counts.get(key)||0)+1)}
-  const bounds=(nodeId:string)=>{if(!visibleIds.has(nodeId))return undefined;const node=diagram.nodes.find(n=>n.id===nodeId);if(!node)return undefined;const el=doc.elements[node.elementId];if(!el)return undefined;const p=diagram.type==='uml-activity'?activityDisplayPosition(doc,diagram,node,activityFrame):umlAbsolutePosition(diagram,node),size=atlasNodeSize(diagram.type,el,node,umlNodeDepth(diagram,node),visibleNodes.some(n=>n.parentNodeId===node.id));return {...p,...size,element:el}}
+  const bounds=(nodeId:string)=>{if(!visibleIds.has(nodeId))return undefined;const node=diagram.nodes.find(n=>n.id===nodeId);if(!node)return undefined;const el=doc.elements[node.elementId];if(!el)return undefined;const p=diagram.type==='uml-activity'?activityDisplayPosition(doc,diagram,node,activityFrame):umlAbsolutePosition(diagram,node),size=novziNodeSize(diagram.type,el,node,umlNodeDepth(diagram,node),visibleNodes.some(n=>n.parentNodeId===node.id));return {...p,...size,element:el}}
   const hub=(e:Diagram['edges'][number])=>{const a=bounds(e.source),b=bounds(e.target);if(!a||!b)return undefined;const from=diagram.type==='uml-activity'?activityPort(a,a.element,e.sourceHandle,true):diagram.type==='uml-usecase'?useCasePort(a,a.element,classEndProperties(e,'source').handle,true):diagram.type==='uml-deployment'?deploymentPort(a,deploymentCube(doc,a.element),classEndProperties(e,'source').handle,true):classPort(a,classEndProperties(e,'source').handle,true),to=diagram.type==='uml-activity'?activityPort(b,b.element,e.targetHandle,false):diagram.type==='uml-usecase'?useCasePort(b,b.element,classEndProperties(e,'target').handle,false):diagram.type==='uml-deployment'?deploymentPort(b,deploymentCube(doc,b.element),classEndProperties(e,'target').handle,false):classPort(b,classEndProperties(e,'target').handle,false),route=diagram.type==='uml-activity'&&e.relationKind==='exception-handler'?activityExceptionRoute(from,to):classRelationRoute({sourceX:from.x,sourceY:from.y,targetX:to.x,targetY:to.y,sourcePosition:from.side,targetPosition:to.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||(diagram.type==='uml-usecase'?'straight':'smoothstep')},e.source===e.target);return {x:route.labelX,y:route.labelY}}
   // Reserve lanes only when an edge REALLY needs to detour around obstacles.
   // Otherwise keep the visually shortest route and let the base path renderer work.
@@ -152,7 +152,7 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const classData=['uml-class','uml-usecase','uml-deployment'].includes(diagram.type)?(()=>{const source=classEndProperties(e,'source'),target=classEndProperties(e,'target'),center=hub(e),link=e.annotationTargetEdgeId&&visibleEdges.find(x=>x.id===e.annotationTargetEdgeId),cls=e.associationClassId&&visibleNodes.find(n=>n.elementId===e.associationClassId),box=cls?bounds(cls.id):undefined;return {sourceMultiplicity:source.multiplicity,targetMultiplicity:target.multiplicity,sourceRole:source.role,targetRole:target.role,sourceNavigability:source.navigability,targetNavigability:target.navigability,semanticDisplayLabel:relationLabel,extensionNote:diagram.type==='uml-usecase'?useCaseExtensionNote(doc,diagram,e):undefined,extraEnds:e.associationEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId);if(!r||!center)return [];const p=diagram.type==='uml-deployment'?(end.handle?deploymentPort(r,deploymentCube(doc,r.element),end.handle,false):deploymentFacingPort(r,deploymentCube(doc,r.element),center)):end.handle?classPort(r,end.handle,false):classFacingPort(r,center);return [{...p,id:end.id,navigability:end.navigability,label:[end.role,end.multiplicity].filter(Boolean).join(' ')}]}),associationClassPoint:box&&center?classFacingPort(box,center):undefined,annotationPoint:link?hub(link):undefined}})():{}
    return ({
     id:e.id,source:e.source,target:e.target,sourceHandle:diagram.type==='uml-class'?classEndProperties(e,'source').handle||'right':sequenceHandle(e,'source'),targetHandle:diagram.type==='uml-usecase'&&e.relationKind==='annotation'&&doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type==='uml-subject'?'uc-annotation':diagram.type==='uml-class'?classEndProperties(e,'target').handle||'left':sequenceHandle(e,'target'),label:relationLabel,
-    type:uml?'atlas-uml':parallel||shouldAvoid||routeLane!==0?'atlas-parallel':route,
+    type:uml?'novzi-uml':parallel||shouldAvoid||routeLane!==0?'novzi-parallel':route,
     ...(['uml-component','uml-deployment'].includes(diagram.type)?{zIndex:Math.max(1,Math.min(...[e.source,e.target].map(id=>{const n=diagram.nodes.find(x=>x.id===id);return n?umlNodeDepth(diagram,n):0}))*10+1)}:{}),
     data:uml?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole,wholeEnd:e.wholeEnd,sourceNavigability:e.sourceNavigability,targetNavigability:e.targetNavigability,...classData,...(diagram.type==='uml-component'?{componentAssembly:componentAssemblyDirection(doc,diagram,e),semanticDisplayLabel:relationLabel,extraEnds:e.componentEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId),center=hub(e);if(!r||!center)return [];return [{...(end.handle?classPort(r,end.handle,false):classFacingPort(r,center)),id:end.id,label:''}]}),annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}:{}),...(sequenceTyped?{sequenceGeometry:sequenceEdgeGeometry(doc,diagram,e)}:{}),...(diagram.type==='uml-activity'?{activityInterrupted:!!e.activityEdge?.interruptingRegionId&&e.relationKind!=='exception-handler',annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}: {})}:parallel||shouldAvoid||routeLane!==0?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
     animated:diagram.type==='sequence',
@@ -162,8 +162,8 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
     markerStart:uml?undefined:!noArrow&&['reverse','both'].includes(e.direction||'forward')?{type:['include','extend','dependency'].includes(semantic)?MarkerType.Arrow:MarkerType.ArrowClosed,color:'#8e9cb0',width:16,height:16}:undefined
    })
   })
-  if(sequenceFrame){let id=`atlas-sequence-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:sequenceFrame.x,y:sequenceFrame.y},data:{label:`sd ${diagram.name}`},style:{width:sequenceFrame.width,height:sequenceFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
-  if(activityFrame){let id=`atlas-activity-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:activityFrame.x,y:activityFrame.y},data:{label:diagram.name},style:{width:activityFrame.width,height:activityFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
+  if(sequenceFrame){let id=`novzi-sequence-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:sequenceFrame.x,y:sequenceFrame.y},data:{label:`sd ${diagram.name}`},style:{width:sequenceFrame.width,height:sequenceFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
+  if(activityFrame){let id=`novzi-activity-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:activityFrame.x,y:activityFrame.y},data:{label:diagram.name},style:{width:activityFrame.width,height:activityFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
   return {nodes,edges}
  },[diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution])
 }

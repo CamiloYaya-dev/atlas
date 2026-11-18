@@ -1,6 +1,6 @@
 import type {PoolClient} from 'pg'
 import {pool} from '../db/pool'
-import {PERMISSIONS,ROLE_PRESETS} from '@atlas/contracts'
+import {PERMISSIONS,ROLE_PRESETS} from '@novzi/contracts'
 import {forbidden,DomainError,notFound} from '../domain/errors'
 export const catalog=new Set<string>(PERMISSIONS)
 export interface Access {roleId:string;roleKey:string;roleName:string;permissions:Set<string>}

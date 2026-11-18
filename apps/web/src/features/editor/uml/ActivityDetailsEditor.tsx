@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {editElement} from '../domain/document-commands'
-import {activityDefaults,adaptActivityDocument,activityNodeLabel,newActivityIssues,activityDocumentIssues,uid,activityCallParameters,activityParameterRoles} from '@atlas/contracts'
-import type {ActivityDetail,ActivityRoot,ActivityParameter,Diagram,ModelElement,ProjectDocument} from '@atlas/contracts'
+import {activityDefaults,adaptActivityDocument,activityNodeLabel,newActivityIssues,activityDocumentIssues,uid,activityCallParameters,activityParameterRoles} from '@novzi/contracts'
+import type {ActivityDetail,ActivityRoot,ActivityParameter,Diagram,ModelElement,ProjectDocument} from '@novzi/contracts'
 const compact=<T extends object>(x:T):T=>Object.fromEntries(Object.entries(x).filter(([,v])=>v!==undefined&&v!=='')) as T
 const num=(s:string):number|'*'|undefined=>s===''?undefined:s==='*'?'*':Number(s)
 const allowedTypes=['uml-class','uml-interface','uml-enumeration','uml-datatype','uml-primitive','uml-association-class','uml-signal','component']

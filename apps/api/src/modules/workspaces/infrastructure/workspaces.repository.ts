@@ -1,5 +1,5 @@
 import {pool} from '../../../db/pool'
-import type {Workspace,Role} from '@atlas/contracts'
+import type {Workspace,Role} from '@novzi/contracts'
 import {initializeWorkspaceRoles,access,requirePermission} from '../../../security/roles'
 import {DomainError,notFound} from '../../../domain/errors'
 export class WorkspacesRepository {

@@ -12,7 +12,7 @@ export async function encodeCapturedDiagram(base64:string,format:'png'|'jpg',wat
  if(!width||!height||width>5000||height>5000||width*height>20_000_000)throw new DomainError('Dimensiones de exportación excesivas',413)
  const input=sharp(data,{limitInputPixels:20_000_000,failOn:'error'}).flatten({background:'#f7faff'})
  if(watermarked){
-  const label='ATLAS · USO NO COMERCIAL'
+  const label='NOVZI · USO NO COMERCIAL'
   const tiles:string[]=[]
   for(let y=-220;y<height+350;y+=185)for(let x=-300;x<width+450;x+=440){
    tiles.push(`<text x="${x}" y="${y}" fill="#27496d" font-size="27" font-weight="700" font-family="Arial,sans-serif" transform="rotate(-23 ${x} ${y})">${label}</text>`)

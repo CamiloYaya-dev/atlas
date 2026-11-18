@@ -1,4 +1,4 @@
-/** Calcula el punto y la tangente real a media longitud de una ruta SVG de ATLAS.
+/** Calcula el punto y la tangente real a media longitud de una ruta SVG de NOVZI.
  * No usa el vector directo entre cajas: ese vector falla en enlaces ortogonales. */
 export interface AssemblyAnchor {x:number;y:number;angle:number}
 interface Point {x:number;y:number}

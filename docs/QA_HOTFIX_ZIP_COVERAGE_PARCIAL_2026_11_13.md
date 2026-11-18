@@ -1,4 +1,4 @@
-# ATLAS · Hotfix de prueba ZIP y cobertura parcial (13/11/2026)
+# NOVZI · Hotfix de prueba ZIP y cobertura parcial (13/11/2026)
 
 ## Qué se corrigió
 
@@ -17,7 +17,7 @@ No. Comparación de los paquetes anteriores entregados: 46 archivos de pruebas a
 
 ## Comprobar en Windows
 
-Desde la raíz de ATLAS y tras respaldar el código:
+Desde la raíz de NOVZI y tras respaldar el código:
 
 ```powershell
 npm run typecheck

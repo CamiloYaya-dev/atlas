@@ -1,4 +1,4 @@
-# ATLAS V4.8.1 · UML: relaciones, paquetes, perfiles y casos de uso
+# NOVZI V4.8.1 · UML: relaciones, paquetes, perfiles y casos de uso
 
 Fecha: 2026-11-14. Referencia: OMG UML 2.5.1, secciones 10.4, 11.2–11.6, 12.2–12.3, 18.1, anexo B.
 
@@ -15,7 +15,7 @@ Fecha: 2026-11-14. Referencia: OMG UML 2.5.1, secciones 10.4, 11.2–11.6, 12.2�
 
 ## Instalación
 
-Respaldar PostgreSQL y archivos antes de aplicar. Extraer el ZIP sobre la raíz de ATLAS, conservando `.env`.
+Respaldar PostgreSQL y archivos antes de aplicar. Extraer el ZIP sobre la raíz de NOVZI, conservando `.env`.
 
 ```powershell
 npm run db:migrate
@@ -26,7 +26,7 @@ npm run test:coverage
 npm run coverage:check:90
 ```
 
-## Pruebas visuales con `ATLAS_QA_UML_Cinco_Vistas_20261114.json`
+## Pruebas visuales con `NOVZI_QA_UML_Cinco_Vistas_20261114.json`
 
 Crear un proyecto de QA **vacío** e importar el JSON. El importador reemplaza el contenido del proyecto actual.
 
@@ -43,4 +43,4 @@ Crear un proyecto de QA **vacío** e importar el JSON. El importador reemplaza e
 - TypeScript frontend: aprobado.
 - Suite UI, cobertura ≥90% y typecheck completo de API: pendientes en Windows (binarios Windows en las dependencias disponibles y paquete `sharp` Linux ausente).
 
-ATLAS implementa un subconjunto del metamodelo y la notación UML 2.5.1; no se certifica conformidad OMG total.
+NOVZI implementa un subconjunto del metamodelo y la notación UML 2.5.1; no se certifica conformidad OMG total.

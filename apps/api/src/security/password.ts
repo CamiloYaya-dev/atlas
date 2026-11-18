@@ -1,6 +1,6 @@
 import {scrypt as scryptCallback,randomBytes,timingSafeEqual,createHash} from 'node:crypto'
 
-// Mantiene el formato de hash de ATLAS V4.2. No invalida contraseñas existentes.
+// Mantiene el formato de hash de NOVZI V4.2. No invalida contraseñas existentes.
 // N=2^15, r=8, p=3; configuración explícita para compatibilidad.
 const options={N:32768,r:8,p:3,maxmem:64*1024*1024}
 

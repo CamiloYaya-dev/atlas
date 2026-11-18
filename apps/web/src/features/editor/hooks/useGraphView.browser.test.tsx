@@ -1,9 +1,9 @@
 import {describe,it,expect} from 'vitest'
 import {renderHook} from '@testing-library/react'
-import {demoDocument} from '@atlas/fixtures'
+import {demoDocument} from '@novzi/fixtures'
 import {useGraphView} from './useGraphView'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {Perspective,Diagram} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {Perspective,Diagram} from '@novzi/contracts'
 import type {Node,Edge} from '@xyflow/react'
 
 const doc=demoDocument()
@@ -77,7 +77,7 @@ describe('UML Secuencia — regresión de mensajes paralelos',()=>{
   const input={doc:model,diagram,groups:[],dependencies:false,mode:'technical' as const,selectedId:null,canEdit:true}
   const {result}=renderHook(()=>useGraphView(input))
   expect(result.current.edges).toHaveLength(6)
-  expect(result.current.edges.every(e=>e.type==='atlas-uml')).toBe(true)
+  expect(result.current.edges.every(e=>e.type==='novzi-uml')).toBe(true)
   expect(result.current.edges.every(e=>String(e.sourceHandle).startsWith('seq-'))).toBe(true)
   expect(result.current.edges.every(e=>String(e.targetHandle).startsWith('seq-'))).toBe(true)
   expect(new Set(result.current.edges.filter(e=>e.source==='aa').map(e=>e.sourceHandle)).size).toBe(3)
@@ -92,7 +92,7 @@ it('los puertos históricos de actividad llegan al único vértice y las flechas
  const diagram:Diagram={id:'d',type:'uml-activity',name:'Actividad',description:'',createdAt:'2026-11-14',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:200,y:180}],edges:[{id:'e',source:'a',target:'b',sourceHandle:'bottom-3',targetHandle:'top-1',relationKind:'control-flow',label:'[ok]'}]}
  model.diagrams=[diagram]
  const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
- expect(result.current.edges[0]).toMatchObject({sourceHandle:'bottom-2',targetHandle:'top-2',type:'atlas-uml',label:'[ok]'})
+ expect(result.current.edges[0]).toMatchObject({sourceHandle:'bottom-2',targetHandle:'top-2',type:'novzi-uml',label:'[ok]'})
  expect(diagram.edges[0].sourceHandle).toBe('bottom-3')
 })
 it('destrucción anidada termina la línea de vida y no queda restringida al interior de la activación',()=>{
@@ -108,7 +108,7 @@ it('C1 renderiza relaciones bidireccionales, inversas, sin flecha y paralelas si
  const snapshot=structuredClone(model)
  const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
  const [a,b,c,d]=result.current.edges
- expect(result.current.edges.every(e=>e.type==='atlas-parallel')).toBe(true)
+ expect(result.current.edges.every(e=>e.type==='novzi-parallel')).toBe(true)
  expect(a.markerStart).toBeDefined();expect(a.markerEnd).toBeUndefined();expect(a.style?.strokeDasharray).toBe('2 5')
  expect(b.markerStart).toBeUndefined();expect(b.markerEnd).toBeUndefined();expect(b.label).toBe('')
  expect(c.markerStart).toBeDefined();expect(c.markerEnd).toBeDefined();expect(c.style?.strokeDasharray).toBe('7 5')
@@ -130,7 +130,7 @@ it('los mensajes de secuencia explícitos respetan el puerto disponible y degrad
 
 it('UML sin relación explícita usa notación por defecto y conserva puertos de una acción',()=>{
  const model=emptyDoc();for(const id of ['a','b'])model.elements[id]={...createElement(id,'uml-action'),id};const diagram:Diagram={id:'a',type:'uml-activity',name:'QA04',description:'',createdAt:'2026-11-14',nodes:[{id:'a',elementId:'a',x:0,y:0},{id:'b',elementId:'b',x:200,y:100}],edges:[{id:'ab',source:'a',target:'b',sourceHandle:'top-1',targetHandle:'bottom-3'}]};model.diagrams=[diagram]
- const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:'b',canEdit:true}));expect(result.current.edges[0]).toMatchObject({type:'atlas-uml',sourceHandle:'top-1',targetHandle:'bottom-3'});expect(result.current.edges[0].data?.relationKind).toBe('control-flow');expect(result.current.nodes.find(n=>n.id==='b')?.selected).toBe(true);expect(diagram.edges[0].relationKind).toBeUndefined()
+ const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:'b',canEdit:true}));expect(result.current.edges[0]).toMatchObject({type:'novzi-uml',sourceHandle:'top-1',targetHandle:'bottom-3'});expect(result.current.edges[0].data?.relationKind).toBe('control-flow');expect(result.current.nodes.find(n=>n.id==='b')?.selected).toBe(true);expect(diagram.edges[0].relationKind).toBeUndefined()
 })
 
 it('normaliza exclusivamente las puntas antiguas de símbolos de actividad sin alterar el modelo',()=>{

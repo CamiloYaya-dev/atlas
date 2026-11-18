@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {emptyDoc,isProjectDocument,createElement,DIAGRAM_KINDS,ELEMENT_KINDS,PERMISSIONS,ROLE_PRESETS} from './index'
-import {demoDocument} from '@atlas/fixtures'
+import {demoDocument} from '@novzi/fixtures'
 test('documento inicial y fixture son válidos y serializables',()=>{
  for(const doc of [emptyDoc(),demoDocument()]){
   assert.equal(isProjectDocument(doc),true)

@@ -1,8 +1,8 @@
 import {render,screen,fireEvent} from '@testing-library/react'
 import {useState} from 'react'
 import {it,expect,vi} from 'vitest'
-import {createElement} from '@atlas/contracts'
-import type {ModelElement} from '@atlas/contracts'
+import {createElement} from '@novzi/contracts'
+import type {ModelElement} from '@novzi/contracts'
 import UmlDetailsEditor from './UmlDetailsEditor'
 function fixture(type:ModelElement['type']){return createElement('Elemento QA',type)}
 function Harness({initial,disabled=false,onChange,catalog}:{initial:ModelElement;catalog?:Record<string,ModelElement>;disabled?:boolean;onChange?:(uml:NonNullable<ModelElement['uml']>)=>void}){

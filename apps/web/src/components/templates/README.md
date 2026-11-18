@@ -1,7 +1,7 @@
-# Atomic Design en ATLAS
+# Atomic Design en NOVZI
 - `atoms/`: elementos indivisibles (botones, iconos, etiquetas).
 - `molecules/`: campos de formulario y modales (`Overlay`, `Field`).
-- `organisms/`: diagramas interactivos (`AtlasNode`, futuro `DiagramCanvas`).
+- `organisms/`: diagramas interactivos (`NovziNode`, futuro `DiagramCanvas`).
 - `templates/`: composiciones de layout reutilizables.
 - `pages/`: vistas vinculadas a rutas (fase siguiente).
 

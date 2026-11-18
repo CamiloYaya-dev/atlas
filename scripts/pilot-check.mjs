@@ -13,11 +13,11 @@ function envFile(relative){
  return parsed
 }
 const web=envFile('apps/web/.env'),api=envFile('apps/api/.env')
-const host=web.ATLAS_NGROK_HOST||''
+const host=web.NOVZI_NGROK_HOST||''
 const origin=`https://${host}`
 const checks=[
  ['Host ngrok específico',!!host&&/^[a-z0-9][a-z0-9.-]*[a-z0-9]$/i.test(host)&&!host.includes('..')],
- ['Cookie HTTPS Secure',api.ATLAS_SECURE_COOKIES==='true'],
+ ['Cookie HTTPS Secure',api.NOVZI_SECURE_COOKIES==='true'],
  ['CORS_ORIGINS incluye host HTTPS',Boolean(host&&api.CORS_ORIGINS?.split(',').map(x=>x.trim()).includes(origin))],
  ['API solo loopback',!api.HOST||api.HOST==='127.0.0.1'||api.HOST==='localhost'],
  ['DB local Docker',/127\.0\.0\.1|localhost/.test(api.DATABASE_URL||'')],

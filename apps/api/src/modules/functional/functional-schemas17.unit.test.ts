@@ -60,7 +60,7 @@ test('Combinación JSON: por tipo documental se elige formulario, plantilla o am
  assert.throws(()=>validateTransferSelection({finding:'none'}),/Selecciona/)
  assert.throws(()=>validateTransferSelection({finding:'bug'}),/inválida/)
  const layout=validateTemplate({name:'Documento con tabla',kind:'finding',layout:[templateElement]})
- const bundle={format:'ATLAS-FUNCTIONAL-SCHEMAS',version:1,exportedAt:'2026-11-18',selections:{...selections,rf:'none',story:'none'},kinds:{finding:{templates:[layout],fieldDependencies:[{id,...validateField({name:'Matriz de ejecución',fieldType:'table',required:true}),scope:'template'}]}}}
+ const bundle={format:'NOVZI-FUNCTIONAL-SCHEMAS',version:1,exportedAt:'2026-11-18',selections:{...selections,rf:'none',story:'none'},kinds:{finding:{templates:[layout],fieldDependencies:[{id,...validateField({name:'Matriz de ejecución',fieldType:'table',required:true}),scope:'template'}]}}}
  assert.equal(parseFunctionalBundle(bundle).kinds.finding?.templates?.[0].layout[0].field,'custom:'+id)
  assert.throws(()=>parseFunctionalBundle({...bundle,version:2}),/incompatible/)
 })
@@ -81,7 +81,7 @@ test('Plantilla sola exporta dependencias e importa tabla con nuevo ID, sin alte
 })
 test('Formulario solo convierte campos ligados a plantillas en campos generales visibles',async()=>{
  const target=fake()
- const bundle={format:'ATLAS-FUNCTIONAL-SCHEMAS' as const,version:1 as const,exportedAt:'2026-11-18',selections:{finding:'form' as const,rf:'none' as const,rnf:'none' as const,story:'none' as const},kinds:{finding:{form:{fields:[{id,...validateField({name:'Lista de pruebas',fieldType:'list'}),scope:'template' as const}]}}}}
+ const bundle={format:'NOVZI-FUNCTIONAL-SCHEMAS' as const,version:1 as const,exportedAt:'2026-11-18',selections:{finding:'form' as const,rf:'none' as const,rnf:'none' as const,story:'none' as const},kinds:{finding:{form:{fields:[{id,...validateField({name:'Lista de pruebas',fieldType:'list'}),scope:'template' as const}]}}}}
  await importFunctionalBundle(target.c,projectId,userId,parseFunctionalBundle(bundle))
  assert.equal(target.fields[0].scope,'global')
 })

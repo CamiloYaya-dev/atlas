@@ -1,22 +1,30 @@
+# NOVZI 4.8.1 — código migrado de ATLAS
+
+> **Importante (18 de noviembre de 2026):** este paquete corrige migraciones históricas alteradas por finales de línea Windows y renombra el producto a NOVZI. Conserva la conexión física heredada a PostgreSQL para **evitar pérdida aparente de datos**. Lee primero [la guía de migración](docs/NOVZI_REBRANDING_MIGRACIONES.md).
+>
+> Comandos iniciales desde PowerShell: `npm ci` → `npm run db:up` → `npm run db:migrations:status` → `npm run db:migrate` → `npm run db:seed` → `npm run admin:ensure` → `npm run dev`. Si `db:migrations:status` muestra `DISTINTO`, **detente** antes de migrar.
+>
+> El ZIP contiene archivos `.env` existentes y respaldos de desarrollo. No lo publiques ni lo subas a un repositorio público.
+
 > **Hotfix de interfaz (12/11/2026):** «Ampliar área de trabajo» oculta título, descripción y filtros, con restauración desde el lienzo. «Agregar caja» está junto a pantalla completa y su formulario funciona también en fullscreen. Ver [CHANGELOG](CHANGELOG.md) y [GUÍA V4.8.1](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md).
 
-> **Hotfix V4.8.1 (12/11/2026):** corregida pantalla gris al ocultar el menú lateral o ampliar el área de trabajo; pruebas CSS reales en Chromium. Ver [auditoría y contexto maestro](docs/ATLAS_CONTEXTO_Y_AUDITORIA_V4_8_1.md) y [guía de restauración/editor](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md).
+> **Hotfix V4.8.1 (12/11/2026):** corregida pantalla gris al ocultar el menú lateral o ampliar el área de trabajo; pruebas CSS reales en Chromium. Ver [auditoría y contexto maestro](docs/NOVZI_CONTEXTO_Y_AUDITORIA_V4_8_1.md) y [guía de restauración/editor](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md).
 
 > **Actualización V4.8.1:** consulta [GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md](GUIA_V4_8_1_RESTAURACION_Y_EDITOR.md) para instalación, migración 005, ramas de restauración y controles del lienzo.
 
-> **Nuevo — ATLAS V4.8.0:** mejoras del contador de colaboradores, restauración sin `alert/confirm/prompt`, auditoría filtrable y paginada, y filtros dinámicos por diagrama de cualquier tipo. Consulta la [guía de instalación y pruebas V4.8](GUIA_V4_8_PRESENCIA_FILTROS_HISTORIAL.md). Compatible con DEV y PILOTO compilado dentro de la misma carpeta.
+> **Nuevo — NOVZI V4.8.0:** mejoras del contador de colaboradores, restauración sin `alert/confirm/prompt`, auditoría filtrable y paginada, y filtros dinámicos por diagrama de cualquier tipo. Consulta la [guía de instalación y pruebas V4.8](GUIA_V4_8_PRESENCIA_FILTROS_HISTORIAL.md). Compatible con DEV y PILOTO compilado dentro de la misma carpeta.
 
 > **Corrección V4.7.2 (administración):** [guía de instalación, cambios y QA](GUIA_CORRECCION_ADMINISTRACION_4_7_2.md). La creación de espacios es posible para cualquier cuenta activa; borrado y acceso por proyecto mantienen permisos.
 
-> **ATLAS 4.7.0**: acceso granular por espacio y proyecto. Ver [GUIA_ACCESOS_V4_7.md](GUIA_ACCESOS_V4_7.md) para migración, seguridad y pruebas.
+> **NOVZI 4.7.0**: acceso granular por espacio y proyecto. Ver [GUIA_ACCESOS_V4_7.md](GUIA_ACCESOS_V4_7.md) para migración, seguridad y pruebas.
 
-## ATLAS V4.5.0 — Colaboración en vivo (incremento de V4.4.1)
+## NOVZI V4.5.0 — Colaboración en vivo (incremento de V4.4.1)
 
 Incluye eventos SSE, participantes por proyecto/diagrama/caja y fusión transaccional de cambios independientes con conflictos 409 por propiedad. Mantiene el historial y los permisos. **No requiere nuevas migraciones ni dependencias.** Consulta [COLABORACION_TIEMPO_REAL_V4_5.md](COLABORACION_TIEMPO_REAL_V4_5.md) para detalles y pruebas de dos navegadores.
 
-# ATLAS V4.3 — QA automatizada por comportamiento
+# NOVZI V4.3 — QA automatizada por comportamiento
 
-ATLAS es un monorepo React + TypeScript + Fastify + PostgreSQL. Esta actualización conserva el login cerrado, el editor y los permisos de V4.2.2, e integra pruebas por capas y una base QA aislada.
+NOVZI es un monorepo React + TypeScript + Fastify + PostgreSQL. Esta actualización conserva el login cerrado, el editor y los permisos de V4.2.2, e integra pruebas por capas y una base QA aislada.
 
 ## Inicio rápido Windows
 
@@ -53,13 +61,13 @@ Ver `QA_EJECUCION_WINDOWS.md` y `QA_COBERTURA.md` antes de declarar una versión
 
 ## Restricción de seguridad
 
-No se ejecutan pruebas destructivas en la BD de desarrollo ni en producción. `test:db` y `test:e2e:local` usan exclusivamente `127.0.0.1:5433/atlas_test` y verifican `NODE_ENV=test`. Las cuentas E2E son temporales.
+No se ejecutan pruebas destructivas en la BD de desarrollo ni en producción. `test:db` y `test:e2e:local` usan exclusivamente `127.0.0.1:5433/novzi_test` y verifican `NODE_ENV=test`. Las cuentas E2E son temporales.
 
 ---
 
 ## Documentación histórica V4.2
 
-# ATLAS V4.2.1 — Desarrollo con npm (sin archivos BAT)
+# NOVZI V4.2.1 — Desarrollo con npm (sin archivos BAT)
 
 Frontend React/Vite, API Fastify, PostgreSQL 16 en Docker local, acceso cerrado, control de roles y permisos granulares.
 
@@ -133,7 +141,7 @@ Docker PostgreSQL es **solo para desarrollo**. Mantener Web/API/BD separados por
 
 ## Seguridad y limitaciones
 
-El modo `AUTH_MODE=local` permite crear el admin inicial por CLI y luego iniciar sesión. No ejecutar bootstrap en producción sin un proceso formal de aprovisionamiento. `db:seed` es solo para desarrollo. Las capacidades, permisos y autenticación mantienen la implementación de ATLAS V4.2; esta actualización cambia exclusivamente la experiencia de ejecución y mantenimiento.
+El modo `AUTH_MODE=local` permite crear el admin inicial por CLI y luego iniciar sesión. No ejecutar bootstrap en producción sin un proceso formal de aprovisionamiento. `db:seed` es solo para desarrollo. Las capacidades, permisos y autenticación mantienen la implementación de NOVZI V4.2; esta actualización cambia exclusivamente la experiencia de ejecución y mantenimiento.
 
 No se ha ejecutado aquí un arranque completo con Docker y las dependencias npm. Los comandos están verificados a nivel de JSON y sintaxis JavaScript; los flujos de BD/API se deben validar en Windows.
 
@@ -153,7 +161,7 @@ Guía y diagnóstico: `QA_COVERAGE_95.md`. Los porcentajes no se infieren del n�
 
 ---
 
-## ATLAS V4.4 — Cierre local y pruebas reales
+## NOVZI V4.4 — Cierre local y pruebas reales
 
 El alcance V4 queda cerrado para desarrollo local y piloto ngrok restringido. **No es una declaración de que el producto ya esté certificado.** Lee [`docs/V4_CIERRE_LOCAL.md`](docs/V4_CIERRE_LOCAL.md) y [`docs/PILOTO_NGROK_LOCAL.md`](docs/PILOTO_NGROK_LOCAL.md).
 
@@ -191,23 +199,23 @@ Los recolectores cuentan los módulos fuente que aún no tienen pruebas (0%); no
 
 ### Piloto temporal ngrok
 
-Configura `ATLAS_NGROK_HOST` en `apps/web/.env`, `ATLAS_SECURE_COOKIES=true` y `CORS_ORIGINS=https://HOST` exacto en `apps/api/.env`. Ejecuta `npm run pilot:check`, después `npm run pilot:start` y expón **solo** el puerto **4173** con `ngrok http 4173`. Usa el bundle compilado; no expongas el servidor Vite de desarrollo (5173), la API ni PostgreSQL directamente.
+Configura `NOVZI_NGROK_HOST` en `apps/web/.env`, `NOVZI_SECURE_COOKIES=true` y `CORS_ORIGINS=https://HOST` exacto en `apps/api/.env`. Ejecuta `npm run pilot:check`, después `npm run pilot:start` y expón **solo** el puerto **4173** con `ngrok http 4173`. Usa el bundle compilado; no expongas el servidor Vite de desarrollo (5173), la API ni PostgreSQL directamente.
 
 ## Cierre V1 funcional — código candidato V4.6.0
 
 Se añadieron historial visual, comparación/restauración segura de revisiones, auditoría, renombrado de proyectos, E2E multiusuario con identidades diferentes y restauración aislada de PostgreSQL. Lee **CIERRE_V1_FUNCIONAL.md** antes de probar; la certificación en Windows sigue pendiente.
 
-## Tutorial interactivo — Aprender ATLAS
+## Tutorial interactivo — Aprender NOVZI
 
-Desde la barra lateral o el icono de libro de la barra superior se puede abrir **Aprender ATLAS**, un recorrido contextual y no destructivo de 18 pasos que explica organizaciones/espacios, proyectos, tipos de diagramas C1–C4, cajas, relaciones, perspectivas funcional/técnica y trazabilidad. Incluye ejercicios locales sin modificar PostgreSQL. Véase `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.
+Desde la barra lateral o el icono de libro de la barra superior se puede abrir **Aprender NOVZI**, un recorrido contextual y no destructivo de 18 pasos que explica organizaciones/espacios, proyectos, tipos de diagramas C1–C4, cajas, relaciones, perspectivas funcional/técnica y trazabilidad. Incluye ejercicios locales sin modificar PostgreSQL. Véase `docs/TUTORIAL_INTERACTIVO_V4_8_1.md`.
 
-## ATLAS Academy — misiones e insignias prácticas
+## NOVZI Academy — misiones e insignias prácticas
 
-La opción **Misiones** abre un laboratorio real en una organización y un proyecto creados expresamente por el alumno. Incluye modelado funcional (C1, proceso, HU/RF/caso de uso), técnico (C2/C3/C4, API, componentes y enlaces con requisitos) e integración en vista Mixta. Las insignias se validan contra el documento del proyecto tras guardarse; no se conceden por avanzar en lecciones simuladas. El recorrido de 18 pasos «Aprender ATLAS» continúa disponible. Ver [docs/ACADEMIA_MISIONES_PRACTICAS.md](docs/ACADEMIA_MISIONES_PRACTICAS.md).
+La opción **Misiones** abre un laboratorio real en una organización y un proyecto creados expresamente por el alumno. Incluye modelado funcional (C1, proceso, HU/RF/caso de uso), técnico (C2/C3/C4, API, componentes y enlaces con requisitos) e integración en vista Mixta. Las insignias se validan contra el documento del proyecto tras guardarse; no se conceden por avanzar en lecciones simuladas. El recorrido de 18 pasos «Aprender NOVZI» continúa disponible. Ver [docs/ACADEMIA_MISIONES_PRACTICAS.md](docs/ACADEMIA_MISIONES_PRACTICAS.md).
 
 ## Editor de relaciones y navegación entre cajas (actualización V4.8.1)
 
-En **Configurar relación** (clic en una línea) puedes cambiar dirección, tipo de línea y recorrido, o eliminar la relación si tu rol lo permite. Las cajas tienen ahora ocho puertos (uno a cada lado, tres arriba y tres abajo). En el Inspector puedes vincular una vista completa o una **caja específica**, y el botón **Volver** recupera la vista anterior. El laboratorio técnico reconoce las parejas C2 aunque las flechas se dibujen a la inversa, y «Muéstrame dónde» resalta el botón real para configurar campos personalizados. Guía y pruebas en `docs/EDITOR_RELACIONES_NAVEGACION_ATLAS_V4_8_1.md`; ejecuta `npm run test:graph`.
+En **Configurar relación** (clic en una línea) puedes cambiar dirección, tipo de línea y recorrido, o eliminar la relación si tu rol lo permite. Las cajas tienen ahora ocho puertos (uno a cada lado, tres arriba y tres abajo). En el Inspector puedes vincular una vista completa o una **caja específica**, y el botón **Volver** recupera la vista anterior. El laboratorio técnico reconoce las parejas C2 aunque las flechas se dibujen a la inversa, y «Muéstrame dónde» resalta el botón real para configurar campos personalizados. Guía y pruebas en `docs/EDITOR_RELACIONES_NAVEGACION_NOVZI_V4_8_1.md`; ejecuta `npm run test:graph`.
 
 ### Conexiones múltiples y navegación entre los cuatro niveles C4
 
@@ -220,4 +228,4 @@ Cada diagrama puede exportarse como PNG/JPG, con firma de procedencia y auditor�
 
 ### UML y exportación avanzada de fichas (13/11/2026)
 
-ATLAS incorpora 14 tipos de diagramas UML agrupados, paletas semánticas por vista y una vista de casos de uso conectable con trazabilidad. Las exportaciones PRO de fichas pueden generarse en PDF, Word (DOCX) o HTML y la imagen coloca las fichas al margen del grafo. Consulta [`docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md`](docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md).
+NOVZI incorpora 14 tipos de diagramas UML agrupados, paletas semánticas por vista y una vista de casos de uso conectable con trazabilidad. Las exportaciones PRO de fichas pueden generarse en PDF, Word (DOCX) o HTML y la imagen coloca las fichas al margen del grafo. Consulta [`docs/NOVZI_UML_Y_EXPORTACION_FICHAS_2026-11-13.md`](docs/NOVZI_UML_Y_EXPORTACION_FICHAS_2026-11-13.md).

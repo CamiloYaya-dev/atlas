@@ -1,5 +1,5 @@
-import type {AdvancedExportRequest,Diagram,ProjectDocument} from '@atlas/contracts'
-import {exportFieldsFor} from '@atlas/contracts'
+import type {AdvancedExportRequest,Diagram,ProjectDocument} from '@novzi/contracts'
+import {exportFieldsFor} from '@novzi/contracts'
 import {zipFiles} from './advanced-document'
 
 type Sheet={name:string;type:string;rows:{label:string;value:string}[]}
@@ -55,7 +55,7 @@ export function buildDiagramPdf(doc:ProjectDocument,diagram:Diagram,request:Adva
   }
  }
  const space=(px:number)=>{current.y-=px;if(current.y<bottom)newPage()}
- paint('ATLAS  |  FICHAS DE ELEMENTOS',11,true);space(15)
+ paint('NOVZI  |  FICHAS DE ELEMENTOS',11,true);space(15)
  paint(diagram.name,18,true);space(5)
  paint(diagram.description||'Fichas de elementos, campos y relaciones',10);space(22)
  if(!sheets.length)paint('No se seleccionaron campos para las fichas.',10)
@@ -80,7 +80,7 @@ export function buildDiagramPdf(doc:ProjectDocument,diagram:Diagram,request:Adva
   pageIds.push(add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${width} ${height}] /Resources ${resources} 0 R /Contents ${contentId} 0 R >>`))
  }
  objects[pagesId-1]=Buffer.from(`<< /Type /Pages /Count ${pageIds.length} /Kids [${pageIds.map(id=>id+' 0 R').join(' ')}] >>`)
- const header=Buffer.from('%PDF-1.4\n%ATLAS\n')
+ const header=Buffer.from('%PDF-1.4\n%NOVZI\n')
  const chunks:Buffer[]=[header],offsets:number[]=[0];let cursor=header.length
  for(const [i,obj] of objects.entries()){
   offsets.push(cursor);const wrapper=Buffer.concat([Buffer.from(`${i+1} 0 obj\n`),obj,Buffer.from('\nendobj\n')]);chunks.push(wrapper);cursor+=wrapper.length

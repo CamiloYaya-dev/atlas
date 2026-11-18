@@ -7,7 +7,7 @@ async function enter(page:import('@playwright/test').Page,email:string,password:
  await page.goto('/')
  await page.getByLabel('Correo electrónico').fill(email)
  await page.getByLabel('Contraseña').fill(password)
- await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
+ await page.getByRole('button',{name:/Entrar a NOVZI/}).click()
  await expect(page.getByText('API · PostgreSQL · Acceso cerrado')).toBeVisible()
  await openQaDemo(page)
 }

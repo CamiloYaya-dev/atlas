@@ -146,7 +146,7 @@ test('Notación UML: etiquetas de componente provisto/requerido y dependencias d
 })
 
 test('Etiquetas UML: el registro compartido manda en la vista de componentes y el despliegue no pierde la relación',()=>{
- const component=JSON.parse(readFileSync(new URL('../../../qa/ATLAS_QA_UML_COMPONENTES.json',import.meta.url),'utf8')) as ProjectDocument
+ const component=JSON.parse(readFileSync(new URL('../../../qa/NOVZI_QA_UML_COMPONENTES.json',import.meta.url),'utf8')) as ProjectDocument
  const v=component.diagrams[0]
  for(const id of ['wire','provided','required','eaccess','pimport']){
   const e=v.edges.find(x=>x.id===id)!
@@ -157,7 +157,7 @@ test('Etiquetas UML: el registro compartido manda en la vista de componentes y e
  assert.match(label,/IPago|interface|Interfaz/i)
  const eaccess=v.edges.find(x=>x.id==='eaccess')!;component.componentRelations![eaccess.componentRelationId!].importAlias='PagoAlias'
  assert.match(umlDisplayLabel(v.type,eaccess,component,v),/PagoAlias/)
- const p=JSON.parse(readFileSync(new URL('../../../qa/ATLAS_QA_UML_DESPLIEGUE.json',import.meta.url),'utf8')) as ProjectDocument
+ const p=JSON.parse(readFileSync(new URL('../../../qa/NOVZI_QA_UML_DESPLIEGUE.json',import.meta.url),'utf8')) as ProjectDocument
  const dep=p.diagrams[0],de=dep.edges.find(x=>x.id==='d1-api')!
  assert.equal(typeof umlDisplayLabel(dep.type,de,p,dep),'string')
 })

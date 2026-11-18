@@ -8,7 +8,7 @@ import {COVERAGE_TARGET} from './coverage-target.mjs'
 export {COVERAGE_TARGET}
 
 function priority(name){
- if(/(?:security|auth|access|identity|password|roles|document-policy|projects\.service|AtlasEditor|SecurityPanel)/i.test(name))return 1
+ if(/(?:security|auth|access|identity|password|roles|document-policy|projects\.service|NovziEditor|SecurityPanel)/i.test(name))return 1
  if(/(?:projects|workspaces|contract|db\/|migrate|app\.ts|server\.ts)/i.test(name))return 2
  return 3
 }
@@ -40,7 +40,7 @@ function main(){
  }
  const backlog=buildBacklog(JSON.parse(readFileSync(report,'utf8')))
  const target=backlog.target
- const header=[`# ATLAS — Backlog de cobertura (objetivo ${target} %)`,
+ const header=[`# NOVZI — Backlog de cobertura (objetivo ${target} %)`,
   '',`Generado desde \`coverage/coverage-summary.json\`. No cambia los umbrales ni excluye archivos.`,
   '',`| Métrica | Actual | Cobertura adicional necesaria |`,`|---|---:|---:|`,
   ...metrics.map(m=>`| ${m} | ${backlog.totals[m].pct??'N/D'} % | ${backlog.totals[m].missingToTarget} unidades |`),
@@ -53,7 +53,7 @@ function main(){
   'Primero valida funciones críticas y flujos API/E2E; luego completa condiciones y errores por archivo.','']
  writeFileSync(resolve(root,'coverage/QA_BACKLOG.md'),header.join('\n'))
  writeFileSync(resolve(root,'coverage/QA_BACKLOG.json'),JSON.stringify(backlog,null,2))
- console.log(`\nATLAS coverage: ${backlog.files.length} archivos con al menos una métrica por debajo de ${target}%.`)
+ console.log(`\nNOVZI coverage: ${backlog.files.length} archivos con al menos una métrica por debajo de ${target}%.`)
  console.table(backlog.files.map(f=>({archivo:f.file,prioridad:f.priority,
   lineas:f.gaps.lines.remaining,sentencias:f.gaps.statements.remaining,funciones:f.gaps.functions.remaining,ramas:f.gaps.branches.remaining})))
  console.log('Reporte: coverage/QA_BACKLOG.md y coverage/QA_BACKLOG.json')

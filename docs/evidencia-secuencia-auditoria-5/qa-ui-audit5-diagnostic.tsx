@@ -3,13 +3,13 @@ const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'http://loc
 for(const key of ['window','document','navigator','HTMLElement','Element','Node','Event','MouseEvent','MutationObserver','getComputedStyle']){Object.defineProperty(globalThis,key,{configurable:true,value:key==='window'?dom.window:(dom.window as any)[key]})}
 Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{value:true,configurable:true,writable:true});
 const {render,fireEvent,screen,cleanup}=await import('@testing-library/react');
-const {ExecutionTimeAction}=await import('./apps/web/src/components/organisms/AtlasNode');
+const {ExecutionTimeAction}=await import('./apps/web/src/components/organisms/NovziNode');
 const {default:SequenceRelationDialog}=await import('./apps/web/src/features/editor/uml/SequenceRelationDialog');
-const {emptyDoc,createElement,sequenceDefaults}=await import('@atlas/contracts');
+const {emptyDoc,createElement,sequenceDefaults}=await import('@novzi/contracts');
 const assert=(await import('node:assert/strict')).default;
 
 const {default:SequenceDetailsEditor}=await import("./apps/web/src/features/editor/uml/SequenceDetailsEditor");
-import type {ElementType} from "@atlas/contracts";
+import type {ElementType} from "@novzi/contracts";
 
 const vi={fn(){const mock={calls:[] as any[][]};const f= (...args:any[])=>{mock.calls.push(args)};return Object.assign(f,{mock})}};
 const expect=(actual:any)=>({toBe:(expected:any)=>assert.equal(actual,expected),toEqual:(expected:any)=>assert.deepEqual(actual,expected),toMatch:(regex:RegExp)=>assert.match(actual,regex),toHaveBeenCalledOnce:()=>assert.equal(actual.mock.calls.length,1),not:{toHaveBeenCalled:()=>assert.equal(actual.mock.calls.length,0)}});

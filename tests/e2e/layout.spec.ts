@@ -9,7 +9,7 @@ const css=readFileSync(resolve(process.cwd(),'apps/web/src/styles.css'),'utf8')
 async function mountLayout(page:import('@playwright/test').Page){
  await page.setContent(`
   <div class="layout">
-   <aside class="sidebar">ATLAS · navegación</aside>
+   <aside class="sidebar">NOVZI · navegación</aside>
    <main class="main">
     <header class="topbar"><button id="nav-toggle" aria-label="Ocultar menú lateral">Menú</button></header>
     <section class="page-intro"><div class="heading"><h1>C1 · Contexto</h1><p>Personas y terceros</p></div></section>

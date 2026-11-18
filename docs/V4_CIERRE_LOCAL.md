@@ -1,4 +1,4 @@
-# ATLAS V4 — Alcance congelado y criterios de cierre (piloto cerrado local)
+# NOVZI V4 — Alcance congelado y criterios de cierre (piloto cerrado local)
 
 **Decisión:** Posponer PostgreSQL administrado, despliegue DEV y monetización. El piloto corre en una máquina local con PostgreSQL en Docker y túnel HTTP temporal ngrok, sin registro público.
 

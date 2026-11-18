@@ -1,6 +1,6 @@
-# ATLAS 4.8.1 — UML de despliegue · auditoría 2
+# NOVZI 4.8.1 — UML de despliegue · auditoría 2
 
-Base verificada: `atlas(20261117-004757).zip` (59/59 hashes del manifiesto de la iteración 1 antes de editar). Referencias: especificación `ATLAS_Refactor_Integral_UML_Despliegue.pdf`, auditorías 1 y 2. El alcance original sigue siendo P0. Entrega incremental y fuente de auditoría, no certificación global. No se ejecutó QA integral ni cobertura del 90 %.
+Base verificada: `novzi(20261117-004757).zip` (59/59 hashes del manifiesto de la iteración 1 antes de editar). Referencias: especificación `NOVZI_Refactor_Integral_UML_Despliegue.pdf`, auditorías 1 y 2. El alcance original sigue siendo P0. Entrega incremental y fuente de auditoría, no certificación global. No se ejecutó QA integral ni cobertura del 90 %.
 
 ## Hallazgos
 

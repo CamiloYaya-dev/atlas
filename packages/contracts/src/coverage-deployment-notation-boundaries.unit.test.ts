@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {createElement,emptyDoc,canonicalUmlEdge,umlDisplayLabel,umlEdgeLabel,umlRelationNameLocked,deploymentGlyph,deploymentCube,deploymentPort,deploymentFacingPort,deploymentSvgScene} from './index'
 import type {Diagram,DiagramEdge,ProjectDocument} from './index'
-const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/ATLAS_QA_UML_${name}.json`,import.meta.url),'utf8'))
+const fixture=(name:string):ProjectDocument=>JSON.parse(readFileSync(new URL(`../../../qa/NOVZI_QA_UML_${name}.json`,import.meta.url),'utf8'))
 const edge=(kind:string,extra:Partial<DiagramEdge>={}):DiagramEdge=>({id:'e',source:'a',target:'b',relationKind:kind,...extra})
 
 test('Notación: palabras reservadas y relaciones sin etiqueta histórica no admiten títulos libres de usuario',()=>{

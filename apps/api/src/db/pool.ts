@@ -9,6 +9,6 @@ export const pool=new pg.Pool({
  max:env.dbPoolMax,
  connectionTimeoutMillis:8000,
  idleTimeoutMillis:30000,
- application_name:'atlas-api'
+ application_name:'novzi-api'
 })
 pool.on('error',error=>console.error('PostgreSQL idle client error:',error.message))

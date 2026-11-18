@@ -1,10 +1,10 @@
 import {afterEach,it} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup} from '@testing-library/react'
-import type {ProjectDocument,DiagramEdge} from '@atlas/contracts'
+import type {ProjectDocument,DiagramEdge} from '@novzi/contracts'
 import UseCaseDetailsEditor from './UseCaseDetailsEditor'
 import UseCaseRelationDialog from './UseCaseRelationDialog'
-import fixture from '../../../../../../qa/ATLAS_QA_UML_CASOS_DE_USO.json'
+import fixture from '../../../../../../qa/NOVZI_QA_UML_CASOS_DE_USO.json'
 
 afterEach(cleanup)
 const source=()=>structuredClone(fixture) as ProjectDocument

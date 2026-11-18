@@ -1,4 +1,4 @@
-# ATLAS V4.8.1 · UML estructural — clases, objetos y componentes
+# NOVZI V4.8.1 · UML estructural — clases, objetos y componentes
 
 Esta actualización mejora **tres** de los catorce tipos UML. Los demás conservan el soporte inicial del editor; no se declara conformidad UML 2.5.1 completa.
 
@@ -46,4 +46,4 @@ Nota: esta versión no implementa XMI UML, comprobación semántica integral de 
 - `node scripts/verify-uml-three-qa.cjs` valida la importación de QA, sin modificar PostgreSQL
 - `npm run test:ui`, `npm run test:coverage`, `npm run coverage:check:90` deben validarse en Windows/CI.
 
-El ejemplo **`qa/ATLAS_CIRCUITO_UML_3_VISTAS_QA.json`** incluye 4 vistas conectadas: trazabilidad, UML de clases, objetos y componentes. Utiliza un proyecto vacío porque el importador reemplaza el documento actual.
+El ejemplo **`qa/NOVZI_CIRCUITO_UML_3_VISTAS_QA.json`** incluye 4 vistas conectadas: trazabilidad, UML de clases, objetos y componentes. Utiliza un proyecto vacío porque el importador reemplaza el documento actual.

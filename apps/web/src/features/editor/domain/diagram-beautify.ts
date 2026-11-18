@@ -1,10 +1,10 @@
 /**
- * Deterministic, non-destructive ATLAS diagram arrangement.
+ * Deterministic, non-destructive NOVZI diagram arrangement.
  * Only top-level appearances move. Nested ports, partitions, containment,
  * occurrence timing, element identities and semantic relations stay intact.
  */
-import {atlasNodeSize,newActivityIssues,newClassIssues,newUseCaseIssues,newComponentIssues,newDeploymentIssues,newSequenceIssues} from '@atlas/contracts'
-import type {ProjectDocument,Diagram,DiagramNode} from '@atlas/contracts'
+import {novziNodeSize,newActivityIssues,newClassIssues,newUseCaseIssues,newComponentIssues,newDeploymentIssues,newSequenceIssues} from '@novzi/contracts'
+import type {ProjectDocument,Diagram,DiagramNode} from '@novzi/contracts'
 
 // Space for routing corridors AND readable UML relationship annotations.
 const X_GAP=340
@@ -52,7 +52,7 @@ export function beautifyDiagram(doc:ProjectDocument,diagramId:string):ProjectDoc
  // Keep very wide graphs readable: limit layers and allow vertical columns.
  const groups=new Map<number,typeof roots>()
  for(const n of sorted){const index=layer.get(n.id)||0;const value=groups.get(index)||[];value.push(n);groups.set(index,value)}
- const sizes=new Map(roots.map(n=>{const e=doc.elements[n.elementId];const actual=e?atlasNodeSize(diagram.type,e,n,0,diagram.nodes.some(x=>x.parentNodeId===n.id)):{width:n.width||180,height:n.height||95};return [n.id,{width:Math.max(n.width||0,actual.width),height:Math.max(n.height||0,actual.height)}]}))
+ const sizes=new Map(roots.map(n=>{const e=doc.elements[n.elementId];const actual=e?novziNodeSize(diagram.type,e,n,0,diagram.nodes.some(x=>x.parentNodeId===n.id)):{width:n.width||180,height:n.height||95};return [n.id,{width:Math.max(n.width||0,actual.width),height:Math.max(n.height||0,actual.height)}]}))
  const minX=Math.min(...roots.map(n=>n.x)),minY=Math.min(...roots.map(n=>n.y))
  let x=minX
  const moved=new Map<string,{x:number;y:number}>()

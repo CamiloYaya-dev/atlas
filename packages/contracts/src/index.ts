@@ -64,7 +64,7 @@ export {UML_NOTATION,umlRelationNotation,isUmlDiagram,canonicalUmlEdge,validUmlE
 export type {UmlRelationNotation,UmlTerminal} from './uml-notation'
 export {UML_PACKAGE_SIZE,UML_COMPOSITE_SIZE,UML_PART_SIZE,UML_PORT_SIZE,UML_DEPLOYMENT_CONTAINER_SIZE,UML_EXECUTION_CONTAINER_SIZE,umlContainerAllows,umlContainerSize,umlNodeDepth,umlAncestryValid,umlAbsolutePosition,umlSnapPort} from './uml-containers'
 
-export {atlasNodeSize,atlasNodeMinimum} from './node-sizing'
+export {novziNodeSize,novziNodeMinimum} from './node-sizing'
 export {sequenceSnapChild,sequenceIsParticipant,sequenceIsAttachment,sequencePositionLocked} from './uml-sequence-layout'
 export {sequenceActivationPorts,sequenceActivationHandleValid,sequenceActivationSide,sequenceRenderedHandle,sequenceNearestPort} from './uml-sequence-ports'
 export type {SequenceMessageSide,SequenceMessagePort} from './uml-sequence-ports'

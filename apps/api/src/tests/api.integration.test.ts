@@ -6,13 +6,13 @@ import {pool} from '../db/pool'
 import {hashPassword} from '../security/password'
 import sharp from 'sharp'
 import {readProvenance} from '../modules/exports/provenance'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {ProjectDocument} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 
 // Never run against the user's working or production database.
 const url=process.env.DATABASE_URL||''
-if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/atlas_test(?:\?|$)/.test(url)){
- throw new Error('Solo permitido en PostgreSQL exclusivo QA: 127.0.0.1:5433/atlas_test')
+if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/novzi_test(?:\?|$)/.test(url)){
+ throw new Error('Solo permitido en PostgreSQL exclusivo QA: 127.0.0.1:5433/novzi_test')
 }
 type User={cookie:string;csrf:string;id:string}
 test('API real: autenticación, administración, roles, diagramas y aislamiento',async t=>{
@@ -45,7 +45,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
  }
  let admin:User|undefined,member:User|undefined
  try{
-  const record=await pool.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,platform_admin)
+  const record=await pool.query<{id:string}>(`INSERT INTO novzi_users(email,display_name,password_hash,platform_admin)
    VALUES($1,$2,$3,true) RETURNING id`,[adminEmail,'QA Admin',await hashPassword(pass)])
   adminId=record.rows[0].id
   await t.test('No hay endpoints públicos de registro; /me exige sesión',async()=>{
@@ -56,7 +56,7 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal((await signin(adminEmail,invalidPass)).status,401)
    const result=await signin(adminEmail,pass)
    assert.equal(result.status,200);admin=result.user
-   assert.ok(admin?.cookie.startsWith('atlas_session='))
+   assert.ok(admin?.cookie.startsWith('novzi_session='))
    assert.equal((await send('GET','/auth/me',admin)).status,200)
    assert.equal(String((await send('GET','/auth/me',admin)).headers['cache-control']),'no-store')
   })
@@ -632,9 +632,9 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
   })
  }finally{
   if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId])
-  if(memberId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[memberId])
-  if(extraId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[extraId])
-  if(adminId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[adminId])
+  if(memberId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[memberId])
+  if(extraId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[extraId])
+  if(adminId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[adminId])
   await app.close();await pool.end()
  }
 })

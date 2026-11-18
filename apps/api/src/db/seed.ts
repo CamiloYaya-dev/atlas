@@ -1,5 +1,5 @@
 import {pool} from './pool'
-import {demoDocument} from '@atlas/fixtures'
+import {demoDocument} from '@novzi/fixtures'
 import {DEMO_USER_ID} from '../security/identity'
 import {initializeWorkspaceRoles} from '../security/roles'
 async function seed(){
