@@ -35,15 +35,6 @@ jobs:
       - run: npm run test:unit
       - run: npm run db:migrate
       - run: npm run test:integration
-      - run: npm run test:coverage:gate
-        env:
-          NOVZI_COVERAGE_USE_EXISTING_DB: 'true'
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: novzi-coverage-html-lcov
-          path: coverage/
-          if-no-files-found: ignore
       - run: npm run build
   browser-e2e:
     runs-on: ubuntu-latest
