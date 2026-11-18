@@ -1,0 +1,2260 @@
+{
+  "schema": 1,
+  "elements": {
+    "order-type": {
+      "id": "order-type",
+      "type": "uml-datatype",
+      "name": "Orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "signal-type": {
+      "id": "signal-type",
+      "type": "uml-signal",
+      "name": "Pago aprobado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "error-type": {
+      "id": "error-type",
+      "type": "uml-class",
+      "name": "Error de pago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "operation-type": {
+      "id": "operation-type",
+      "type": "uml-class",
+      "name": "Servicio de pago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "pay",
+            "name": "pagar",
+            "visibility": "public",
+            "returnType": "Boolean",
+            "parameters": [
+              {
+                "id": "pay-order",
+                "name": "orden",
+                "type": "Orden",
+                "typeId": "order-type",
+                "direction": "in",
+                "multiplicity": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "lane": {
+      "id": "lane",
+      "type": "uml-partition",
+      "name": "Gestión de pedido",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "orientation": "vertical",
+        "isDimension": true
+      }
+    },
+    "start": {
+      "id": "start",
+      "type": "uml-start",
+      "name": "Inicio",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "start2": {
+      "id": "start2",
+      "type": "uml-start",
+      "name": "Inicio concurrente",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "merge": {
+      "id": "merge",
+      "type": "uml-decision",
+      "name": "Reunir entrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "merge",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "validate": {
+      "id": "validate",
+      "type": "uml-action",
+      "name": "Validar pago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "opaque",
+        "externalReference": "Validar datos",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "decision": {
+      "id": "decision",
+      "type": "uml-decision",
+      "name": "Resultado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "decision",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "correct": {
+      "id": "correct",
+      "type": "uml-action",
+      "name": "Corregir datos",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "fork": {
+      "id": "fork",
+      "type": "uml-fork",
+      "name": "Distribuir trabajo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "fork",
+        "orientation": "vertical",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "record": {
+      "id": "record",
+      "type": "uml-action",
+      "name": "Registrar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "notify": {
+      "id": "notify",
+      "type": "uml-action",
+      "name": "Notificar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "sendSignal",
+        "referenceId": "signal-type",
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "join": {
+      "id": "join",
+      "type": "uml-fork",
+      "name": "Sincronizar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "join",
+        "orientation": "horizontal",
+        "joinSpec": "and",
+        "isCombineDuplicate": true,
+        "partitionIds": [
+          "lane"
+        ]
+      }
+    },
+    "end": {
+      "id": "end",
+      "type": "uml-end",
+      "name": "Final de actividad",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "flow-end": {
+      "id": "flow-end",
+      "type": "uml-flow-final",
+      "name": "Final de rama",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "prepare": {
+      "id": "prepare",
+      "type": "uml-action",
+      "name": "Preparar orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic"
+      }
+    },
+    "outpin": {
+      "id": "outpin",
+      "type": "uml-activity-pin",
+      "name": "orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "ownerActionId": "prepare",
+        "typeId": "order-type",
+        "lower": 1,
+        "upper": 1
+      }
+    },
+    "buffer": {
+      "id": "buffer",
+      "type": "uml-object-node",
+      "name": "Cola de órdenes",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "centralBuffer",
+        "typeId": "order-type",
+        "upperBound": 1,
+        "ordering": "FIFO"
+      }
+    },
+    "store": {
+      "id": "store",
+      "type": "uml-object-node",
+      "name": "Órdenes",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "dataStore",
+        "typeId": "order-type",
+        "upperBound": 1,
+        "ordering": "ordered",
+        "inState": [
+          "Pendiente"
+        ],
+        "selectionBehaviorId": "qa-selection"
+      }
+    },
+    "process": {
+      "id": "process",
+      "type": "uml-action",
+      "name": "Procesar orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "callOperation",
+        "referenceId": "operation-type",
+        "operationId": "pay"
+      }
+    },
+    "inpin": {
+      "id": "inpin",
+      "type": "uml-activity-pin",
+      "name": "orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "ownerActionId": "process",
+        "typeId": "order-type",
+        "lower": 1,
+        "upper": 1,
+        "argumentParameterId": "pay-order"
+      }
+    },
+    "valuepin": {
+      "id": "valuepin",
+      "type": "uml-activity-pin",
+      "name": "Prioridad",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "value",
+        "ownerActionId": "prepare",
+        "externalType": "Integer",
+        "value": "1",
+        "lower": 1,
+        "upper": 1
+      }
+    },
+    "param-in": {
+      "id": "param-in",
+      "type": "uml-activity-parameter",
+      "name": "Entrada Orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "parameterId": "param-order"
+      }
+    },
+    "param-out": {
+      "id": "param-out",
+      "type": "uml-activity-parameter",
+      "name": "Salida Orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "parameterId": "param-order"
+      }
+    },
+    "object": {
+      "id": "object",
+      "type": "uml-object-node",
+      "name": "orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "object",
+        "typeId": "order-type",
+        "upperBound": 1,
+        "ordering": "unordered"
+      }
+    },
+    "region": {
+      "id": "region",
+      "type": "uml-activity-interruptible-region",
+      "name": "Cancelar espera",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "wait": {
+      "id": "wait",
+      "type": "uml-action",
+      "name": "Esperar señal",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "acceptEvent",
+        "externalReference": "Pago aprobado",
+        "regionIds": [
+          "region"
+        ]
+      }
+    },
+    "timeout": {
+      "id": "timeout",
+      "type": "uml-action",
+      "name": "Tiempo agotado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "timeEvent",
+        "externalReference": "after(30s)",
+        "regionIds": [
+          "region"
+        ]
+      }
+    },
+    "cancel": {
+      "id": "cancel",
+      "type": "uml-action",
+      "name": "Cancelar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic",
+        "precondition": "No hay pago",
+        "postcondition": "Cancelada"
+      }
+    },
+    "protected": {
+      "id": "protected",
+      "type": "uml-action",
+      "name": "Operación protegida",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "callBehavior",
+        "callDiagramId": "qa-activity-called"
+      },
+      "childDiagramId": "qa-activity-called"
+    },
+    "handler": {
+      "id": "handler",
+      "type": "uml-action",
+      "name": "Gestionar error",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic"
+      }
+    },
+    "exception-pin": {
+      "id": "exception-pin",
+      "type": "uml-activity-pin",
+      "name": "error",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "ownerActionId": "handler",
+        "exceptionInput": true,
+        "typeId": "error-type",
+        "lower": 1,
+        "upper": 1
+      }
+    },
+    "note": {
+      "id": "note",
+      "type": "uml-comment",
+      "name": "Interrupción no termina toda la actividad",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "constraint": {
+      "id": "constraint",
+      "type": "uml-constraint",
+      "name": "saldo >= 0",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "combined-start": {
+      "id": "combined-start",
+      "type": "uml-start",
+      "name": "Inicio",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "combined-start2": {
+      "id": "combined-start2",
+      "type": "uml-start",
+      "name": "Inicio",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "md": {
+      "id": "md",
+      "type": "uml-decision",
+      "name": "MergeDecision",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "mergeDecision"
+      }
+    },
+    "jf": {
+      "id": "jf",
+      "type": "uml-fork",
+      "name": "JoinFork",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "joinFork",
+        "orientation": "horizontal"
+      }
+    },
+    "left": {
+      "id": "left",
+      "type": "uml-action",
+      "name": "Camino A",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic"
+      }
+    },
+    "right": {
+      "id": "right",
+      "type": "uml-action",
+      "name": "Camino B",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic"
+      }
+    },
+    "end2": {
+      "id": "end2",
+      "type": "uml-flow-final",
+      "name": "Fin A",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "end3": {
+      "id": "end3",
+      "type": "uml-end",
+      "name": "Fin B",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "aux-start": {
+      "id": "aux-start",
+      "type": "uml-start",
+      "name": "Inicio auxiliar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "aux-data": {
+      "id": "aux-data",
+      "type": "uml-object-node",
+      "name": "Dato de decisión",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "object",
+        "upperBound": 1,
+        "typeId": "order-type"
+      }
+    },
+    "aux-decision": {
+      "id": "aux-decision",
+      "type": "uml-decision",
+      "name": "Con entrada auxiliar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "decision",
+        "decisionInputFlowId": "aux-edge",
+        "decisionInputBehaviorId": "qa-decision-behavior"
+      }
+    },
+    "mixed-join": {
+      "id": "mixed-join",
+      "type": "uml-fork",
+      "name": "Join mixto",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "join",
+        "orientation": "vertical"
+      }
+    },
+    "aux-object": {
+      "id": "aux-object",
+      "type": "uml-object-node",
+      "name": "Dato",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "object",
+        "upperBound": 1,
+        "typeId": "order-type"
+      }
+    },
+    "mixed-target": {
+      "id": "mixed-target",
+      "type": "uml-object-node",
+      "name": "Destino",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "object",
+        "upperBound": 1,
+        "typeId": "order-type"
+      }
+    },
+    "aux-end": {
+      "id": "aux-end",
+      "type": "uml-flow-final",
+      "name": "Otra rama",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "call-start": {
+      "id": "call-start",
+      "type": "uml-start",
+      "name": "Inicio",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "call-action": {
+      "id": "call-action",
+      "type": "uml-action",
+      "name": "Ejecutar pago",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "kind": "generic"
+      }
+    },
+    "call-end": {
+      "id": "call-end",
+      "type": "uml-end",
+      "name": "Final",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {}
+    },
+    "result-pin": {
+      "id": "result-pin",
+      "type": "uml-activity-pin",
+      "name": "Resultado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "ownerActionId": "process",
+        "externalType": "Boolean",
+        "lower": 1,
+        "upper": 1,
+        "argumentParameterId": "pay:return"
+      }
+    },
+    "bool-type": {
+      "id": "bool-type",
+      "type": "uml-datatype",
+      "name": "Boolean",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "qa-selection-bag": {
+      "id": "qa-selection-bag",
+      "type": "uml-activity-parameter",
+      "name": "Órdenes",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "parameterId": "bag"
+      }
+    },
+    "qa-selection-selected": {
+      "id": "qa-selection-selected",
+      "type": "uml-activity-parameter",
+      "name": "Orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "parameterId": "selected"
+      }
+    },
+    "qa-decision-behavior-input": {
+      "id": "qa-decision-behavior-input",
+      "type": "uml-activity-parameter",
+      "name": "Orden",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "parameterId": "input"
+      }
+    },
+    "qa-decision-behavior-return": {
+      "id": "qa-decision-behavior-return",
+      "type": "uml-activity-parameter",
+      "name": "Resultado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "parameterId": "return"
+      }
+    },
+    "convert-i": {
+      "id": "convert-i",
+      "type": "uml-activity-parameter",
+      "name": "Entrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "input",
+        "parameterId": "i"
+      }
+    },
+    "convert-o": {
+      "id": "convert-o",
+      "type": "uml-activity-parameter",
+      "name": "Salida",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "activityDetail": {
+        "role": "output",
+        "parameterId": "o"
+      }
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa-activity",
+      "type": "uml-activity",
+      "name": "QA · Actividades — control, datos y excepciones",
+      "description": "Validar todos los roles y propiedades. Los filtros seleccionan zonas de revisión.",
+      "createdAt": "2026-11-16",
+      "activity": {
+        "parameters": [
+          {
+            "id": "param-order",
+            "name": "Orden",
+            "direction": "inout",
+            "typeId": "order-type",
+            "lower": 1,
+            "upper": 1,
+            "stream": true
+          }
+        ],
+        "precondition": "Solicitud recibida",
+        "postcondition": "Orden procesada",
+        "isSingleExecution": false,
+        "showFrame": true
+      },
+      "nodes": [
+        {
+          "id": "lane",
+          "elementId": "lane",
+          "x": 100,
+          "y": 60,
+          "filterIds": [
+            "control"
+          ],
+          "width": 1410,
+          "height": 760
+        },
+        {
+          "id": "start",
+          "elementId": "start",
+          "x": 70,
+          "y": 100,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "start2",
+          "elementId": "start2",
+          "x": 70,
+          "y": 550,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "merge",
+          "elementId": "merge",
+          "x": 250,
+          "y": 90,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "validate",
+          "elementId": "validate",
+          "x": 440,
+          "y": 90,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "decision",
+          "elementId": "decision",
+          "x": 730,
+          "y": 95,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "correct",
+          "elementId": "correct",
+          "x": 440,
+          "y": 300,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "fork",
+          "elementId": "fork",
+          "x": 900,
+          "y": 105,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "record",
+          "elementId": "record",
+          "x": 1060,
+          "y": 90,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "notify",
+          "elementId": "notify",
+          "x": 1060,
+          "y": 300,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "join",
+          "elementId": "join",
+          "x": 950,
+          "y": 535,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "end",
+          "elementId": "end",
+          "x": 1220,
+          "y": 540,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "flow-end",
+          "elementId": "flow-end",
+          "x": 280,
+          "y": 550,
+          "filterIds": [
+            "control"
+          ],
+          "parentNodeId": "lane"
+        },
+        {
+          "id": "prepare",
+          "elementId": "prepare",
+          "x": 100,
+          "y": 1000,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "outpin",
+          "elementId": "outpin",
+          "x": 20,
+          "y": 20,
+          "filterIds": [
+            "data"
+          ],
+          "parentNodeId": "prepare"
+        },
+        {
+          "id": "buffer",
+          "elementId": "buffer",
+          "x": 530,
+          "y": 1000,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "store",
+          "elementId": "store",
+          "x": 860,
+          "y": 1000,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "process",
+          "elementId": "process",
+          "x": 1220,
+          "y": 1000,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "inpin",
+          "elementId": "inpin",
+          "x": -24,
+          "y": 22,
+          "filterIds": [
+            "data"
+          ],
+          "parentNodeId": "process"
+        },
+        {
+          "id": "valuepin",
+          "elementId": "valuepin",
+          "x": -24,
+          "y": 44,
+          "filterIds": [
+            "data"
+          ],
+          "parentNodeId": "prepare"
+        },
+        {
+          "id": "param-in",
+          "elementId": "param-in",
+          "x": 100,
+          "y": 1230,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "param-out",
+          "elementId": "param-out",
+          "x": 1220,
+          "y": 1230,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "object",
+          "elementId": "object",
+          "x": 630,
+          "y": 1230,
+          "filterIds": [
+            "data"
+          ]
+        },
+        {
+          "id": "region",
+          "elementId": "region",
+          "x": 1650,
+          "y": 70,
+          "filterIds": [
+            "special"
+          ],
+          "width": 820,
+          "height": 440
+        },
+        {
+          "id": "wait",
+          "elementId": "wait",
+          "x": 60,
+          "y": 130,
+          "filterIds": [
+            "special"
+          ],
+          "parentNodeId": "region"
+        },
+        {
+          "id": "timeout",
+          "elementId": "timeout",
+          "x": 400,
+          "y": 130,
+          "filterIds": [
+            "special"
+          ],
+          "parentNodeId": "region"
+        },
+        {
+          "id": "cancel",
+          "elementId": "cancel",
+          "x": 2550,
+          "y": 150,
+          "filterIds": [
+            "special"
+          ]
+        },
+        {
+          "id": "protected",
+          "elementId": "protected",
+          "x": 1710,
+          "y": 620,
+          "filterIds": [
+            "special"
+          ]
+        },
+        {
+          "id": "handler",
+          "elementId": "handler",
+          "x": 2300,
+          "y": 620,
+          "filterIds": [
+            "special"
+          ]
+        },
+        {
+          "id": "exception-pin",
+          "elementId": "exception-pin",
+          "x": -24,
+          "y": 22,
+          "filterIds": [
+            "special"
+          ],
+          "parentNodeId": "handler"
+        },
+        {
+          "id": "note",
+          "elementId": "note",
+          "x": 1720,
+          "y": 880,
+          "filterIds": [
+            "special"
+          ]
+        },
+        {
+          "id": "constraint",
+          "elementId": "constraint",
+          "x": 2400,
+          "y": 880,
+          "filterIds": [
+            "special"
+          ]
+        },
+        {
+          "id": "combined-start",
+          "elementId": "combined-start",
+          "x": 100,
+          "y": 1560,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "combined-start2",
+          "elementId": "combined-start2",
+          "x": 100,
+          "y": 1770,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "md",
+          "elementId": "md",
+          "x": 330,
+          "y": 1650,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "jf",
+          "elementId": "jf",
+          "x": 740,
+          "y": 1650,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "left",
+          "elementId": "left",
+          "x": 520,
+          "y": 1510,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "right",
+          "elementId": "right",
+          "x": 520,
+          "y": 1850,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "end2",
+          "elementId": "end2",
+          "x": 1050,
+          "y": 1510,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "end3",
+          "elementId": "end3",
+          "x": 1050,
+          "y": 1850,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "aux-start",
+          "elementId": "aux-start",
+          "x": 1640,
+          "y": 1150,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "aux-data",
+          "elementId": "aux-data",
+          "x": 1640,
+          "y": 1390,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "aux-decision",
+          "elementId": "aux-decision",
+          "x": 1930,
+          "y": 1220,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "mixed-join",
+          "elementId": "mixed-join",
+          "x": 2280,
+          "y": 1220,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "aux-object",
+          "elementId": "aux-object",
+          "x": 1920,
+          "y": 1510,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "mixed-target",
+          "elementId": "mixed-target",
+          "x": 2550,
+          "y": 1220,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "aux-end",
+          "elementId": "aux-end",
+          "x": 2240,
+          "y": 1020,
+          "filterIds": [
+            "combined"
+          ]
+        },
+        {
+          "id": "result-pin",
+          "elementId": "result-pin",
+          "x": 186,
+          "y": 22,
+          "parentNodeId": "process",
+          "filterIds": [
+            "data"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "c1",
+          "source": "start",
+          "target": "merge",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c2",
+          "source": "merge",
+          "target": "validate",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c3",
+          "source": "validate",
+          "target": "decision",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c6",
+          "source": "correct",
+          "target": "merge",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c7",
+          "source": "fork",
+          "target": "record",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c8",
+          "source": "fork",
+          "target": "notify",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c9",
+          "source": "record",
+          "target": "join",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c10",
+          "source": "notify",
+          "target": "join",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c11",
+          "source": "join",
+          "target": "end",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c12",
+          "source": "start2",
+          "target": "flow-end",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "c4",
+          "source": "decision",
+          "target": "correct",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "right",
+          "activityEdge": {
+            "guard": "inválido"
+          }
+        },
+        {
+          "id": "c5",
+          "source": "decision",
+          "target": "fork",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "guard": "else"
+          }
+        },
+        {
+          "id": "o1",
+          "source": "outpin",
+          "target": "buffer",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "weight": 1
+          }
+        },
+        {
+          "id": "o2",
+          "source": "buffer",
+          "target": "store",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "weight": 1
+          }
+        },
+        {
+          "id": "o3",
+          "source": "store",
+          "target": "inpin",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "weight": 1
+          }
+        },
+        {
+          "id": "o4",
+          "source": "param-in",
+          "target": "object",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "weight": 1
+          }
+        },
+        {
+          "id": "o5",
+          "source": "object",
+          "target": "param-out",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "weight": 1
+          }
+        },
+        {
+          "id": "interrupt",
+          "source": "timeout",
+          "target": "cancel",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "interruptingRegionId": "region",
+            "guard": "cancelado"
+          }
+        },
+        {
+          "id": "exception",
+          "source": "protected",
+          "target": "exception-pin",
+          "relationKind": "exception-handler",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "exceptionTypeIds": [
+              "error-type"
+            ]
+          }
+        },
+        {
+          "id": "annotation",
+          "source": "note",
+          "target": "timeout",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "annotationTargetEdgeId": "interrupt"
+        },
+        {
+          "id": "constraint-edge",
+          "source": "constraint",
+          "target": "cancel",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m1",
+          "source": "combined-start",
+          "target": "md",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m2",
+          "source": "combined-start2",
+          "target": "md",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m3",
+          "source": "md",
+          "target": "left",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m4",
+          "source": "md",
+          "target": "right",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m5",
+          "source": "left",
+          "target": "jf",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m6",
+          "source": "right",
+          "target": "jf",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m7",
+          "source": "jf",
+          "target": "end2",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "m8",
+          "source": "jf",
+          "target": "end3",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "aux-primary",
+          "source": "aux-start",
+          "target": "aux-decision",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "aux-edge",
+          "source": "aux-data",
+          "target": "aux-decision",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "transformationBehaviorId": "convert"
+          }
+        },
+        {
+          "id": "aux-out",
+          "source": "aux-decision",
+          "target": "mixed-join",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "guard": "válido"
+          }
+        },
+        {
+          "id": "aux-other",
+          "source": "aux-decision",
+          "target": "aux-end",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "activityEdge": {
+            "guard": "else"
+          }
+        },
+        {
+          "id": "mixed-in",
+          "source": "aux-object",
+          "target": "mixed-join",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "mixed-out",
+          "source": "mixed-join",
+          "target": "mixed-target",
+          "relationKind": "object-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "loop",
+          "source": "cancel",
+          "target": "cancel",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "pathStyle": "smoothstep",
+          "sourceHandle": "top-1",
+          "targetHandle": "top-3",
+          "activityEdge": {
+            "guard": "reintentar"
+          }
+        }
+      ],
+      "filters": [
+        {
+          "id": "control",
+          "label": "Control y reintento"
+        },
+        {
+          "id": "data",
+          "label": "Objeto y pines"
+        },
+        {
+          "id": "special",
+          "label": "Señales, regiones, excepciones"
+        },
+        {
+          "id": "combined",
+          "label": "Controles combinados"
+        }
+      ]
+    },
+    {
+      "id": "qa-activity-called",
+      "type": "uml-activity",
+      "name": "Actividad llamada · QA",
+      "description": "Comprobar navegación",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "call-start",
+          "elementId": "call-start",
+          "x": 50,
+          "y": 100
+        },
+        {
+          "id": "call-action",
+          "elementId": "call-action",
+          "x": 250,
+          "y": 100
+        },
+        {
+          "id": "call-end",
+          "elementId": "call-end",
+          "x": 650,
+          "y": 100
+        }
+      ],
+      "edges": [
+        {
+          "id": "call-in",
+          "source": "call-start",
+          "target": "call-action",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "call-out",
+          "source": "call-action",
+          "target": "call-end",
+          "relationKind": "control-flow",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        }
+      ]
+    },
+    {
+      "id": "qa-selection",
+      "type": "uml-activity",
+      "name": "Seleccionar orden pendiente",
+      "description": "Firma declarada sin efectos laterales; ejemplo de QA",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "qa-selection-bag",
+          "elementId": "qa-selection-bag",
+          "x": 150,
+          "y": 130
+        },
+        {
+          "id": "qa-selection-selected",
+          "elementId": "qa-selection-selected",
+          "x": 650,
+          "y": 130
+        }
+      ],
+      "edges": [],
+      "activity": {
+        "readOnlyBehavior": true,
+        "showFrame": true,
+        "parameters": [
+          {
+            "id": "bag",
+            "name": "Órdenes",
+            "direction": "in",
+            "typeId": "order-type",
+            "lower": 0,
+            "upper": "*",
+            "ordered": false,
+            "unique": false
+          },
+          {
+            "id": "selected",
+            "name": "Orden",
+            "direction": "out",
+            "typeId": "order-type",
+            "lower": 0,
+            "upper": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "qa-decision-behavior",
+      "type": "uml-activity",
+      "name": "Determinar condición",
+      "description": "Firma declarada sin efectos laterales; ejemplo de QA",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "qa-decision-behavior-input",
+          "elementId": "qa-decision-behavior-input",
+          "x": 150,
+          "y": 130
+        },
+        {
+          "id": "qa-decision-behavior-return",
+          "elementId": "qa-decision-behavior-return",
+          "x": 650,
+          "y": 130
+        }
+      ],
+      "edges": [],
+      "activity": {
+        "readOnlyBehavior": true,
+        "showFrame": true,
+        "parameters": [
+          {
+            "id": "input",
+            "name": "Orden",
+            "direction": "in",
+            "typeId": "bool-type",
+            "lower": 1,
+            "upper": 1
+          },
+          {
+            "id": "return",
+            "name": "Resultado",
+            "direction": "return",
+            "typeId": "bool-type",
+            "lower": 1,
+            "upper": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "convert",
+      "name": "Convertir",
+      "type": "uml-activity",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "convert-i",
+          "elementId": "convert-i",
+          "x": 150,
+          "y": 130
+        },
+        {
+          "id": "convert-o",
+          "elementId": "convert-o",
+          "x": 650,
+          "y": 130
+        }
+      ],
+      "edges": [],
+      "activity": {
+        "readOnlyBehavior": true,
+        "showFrame": true,
+        "parameters": [
+          {
+            "id": "i",
+            "name": "Entrada",
+            "direction": "in",
+            "typeId": "order-type",
+            "lower": 1,
+            "upper": 1
+          },
+          {
+            "id": "o",
+            "name": "Salida",
+            "direction": "out",
+            "typeId": "bool-type",
+            "lower": 1,
+            "upper": 1
+          }
+        ]
+      }
+    }
+  ],
+  "fieldDefinitions": []
+}

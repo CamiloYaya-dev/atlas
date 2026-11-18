@@ -2,7 +2,7 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {createHmac} from 'node:crypto'
 import {hashPassword,verifyPassword,hashSecret} from './password'
-import {PERMISSIONS,ROLE_PRESETS,DIAGRAM_KINDS,ELEMENT_KINDS,relationScope,permissionLabel} from '@atlas/contracts'
+import {PERMISSIONS,ROLE_PRESETS,DIAGRAM_KINDS,ELEMENT_KINDS,relationScope,permissionLabel} from '@novzi/contracts'
 import {allowed,requirePermission,requireValidPermissions} from './roles'
 import type {Access} from './roles'
 const access=(roleKey:string,permissions:string[]=[]):Access=>({roleId:'x',roleKey,roleName:'test',permissions:new Set(permissions)})

@@ -6,5 +6,5 @@ import '@xyflow/react/dist/style.css'
 import './styles.css'
 
 const root = document.getElementById('root')
-if (!root) throw new Error('ATLAS: no se encontró el contenedor #root')
+if (!root) throw new Error('NOVZI: no se encontró el contenedor #root')
 createRoot(root).render(<React.StrictMode><ErrorBoundary><App/></ErrorBoundary></React.StrictMode>)

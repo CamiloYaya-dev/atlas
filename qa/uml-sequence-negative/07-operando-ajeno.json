@@ -1,0 +1,1385 @@
+{
+  "schema": 1,
+  "elements": {
+    "approval-signal": {
+      "id": "approval-signal",
+      "type": "uml-signal",
+      "name": "PagoAprobado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "payment-type": {
+      "id": "payment-type",
+      "type": "uml-class",
+      "name": "PagoService",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "operations": [
+          {
+            "id": "pay-op",
+            "name": "pagar",
+            "visibility": "public",
+            "returnType": "String",
+            "parameters": [
+              {
+                "id": "p-id",
+                "name": "id",
+                "type": "String",
+                "direction": "in"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "client": {
+      "id": "client",
+      "type": "uml-lifeline",
+      "name": "cliente",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Cliente"
+      }
+    },
+    "api": {
+      "id": "api",
+      "type": "uml-lifeline",
+      "name": "api",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "classifierId": "payment-type"
+      }
+    },
+    "gateway": {
+      "id": "gateway",
+      "type": "uml-lifeline",
+      "name": "pasarela",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Pasarela"
+      }
+    },
+    "temp": {
+      "id": "temp",
+      "type": "uml-lifeline",
+      "name": "sesión",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Sesión"
+      }
+    },
+    "activation": {
+      "id": "activation",
+      "type": "uml-activation",
+      "name": "Ejecutar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "api",
+        "startOccurrenceId": "call:receive",
+        "finishOccurrenceId": "reply:send",
+        "executionKind": "behavior"
+      }
+    },
+    "nested": {
+      "id": "nested",
+      "type": "uml-activation",
+      "name": "Interna",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "api",
+        "startOccurrenceId": "self:receive",
+        "finishOccurrenceId": "nested-end",
+        "executionKind": "generic"
+      }
+    },
+    "x": {
+      "id": "x",
+      "type": "uml-destruction",
+      "name": "Destrucción",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "lifelineId": "temp",
+        "occurrenceId": "delete:receive"
+      }
+    },
+    "alt": {
+      "id": "alt",
+      "type": "uml-frame",
+      "name": "Resultado",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "alt",
+        "coveredLifelineIds": [
+          "client",
+          "api",
+          "gateway"
+        ],
+        "operands": [
+          {
+            "id": "approved",
+            "guard": "aprobado"
+          },
+          {
+            "id": "rejected",
+            "guard": "else"
+          }
+        ]
+      }
+    },
+    "ref-client": {
+      "id": "ref-client",
+      "type": "uml-lifeline",
+      "name": "cliente",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Cliente"
+      }
+    },
+    "ref-api": {
+      "id": "ref-api",
+      "type": "uml-lifeline",
+      "name": "servicio",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Registro"
+      }
+    },
+    "ref": {
+      "id": "ref",
+      "type": "uml-interaction",
+      "name": "Registrar rechazo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "interactionId": "qa-seq-ref",
+        "coveredLifelineIds": [
+          "api",
+          "gateway"
+        ],
+        "roleMappings": [
+          {
+            "from": "ref-client",
+            "to": "api"
+          },
+          {
+            "from": "ref-api",
+            "to": "gateway"
+          }
+        ]
+      }
+    },
+    "gate": {
+      "id": "gate",
+      "type": "uml-gate",
+      "name": "entrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "gateKind": "formal",
+        "ownerId": "qa-seq",
+        "side": "left",
+        "position": 0.72
+      }
+    },
+    "invariant": {
+      "id": "invariant",
+      "type": "uml-sequence-invariant",
+      "name": "Saldo",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "expression": "saldo >= 0",
+        "lifelineId": "api",
+        "occurrenceId": "invariant-event"
+      }
+    },
+    "continuation": {
+      "id": "continuation",
+      "type": "uml-sequence-continuation",
+      "name": "Continuar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "continuationKind": "finish",
+        "coveredLifelineIds": [
+          "client",
+          "api"
+        ]
+      }
+    },
+    "time": {
+      "id": "time",
+      "type": "uml-time",
+      "name": "t0",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "timeObservation",
+        "occurrenceIds": [
+          "call:send"
+        ]
+      }
+    },
+    "duration": {
+      "id": "duration",
+      "type": "uml-constraint",
+      "name": "SLA",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "temporalKind": "durationConstraint",
+        "occurrenceIds": [
+          "call:send",
+          "reply:receive"
+        ],
+        "minimum": 0,
+        "maximum": 800,
+        "unit": "ms"
+      }
+    },
+    "comment": {
+      "id": "comment",
+      "type": "uml-comment",
+      "name": "Revisar",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {}
+    },
+    "op-line-0": {
+      "id": "op-line-0",
+      "type": "uml-lifeline",
+      "name": "a",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Servicio",
+        "coregions": [
+          {
+            "startId": "core-start",
+            "finishId": "core-end"
+          }
+        ]
+      }
+    },
+    "op-line-1": {
+      "id": "op-line-1",
+      "type": "uml-lifeline",
+      "name": "b",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "externalType": "Servicio"
+      }
+    },
+    "frame-alt": {
+      "id": "frame-alt",
+      "type": "uml-frame",
+      "name": "alt",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "alt",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "alt-1",
+            "guard": "condición"
+          },
+          {
+            "id": "alt-2",
+            "guard": "else"
+          }
+        ]
+      }
+    },
+    "frame-opt": {
+      "id": "frame-opt",
+      "type": "uml-frame",
+      "name": "opt",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "opt",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "opt-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-loop": {
+      "id": "frame-loop",
+      "type": "uml-frame",
+      "name": "loop",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "loop",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "loop-1",
+            "guard": "condición",
+            "min": 1,
+            "max": 3
+          }
+        ]
+      }
+    },
+    "frame-break": {
+      "id": "frame-break",
+      "type": "uml-frame",
+      "name": "break",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "break",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "break-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-par": {
+      "id": "frame-par",
+      "type": "uml-frame",
+      "name": "par",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "par",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "par-1",
+            "guard": "condición"
+          },
+          {
+            "id": "par-2"
+          }
+        ]
+      }
+    },
+    "frame-seq": {
+      "id": "frame-seq",
+      "type": "uml-frame",
+      "name": "seq",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "seq",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "seq-1",
+            "guard": "condición"
+          },
+          {
+            "id": "seq-2"
+          }
+        ]
+      }
+    },
+    "frame-strict": {
+      "id": "frame-strict",
+      "type": "uml-frame",
+      "name": "strict",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "strict",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "strict-1",
+            "guard": "condición"
+          },
+          {
+            "id": "strict-2"
+          }
+        ]
+      }
+    },
+    "frame-critical": {
+      "id": "frame-critical",
+      "type": "uml-frame",
+      "name": "critical",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "critical",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "critical-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-neg": {
+      "id": "frame-neg",
+      "type": "uml-frame",
+      "name": "neg",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "neg",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "neg-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-assert": {
+      "id": "frame-assert",
+      "type": "uml-frame",
+      "name": "assert",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "assert",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "assert-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-ignore": {
+      "id": "frame-ignore",
+      "type": "uml-frame",
+      "name": "ignore",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "ignore",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "ignore-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    },
+    "frame-consider": {
+      "id": "frame-consider",
+      "type": "uml-frame",
+      "name": "consider",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "sequenceDetail": {
+        "operator": "consider",
+        "coveredLifelineIds": [
+          "op-line-0",
+          "op-line-1"
+        ],
+        "operands": [
+          {
+            "id": "consider-1",
+            "guard": "condición"
+          }
+        ]
+      }
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa-seq",
+      "name": "Pago y ciclo de vida",
+      "type": "uml-sequence",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "client",
+          "elementId": "client",
+          "x": 80,
+          "y": 60,
+          "width": 170,
+          "height": 1050
+        },
+        {
+          "id": "api",
+          "elementId": "api",
+          "x": 410,
+          "y": 60,
+          "width": 170,
+          "height": 1050
+        },
+        {
+          "id": "gateway",
+          "elementId": "gateway",
+          "x": 750,
+          "y": 60,
+          "width": 170,
+          "height": 1050
+        },
+        {
+          "id": "temp",
+          "elementId": "temp",
+          "x": 1090,
+          "y": 60,
+          "width": 170,
+          "height": 1050
+        },
+        {
+          "id": "activation",
+          "elementId": "activation",
+          "x": 485,
+          "y": 140,
+          "width": 48,
+          "height": 440
+        },
+        {
+          "id": "nested",
+          "elementId": "nested",
+          "x": 500,
+          "y": 318,
+          "width": 48,
+          "height": 56
+        },
+        {
+          "id": "x",
+          "elementId": "x",
+          "x": 1164,
+          "y": 510,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "alt",
+          "elementId": "alt",
+          "x": 65,
+          "y": 170,
+          "width": 920,
+          "height": 145
+        },
+        {
+          "id": "ref",
+          "elementId": "ref",
+          "x": 385,
+          "y": 820,
+          "width": 550,
+          "height": 120
+        },
+        {
+          "id": "gate",
+          "elementId": "gate",
+          "x": 20,
+          "y": 775,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "invariant",
+          "elementId": "invariant",
+          "x": 415,
+          "y": 680,
+          "width": 160,
+          "height": 48
+        },
+        {
+          "id": "continuation",
+          "elementId": "continuation",
+          "x": 67,
+          "y": 970,
+          "width": 190,
+          "height": 48
+        },
+        {
+          "id": "time",
+          "elementId": "time",
+          "x": 17,
+          "y": 140,
+          "width": 128,
+          "height": 60
+        },
+        {
+          "id": "duration",
+          "elementId": "duration",
+          "x": 800,
+          "y": 680,
+          "width": 170,
+          "height": 60
+        },
+        {
+          "id": "comment",
+          "elementId": "comment",
+          "x": 1030,
+          "y": 680,
+          "width": 185,
+          "height": 70
+        }
+      ],
+      "edges": [
+        {
+          "id": "call",
+          "source": "client",
+          "target": "api",
+          "label": "pagar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "pay-op",
+            "arguments": [
+              {
+                "value": "id"
+              }
+            ],
+            "sendId": "call:send",
+            "receiveId": "call:receive"
+          }
+        },
+        {
+          "id": "async",
+          "source": "activation",
+          "target": "gateway",
+          "label": "autorizar",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "async:send",
+            "receiveId": "async:receive"
+          }
+        },
+        {
+          "id": "signal",
+          "source": "gateway",
+          "target": "activation",
+          "label": "PagoAprobado",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchSignal",
+            "signatureOwnerId": "approval-signal",
+            "signatureId": "approval-signal",
+            "sendId": "signal:send",
+            "receiveId": "signal:receive"
+          }
+        },
+        {
+          "id": "self",
+          "source": "activation",
+          "target": "activation",
+          "label": "validar",
+          "relationKind": "message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "synchCall",
+            "sendId": "self:send",
+            "receiveId": "self:receive"
+          }
+        },
+        {
+          "id": "create",
+          "source": "api",
+          "target": "temp",
+          "label": "Crear sesión",
+          "relationKind": "create",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sequenceEdge": {
+            "sort": "createMessage",
+            "sendId": "create:send",
+            "receiveId": "create:receive"
+          }
+        },
+        {
+          "id": "delete",
+          "source": "api",
+          "target": "x",
+          "label": "Eliminar sesión",
+          "relationKind": "destroy",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "deleteMessage",
+            "sendId": "delete:send",
+            "receiveId": "delete:receive"
+          }
+        },
+        {
+          "id": "reply",
+          "source": "api",
+          "target": "client",
+          "label": "resultado",
+          "relationKind": "reply",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "sequenceEdge": {
+            "sort": "reply",
+            "replyToId": "call",
+            "signatureOwnerId": "payment-type",
+            "signatureId": "pay-op",
+            "arguments": [
+              {
+                "value": "resultado"
+              }
+            ],
+            "sendId": "reply:send",
+            "receiveId": "reply:receive"
+          }
+        },
+        {
+          "id": "found",
+          "source": "client",
+          "target": "client",
+          "label": "notificación externa",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "receiveId": "found:receive"
+          }
+        },
+        {
+          "id": "lost",
+          "source": "api",
+          "target": "api",
+          "label": "fuera de alcance",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "lost:send"
+          }
+        },
+        {
+          "id": "gate-message",
+          "source": "gate",
+          "target": "client",
+          "label": "entrada",
+          "relationKind": "async-message",
+          "direction": "forward",
+          "lineStyle": "solid",
+          "sequenceEdge": {
+            "sort": "asynchCall",
+            "sendId": "gate-message:send",
+            "receiveId": "gate-message:receive"
+          }
+        },
+        {
+          "id": "order",
+          "source": "client",
+          "target": "api",
+          "label": "",
+          "relationKind": "general-ordering",
+          "direction": "forward",
+          "lineStyle": "dotted",
+          "sequenceEdge": {
+            "beforeId": "call:send",
+            "afterId": "invariant-event"
+          }
+        },
+        {
+          "id": "note",
+          "source": "comment",
+          "target": "client",
+          "label": "",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed",
+          "annotationTargetEdgeId": "call"
+        }
+      ],
+      "interaction": {
+        "id": "qa-seq",
+        "occurrences": [
+          {
+            "id": "call:send",
+            "nodeId": "client",
+            "time": 130,
+            "kind": "send"
+          },
+          {
+            "id": "call:receive",
+            "nodeId": "api",
+            "time": 130,
+            "kind": "receive"
+          },
+          {
+            "id": "async:send",
+            "nodeId": "activation",
+            "time": 218,
+            "kind": "send",
+            "operandId": "absent"
+          },
+          {
+            "id": "async:receive",
+            "nodeId": "gateway",
+            "time": 218,
+            "kind": "receive",
+            "operandId": "approved"
+          },
+          {
+            "id": "signal:send",
+            "nodeId": "gateway",
+            "time": 242,
+            "kind": "send",
+            "operandId": "approved"
+          },
+          {
+            "id": "signal:receive",
+            "nodeId": "activation",
+            "time": 242,
+            "kind": "receive",
+            "operandId": "approved"
+          },
+          {
+            "id": "self:send",
+            "nodeId": "activation",
+            "time": 320,
+            "kind": "send"
+          },
+          {
+            "id": "self:receive",
+            "nodeId": "activation",
+            "time": 350,
+            "kind": "receive"
+          },
+          {
+            "id": "nested-end",
+            "nodeId": "api",
+            "time": 380,
+            "kind": "finish"
+          },
+          {
+            "id": "create:send",
+            "nodeId": "api",
+            "time": 420,
+            "kind": "send"
+          },
+          {
+            "id": "create:receive",
+            "nodeId": "temp",
+            "time": 420,
+            "kind": "receive"
+          },
+          {
+            "id": "delete:send",
+            "nodeId": "api",
+            "time": 530,
+            "kind": "send"
+          },
+          {
+            "id": "delete:receive",
+            "nodeId": "x",
+            "time": 530,
+            "kind": "receive"
+          },
+          {
+            "id": "reply:send",
+            "nodeId": "api",
+            "time": 640,
+            "kind": "send"
+          },
+          {
+            "id": "reply:receive",
+            "nodeId": "client",
+            "time": 640,
+            "kind": "receive"
+          },
+          {
+            "id": "invariant-event",
+            "nodeId": "api",
+            "time": 710,
+            "kind": "event"
+          },
+          {
+            "id": "found:receive",
+            "nodeId": "client",
+            "time": 740,
+            "kind": "receive"
+          },
+          {
+            "id": "lost:send",
+            "nodeId": "api",
+            "time": 780,
+            "kind": "send"
+          },
+          {
+            "id": "gate-message:send",
+            "nodeId": "gate",
+            "time": 800,
+            "kind": "send"
+          },
+          {
+            "id": "gate-message:receive",
+            "nodeId": "client",
+            "time": 800,
+            "kind": "receive"
+          }
+        ],
+        "showFrame": true
+      }
+    },
+    {
+      "id": "qa-seq-ref",
+      "name": "Registrar rechazo",
+      "type": "uml-sequence",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "ref-client",
+          "elementId": "ref-client",
+          "x": 90,
+          "y": 50,
+          "width": 170,
+          "height": 460
+        },
+        {
+          "id": "ref-api",
+          "elementId": "ref-api",
+          "x": 420,
+          "y": 50,
+          "width": 170,
+          "height": 460
+        }
+      ],
+      "edges": [],
+      "interaction": {
+        "id": "qa-seq-ref",
+        "occurrences": [],
+        "showFrame": true
+      }
+    },
+    {
+      "id": "qa-seq-operators",
+      "name": "Operadores UML",
+      "type": "uml-sequence",
+      "description": "",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "op-line-0",
+          "elementId": "op-line-0",
+          "x": 110,
+          "y": 60,
+          "width": 170,
+          "height": 2500
+        },
+        {
+          "id": "op-line-1",
+          "elementId": "op-line-1",
+          "x": 510,
+          "y": 60,
+          "width": 170,
+          "height": 2500
+        },
+        {
+          "id": "frame-alt",
+          "elementId": "frame-alt",
+          "x": 70,
+          "y": 140,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-opt",
+          "elementId": "frame-opt",
+          "x": 70,
+          "y": 330,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-loop",
+          "elementId": "frame-loop",
+          "x": 70,
+          "y": 520,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-break",
+          "elementId": "frame-break",
+          "x": 70,
+          "y": 710,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-par",
+          "elementId": "frame-par",
+          "x": 70,
+          "y": 900,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-seq",
+          "elementId": "frame-seq",
+          "x": 70,
+          "y": 1090,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-strict",
+          "elementId": "frame-strict",
+          "x": 70,
+          "y": 1280,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-critical",
+          "elementId": "frame-critical",
+          "x": 70,
+          "y": 1470,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-neg",
+          "elementId": "frame-neg",
+          "x": 70,
+          "y": 1660,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-assert",
+          "elementId": "frame-assert",
+          "x": 70,
+          "y": 1850,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-ignore",
+          "elementId": "frame-ignore",
+          "x": 70,
+          "y": 2040,
+          "width": 630,
+          "height": 160
+        },
+        {
+          "id": "frame-consider",
+          "elementId": "frame-consider",
+          "x": 70,
+          "y": 2230,
+          "width": 630,
+          "height": 160
+        }
+      ],
+      "edges": [],
+      "interaction": {
+        "id": "qa-seq-operators",
+        "occurrences": [
+          {
+            "id": "core-start",
+            "nodeId": "op-line-0",
+            "time": 90,
+            "kind": "event"
+          },
+          {
+            "id": "core-end",
+            "nodeId": "op-line-0",
+            "time": 125,
+            "kind": "event"
+          }
+        ],
+        "showFrame": true
+      }
+    }
+  ],
+  "fieldDefinitions": []
+}

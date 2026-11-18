@@ -1,8 +1,8 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels} from '@atlas/contracts'
-import type {DiagramEdge} from '@atlas/contracts'
-import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
+import {emptyDoc,createElement,diagramLabels,diagramCreationEnabled,elementLabels,fieldLabels} from '@novzi/contracts'
+import type {DiagramEdge} from '@novzi/contracts'
+import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,editRelation,removeRelation,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
 function fixture(){
  const a=createElement('Iniciar sesión','activity'),b=createElement('Verificar credenciales','activity')
  a.id='auth';b.id='verify'
@@ -18,8 +18,12 @@ test('catálogos de vistas, elementos y campos disponibles',()=>{
 })
 test('crear y renombrar diagramas C1/C2/C3/C4/procesos/secuencias/datos/trazabilidad',()=>{
  let d=emptyDoc()
- for(const [i,type] of Object.keys(diagramLabels).entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type:type as keyof typeof diagramLabels,date:'2026-01-01'})
- assert.equal(d.diagrams.length,Object.keys(diagramLabels).length)
+ const types=Object.keys(diagramLabels) as (keyof typeof diagramLabels)[]
+ const enabled=types.filter(diagramCreationEnabled),disabled=types.filter(t=>!diagramCreationEnabled(t))
+ assert.equal(enabled.length,15);assert.equal(disabled.length,8)
+ for(const [i,type] of enabled.entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type,date:'2026-01-01'})
+ assert.equal(d.diagrams.length,enabled.length)
+ for(const type of disabled)assert.throws(()=>createDiagram(d,{id:'blocked-'+type,name:'Histórica',type,date:'2026-01-01'}),/deshabilitada/)
  d=editDiagram(d,'id0',{name:'Contexto',description:'Visión ejecutiva'})
  assert.equal(d.diagrams[0].name,'Contexto');assert.equal(d.diagrams[0].description,'Visión ejecutiva')
 })
@@ -47,14 +51,15 @@ test('conectar, modificar nodos y eliminar caja conserva catálogo y elimina rel
  assert.equal(d.diagrams[0].edges.length,0)
  assert.ok(d.elements.auth,'el elemento no se borra al retirarlo de una vista')
 })
-test('conexiones no permiten duplicados, autoconexión ni extremos huérfanos',()=>{
+test('relaciones paralelas tienen identidades propias; autoconexiones y extremos huérfanos se rechazan',()=>{
  const d=fixture(),e:DiagramEdge={id:'r1',source:'n1',target:'n2'}
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'n1'}),/Autoconexión/)
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'missing'}),/inexistentes/)
  const x=connectNodes(d,'d1',e)
- assert.throws(()=>connectNodes(x,'d1',{...e,id:'r2'}),/duplicada/)
- assert.throws(()=>connectNodes(x,'d1',{...e,source:'n2',target:'n1'}),/duplicada/)
- assert.equal(x.diagrams[0].edges.length,1)
+ assert.throws(()=>connectNodes(x,'d1',e),/duplicad/)
+ const two=connectNodes(x,'d1',{...e,id:'r2',sourceHandle:'top-1',targetHandle:'bottom-3'})
+ const three=connectNodes(two,'d1',{...e,id:'r3',source:'n2',target:'n1'})
+ assert.equal(three.diagrams[0].edges.length,3)
 })
 test('validación de movimiento y eliminación de diagramas referenciados',()=>{
  let d=fixture()
@@ -97,3 +102,46 @@ test('borrar una vista deja intactas las otras vistas y los elementos compartido
  assert.equal(d.diagrams[0].nodes[0].elementId,'auth')
  assert.equal(Object.keys(d.elements).length,2)
 })
+
+test('relación: editar dirección, puertos y tipo de línea no cambia los extremos',()=>{
+ let d=fixture();d=connectNodes(d,'d1',{id:'link1',source:'n1',target:'n2'})
+ d=editRelation(d,'d1','link1',{direction:'both',lineStyle:'dotted',pathStyle:'straight',sourceHandle:'top-1',targetHandle:'bottom-3'})
+ const edge=d.diagrams[0].edges[0]
+ assert.equal(edge.direction,'both');assert.equal(edge.lineStyle,'dotted');assert.equal(edge.pathStyle,'straight');assert.equal(edge.sourceHandle,'top-1');assert.equal(edge.targetHandle,'bottom-3');assert.equal(edge.source,'n1');assert.equal(edge.target,'n2')
+ assert.throws(()=>editRelation(d,'d1','link1',{source:'n2'}),/extremos/)
+})
+test('eliminar solo la relación respeta nodos y conserva la ficha original',()=>{
+ let d=fixture();d=connectNodes(d,'d1',{id:'link1',source:'n1',target:'n2'})
+ d=removeRelation(d,'d1','link1')
+ assert.equal(d.diagrams[0].edges.length,0);assert.equal(d.diagrams[0].nodes.length,2)
+ assert.ok(d.elements.auth);assert.ok(d.elements.verify)
+ assert.throws(()=>removeRelation(d,'d1','link1'),/inexistente/)
+})
+test('desvincular una caja de destino conserva el diagrama general',()=>{
+ let d=fixture();d=editElement(d,'auth',{childDiagramId:'d1',childNodeId:'n2'},'2026-11-12')
+ d=removeElementNode(d,'d1','verify')
+ assert.equal(d.elements.auth.childDiagramId,'d1')
+ assert.equal(d.elements.auth.childNodeId,undefined)
+})
+
+test('dos relaciones del mismo par mantienen identidad, estilo y puerto independientes',()=>{
+ let d=fixture()
+ d=connectNodes(d,'d1',{id:'a',source:'n1',target:'n2',sourceHandle:'right',targetHandle:'left',label:'HTTPS'})
+ d=connectNodes(d,'d1',{id:'b',source:'n1',target:'n2',sourceHandle:'top-2',targetHandle:'bottom-3',label:'Evento'})
+ assert.equal(d.diagrams[0].edges.length,2)
+ d=removeRelation(d,'d1','a')
+ assert.equal(d.diagrams[0].edges.length,1)
+ assert.equal(d.diagrams[0].edges[0].sourceHandle,'top-2')
+ assert.equal(d.diagrams[0].edges[0].label,'Evento')
+})
+
+
+test('operaciones sobre identidad inexistente no cambian el modelo',()=>{
+ const d=fixture(),snapshot=structuredClone(d)
+ assert.throws(()=>deleteDiagram(d,'missing'),/Diagrama no encontrado/)
+ assert.throws(()=>editRelation(d,'d1','missing',{label:'QA'}),/Relación inexistente/)
+ assert.throws(()=>addElementNode(d,'d1',{...d.elements.auth,name:'Otro elemento'},{id:'another',x:0,y:0}),/ID de elemento duplicado/)
+ const result=addElementNode(d,'d1',d.elements.auth,{id:'another',x:0,y:0});assert.equal(Object.keys(result.elements).length,2);assert.equal(result.diagrams[0].nodes.length,3)
+ assert.deepEqual(d,snapshot)
+})
+

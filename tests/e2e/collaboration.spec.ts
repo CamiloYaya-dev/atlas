@@ -1,47 +1,59 @@
 import {test,expect} from '@playwright/test'
-const email=process.env.E2E_ADMIN_EMAIL||''
-const password=process.env.E2E_ADMIN_PASSWORD||''
-if(!email||!password)throw Error('Configura credenciales E2E de la base LOCAL QA')
-
-async function authenticate(page:import('@playwright/test').Page){
+import {openQaDemo,openQaDiagram,observeQaHttp} from './qa-navigation'
+const adminEmail=process.env.E2E_ADMIN_EMAIL||'',adminPassword=process.env.E2E_ADMIN_PASSWORD||''
+const editorEmail=process.env.E2E_EDITOR_EMAIL||'',editorPassword=process.env.E2E_EDITOR_PASSWORD||''
+if(!adminEmail||!adminPassword||!editorEmail||!editorPassword)throw Error('E2E requires two independent QA accounts')
+async function enter(page:import('@playwright/test').Page,email:string,password:string){
  await page.goto('/')
  await page.getByLabel('Correo electrónico').fill(email)
  await page.getByLabel('Contraseña').fill(password)
- await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
+ await page.getByRole('button',{name:/Entrar a NOVZI/}).click()
  await expect(page.getByText('API · PostgreSQL · Acceso cerrado')).toBeVisible()
- await expect(page.locator('.collab-status.connected')).toBeVisible({timeout:15000})
+ await openQaDemo(page)
 }
-
-test('dos navegadores sincronizan un diagrama nuevo, las cajas y el historial sin recargar',async({browser})=>{
- const one=await browser.newContext()
- let two:import('@playwright/test').BrowserContext|null=null
+test('dos usuarios diferentes: cambios independientes sobreviven y el rol limitado no ve C3',async({browser})=>{
+ const a=await browser.newContext(),b=await browser.newContext()
+ observeQaHttp(a);observeQaHttp(b)
  try{
-  const alice=await one.newPage()
-  await authenticate(alice)
-  two=await browser.newContext({storageState:await one.storageState()})
-  const bob=await two.newPage()
-  await bob.goto('/')
-  await expect(bob.locator('.collab-status.connected')).toBeVisible({timeout:15000})
-  await expect(alice.locator('.collab-status')).toContainText('2 en línea',{timeout:15000})
-  const diagramName='Colaboración QA '+Date.now()
-  await alice.getByRole('button',{name:'Crear diagrama'}).click()
-  const modal=alice.getByRole('dialog',{name:'Nuevo diagrama'})
-  await modal.getByLabel('Nombre del diagrama').fill(diagramName)
-  await modal.getByLabel('Tipo de visualización').selectOption('custom')
-  await modal.getByRole('button',{name:'Crear',exact:true}).click()
-  await expect(alice.getByText('Guardado',{exact:true})).toBeVisible({timeout:15000})
-  await expect(bob.getByRole('button',{name:diagramName})).toBeVisible({timeout:15000})
-  await bob.getByRole('button',{name:diagramName}).click()
-  await expect(bob.getByRole('heading',{name:diagramName})).toBeVisible()
-  const elementName='Elemento colaborativo '+Date.now()
-  await alice.getByRole('button',{name:'Agregar caja'}).click()
-  const nodeModal=alice.getByRole('dialog',{name:'Agregar caja al diagrama'})
-  await nodeModal.getByLabel('Nombre de la caja').fill(elementName)
-  await nodeModal.getByLabel('Tipo de elemento').selectOption('activity')
-  await nodeModal.getByRole('button',{name:'Agregar al lienzo'}).click()
-  await expect(alice.getByText('Guardado',{exact:true})).toBeVisible({timeout:15000})
-  await expect(bob.getByText(elementName)).toBeVisible({timeout:15000})
-  await alice.getByRole('button',{name:/Historial/}).click()
-  await expect(alice.getByRole('dialog',{name:'Historial de versiones'})).toBeVisible()
- }finally{await one.close();if(two)await two.close()}
+  const pageA=await a.newPage(),pageB=await b.newPage()
+  await enter(pageA,adminEmail,adminPassword)
+  await enter(pageB,editorEmail,editorPassword)
+  await expect(pageB.locator('[data-tour="diagram-nav"] .diagram-folder-toggle').filter({hasText:'C3 · Componentes'}),'El rol limitado no debe recibir ni la carpeta C3').toHaveCount(0)
+  // Different identities, one workspace. SSE delivers authorized updates without a reload.
+  await expect(pageA.locator('.collab-status')).toContainText('en línea',{timeout:20000})
+  await expect(pageB.locator('.collab-status')).toContainText('en línea',{timeout:20000})
+  await openQaDiagram(pageA,'C1 · Contexto de Zercano','C1 · Contexto')
+  const contentA='Edición A '+Date.now()
+  const [savedA]=await Promise.all([
+   pageA.waitForResponse(r=>r.request().method()==='PUT'&&/\/api\/v1\/projects\/[^/]+\/document$/.test(new URL(r.url()).pathname),{timeout:20000}),
+   pageA.getByLabel('Descripción').fill(contentA)
+  ])
+  expect(savedA.ok(),'La escritura de A debe persistir en PostgreSQL').toBe(true)
+  expect((await savedA.json()).document.diagrams.find((d:{id:string})=>d.id==='c1')?.description).toBe(contentA)
+  await expect(pageA.locator('.save-chip.saved')).toBeVisible({timeout:20000})
+  await openQaDiagram(pageB,'C1 · Contexto de Zercano','C1 · Contexto')
+  await expect(pageB.getByLabel('Descripción')).toHaveValue(contentA,{timeout:20000})
+  await openQaDiagram(pageB,'C2 · Contenedores','C2 · Contenedores')
+  const contentB='Edición B '+Date.now()
+  const [savedB]=await Promise.all([
+   pageB.waitForResponse(r=>r.request().method()==='PUT'&&/\/api\/v1\/projects\/[^/]+\/document$/.test(new URL(r.url()).pathname),{timeout:20000}),
+   pageB.getByLabel('Descripción').fill(contentB)
+  ])
+  expect(savedB.ok(),'La escritura de B debe persistir en PostgreSQL').toBe(true)
+  const persistedB=(await savedB.json()).document.diagrams as Array<{id:string;description:string}>
+  expect(persistedB.find(d=>d.id==='c1')?.description,'La escritura de B no debe pisar C1').toBe(contentA)
+  expect(persistedB.find(d=>d.id==='c2')?.description,'B solo modifica C2').toBe(contentB)
+  await expect(pageB.locator('.save-chip.saved')).toBeVisible({timeout:20000})
+  await openQaDiagram(pageA,'C2 · Contenedores','C2 · Contenedores')
+  await expect(pageA.getByLabel('Descripción')).toHaveValue(contentB,{timeout:20000})
+  // Persisted read in a fresh browser load complements the live assertions.
+  await pageA.reload()
+  await pageB.reload()
+  await openQaDemo(pageA)
+  await openQaDemo(pageB)
+  await openQaDiagram(pageA,'C1 · Contexto de Zercano','C1 · Contexto')
+  await openQaDiagram(pageB,'C2 · Contenedores','C2 · Contenedores')
+  await expect(pageA.getByLabel('Descripción')).toHaveValue(contentA)
+  await expect(pageB.getByLabel('Descripción')).toHaveValue(contentB)
+ }finally{await a.close();await b.close()}
 })

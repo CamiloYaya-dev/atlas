@@ -1,2 +1,2 @@
 // Datos inventados reutilizables por API y frontend.
-export { demoDocument } from '@atlas/fixtures'
+export { demoDocument } from '@novzi/fixtures'

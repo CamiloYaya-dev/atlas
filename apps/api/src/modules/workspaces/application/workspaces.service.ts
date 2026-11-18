@@ -4,4 +4,6 @@ export class WorkspacesService {
  constructor(private readonly repo=new WorkspacesRepository()){}
  list(userId:string){return this.repo.listForUser(userId)}
  create(name:unknown,userId:string){return this.repo.create(cleanName(name,120),userId)}
+ rename(id:string,name:unknown,userId:string){return this.repo.rename(id,cleanName(name,120),userId)}
+ delete(id:string,userId:string,options?:unknown){return this.repo.delete(id,userId,options)}
 }

@@ -1,6 +1,7 @@
 import {readdir,stat} from 'node:fs/promises'
 import {existsSync} from 'node:fs'
 import {resolve,relative} from 'node:path'
+import {pathToFileURL} from 'node:url'
 import {spawnSync} from 'node:child_process'
 const root=resolve(import.meta.dirname,'..')
 const tsx=resolve(root,'node_modules','tsx','dist','cli.mjs')
@@ -15,18 +16,19 @@ if(mode==='unit'){
  }
 }else{
  const url=process.env.DATABASE_URL||''
- if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/atlas_test(?:\?|$)/.test(url)){
-  console.error('INTEGRACIÓN BLOQUEADA: requiere PostgreSQL LOCAL QA, puerto 5433 y nombre atlas_test. Usa npm run test:db');process.exit(1)
+ if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/novzi_test(?:\?|$)/.test(url)){
+  console.error('INTEGRACIÓN BLOQUEADA: requiere PostgreSQL LOCAL QA, puerto 5433 y nombre novzi_test. Usa npm run test:db');process.exit(1)
  }
- files=[resolve(root,'apps/api/src/tests/integration.test.ts'),resolve(root,'apps/api/src/tests/api.integration.test.ts')]
+ files=[resolve(root,'apps/api/src/tests/integration.test.ts'),resolve(root,'apps/api/src/tests/api.integration.test.ts'),resolve(root,'apps/api/src/tests/uml-scoped.integration.test.ts')]
 }
 files.sort()
-console.log(`[ATLAS QA] ${mode}: ${files.length} archivos de pruebas`)
-const safeEnv={...process.env,NODE_ENV:'test',AUTH_MODE:'local',ATLAS_CSRF_SECRET:process.env.ATLAS_CSRF_SECRET||'qa-secret-local-only-for-unit-tests-2026-01',DATABASE_URL:process.env.DATABASE_URL||'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'}
+console.log(`[NOVZI QA] ${mode}: ${files.length} archivos de pruebas`)
+const safeEnv={...process.env,NODE_ENV:'test',AUTH_MODE:'local',NOVZI_CSRF_SECRET:process.env.NOVZI_CSRF_SECRET||'qa-secret-local-only-for-unit-tests-2026-01',DATABASE_URL:process.env.DATABASE_URL||'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test'}
 let failed=false
 for(const file of files){
- const args=[tsx,'--test',...(coverage?['--experimental-test-coverage']:[]),file]
- console.log(`\n[ATLAS QA] ${relative(root,file)}`)
+ const loader=pathToFileURL(resolve(root,'scripts/coverage-ts-register.mjs')).href
+ const args=[...(process.env.NOVZI_QA_COVERAGE_TS==='1'?['--enable-source-maps','--import',loader]:[tsx]),'--test',...(coverage?['--experimental-test-coverage']:[]),file]
+ console.log(`\n[NOVZI QA] ${relative(root,file)}`)
  const run=spawnSync(process.execPath,args,{cwd:root,stdio:'inherit',env:safeEnv,windowsHide:false})
  if(run.status!==0){failed=true;console.error(`[FALLÓ] ${relative(root,file)}`)}
 }

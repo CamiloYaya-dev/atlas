@@ -21,9 +21,9 @@ test('cliente HTTP: POST y PUT envían token CSRF y cuerpo de petición',async()
    let capture:RequestInit|undefined
    globalThis.fetch=async(_url,options)=>{capture=options;return new Response(JSON.stringify({ok:true}),{status:200})}
    setCsrf('csrf-test')
-   await request('/test',{method,body:JSON.stringify({name:'ATLAS'})})
+   await request('/test',{method,body:JSON.stringify({name:'NOVZI'})})
    assert.equal((capture?.headers as Record<string,string>)['X-CSRF-Token'],'csrf-test')
-   assert.equal(capture?.body,JSON.stringify({name:'ATLAS'}))
+   assert.equal(capture?.body,JSON.stringify({name:'NOVZI'}))
   }
  }finally{restore()}
 })

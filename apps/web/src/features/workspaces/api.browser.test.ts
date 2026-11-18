@@ -14,3 +14,10 @@ describe('API de espacios de trabajo',()=>{
   expect(request).toHaveBeenCalledWith('/workspaces',{method:'POST',body:JSON.stringify({name:'Nuevo espacio'})})
  })
 })
+
+it('renombrar y borrar exigen el recurso codificado y el borrado en cascada explícito',async()=>{
+ const {renameWorkspace,deleteWorkspace}=await import('./api')
+ await renameWorkspace('w/1','Nuevo');expect(request).toHaveBeenLastCalledWith('/workspaces/w%2F1',{method:'PATCH',body:JSON.stringify({name:'Nuevo'})})
+ await deleteWorkspace('w/1');expect(request).toHaveBeenLastCalledWith('/workspaces/w%2F1',{method:'DELETE'})
+ await deleteWorkspace('w/1','Nuevo',true);expect(request).toHaveBeenLastCalledWith('/workspaces/w%2F1',{method:'DELETE',body:JSON.stringify({confirmName:'Nuevo',deleteProjects:true})})
+})

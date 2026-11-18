@@ -1,0 +1,174 @@
+{
+  "original_migration_hashes": {
+    "apps/api/migrations/001_core.sql": "4b71510a6b46af1c556b28d2645a4f4fcfa327e7d1815904f408eae2f1914404",
+    "apps/api/migrations/002_document_history.sql": "51712ea64f194ee57b3b4a0b67e49fd206090a606423f55085a0f7aafbd7fa20",
+    "apps/api/migrations/003_access_control.sql": "8f355906dcfedaa20cb39ea1b43a59a6f7b7a8e219821c9a520200fa7f9de56b",
+    "apps/api/migrations/004_project_access.sql": "a52800d35bd7b773024417963c7be6cd3dbebbc8e194ee848a93e35daa946b13",
+    "apps/api/migrations/005_restore_branches.sql": "d65e3c50e5a4d72119638128bf3cd6db73a09efa4a2875e1871e690cf19a51a4",
+    "apps/api/migrations/006_licensing_export_provenance.sql": "6f2ce84d2d1352fec57cccf3145d6783d2f7b6e4825042727f36854d674dd384",
+    "apps/api/migrations/007_uml_elements_permissions.sql": "2945f668df394bf917063df0cc980db151f1cb3dde27e15113646d331ce17587",
+    "apps/api/migrations/008_uml_activity_permissions.sql": "b845c97269b0107945acc5a9c846c21a5bde2e47b6ae2f130fa6d29bcc9c5b54",
+    "apps/api/migrations/009_uml_class_permissions.sql": "f7aeeb47cc92e3a1f21b68e64665d54fca270718bebdb01c7620054c52da6e9e",
+    "apps/api/migrations/010_uml_activity_detail_permissions.sql": "92d58fd7aff5d11f1f05f9d7aa83966c26ffa5a39da13494d2210c376be67255",
+    "apps/api/migrations/011_uml_sequence_detail_permissions.sql": "2ebcefbf206d1087a617d7d4ab731a790b1e7ee1379a2fce03e14ed290889b4c",
+    "apps/api/migrations/012_functional_management.sql": "30ac6522007ce3595401f15c31d0eb6b2a1ab40c76ab10a2dd35297d15f4fcdb",
+    "apps/api/migrations/013_functional_template_pages.sql": "26d205ecda90e7bdc5545e81fb2623d49e81c87d69755b387f94bf89c5dab401",
+    "apps/api/migrations/014_functional_forms_templates.sql": "aa87313dc9423645a1314f0bd1060258a1ab37c4847e6075e395797ba030c4c2"
+  },
+  "text_files_updated": 361,
+  "paths_renamed": 38,
+  "old_to_new_paths": [
+    [
+      "apps/web/src/features/editor/AtlasEditor.tsx",
+      "apps/web/src/features/editor/NovziEditor.tsx"
+    ],
+    [
+      "apps/web/src/features/editor/AtlasEditor.behavior.browser.test.tsx",
+      "apps/web/src/features/editor/NovziEditor.behavior.browser.test.tsx"
+    ],
+    [
+      "apps/web/src/features/editor/AtlasEditor.browser.test.tsx",
+      "apps/web/src/features/editor/NovziEditor.browser.test.tsx"
+    ],
+    [
+      "apps/web/src/components/organisms/AtlasNode.tsx",
+      "apps/web/src/components/organisms/NovziNode.tsx"
+    ],
+    [
+      "apps/web/src/components/organisms/coverage-atlas-node-variants.browser.test.tsx",
+      "apps/web/src/components/organisms/coverage-novzi-node-variants.browser.test.tsx"
+    ],
+    [
+      "apps/web/src/components/organisms/AtlasParallelEdge.tsx",
+      "apps/web/src/components/organisms/NovziParallelEdge.tsx"
+    ],
+    [
+      "apps/web/src/components/organisms/coverage-atlas-node.browser.test.tsx",
+      "apps/web/src/components/organisms/coverage-novzi-node.browser.test.tsx"
+    ],
+    [
+      "apps/web/src/components/organisms/AtlasUmlEdge.tsx",
+      "apps/web/src/components/organisms/NovziUmlEdge.tsx"
+    ],
+    [
+      "apps/api/src/db/atlas-demo-project.json",
+      "apps/api/src/db/novzi-demo-project.json"
+    ],
+    [
+      "docs/qa/ATLAS_QA_UML_Cinco_Vistas_20261114.json",
+      "docs/qa/NOVZI_QA_UML_Cinco_Vistas_20261114.json"
+    ],
+    [
+      "tests/e2e/atlas.spec.ts",
+      "tests/e2e/novzi.spec.ts"
+    ],
+    [
+      "examples/ATLAS_QA_UML_CasosUso_Trazabilidad.json",
+      "examples/NOVZI_QA_UML_CasosUso_Trazabilidad.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_CASOS_DE_USO.json",
+      "qa/NOVZI_QA_UML_CASOS_DE_USO.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_CLASES.json",
+      "qa/NOVZI_QA_UML_CLASES.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_COMPONENTES_ASOCIACION.json",
+      "qa/NOVZI_QA_UML_COMPONENTES_ASOCIACION.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json",
+      "qa/NOVZI_QA_UML_COMPONENTES_DIAGRAMA_UNICO.json"
+    ],
+    [
+      "qa/ATLAS_CIRCUITO_UML_3_VISTAS_QA.json",
+      "qa/NOVZI_CIRCUITO_UML_3_VISTAS_QA.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_SECUENCIA_DIAGRAMA_UNICO.json",
+      "qa/NOVZI_QA_UML_SECUENCIA_DIAGRAMA_UNICO.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_CLASES_NEGATIVOS.json",
+      "qa/NOVZI_QA_UML_CLASES_NEGATIVOS.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_SECUENCIA_FIRMAS.json",
+      "qa/NOVZI_QA_UML_SECUENCIA_FIRMAS.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_CLASES_ASOCIACION_COMPARTIDA.json",
+      "qa/NOVZI_QA_UML_CLASES_ASOCIACION_COMPARTIDA.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_COMPONENTES.json",
+      "qa/NOVZI_QA_UML_COMPONENTES.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_DESPLIEGUE_AUDITORIA_2_DIAGRAMA_UNICO.json",
+      "qa/NOVZI_QA_UML_DESPLIEGUE_AUDITORIA_2_DIAGRAMA_UNICO.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_CLASES_AUDITORIA.json",
+      "qa/NOVZI_QA_UML_CLASES_AUDITORIA.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_DESPLIEGUE.json",
+      "qa/NOVZI_QA_UML_DESPLIEGUE.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_SECUENCIA.json",
+      "qa/NOVZI_QA_UML_SECUENCIA.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_ACTIVIDADES_BORRADOR_LLAMADA.json",
+      "qa/NOVZI_QA_UML_ACTIVIDADES_BORRADOR_LLAMADA.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_ACTIVIDADES.json",
+      "qa/NOVZI_QA_UML_ACTIVIDADES.json"
+    ],
+    [
+      "qa/ATLAS_QA_UML_DESPLIEGUE_AUDITORIA_1_DIAGRAMA_UNICO.json",
+      "qa/NOVZI_QA_UML_DESPLIEGUE_AUDITORIA_1_DIAGRAMA_UNICO.json"
+    ],
+    [
+      "docs/ATLAS_UX_EDITOR_PATCH_12.md",
+      "docs/NOVZI_UX_EDITOR_PATCH_12.md"
+    ],
+    [
+      "docs/EXPORTACION_AVANZADA_PREMIUM_ATLAS_V4_8_1.md",
+      "docs/EXPORTACION_AVANZADA_PREMIUM_NOVZI_V4_8_1.md"
+    ],
+    [
+      "docs/ATLAS_CONTEXTO_Y_AUDITORIA_V4_8_1.md",
+      "docs/NOVZI_CONTEXTO_Y_AUDITORIA_V4_8_1.md"
+    ],
+    [
+      "docs/FIX_UML_ENSAMBLE_REDIMENSIONADO_ATLAS_V4_8_1.md",
+      "docs/FIX_UML_ENSAMBLE_REDIMENSIONADO_NOVZI_V4_8_1.md"
+    ],
+    [
+      "docs/ATLAS_UX_12_SHA256.txt",
+      "docs/NOVZI_UX_12_SHA256.txt"
+    ],
+    [
+      "docs/ATLAS_UML_Y_EXPORTACION_FICHAS_2026-11-13.md",
+      "docs/NOVZI_UML_Y_EXPORTACION_FICHAS_2026-11-13.md"
+    ],
+    [
+      "docs/ATLAS_UX_EDITOR_PATCH_11.md",
+      "docs/NOVZI_UX_EDITOR_PATCH_11.md"
+    ],
+    [
+      "docs/EDITOR_RELACIONES_NAVEGACION_ATLAS_V4_8_1.md",
+      "docs/EDITOR_RELACIONES_NAVEGACION_NOVZI_V4_8_1.md"
+    ],
+    [
+      "ATLAS_QA_UML_Actividades_20261114.json",
+      "NOVZI_QA_UML_Actividades_20261114.json"
+    ]
+  ]
+}

@@ -1,7 +1,7 @@
 {
-  "name": "@atlas/api",
+  "name": "@novzi/api",
   "private": true,
-  "version": "4.5.0",
+  "version": "4.8.1",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -15,16 +15,20 @@
     "admin:create": "tsx src/db/create-admin.ts",
     "admin:status": "tsx src/db/admin-status.ts",
     "test:policy": "tsx --test src/domain/access-policy.test.ts",
-    "e2e:seed": "tsx src/db/e2e-seed.ts"
+    "e2e:seed": "tsx src/db/e2e-seed.ts",
+    "db:migrations:status": "tsx src/db/migration-status.ts",
+    "db:reset:demo": "tsx src/db/reset-demo.ts",
+    "db:demo:status": "tsx src/db/demo-status.ts"
   },
   "dependencies": {
-    "@atlas/contracts": "*",
-    "@atlas/fixtures": "*",
+    "@novzi/contracts": "*",
+    "@novzi/fixtures": "*",
     "fastify": "^5.2.0",
     "pg": "^8.16.0",
     "dotenv": "^16.5.0",
     "@fastify/cors": "^11.2.0",
-    "@fastify/rate-limit": "^10.3.0"
+    "@fastify/rate-limit": "^10.3.0",
+    "sharp": "^0.34.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

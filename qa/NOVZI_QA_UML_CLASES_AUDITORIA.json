@@ -1,0 +1,1885 @@
+{
+  "schema": 1,
+  "elements": {
+    "pedido": {
+      "id": "pedido",
+      "name": "Pedido",
+      "type": "uml-class",
+      "description": "T01: probar alta, edición, sobrecarga, ID de tipo, longitud técnica. Renombrar Integer y comprobar actualización. Rechazar nombre vacío, atributo duplicado, firma duplicada y multiplicidad 5..2.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T01: probar alta, edición, sobrecarga, ID de tipo, longitud técnica. Renombrar Integer y comprobar actualización. Rechazar nombre vacío, atributo duplicado, firma duplicada y multiplicidad 5..2.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-id",
+            "name": "id",
+            "type": "UUID",
+            "visibility": "private",
+            "readOnly": true
+          },
+          {
+            "id": "a-saldo",
+            "name": "saldo",
+            "type": "Real",
+            "visibility": "protected",
+            "multiplicity": "0..1",
+            "defaultValue": "0",
+            "readOnly": true
+          },
+          {
+            "id": "a-total",
+            "name": "total",
+            "type": "Integer",
+            "visibility": "public",
+            "static": true,
+            "derived": true,
+            "typeId": "integer",
+            "length": 12
+          },
+          {
+            "id": "a-est",
+            "name": "estados",
+            "type": "EstadoPago",
+            "visibility": "private",
+            "typeId": "estado",
+            "multiplicity": "0..*",
+            "ordered": true,
+            "unique": true
+          }
+        ],
+        "operations": [
+          {
+            "id": "o-pagar",
+            "name": "pagar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": []
+          },
+          {
+            "id": "o-pagar2",
+            "name": "pagar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": [
+              {
+                "id": "p-monto",
+                "name": "monto",
+                "type": "Real",
+                "direction": "in",
+                "defaultValue": "0"
+              }
+            ]
+          },
+          {
+            "id": "o-cons",
+            "name": "consultar",
+            "returnType": "Integer",
+            "visibility": "public",
+            "parameters": [],
+            "static": true,
+            "query": true,
+            "returnTypeId": "integer"
+          }
+        ]
+      }
+    },
+    "persona": {
+      "id": "persona",
+      "name": "Persona",
+      "type": "uml-class",
+      "description": "T01/T03: nombre y operación en cursiva; activar final además de abstracta debe rechazarse.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T01/T03: nombre y operación en cursiva; activar final además de abstracta debe rechazarse.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "abstract": true,
+        "operations": [
+          {
+            "id": "o-ident",
+            "name": "identificar",
+            "returnType": "String",
+            "visibility": "public",
+            "parameters": [],
+            "abstract": true
+          }
+        ]
+      }
+    },
+    "final": {
+      "id": "final",
+      "name": "FacturaFinal",
+      "type": "uml-class",
+      "description": "T03: no puede ser padre de generalización. Intentar Pedido → FacturaFinal.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T03: no puede ser padre de generalización. Intentar Pedido → FacturaFinal.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "leaf": true
+      }
+    },
+    "contrato": {
+      "id": "contrato",
+      "name": "IPago",
+      "type": "uml-interface",
+      "description": "T01: miembros públicos. Intentar atributo privado y operación protegida; bloquear.",
+      "summary": "T01: miembros públicos. Intentar atributo privado y operación protegida; bloquear.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-mon",
+            "name": "moneda",
+            "type": "String",
+            "visibility": "public"
+          }
+        ],
+        "operations": [
+          {
+            "id": "o-proc",
+            "name": "procesar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "estado": {
+      "id": "estado",
+      "name": "EstadoPago",
+      "type": "uml-enumeration",
+      "description": "T01: literales ordenados. Intentar duplicar APROBADO o introducir atributo mutable.",
+      "summary": "T01: literales ordenados. Intentar duplicar APROBADO o introducir atributo mutable.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "literals": [
+          {
+            "id": "l1",
+            "name": "PENDIENTE"
+          },
+          {
+            "id": "l2",
+            "name": "APROBADO"
+          },
+          {
+            "id": "l3",
+            "name": "RECHAZADO"
+          }
+        ],
+        "attributes": [
+          {
+            "id": "a-code",
+            "name": "codigo",
+            "type": "Integer",
+            "visibility": "public",
+            "readOnly": true
+          }
+        ],
+        "operations": [
+          {
+            "id": "o-text",
+            "name": "texto",
+            "returnType": "String",
+            "visibility": "public",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "direccion": {
+      "id": "direccion",
+      "name": "Dirección",
+      "type": "uml-datatype",
+      "description": "T01: propiedades de valor; probar edición y reutilización.",
+      "summary": "T01: propiedades de valor; probar edición y reutilización.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-calle",
+            "name": "calle",
+            "type": "String",
+            "visibility": "public"
+          },
+          {
+            "id": "a-ciu",
+            "name": "ciudad",
+            "type": "String",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "integer": {
+      "id": "integer",
+      "name": "Integer",
+      "type": "uml-primitive",
+      "description": "T01: no permite atributos. Renombrarlo debe actualizar las referencias en Pedido.\nAUD-CL-005: argumento de tipo válido para la plantilla enlazada.",
+      "summary": "T01: no permite atributos. Renombrarlo debe actualizar las referencias en Pedido.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "operations": [
+          {
+            "id": "o-abs",
+            "name": "abs",
+            "returnType": "Integer",
+            "visibility": "public",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "senal": {
+      "id": "senal",
+      "name": "PagoAprobado",
+      "type": "uml-signal",
+      "description": "T01: admite atributos, no operaciones.",
+      "summary": "T01: admite atributos, no operaciones.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-se",
+            "name": "idPago",
+            "type": "UUID",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "cliente": {
+      "id": "cliente",
+      "name": "Cliente",
+      "type": "uml-class",
+      "description": "T03/T04: dos relaciones paralelas con Cuenta; probar roles, multiplicidades y navegabilidad.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T03/T04: dos relaciones paralelas con Cuenta; probar roles, multiplicidades y navegabilidad.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "cuenta": {
+      "id": "cuenta",
+      "name": "Cuenta",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "carpeta": {
+      "id": "carpeta",
+      "name": "Carpeta",
+      "type": "uml-class",
+      "description": "T03: composición reflexiva válida a nivel de tipos; probar asociación reflexiva adicional y rechazar generalización reflexiva.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T03: composición reflexiva válida a nivel de tipos; probar asociación reflexiva adicional y rechazar generalización reflexiva.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "equipo": {
+      "id": "equipo",
+      "name": "Equipo",
+      "type": "uml-class",
+      "description": "T04: agregación con todo en destino. Invertir todo y verificar que los roles permanezcan en su extremo.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T04: agregación con todo en destino. Invertir todo y verificar que los roles permanezcan en su extremo.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "jugador": {
+      "id": "jugador",
+      "name": "Jugador",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "orden": {
+      "id": "orden",
+      "name": "Orden",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "linea": {
+      "id": "linea",
+      "name": "LíneaOrden",
+      "type": "uml-class",
+      "description": "T04: todo Orden tiene 0..1; intentar cambiar el extremo todo a * o 2..5.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T04: todo Orden tiene 0..1; intentar cambiar el extremo todo a * o 2..5.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "base": {
+      "id": "base",
+      "name": "Entidad",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "abstract": true
+      }
+    },
+    "auditable": {
+      "id": "auditable",
+      "name": "Auditable",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "factura": {
+      "id": "factura",
+      "name": "Factura",
+      "type": "uml-class",
+      "description": "T03: herencia múltiple válida; intentar Entidad → Factura o Factura → Factura.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T03: herencia múltiple válida; intentar Entidad → Factura o Factura → Factura.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "i2": {
+      "id": "i2",
+      "name": "IReembolso",
+      "type": "uml-interface",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "operations": [
+          {
+            "id": "o-reem",
+            "name": "reembolsar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "serv": {
+      "id": "serv",
+      "name": "ServicioPago",
+      "type": "uml-class",
+      "description": "T03: realiza dos contratos; intentar realización invertida IPago → ServicioPago.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T03: realiza dos contratos; intentar realización invertida IPago → ServicioPago.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "operations": [
+          {
+            "id": "o-serv-a",
+            "name": "procesar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": []
+          },
+          {
+            "id": "o-serv-b",
+            "name": "reembolsar",
+            "returnType": "Boolean",
+            "visibility": "public",
+            "parameters": []
+          }
+        ]
+      }
+    },
+    "api": {
+      "id": "api",
+      "name": "API Cobros",
+      "type": "uml-class",
+      "description": "T05: cambiar dependencia con nombre a uso; nombre desaparece del lienzo y se conserva como descripción. Intentar editar palabra fija.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T05: cambiar dependencia con nombre a uso; nombre desaparece del lienzo y se conserva como descripción. Intentar editar palabra fija.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "motor": {
+      "id": "motor",
+      "name": "MotorPago",
+      "type": "uml-class",
+      "description": "T04: dependencia circular debe permitirse con advertencia de diseño.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T04: dependencia circular debe permitirse con advertencia de diseño.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "politica": {
+      "id": "politica",
+      "name": "PolíticaCobro",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "modelo": {
+      "id": "modelo",
+      "name": "ModeloCobros",
+      "type": "uml-model",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "paquete": {
+      "id": "paquete",
+      "name": "Contratos",
+      "type": "uml-package",
+      "description": "T05: importación de paquete, alias de elemento, merge y access; probar importación a sí mismo.\nAUD-CL-001/005: intentar usar este paquete como tipo de atributo, retorno, parámetro o argumento de plantilla; debe estar excluido y rechazado por API.",
+      "summary": "T05: importación de paquete, alias de elemento, merge y access; probar importación a sí mismo.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "externo": {
+      "id": "externo",
+      "name": "TiposExternos",
+      "type": "uml-package",
+      "description": "\nAUD-CL-001/005: intentar usar este paquete como tipo de atributo, retorno, parámetro o argumento de plantilla; debe estar excluido y rechazado por API.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "publico": {
+      "id": "publico",
+      "name": "ReferenciaPublica",
+      "type": "uml-datatype",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "visibility": "public"
+      }
+    },
+    "dominio": {
+      "id": "dominio",
+      "name": "Dominio",
+      "type": "uml-package",
+      "description": "T06: contiene subpaquete y clase anidada. Mover una aparición sin alterar ownership. Intentar ciclo de paquetes e importar un miembro propio.\nAUD-CL-001/005: intentar usar este paquete como tipo de atributo, retorno, parámetro o argumento de plantilla; debe estar excluido y rechazado por API.",
+      "summary": "T06: contiene subpaquete y clase anidada. Mover una aparición sin alterar ownership. Intentar ciclo de paquetes e importar un miembro propio.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "sub": {
+      "id": "sub",
+      "name": "Pagos",
+      "type": "uml-package",
+      "description": "\nAUD-CL-001/005: intentar usar este paquete como tipo de atributo, retorno, parámetro o argumento de plantilla; debe estar excluido y rechazado por API.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "visibility": "public"
+      },
+      "semanticOwnerId": "dominio"
+    },
+    "priv": {
+      "id": "priv",
+      "name": "DetallePrivado",
+      "type": "uml-class",
+      "description": "T05/T06: importación privada de este elemento desde otro namespace debe rechazarse; prohibir apropiación no autorizada.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T05/T06: importación privada de este elemento desde otro namespace debe rechazarse; prohibir apropiación no autorizada.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "visibility": "private"
+      },
+      "semanticOwnerId": "sub"
+    },
+    "publicacion": {
+      "id": "publicacion",
+      "name": "Publicación",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "semanticOwnerId": "dominio"
+    },
+    "estu": {
+      "id": "estu",
+      "name": "Estudiante",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "curso": {
+      "id": "curso",
+      "name": "Curso",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "mat": {
+      "id": "mat",
+      "name": "Matrícula",
+      "type": "uml-association-class",
+      "description": "T07: asociación binaria con clase adjunta. Editar relación, guardar/recargar y probar borrar de forma coherente.\nAUD-CL-004: reutilizar la ficha en otra vista y conservar exactamente los extremos semánticos. Cambiar a otros extremos debe rechazarse. Una ficha sin asociación debe generar diagnóstico.",
+      "summary": "T07: asociación binaria con clase adjunta. Editar relación, guardar/recargar y probar borrar de forma coherente.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-fecha",
+            "name": "fecha",
+            "type": "Date",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "prove": {
+      "id": "prove",
+      "name": "Proveedor",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "prod": {
+      "id": "prod",
+      "name": "Producto",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "suc": {
+      "id": "suc",
+      "name": "Sucursal",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "oferta": {
+      "id": "oferta",
+      "name": "Oferta",
+      "type": "uml-association-class",
+      "description": "\nAUD-CL-004: reutilizar la ficha en otra vista y conservar exactamente los extremos semánticos. Cambiar a otros extremos debe rechazarse. Una ficha sin asociación debe generar diagnóstico.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "attributes": [
+          {
+            "id": "a-precio",
+            "name": "precio",
+            "type": "Real",
+            "visibility": "public"
+          }
+        ]
+      }
+    },
+    "nota": {
+      "id": "nota",
+      "name": "Revisar matrícula",
+      "type": "uml-comment",
+      "description": "",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "note": "T07 · comentario anclado a la relación matrícula, no dependencia."
+      }
+    },
+    "regla": {
+      "id": "regla",
+      "name": "Precio positivo",
+      "type": "uml-constraint",
+      "description": "T07: no ejecutar OCL. Rechazar expresión vacía.",
+      "summary": "T07: no ejecutar OCL. Rechazar expresión vacía.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "expression": "precio >= 0"
+      }
+    },
+    "template": {
+      "id": "template",
+      "name": "Caja",
+      "type": "uml-class",
+      "description": "T07: parámetro formal T, binding válido desde CajaEntera. Intentar binding con parámetro desconocido.\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "T07: parámetro formal T, binding válido desde CajaEntera. Intentar binding con parámetro desconocido.",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "uml": {
+        "templateParameters": [
+          {
+            "id": "T",
+            "name": "T",
+            "constraint": "Tipo de valor",
+            "typeId": "integer"
+          }
+        ]
+      }
+    },
+    "entera": {
+      "id": "entera",
+      "name": "CajaEntera",
+      "type": "uml-class",
+      "description": "\nAUD-CL-003: intentar inyectar slots de instancia por JSON: debe rechazarse.",
+      "summary": "",
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {}
+    },
+    "qa3-p": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-p",
+      "name": "ImportadorTransitivo",
+      "type": "uml-package",
+      "description": "AUD-CL-012: cambia alias Z a Y: debe bloquearse por colisión transitiva. Cambia a SoloQ: debe permitir (alias privado no reexportado). PaquetePrivado importa solamente el nombre de OrigenTipos.",
+      "summary": "QA de importaciones UML"
+    },
+    "qa3-q": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-q",
+      "name": "ProveedorPublico",
+      "type": "uml-package",
+      "description": "AUD-CL-012: probar alias, transitividad y acceso privado.",
+      "summary": "QA de importaciones UML"
+    },
+    "qa3-r": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-r",
+      "name": "OrigenTipos",
+      "type": "uml-package",
+      "description": "AUD-CL-012: probar alias, transitividad y acceso privado.",
+      "summary": "QA de importaciones UML"
+    },
+    "qa3-a": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-a",
+      "name": "TipoPublico",
+      "type": "uml-class",
+      "description": "AUD-CL-012: probar alias, transitividad y acceso privado.",
+      "summary": "QA de importaciones UML",
+      "semanticOwnerId": "qa3-r"
+    },
+    "qa3-b": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-b",
+      "name": "OtroTipo",
+      "type": "uml-class",
+      "description": "AUD-CL-012: probar alias, transitividad y acceso privado.",
+      "summary": "QA de importaciones UML"
+    },
+    "qa3-private": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-private",
+      "name": "ConsumidorPrivado",
+      "type": "uml-package",
+      "description": "AUD-CL-012: packageAccess no reexporta miembros; OrigenCalificado importa el nombre del paquete, no su contenido.",
+      "summary": "QA de importaciones UML"
+    },
+    "qa3-hidden": {
+      "owner": "QA",
+      "author": "NOVZI",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "links": [],
+      "fields": {},
+      "id": "qa3-hidden",
+      "name": "TipoNoReexportado",
+      "type": "uml-class",
+      "description": "AUD-CL-012: probar alias, transitividad y acceso privado.",
+      "summary": "QA de importaciones UML",
+      "semanticOwnerId": "qa3-r"
+    }
+  },
+  "diagrams": [
+    {
+      "id": "qa-clases-manual",
+      "type": "uml-class",
+      "name": "QA · UML Clases · Reglas de negocio",
+      "description": "Laboratorio exclusivo UML Clases. Cada zona tiene un filtro y ejemplos válidos. Las fichas contienen instrucciones de casos negativos. Importar en proyecto desechable. T01–T11: los casos históricos, API, ACL, exportación y regresiones se ejecutan adicionalmente; no se certifican solo con este JSON.\nAUD-CL-002/006/007: editar dependencia: sin roles, multiplicidades, orden ni navegabilidad. Comparar etiquetas fijas, alias, sustituciones, flechas y rutas del canvas con exportación. AUD-CL-008: importar, guardar, recargar y comprobar historial sin alterar IDs.\nIteración 2: editar multiplicidad de un parámetro (1.. inválido, 1..* válido), comprobar desplazamiento horizontal del inspector y ausencia de diagnóstico/perspectivas UML. Probar importar miembro protected/package y duplicar alias: deberán rechazarse. Para multivista, usar dos diagramas de prueba independientes con apariciones de la misma clase de asociación.",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "n-pedido",
+          "elementId": "pedido",
+          "x": 0,
+          "y": 0,
+          "filterIds": [
+            "qa01"
+          ],
+          "width": 380,
+          "height": 275
+        },
+        {
+          "id": "n-persona",
+          "elementId": "persona",
+          "x": 520,
+          "y": 0,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-final",
+          "elementId": "final",
+          "x": 1040,
+          "y": 0,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-contrato",
+          "elementId": "contrato",
+          "x": 1560,
+          "y": 0,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-estado",
+          "elementId": "estado",
+          "x": 0,
+          "y": 380,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-direccion",
+          "elementId": "direccion",
+          "x": 520,
+          "y": 380,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-integer",
+          "elementId": "integer",
+          "x": 1040,
+          "y": 380,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-senal",
+          "elementId": "senal",
+          "x": 1560,
+          "y": 380,
+          "filterIds": [
+            "qa01"
+          ]
+        },
+        {
+          "id": "n-cliente",
+          "elementId": "cliente",
+          "x": 0,
+          "y": 840,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-cuenta",
+          "elementId": "cuenta",
+          "x": 620,
+          "y": 840,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-carpeta",
+          "elementId": "carpeta",
+          "x": 1240,
+          "y": 840,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-equipo",
+          "elementId": "equipo",
+          "x": 0,
+          "y": 1240,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-jugador",
+          "elementId": "jugador",
+          "x": 620,
+          "y": 1240,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-orden",
+          "elementId": "orden",
+          "x": 1240,
+          "y": 1240,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-linea",
+          "elementId": "linea",
+          "x": 1860,
+          "y": 1240,
+          "filterIds": [
+            "qa02"
+          ]
+        },
+        {
+          "id": "n-base",
+          "elementId": "base",
+          "x": 0,
+          "y": 1680,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-auditable",
+          "elementId": "auditable",
+          "x": 540,
+          "y": 1680,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-factura",
+          "elementId": "factura",
+          "x": 270,
+          "y": 2010,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-ipago",
+          "elementId": "contrato",
+          "x": 1100,
+          "y": 1680,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-i2",
+          "elementId": "i2",
+          "x": 1640,
+          "y": 1680,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-serv",
+          "elementId": "serv",
+          "x": 1350,
+          "y": 2010,
+          "filterIds": [
+            "qa03"
+          ]
+        },
+        {
+          "id": "n-api",
+          "elementId": "api",
+          "x": 0,
+          "y": 2490,
+          "filterIds": [
+            "qa04"
+          ]
+        },
+        {
+          "id": "n-motor",
+          "elementId": "motor",
+          "x": 660,
+          "y": 2490,
+          "filterIds": [
+            "qa04"
+          ]
+        },
+        {
+          "id": "n-politica",
+          "elementId": "politica",
+          "x": 1320,
+          "y": 2490,
+          "filterIds": [
+            "qa04"
+          ]
+        },
+        {
+          "id": "n-modelo",
+          "elementId": "modelo",
+          "x": 0,
+          "y": 2860,
+          "filterIds": [
+            "qa04"
+          ],
+          "width": 340,
+          "height": 180
+        },
+        {
+          "id": "n-paquete",
+          "elementId": "paquete",
+          "x": 660,
+          "y": 2860,
+          "filterIds": [
+            "qa04"
+          ],
+          "width": 340,
+          "height": 180
+        },
+        {
+          "id": "n-externo",
+          "elementId": "externo",
+          "x": 1320,
+          "y": 2860,
+          "filterIds": [
+            "qa04"
+          ],
+          "width": 340,
+          "height": 180
+        },
+        {
+          "id": "n-publico",
+          "elementId": "publico",
+          "x": 1980,
+          "y": 2860,
+          "filterIds": [
+            "qa04"
+          ]
+        },
+        {
+          "id": "n-dominio",
+          "elementId": "dominio",
+          "x": 0,
+          "y": 3370,
+          "filterIds": [
+            "qa05"
+          ],
+          "width": 930,
+          "height": 590
+        },
+        {
+          "id": "n-sub",
+          "elementId": "sub",
+          "x": 40,
+          "y": 85,
+          "filterIds": [
+            "qa05"
+          ],
+          "parentNodeId": "n-dominio",
+          "width": 470,
+          "height": 340
+        },
+        {
+          "id": "n-priv",
+          "elementId": "priv",
+          "x": 50,
+          "y": 105,
+          "filterIds": [
+            "qa05"
+          ],
+          "parentNodeId": "n-sub",
+          "width": 305,
+          "height": 150
+        },
+        {
+          "id": "n-publicacion",
+          "elementId": "publicacion",
+          "x": 575,
+          "y": 105,
+          "filterIds": [
+            "qa05"
+          ],
+          "parentNodeId": "n-dominio",
+          "width": 305,
+          "height": 150
+        },
+        {
+          "id": "n-dom-ref",
+          "elementId": "dominio",
+          "x": 1130,
+          "y": 3370,
+          "filterIds": [
+            "qa05"
+          ],
+          "width": 330,
+          "height": 190
+        },
+        {
+          "id": "n-pub-ref",
+          "elementId": "publicacion",
+          "x": 1670,
+          "y": 3370,
+          "filterIds": [
+            "qa05"
+          ]
+        },
+        {
+          "id": "n-estu",
+          "elementId": "estu",
+          "x": 0,
+          "y": 4220,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-curso",
+          "elementId": "curso",
+          "x": 700,
+          "y": 4220,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-mat",
+          "elementId": "mat",
+          "x": 350,
+          "y": 4500,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-prove",
+          "elementId": "prove",
+          "x": 1180,
+          "y": 4220,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-prod",
+          "elementId": "prod",
+          "x": 1880,
+          "y": 4220,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-suc",
+          "elementId": "suc",
+          "x": 1530,
+          "y": 4600,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-oferta",
+          "elementId": "oferta",
+          "x": 1900,
+          "y": 4600,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-nota",
+          "elementId": "nota",
+          "x": 0,
+          "y": 4820,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-regla",
+          "elementId": "regla",
+          "x": 1180,
+          "y": 4820,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-template",
+          "elementId": "template",
+          "x": 0,
+          "y": 5170,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-entera",
+          "elementId": "entera",
+          "x": 700,
+          "y": 5170,
+          "filterIds": [
+            "qa06"
+          ]
+        },
+        {
+          "id": "n-qa3-p",
+          "elementId": "qa3-p",
+          "x": 0,
+          "y": 5670,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-q",
+          "elementId": "qa3-q",
+          "x": 400,
+          "y": 5670,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-r",
+          "elementId": "qa3-r",
+          "x": 800,
+          "y": 5670,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-a",
+          "elementId": "qa3-a",
+          "x": 1200,
+          "y": 5670,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-b",
+          "elementId": "qa3-b",
+          "x": 0,
+          "y": 6020,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-private",
+          "elementId": "qa3-private",
+          "x": 400,
+          "y": 6020,
+          "width": 220,
+          "height": 120
+        },
+        {
+          "id": "n-qa3-hidden",
+          "elementId": "qa3-hidden",
+          "x": 800,
+          "y": 6020,
+          "width": 220,
+          "height": 120
+        }
+      ],
+      "edges": [
+        {
+          "id": "as-simple",
+          "source": "n-cliente",
+          "target": "n-cuenta",
+          "relationKind": "association",
+          "sourceRole": "titular",
+          "targetRole": "cuentas",
+          "sourceMultiplicity": "1",
+          "targetMultiplicity": "0..*",
+          "sourceNavigability": "unspecified",
+          "targetNavigability": "unspecified",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "label": "posee",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "as-nav",
+          "source": "n-cliente",
+          "target": "n-cuenta",
+          "relationKind": "navigable-association",
+          "sourceNavigability": "non-navigable",
+          "targetNavigability": "navigable",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "label": "consulta",
+          "direction": "forward",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "as-bi",
+          "source": "n-cliente",
+          "target": "n-cuenta",
+          "relationKind": "bidirectional-association",
+          "sourceNavigability": "navigable",
+          "targetNavigability": "navigable",
+          "sourceHandle": "bottom-3",
+          "targetHandle": "bottom-1",
+          "label": "administra",
+          "direction": "both",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "as-self",
+          "source": "n-carpeta",
+          "target": "n-carpeta",
+          "relationKind": "association",
+          "sourceHandle": "top-1",
+          "targetHandle": "top-3",
+          "sourceRole": "origen",
+          "targetRole": "relacionadas",
+          "targetMultiplicity": "0..*",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "comp-self",
+          "source": "n-carpeta",
+          "target": "n-carpeta",
+          "relationKind": "composition",
+          "sourceHandle": "left",
+          "targetHandle": "right",
+          "wholeEnd": "source",
+          "sourceMultiplicity": "1",
+          "targetMultiplicity": "0..*",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "aggr",
+          "source": "n-jugador",
+          "target": "n-equipo",
+          "relationKind": "aggregation",
+          "wholeEnd": "target",
+          "sourceRole": "jugadores",
+          "targetRole": "equipos",
+          "sourceMultiplicity": "0..*",
+          "targetMultiplicity": "0..*",
+          "sourceHandle": "left",
+          "targetHandle": "right",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "comp",
+          "source": "n-orden",
+          "target": "n-linea",
+          "relationKind": "composition",
+          "wholeEnd": "source",
+          "sourceRole": "orden",
+          "targetRole": "lineas",
+          "sourceMultiplicity": "0..1",
+          "targetMultiplicity": "1..*",
+          "targetOrdered": true,
+          "targetUnique": true,
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "g1",
+          "source": "n-factura",
+          "target": "n-base",
+          "relationKind": "generalization",
+          "sourceHandle": "top-1",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "g2",
+          "source": "n-factura",
+          "target": "n-auditable",
+          "relationKind": "generalization",
+          "sourceHandle": "top-3",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "r1",
+          "source": "n-serv",
+          "target": "n-ipago",
+          "relationKind": "realization",
+          "sourceHandle": "top-1",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "r2",
+          "source": "n-serv",
+          "target": "n-i2",
+          "relationKind": "realization",
+          "sourceHandle": "top-3",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "r-generic",
+          "source": "n-factura",
+          "target": "n-serv",
+          "relationKind": "specification-realization",
+          "description": "Factura especifica el resultado que ServicioPago implementa.",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "dep",
+          "source": "n-api",
+          "target": "n-motor",
+          "relationKind": "dependency",
+          "label": "Calcula importe",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "dep-cycle",
+          "source": "n-motor",
+          "target": "n-api",
+          "relationKind": "dependency",
+          "label": "Consulta configuración",
+          "sourceHandle": "bottom-1",
+          "targetHandle": "bottom-3",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "use",
+          "source": "n-motor",
+          "target": "n-politica",
+          "relationKind": "usage",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "abstract-rel",
+          "source": "n-api",
+          "target": "n-politica",
+          "relationKind": "abstraction",
+          "sourceHandle": "top-3",
+          "targetHandle": "top-1",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "trace",
+          "source": "n-api",
+          "target": "n-politica",
+          "relationKind": "trace",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "refine",
+          "source": "n-motor",
+          "target": "n-politica",
+          "relationKind": "refine",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "derive",
+          "source": "n-politica",
+          "target": "n-motor",
+          "relationKind": "derive",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "import",
+          "source": "n-modelo",
+          "target": "n-paquete",
+          "relationKind": "packageImport",
+          "description": "Texto histórico conservado: Agrupa 3\nQA: importación explícita de miembros públicos del paquete.",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "pkgimport",
+          "source": "n-paquete",
+          "target": "n-externo",
+          "relationKind": "packageImport",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "elimport",
+          "source": "n-externo",
+          "target": "n-publico",
+          "relationKind": "elementImport",
+          "importAlias": "RefPublica",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "access",
+          "source": "n-paquete",
+          "target": "n-publico",
+          "relationKind": "access",
+          "sourceHandle": "bottom-3",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "merge",
+          "source": "n-modelo",
+          "target": "n-paquete",
+          "relationKind": "merge",
+          "sourceHandle": "bottom-2",
+          "targetHandle": "bottom-2",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "contain",
+          "source": "n-dom-ref",
+          "target": "n-pub-ref",
+          "relationKind": "containment",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "matricula",
+          "source": "n-estu",
+          "target": "n-curso",
+          "relationKind": "association",
+          "associationClassId": "mat",
+          "sourceMultiplicity": "0..*",
+          "targetMultiplicity": "0..*",
+          "label": "matricula",
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "oferta",
+          "source": "n-prove",
+          "target": "n-prod",
+          "relationKind": "association",
+          "associationClassId": "oferta",
+          "associationEnds": [
+            {
+              "id": "of-prove",
+              "nodeId": "n-prove",
+              "role": "proveedor",
+              "multiplicity": "1"
+            },
+            {
+              "id": "of-prod",
+              "nodeId": "n-prod",
+              "role": "producto",
+              "multiplicity": "1..*"
+            },
+            {
+              "id": "of-suc",
+              "nodeId": "n-suc",
+              "role": "sucursal",
+              "multiplicity": "0..*",
+              "navigability": "navigable",
+              "handle": "top-2"
+            }
+          ],
+          "direction": "none",
+          "lineStyle": "solid"
+        },
+        {
+          "id": "note-edge",
+          "source": "n-nota",
+          "target": "n-estu",
+          "relationKind": "annotation",
+          "annotationTargetEdgeId": "matricula",
+          "sourceHandle": "top-2",
+          "direction": "none",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "constraint-node",
+          "source": "n-regla",
+          "target": "n-oferta",
+          "relationKind": "annotation",
+          "direction": "none",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "bind",
+          "source": "n-entera",
+          "target": "n-template",
+          "relationKind": "bind",
+          "templateBindings": [
+            {
+              "parameterId": "T",
+              "elementId": "integer"
+            }
+          ],
+          "sourceHandle": "left",
+          "targetHandle": "right",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "qa3-public-element",
+          "source": "n-qa3-q",
+          "target": "n-qa3-a",
+          "relationKind": "elementImport",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "importAlias": "Y"
+        },
+        {
+          "id": "qa3-public-package",
+          "source": "n-qa3-p",
+          "target": "n-qa3-q",
+          "relationKind": "packageImport",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "qa3-distinct",
+          "source": "n-qa3-p",
+          "target": "n-qa3-b",
+          "relationKind": "elementImport",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "importAlias": "Z"
+        },
+        {
+          "id": "qa3-private-element",
+          "source": "n-qa3-q",
+          "target": "n-qa3-hidden",
+          "relationKind": "elementAccess",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "importAlias": "SoloQ"
+        },
+        {
+          "id": "qa3-private-package",
+          "source": "n-qa3-private",
+          "target": "n-qa3-q",
+          "relationKind": "packageAccess",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        },
+        {
+          "id": "qa3-package-name",
+          "source": "n-qa3-private",
+          "target": "n-qa3-r",
+          "relationKind": "elementImport",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "importAlias": "OrigenCalificado"
+        },
+        {
+          "id": "qa3-private-package-name",
+          "source": "n-qa3-p",
+          "target": "n-qa3-r",
+          "relationKind": "elementAccess",
+          "direction": "forward",
+          "lineStyle": "dashed",
+          "importAlias": "PaquetePrivado"
+        },
+        {
+          "id": "qa3-legacy-unambiguous",
+          "source": "n-qa3-private",
+          "target": "n-qa3-b",
+          "relationKind": "import",
+          "direction": "forward",
+          "lineStyle": "dashed"
+        }
+      ],
+      "filters": [
+        {
+          "id": "qa01",
+          "label": "01 · Tipos y miembros"
+        },
+        {
+          "id": "qa02",
+          "label": "02 · Asociaciones, bucles y rombos"
+        },
+        {
+          "id": "qa03",
+          "label": "03 · Herencia y realización"
+        },
+        {
+          "id": "qa04",
+          "label": "04 · Dependencia, uso y palabras fijas"
+        },
+        {
+          "id": "qa05",
+          "label": "05 · Propiedad semántica y layout"
+        },
+        {
+          "id": "qa06",
+          "label": "06 · Asociación clase, n-aria, anotación y plantilla"
+        }
+      ]
+    }
+  ],
+  "fieldDefinitions": []
+}

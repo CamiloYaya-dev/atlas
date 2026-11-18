@@ -4,10 +4,10 @@ import {randomUUID} from 'node:crypto'
 import {pool} from '../db/pool'
 import {WorkspacesService} from '../modules/workspaces/application/workspaces.service'
 import {ProjectsService} from '../modules/projects/application/projects.service'
-import {emptyDoc} from '@atlas/contracts'
+import {emptyDoc} from '@novzi/contracts'
 
-if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'){
- throw new Error('Pruebas de BD bloqueadas. Usa NODE_ENV=test y ATLAS_ALLOW_DB_TESTS=true con una BD EXCLUSIVA de pruebas.')
+if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'){
+ throw new Error('Pruebas de BD bloqueadas. Usa NODE_ENV=test y NOVZI_ALLOW_DB_TESTS=true con una BD EXCLUSIVA de pruebas.')
 }
 const w=new WorkspacesService(),p=new ProjectsService()
 test('aislamiento multi-tenant, permisos de lector y concurrencia optimista',async()=>{
@@ -23,6 +23,9 @@ test('aislamiento multi-tenant, permisos de lector y concurrencia optimista',asy
   const viewerRole=await pool.query<{id:string}>("SELECT id FROM workspace_roles WHERE workspace_id=$1 AND role_key='viewer'",[ws])
   assert.ok(viewerRole.rows[0],'El espacio debe tener el rol viewer inicializado')
   await pool.query("INSERT INTO workspace_members(workspace_id,user_id,role,role_id) VALUES($1,$2,'viewer',$3)",[ws,viewer,viewerRole.rows[0].id])
+  assert.deepEqual(await p.list(ws,viewer),[],'Un miembro del espacio no obtiene todos los proyectos')
+  await assert.rejects(()=>p.loadDocument(project.id,viewer),{statusCode:404})
+  await pool.query('INSERT INTO project_members(project_id,workspace_id,user_id,role_id) VALUES($1,$2,$3,$4)',[project.id,ws,viewer,viewerRole.rows[0].id])
   assert.equal((await p.loadDocument(project.id,viewer))?.version,1)
   await assert.rejects(()=>p.saveDocument(project.id,emptyDoc(),1,viewer))
   assert.equal(await p.saveDocument(project.id,emptyDoc(),1,owner),2)

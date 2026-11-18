@@ -20,3 +20,10 @@ coverage/
 # Test coverage artifacts
 coverage/
 .coverage/
+
+# Evidencia generada de QA UML
+/qa/uml-*-evidence/
+
+# Documentacion
+.docs/
+docs/

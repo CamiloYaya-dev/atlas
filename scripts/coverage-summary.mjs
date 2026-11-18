@@ -7,7 +7,7 @@ if(!existsSync(file)){console.error('No existe cobertura. Ejecuta npm run test:c
 const result=JSON.parse(readFileSync(file,'utf8'))
 const metrics=['lines','statements','functions','branches']
 const entries=Object.entries(result).filter(([key])=>key!=='total')
-console.log('ATLAS — Coverage real (porcentaje de código ejecutado, NO de pruebas aprobadas)')
+console.log('NOVZI — Coverage real (porcentaje de código ejecutado, NO de pruebas aprobadas)')
 console.log('Área'.padEnd(18)+metrics.map(m=>m.padStart(14)).join(''))
 for(const area of ['TOTAL','API','WEB','PACKAGES']){
  const matches=area==='TOTAL'?entries:entries.filter(([name])=>{

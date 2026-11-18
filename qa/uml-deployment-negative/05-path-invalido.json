@@ -1,0 +1,834 @@
+{
+  "schema": 1,
+  "elements": {
+    "host": {
+      "id": "host",
+      "type": "uml-device",
+      "name": "Servidor de aplicaciones",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deviceIcon": "server",
+        "deployment": {
+          "kind": "node"
+        }
+      }
+    },
+    "runtime": {
+      "id": "runtime",
+      "type": "uml-execution",
+      "name": "Node.js",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "runtimeIcon": "nodejs",
+        "deployment": {
+          "kind": "node"
+        }
+      },
+      "semanticOwnerId": "host"
+    },
+    "api": {
+      "id": "api",
+      "type": "uml-artifact",
+      "name": "api.js",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "artifact",
+          "fileName": "api.js"
+        }
+      }
+    },
+    "lib": {
+      "id": "lib",
+      "type": "uml-artifact",
+      "name": "lib.js",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "artifact"
+        }
+      }
+    },
+    "spec": {
+      "id": "spec",
+      "type": "uml-artifact",
+      "name": "Configuración producción",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "specification",
+          "deploymentLocation": "/srv/app",
+          "executionLocation": "/srv/app/api.js"
+        }
+      }
+    },
+    "db": {
+      "id": "db",
+      "type": "uml-device",
+      "name": "Servidor BD",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "node"
+        }
+      }
+    },
+    "node": {
+      "id": "node",
+      "type": "uml-node",
+      "name": "Recurso computacional",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "attributes": [
+          {
+            "id": "cores",
+            "name": "cores",
+            "visibility": "public",
+            "type": "Integer"
+          }
+        ],
+        "deployment": {
+          "kind": "node"
+        }
+      }
+    },
+    "pkg": {
+      "id": "pkg",
+      "type": "uml-package",
+      "name": "Infraestructura",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "parent": {
+      "id": "parent",
+      "type": "uml-artifact",
+      "name": "paquete.zip",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "artifact"
+        }
+      },
+      "semanticOwnerId": "pkg"
+    },
+    "nested": {
+      "id": "nested",
+      "type": "uml-artifact",
+      "name": "readme.txt",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "artifact"
+        }
+      },
+      "semanticOwnerId": "parent"
+    },
+    "component": {
+      "id": "component",
+      "type": "component",
+      "name": "API de pagos",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "component": {
+          "kind": "component"
+        }
+      }
+    },
+    "class": {
+      "id": "class",
+      "type": "uml-class",
+      "name": "Controlador",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "interface": {
+      "id": "interface",
+      "type": "uml-interface",
+      "name": "Contrato HTTP",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "datatype": {
+      "id": "datatype",
+      "type": "uml-datatype",
+      "name": "Identificador",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "note": {
+      "id": "note",
+      "type": "uml-comment",
+      "name": "Conexión cifrada",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "constraint": {
+      "id": "constraint",
+      "type": "uml-constraint",
+      "name": "{latencia < 100ms}",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": []
+    },
+    "host-instance": {
+      "id": "host-instance",
+      "type": "uml-object",
+      "name": "srv01",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "instance",
+          "classifierIds": [
+            "node"
+          ],
+          "slots": [
+            {
+              "id": "slot-cores",
+              "ownerId": "node",
+              "propertyId": "cores",
+              "value": 4
+            }
+          ]
+        }
+      }
+    },
+    "api-instance": {
+      "id": "api-instance",
+      "type": "uml-object",
+      "name": "api01",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "instance",
+          "classifierIds": [
+            "api"
+          ]
+        }
+      }
+    },
+    "role": {
+      "id": "role",
+      "type": "uml-part",
+      "name": "worker",
+      "summary": "",
+      "description": "",
+      "author": "QA",
+      "owner": "",
+      "status": "Borrador",
+      "createdAt": "2026-11-16",
+      "updatedAt": "2026-11-16",
+      "fields": {},
+      "links": [],
+      "uml": {
+        "deployment": {
+          "kind": "part",
+          "typeId": "node",
+          "multiplicity": "2"
+        }
+      },
+      "semanticOwnerId": "host"
+    }
+  },
+  "diagrams": [
+    {
+      "id": "deployment",
+      "type": "uml-deployment",
+      "name": "Infraestructura QA · despliegue",
+      "description": "Modelo autocontenido: asignaciones, instancias, topología y manifestación",
+      "createdAt": "2026-11-16",
+      "nodes": [
+        {
+          "id": "host",
+          "elementId": "host",
+          "x": 40,
+          "y": 50,
+          "width": 570,
+          "height": 490
+        },
+        {
+          "id": "runtime",
+          "elementId": "runtime",
+          "x": 35,
+          "y": 90,
+          "width": 480,
+          "height": 340,
+          "parentNodeId": "host"
+        },
+        {
+          "id": "api",
+          "elementId": "api",
+          "x": 28,
+          "y": 75,
+          "width": 190,
+          "height": 120,
+          "parentNodeId": "runtime"
+        },
+        {
+          "id": "lib",
+          "elementId": "lib",
+          "x": 255,
+          "y": 75,
+          "width": 190,
+          "height": 115,
+          "parentNodeId": "runtime"
+        },
+        {
+          "id": "spec",
+          "elementId": "spec",
+          "x": 780,
+          "y": 390,
+          "width": 250,
+          "height": 160
+        },
+        {
+          "id": "db",
+          "elementId": "db",
+          "x": 790,
+          "y": 60,
+          "width": 240,
+          "height": 140
+        },
+        {
+          "id": "node",
+          "elementId": "node",
+          "x": 1190,
+          "y": 50,
+          "width": 250,
+          "height": 145
+        },
+        {
+          "id": "pkg",
+          "elementId": "pkg",
+          "x": 40,
+          "y": 610,
+          "width": 390,
+          "height": 260
+        },
+        {
+          "id": "parent",
+          "elementId": "parent",
+          "x": 35,
+          "y": 80,
+          "width": 300,
+          "height": 155,
+          "parentNodeId": "pkg"
+        },
+        {
+          "id": "nested",
+          "elementId": "nested",
+          "x": 35,
+          "y": 75,
+          "width": 210,
+          "height": 70,
+          "parentNodeId": "parent"
+        },
+        {
+          "id": "component",
+          "elementId": "component",
+          "x": 790,
+          "y": 660,
+          "width": 240,
+          "height": 110
+        },
+        {
+          "id": "class",
+          "elementId": "class",
+          "x": 1170,
+          "y": 660,
+          "width": 230,
+          "height": 110
+        },
+        {
+          "id": "interface",
+          "elementId": "interface",
+          "x": 1470,
+          "y": 660,
+          "width": 230,
+          "height": 110
+        },
+        {
+          "id": "datatype",
+          "elementId": "datatype",
+          "x": 1470,
+          "y": 850,
+          "width": 230,
+          "height": 110
+        },
+        {
+          "id": "note",
+          "elementId": "note",
+          "x": 1080,
+          "y": 360,
+          "width": 200,
+          "height": 95
+        },
+        {
+          "id": "constraint",
+          "elementId": "constraint",
+          "x": 1470,
+          "y": 350,
+          "width": 230,
+          "height": 100
+        },
+        {
+          "id": "host-instance",
+          "elementId": "host-instance",
+          "x": 50,
+          "y": 1040,
+          "width": 255,
+          "height": 150
+        },
+        {
+          "id": "api-instance",
+          "elementId": "api-instance",
+          "x": 400,
+          "y": 1040,
+          "width": 240,
+          "height": 145
+        },
+        {
+          "id": "role",
+          "elementId": "role",
+          "x": 1500,
+          "y": 50,
+          "width": 235,
+          "height": 120
+        }
+      ],
+      "edges": [
+        {
+          "id": "d1-api",
+          "source": "api",
+          "target": "runtime",
+          "relationKind": "deployment",
+          "deploymentRelationId": "d1"
+        },
+        {
+          "id": "d1-lib",
+          "source": "lib",
+          "target": "runtime",
+          "relationKind": "deployment",
+          "deploymentRelationId": "d1"
+        },
+        {
+          "id": "d2-api",
+          "source": "api",
+          "target": "db",
+          "relationKind": "deployment",
+          "deploymentRelationId": "d2"
+        },
+        {
+          "id": "d3-api",
+          "source": "api-instance",
+          "target": "host-instance",
+          "relationKind": "deployment",
+          "deploymentRelationId": "d3"
+        },
+        {
+          "id": "manifest",
+          "source": "api",
+          "target": "component",
+          "relationKind": "manifestation",
+          "deploymentRelationId": "m1"
+        },
+        {
+          "id": "manifest2",
+          "source": "lib",
+          "target": "component",
+          "relationKind": "manifestation",
+          "deploymentRelationId": "m2"
+        },
+        {
+          "id": "p1",
+          "source": "host",
+          "target": "db",
+          "relationKind": "communication-path",
+          "deploymentRelationId": "p1"
+        },
+        {
+          "id": "p2",
+          "source": "host",
+          "target": "db",
+          "relationKind": "communication-path",
+          "deploymentRelationId": "p2"
+        },
+        {
+          "id": "p3",
+          "source": "host",
+          "target": "db",
+          "relationKind": "communication-path",
+          "deploymentRelationId": "p3",
+          "associationEnds": [
+            {
+              "id": "p3-0",
+              "nodeId": "host"
+            },
+            {
+              "id": "p3-1",
+              "nodeId": "db"
+            },
+            {
+              "id": "p3-2",
+              "nodeId": "node"
+            }
+          ]
+        },
+        {
+          "id": "g",
+          "source": "host",
+          "target": "node",
+          "relationKind": "generalization",
+          "deploymentRelationId": "g"
+        },
+        {
+          "id": "g2",
+          "source": "db",
+          "target": "node",
+          "relationKind": "generalization",
+          "deploymentRelationId": "g2"
+        },
+        {
+          "id": "c",
+          "source": "host",
+          "target": "db",
+          "relationKind": "composition",
+          "deploymentRelationId": "c",
+          "wholeEnd": "source"
+        },
+        {
+          "id": "o",
+          "source": "host",
+          "target": "runtime",
+          "relationKind": "containment",
+          "deploymentRelationId": "o"
+        },
+        {
+          "id": "o2",
+          "source": "parent",
+          "target": "nested",
+          "relationKind": "containment",
+          "deploymentRelationId": "o2"
+        },
+        {
+          "id": "dep",
+          "source": "component",
+          "target": "class",
+          "relationKind": "dependency",
+          "deploymentRelationId": "dep"
+        },
+        {
+          "id": "use",
+          "source": "class",
+          "target": "interface",
+          "relationKind": "usage",
+          "deploymentRelationId": "use"
+        },
+        {
+          "id": "a",
+          "source": "note",
+          "target": "db",
+          "relationKind": "annotation",
+          "annotationTargetEdgeId": "p1"
+        },
+        {
+          "id": "a2",
+          "source": "constraint",
+          "target": "node",
+          "relationKind": "annotation"
+        }
+      ]
+    }
+  ],
+  "fieldDefinitions": [],
+  "deploymentRelations": {
+    "d1": {
+      "id": "d1",
+      "kind": "deployment",
+      "locationId": "runtime",
+      "artifactIds": [
+        "api",
+        "lib"
+      ],
+      "configurationIds": [
+        "spec"
+      ]
+    },
+    "d2": {
+      "id": "d2",
+      "kind": "deployment",
+      "locationId": "db",
+      "artifactIds": [
+        "api"
+      ]
+    },
+    "d3": {
+      "id": "d3",
+      "kind": "deployment",
+      "locationId": "host-instance",
+      "artifactIds": [
+        "api-instance"
+      ]
+    },
+    "m1": {
+      "id": "m1",
+      "kind": "manifestation",
+      "sourceElementId": "api",
+      "targetElementId": "component"
+    },
+    "m2": {
+      "id": "m2",
+      "kind": "manifestation",
+      "sourceElementId": "lib",
+      "targetElementId": "component"
+    },
+    "p1": {
+      "id": "p1",
+      "kind": "communication-path",
+      "ends": [
+        {
+          "id": "p1-0",
+          "elementId": "api",
+          "role": "extremo0",
+          "multiplicity": "1..*"
+        },
+        {
+          "id": "p1-1",
+          "elementId": "db",
+          "role": "extremo1",
+          "multiplicity": "1..*",
+          "navigability": "navigable"
+        }
+      ],
+      "protocol": "TLS",
+      "name": ""
+    },
+    "p2": {
+      "id": "p2",
+      "kind": "communication-path",
+      "ends": [
+        {
+          "id": "p2-0",
+          "elementId": "host",
+          "role": "extremo0",
+          "multiplicity": "1..*"
+        },
+        {
+          "id": "p2-1",
+          "elementId": "db",
+          "role": "extremo1",
+          "multiplicity": "1..*",
+          "navigability": "navigable"
+        }
+      ],
+      "protocol": "HTTPS",
+      "name": ""
+    },
+    "p3": {
+      "id": "p3",
+      "kind": "communication-path",
+      "ends": [
+        {
+          "id": "p3-0",
+          "elementId": "host",
+          "role": "extremo0",
+          "multiplicity": "1..*"
+        },
+        {
+          "id": "p3-1",
+          "elementId": "db",
+          "role": "extremo1",
+          "multiplicity": "1..*",
+          "navigability": "navigable"
+        },
+        {
+          "id": "p3-2",
+          "elementId": "node",
+          "role": "extremo2",
+          "multiplicity": "1..*"
+        }
+      ],
+      "protocol": "LAN",
+      "name": "Red"
+    },
+    "g": {
+      "id": "g",
+      "kind": "generalization",
+      "sourceElementId": "host",
+      "targetElementId": "node"
+    },
+    "g2": {
+      "id": "g2",
+      "kind": "generalization",
+      "sourceElementId": "db",
+      "targetElementId": "node"
+    },
+    "c": {
+      "id": "c",
+      "kind": "composition",
+      "sourceElementId": "host",
+      "targetElementId": "db"
+    },
+    "o": {
+      "id": "o",
+      "kind": "containment",
+      "sourceElementId": "host",
+      "targetElementId": "runtime"
+    },
+    "o2": {
+      "id": "o2",
+      "kind": "containment",
+      "sourceElementId": "parent",
+      "targetElementId": "nested"
+    },
+    "dep": {
+      "id": "dep",
+      "kind": "dependency",
+      "sourceElementId": "component",
+      "targetElementId": "class",
+      "name": "consulta"
+    },
+    "use": {
+      "id": "use",
+      "kind": "usage",
+      "sourceElementId": "class",
+      "targetElementId": "interface"
+    }
+  }
+}

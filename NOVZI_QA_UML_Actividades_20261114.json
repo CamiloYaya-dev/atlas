@@ -1,0 +1,477 @@
+{
+  "document": {
+    "schema": 1,
+    "elements": {
+      "cliente": {
+        "id": "cliente",
+        "type": "uml-partition",
+        "name": "Cliente",
+        "summary": "Carril de recepción y corrección de datos.",
+        "description": "Carril de recepción y corrección de datos.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "sistema": {
+        "id": "sistema",
+        "type": "uml-partition",
+        "name": "Sistema",
+        "summary": "Carril de registro, notificación y datos.",
+        "description": "Carril de registro, notificación y datos.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "inicio": {
+        "id": "inicio",
+        "type": "uml-start",
+        "name": "Inicio",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "fusion": {
+        "id": "fusion",
+        "type": "uml-decision",
+        "name": "Reunir entrada",
+        "summary": "Rombo histórico sin rol explícito: inferir merge por 2 entradas y 1 salida.",
+        "description": "Rombo histórico sin rol explícito: inferir merge por 2 entradas y 1 salida.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "recibir": {
+        "id": "recibir",
+        "type": "uml-action",
+        "name": "Recibir solicitud",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "decision": {
+        "id": "decision",
+        "type": "uml-decision",
+        "name": "¿Datos válidos?",
+        "summary": "Rombo histórico sin rol explícito: inferir decision por 1 entrada y 2 salidas.",
+        "description": "Rombo histórico sin rol explícito: inferir decision por 1 entrada y 2 salidas.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "corregir": {
+        "id": "corregir",
+        "type": "uml-action",
+        "name": "Corregir datos",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "fork": {
+        "id": "fork",
+        "type": "uml-fork",
+        "name": "Procesar en paralelo",
+        "summary": "Barra histórica sin rol explícito: inferir fork.",
+        "description": "Barra histórica sin rol explícito: inferir fork.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "registrar": {
+        "id": "registrar",
+        "type": "uml-action",
+        "name": "Registrar solicitud",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "notificar": {
+        "id": "notificar",
+        "type": "uml-action",
+        "name": "Notificar cliente",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "fin": {
+        "id": "fin",
+        "type": "uml-end",
+        "name": "Final de actividad",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "fin-flujo": {
+        "id": "fin-flujo",
+        "type": "uml-flow-final",
+        "name": "Final de flujo",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "tipo-solicitud": {
+        "id": "tipo-solicitud",
+        "type": "uml-datatype",
+        "name": "Solicitud",
+        "summary": "Tipo compartido de los dos nodos de objeto.",
+        "description": "Tipo compartido de los dos nodos de objeto.",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {}
+      },
+      "solicitud": {
+        "id": "solicitud",
+        "type": "uml-object-node",
+        "name": "Solicitud recibida",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {},
+        "activityDetail": {
+          "typeId": "tipo-solicitud",
+          "upperBound": 1
+        }
+      },
+      "solicitud-validada": {
+        "id": "solicitud-validada",
+        "type": "uml-object-node",
+        "name": "Solicitud validada",
+        "summary": "",
+        "description": "",
+        "owner": "",
+        "author": "NOVZI QA · reconstrucción",
+        "status": "Borrador",
+        "createdAt": "2026-11-16",
+        "updatedAt": "2026-11-16",
+        "links": [],
+        "fields": {},
+        "activityDetail": {
+          "typeId": "tipo-solicitud",
+          "upperBound": 1
+        }
+      }
+    },
+    "diagrams": [
+      {
+        "id": "qa-actividades-reconstruido",
+        "type": "uml-activity",
+        "name": "QA · Actividades (fixture reconstruido)",
+        "description": "Reconstrucción del fixture faltante 20261114, basada en las aserciones de graph-regression.cjs y el contrato vigente. No es una copia del histórico original. Contiene roles inferibles, dos carriles, flujos de control y objeto y finales distintos.",
+        "createdAt": "2026-11-16",
+        "nodes": [
+          {
+            "id": "n-cliente",
+            "elementId": "cliente",
+            "x": 40,
+            "y": 40,
+            "width": 640,
+            "height": 1200
+          },
+          {
+            "id": "n-sistema",
+            "elementId": "sistema",
+            "x": 720,
+            "y": 40,
+            "width": 840,
+            "height": 1200
+          },
+          {
+            "id": "n-inicio",
+            "elementId": "inicio",
+            "x": 295,
+            "y": 65,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-fusion",
+            "elementId": "fusion",
+            "x": 280,
+            "y": 175,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-recibir",
+            "elementId": "recibir",
+            "x": 215,
+            "y": 330,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-decision",
+            "elementId": "decision",
+            "x": 280,
+            "y": 490,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-corregir",
+            "elementId": "corregir",
+            "x": 38,
+            "y": 665,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-fork",
+            "elementId": "fork",
+            "x": 335,
+            "y": 680,
+            "parentNodeId": "n-cliente"
+          },
+          {
+            "id": "n-registrar",
+            "elementId": "registrar",
+            "x": 60,
+            "y": 680,
+            "parentNodeId": "n-sistema"
+          },
+          {
+            "id": "n-notificar",
+            "elementId": "notificar",
+            "x": 390,
+            "y": 680,
+            "parentNodeId": "n-sistema"
+          },
+          {
+            "id": "n-fin",
+            "elementId": "fin",
+            "x": 140,
+            "y": 1040,
+            "parentNodeId": "n-sistema"
+          },
+          {
+            "id": "n-fin-flujo",
+            "elementId": "fin-flujo",
+            "x": 695,
+            "y": 1040,
+            "parentNodeId": "n-sistema"
+          },
+          {
+            "id": "n-solicitud",
+            "elementId": "solicitud",
+            "x": 390,
+            "y": 210,
+            "parentNodeId": "n-sistema"
+          },
+          {
+            "id": "n-solicitud-validada",
+            "elementId": "solicitud-validada",
+            "x": 390,
+            "y": 425,
+            "parentNodeId": "n-sistema"
+          }
+        ],
+        "edges": [
+          {
+            "id": "r01",
+            "source": "n-inicio",
+            "target": "n-fusion",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2"
+          },
+          {
+            "id": "r02",
+            "source": "n-fusion",
+            "target": "n-recibir",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2"
+          },
+          {
+            "id": "r03",
+            "source": "n-recibir",
+            "target": "n-decision",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2"
+          },
+          {
+            "id": "r04",
+            "source": "n-decision",
+            "target": "n-corregir",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "left",
+            "targetHandle": "top-2",
+            "activityEdge": {
+              "guard": "inválido"
+            }
+          },
+          {
+            "id": "r05",
+            "source": "n-corregir",
+            "target": "n-fusion",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "left",
+            "targetHandle": "left"
+          },
+          {
+            "id": "r06",
+            "source": "n-decision",
+            "target": "n-fork",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "right",
+            "targetHandle": "top-2",
+            "activityEdge": {
+              "guard": "else"
+            }
+          },
+          {
+            "id": "r07",
+            "source": "n-fork",
+            "target": "n-registrar",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "right",
+            "targetHandle": "left"
+          },
+          {
+            "id": "r08",
+            "source": "n-fork",
+            "target": "n-notificar",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "left"
+          },
+          {
+            "id": "r09",
+            "source": "n-registrar",
+            "target": "n-fin",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2"
+          },
+          {
+            "id": "r10",
+            "source": "n-notificar",
+            "target": "n-fin-flujo",
+            "relationKind": "control-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "left"
+          },
+          {
+            "id": "r11",
+            "source": "n-solicitud",
+            "target": "n-solicitud-validada",
+            "relationKind": "object-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "bottom-2",
+            "targetHandle": "top-2"
+          },
+          {
+            "id": "r12",
+            "source": "n-solicitud-validada",
+            "target": "n-fin-flujo",
+            "relationKind": "object-flow",
+            "direction": "forward",
+            "lineStyle": "solid",
+            "pathStyle": "smoothstep",
+            "sourceHandle": "right",
+            "targetHandle": "top-2"
+          }
+        ]
+      }
+    ],
+    "fieldDefinitions": []
+  }
+}

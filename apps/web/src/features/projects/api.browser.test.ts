@@ -1,8 +1,8 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest'
-import {emptyDoc} from '@atlas/contracts'
-import {request} from '../../shared/api/http'
-import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion} from './api'
-vi.mock('../../shared/api/http',()=>({request:vi.fn()}))
+import {emptyDoc} from '@novzi/contracts'
+import {request,requestFile} from '../../shared/api/http'
+import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch,workspaceLicense,exportDiagramImage} from './api'
+vi.mock('../../shared/api/http',()=>({request:vi.fn(),requestFile:vi.fn()}))
 beforeEach(()=>vi.mocked(request).mockResolvedValue({version:4} as never))
 describe('Contratos HTTP de proyectos',()=>{
  it('lista usando el workspace codificado',async()=>{
@@ -11,8 +11,8 @@ describe('Contratos HTTP de proyectos',()=>{
  })
  it('crea proyecto con documento y nombre',async()=>{
   const doc=emptyDoc()
-  await createProject('w1','ATLAS',doc)
-  expect(request).toHaveBeenCalledWith('/workspaces/w1/projects',{method:'POST',body:JSON.stringify({name:'ATLAS',document:doc})})
+  await createProject('w1','NOVZI',doc)
+  expect(request).toHaveBeenCalledWith('/workspaces/w1/projects',{method:'POST',body:JSON.stringify({name:'NOVZI',document:doc})})
  })
  it('carga y guarda con control de versión optimista',async()=>{
   const doc=emptyDoc()
@@ -31,15 +31,51 @@ describe('Contratos HTTP de proyectos',()=>{
   expect(onCommitted).toHaveBeenCalledWith(doc,5)
   expect(request).toHaveBeenCalledWith('/projects/p1/document',{method:'PUT',body:JSON.stringify({document:doc,expectedVersion:4,collaborative:true})})
  })
+ it('contrato HTTP de ramas: creación, consulta, vista previa, resolución y descarte',async()=>{
+  await listRestoreBranches('p1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches')
+  await createRestoreBranch('p1',2)
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches',{method:'POST',body:JSON.stringify({sourceVersion:2})})
+  await previewRestoreBranch('p1','b1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1/preview')
+  await applyRestoreBranch('p1','b1',3,'merge',{'document.elements.a.name':'historical'})
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1/apply',{method:'POST',body:JSON.stringify({expectedVersion:3,mode:'merge',resolutions:{'document.elements.a.name':'historical'}})})
+  await discardRestoreBranch('p1','b1')
+  expect(request).toHaveBeenCalledWith('/projects/p1/restore-branches/b1',{method:'DELETE'})
+ })
+ it('consulta los derechos de licencia y solicita un binario firmado al servidor',async()=>{
+  await workspaceLicense('w/1')
+  expect(request).toHaveBeenCalledWith('/workspaces/w%2F1/license')
+  await exportDiagramImage('project/1','diagram/1','png',9,'cG5n')
+  expect(requestFile).toHaveBeenCalledWith('/projects/project%2F1/diagrams/diagram%2F1/export-image',{format:'png',expectedVersion:9,imageBase64:'cG5n'})
+ })
  it('exporta, importa y consulta historial de versiones',async()=>{
   await exportProject('p1')
   expect(request).toHaveBeenCalledWith('/projects/p1/export')
   const doc=emptyDoc()
   expect(await importProject('p1',doc,7)).toBe(4)
   expect(request).toHaveBeenCalledWith('/projects/p1/import',{method:'POST',body:JSON.stringify({document:doc,expectedVersion:7})})
+  const scope={mode:'diagram' as const,targetDiagramId:'dest',sourceDiagramId:'src'}
+  expect(await importProject('p1',doc,7,scope)).toBe(4)
+  expect(request).toHaveBeenCalledWith('/projects/p1/import',{method:'POST',body:JSON.stringify({document:doc,expectedVersion:7,scope})})
   await listDocumentVersions('p1')
   expect(request).toHaveBeenCalledWith('/projects/p1/versions')
   await loadDocumentVersion('p1',2)
   expect(request).toHaveBeenCalledWith('/projects/p1/versions/2')
  })
+})
+
+it('presencia, permisos, administración y licencia codifican identificadores y conservan payloads',async()=>{
+ const api=await import('./api')
+ await api.sendPresence('p/1','client','diagram','element');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/presence',{method:'POST',body:JSON.stringify({clientId:'client',diagramId:'diagram',elementId:'element'})})
+ await api.renameProject('p/1','Nuevo');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1',{method:'PATCH',body:JSON.stringify({name:'Nuevo'})})
+ await api.restoreDocumentVersion('p/1',2,5);expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/restore',{method:'POST',body:JSON.stringify({sourceVersion:2,expectedVersion:5})})
+ await api.projectAccess('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/access')
+ await api.projectMembers('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members')
+ await api.projectCandidates('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/candidates')
+ await api.assignProjectMember('p/1','u/1','r1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members/u%2F1',{method:'PUT',body:JSON.stringify({roleId:'r1'})})
+ await api.removeProjectMember('p/1','u/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1/members/u%2F1',{method:'DELETE'})
+ await api.deleteProject('p/1');expect(request).toHaveBeenLastCalledWith('/projects/p%2F1',{method:'DELETE'})
+ const payload={planCode:'pro' as const,status:'active' as const,features:{}};await api.setWorkspaceLicense('w/1',payload);expect(request).toHaveBeenLastCalledWith('/admin/workspaces/w%2F1/license',{method:'PUT',body:JSON.stringify(payload)})
+ vi.mocked(request).mockResolvedValueOnce({version:6,document:emptyDoc()} as never);expect(await api.saveDocument('p/1',emptyDoc(),5)).toBe(6)
 })

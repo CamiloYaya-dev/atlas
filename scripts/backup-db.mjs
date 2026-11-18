@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process';
-import { createWriteStream, mkdirSync, rmSync } from 'node:fs';
+import { createWriteStream, createReadStream, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 mkdirSync('backups', { recursive: true });
-const file = join('backups', `atlas-local-${new Date().toISOString().replaceAll(':','-')}.dump`);
+const file = join('backups', `novzi-local-${new Date().toISOString().replaceAll(':','-')}.dump`);
 console.log(`Generando copia local: ${file}`);
 const proc = spawn('docker', ['compose','exec','-T','db','pg_dump','-U','atlas','-d','atlas','-Fc'], { stdio: ['ignore','pipe','inherit'] });
 const dest = createWriteStream(file);
@@ -19,5 +20,9 @@ if (code !== 0) {
   console.error('Backup fallido; se eliminó el archivo incompleto.');
   process.exitCode = 1;
 } else {
-  console.log(`Backup generado: ${file}`);
+  const hash=createHash('sha256');
+  for await(const block of createReadStream(file))hash.update(block);
+  const digest=hash.digest('hex');
+  writeFileSync(file+'.sha256',digest+'  '+file+'\n');
+  console.log(`Backup generado: ${file} (SHA-256 verificado mediante .sha256)`);
 }

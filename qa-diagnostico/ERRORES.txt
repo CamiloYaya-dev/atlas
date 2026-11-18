@@ -1,0 +1,3022 @@
+﻿
+  qa-diagnostico\test-coverage.log:168:# pass 19
+> qa-diagnostico\test-coverage.log:169:# fail 0
+  qa-diagnostico\test-coverage.log:170:# cancelled 0
+  qa-diagnostico\test-coverage.log:171:# skipped 0
+  qa-diagnostico\test-coverage.log:172:# todo 0
+  qa-diagnostico\test-coverage.log:173:# duration_ms 1340.7732
+  qa-diagnostico\test-coverage.log:174:
+  qa-diagnostico\test-coverage.log:175:[NOVZI QA] 
+apps\api\src\db\demo-provision.unit.test.ts
+  qa-diagnostico\test-coverage.log:176:TAP version 13
+  qa-diagnostico\test-coverage.log:177:# node:internal/modules/run_main:123
+  qa-diagnostico\test-coverage.log:193:# Subtest: 
+C:\\Users\\MSI1\\Desktop\\novzi\\apps\\api\\src\\db\\demo-provision.unit.test.ts
+> qa-diagnostico\test-coverage.log:194:not ok 1 - 
+C:\\Users\\MSI1\\Desktop\\novzi\\apps\\api\\src\\db\\demo-provision.unit.test.ts
+  qa-diagnostico\test-coverage.log:195:  ---
+  qa-diagnostico\test-coverage.log:196:  duration_ms: 1352.4526
+  qa-diagnostico\test-coverage.log:197:  type: 'test'
+  qa-diagnostico\test-coverage.log:198:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\
+\apps\\api\\src\\db\\demo-provision.unit.test.ts:1:1'
+> qa-diagnostico\test-coverage.log:199:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-coverage.log:200:  exitCode: 1
+  qa-diagnostico\test-coverage.log:201:  signal: ~
+> qa-diagnostico\test-coverage.log:202:  error: 'test failed'
+> qa-diagnostico\test-coverage.log:203:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-coverage.log:204:  ...
+  qa-diagnostico\test-coverage.log:205:1..1
+  qa-diagnostico\test-coverage.log:206:# tests 1
+  qa-diagnostico\test-coverage.log:207:# suites 0
+  qa-diagnostico\test-coverage.log:208:# pass 0
+> qa-diagnostico\test-coverage.log:209:# fail 1
+  qa-diagnostico\test-coverage.log:210:# cancelled 0
+  qa-diagnostico\test-coverage.log:211:# skipped 0
+  qa-diagnostico\test-coverage.log:212:# todo 0
+  qa-diagnostico\test-coverage.log:213:# duration_ms 1367.8087
+  qa-diagnostico\test-coverage.log:214:[FALL├ô] 
+apps\api\src\db\demo-provision.unit.test.ts
+  qa-diagnostico\test-coverage.log:215:
+  qa-diagnostico\test-coverage.log:216:[NOVZI QA] 
+apps\api\src\db\entrypoints.unit.test.ts
+  qa-diagnostico\test-coverage.log:217:TAP version 13
+  qa-diagnostico\test-coverage.log:248:# Subtest: CLI QA aislado: admin-new
+> qa-diagnostico\test-coverage.log:249:not ok 6 - CLI QA aislado: admin-new
+  qa-diagnostico\test-coverage.log:250:  ---
+  qa-diagnostico\test-coverage.log:251:  duration_ms: 1513.0876
+  qa-diagnostico\test-coverage.log:252:  type: 'test'
+  qa-diagnostico\test-coverage.log:253:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\
+\apps\\api\\src\\db\\entrypoints.unit.test.ts:6:274'
+> qa-diagnostico\test-coverage.log:254:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:255:  error: |-
+  qa-diagnostico\test-coverage.log:256:    
+  qa-diagnostico\test-coverage.log:257:    
+  qa-diagnostico\test-coverage.log:258:    node:internal/modules/run_main:123
+  qa-diagnostico\test-coverage.log:259:        triggerUncaughtException(
+  qa-diagnostico\test-coverage.log:260:        ^
+  qa-diagnostico\test-coverage.log:261:    TypeError 
+[ERR_IMPORT_ATTRIBUTE_MISSING]: Module 
+"file:///C:/Users/MSI1/Desktop/novzi/apps/api/src/db/novzi-demo-project.json" needs 
+an import attribute of "type: json"
+  qa-diagnostico\test-coverage.log:262:        at validateAttributes 
+(node:internal/modules/esm/assert:88:15)
+  qa-diagnostico\test-coverage.log:263:        at defaultLoad 
+(node:internal/modules/esm/load:105:3)
+  qa-diagnostico\test-coverage.log:280:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:281:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:282:  expected: 0
+  qa-diagnostico\test-coverage.log:283:  actual: 1
+  qa-diagnostico\test-coverage.log:284:  operator: 'strictEqual'
+  qa-diagnostico\test-coverage.log:285:  stack: |-
+  qa-diagnostico\test-coverage.log:286:    validateAttributes 
+(node:internal/modules/esm/assert:88:15)
+  qa-diagnostico\test-coverage.log:287:    defaultLoad 
+(node:internal/modules/esm/load:105:3)
+  qa-diagnostico\test-coverage.log:288:    nextLoad 
+(node:internal/modules/esm/hooks:748:28)
+  qa-diagnostico\test-coverage.log:289:    load 
+(file:///C:/Users/MSI1/Desktop/novzi/scripts/coverage-ts-loader.mjs:19:72)
+  qa-diagnostico\test-coverage.log:304:# Subtest: CLI QA aislado: admin-rollback
+> qa-diagnostico\test-coverage.log:305:not ok 7 - CLI QA aislado: admin-rollback
+  qa-diagnostico\test-coverage.log:306:  ---
+  qa-diagnostico\test-coverage.log:307:  duration_ms: 1422.2482
+  qa-diagnostico\test-coverage.log:308:  type: 'test'
+  qa-diagnostico\test-coverage.log:309:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\
+\apps\\api\\src\\db\\entrypoints.unit.test.ts:6:274'
+> qa-diagnostico\test-coverage.log:310:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:311:  error: |-
+  qa-diagnostico\test-coverage.log:312:    
+  qa-diagnostico\test-coverage.log:313:    
+  qa-diagnostico\test-coverage.log:314:    node:internal/modules/run_main:123
+  qa-diagnostico\test-coverage.log:315:        triggerUncaughtException(
+  qa-diagnostico\test-coverage.log:316:        ^
+  qa-diagnostico\test-coverage.log:317:    TypeError 
+[ERR_IMPORT_ATTRIBUTE_MISSING]: Module 
+"file:///C:/Users/MSI1/Desktop/novzi/apps/api/src/db/novzi-demo-project.json" needs 
+an import attribute of "type: json"
+  qa-diagnostico\test-coverage.log:318:        at validateAttributes 
+(node:internal/modules/esm/assert:88:15)
+  qa-diagnostico\test-coverage.log:319:        at defaultLoad 
+(node:internal/modules/esm/load:105:3)
+  qa-diagnostico\test-coverage.log:336:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:337:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:338:  expected: 0
+  qa-diagnostico\test-coverage.log:339:  actual: 1
+  qa-diagnostico\test-coverage.log:340:  operator: 'strictEqual'
+  qa-diagnostico\test-coverage.log:341:  stack: |-
+  qa-diagnostico\test-coverage.log:342:    validateAttributes 
+(node:internal/modules/esm/assert:88:15)
+  qa-diagnostico\test-coverage.log:343:    defaultLoad 
+(node:internal/modules/esm/load:105:3)
+  qa-diagnostico\test-coverage.log:344:    nextLoad 
+(node:internal/modules/esm/hooks:748:28)
+  qa-diagnostico\test-coverage.log:345:    load 
+(file:///C:/Users/MSI1/Desktop/novzi/scripts/coverage-ts-loader.mjs:19:72)
+  qa-diagnostico\test-coverage.log:405:# pass 12
+> qa-diagnostico\test-coverage.log:406:# fail 2
+  qa-diagnostico\test-coverage.log:407:# cancelled 0
+  qa-diagnostico\test-coverage.log:408:# skipped 0
+  qa-diagnostico\test-coverage.log:409:# todo 0
+  qa-diagnostico\test-coverage.log:410:# duration_ms 28880.8444
+  qa-diagnostico\test-coverage.log:411:[FALL├ô] 
+apps\api\src\db\entrypoints.unit.test.ts
+  qa-diagnostico\test-coverage.log:412:
+  qa-diagnostico\test-coverage.log:413:[NOVZI QA] apps\api\src\db\pool.unit.test.ts
+  qa-diagnostico\test-coverage.log:414:TAP version 13
+  qa-diagnostico\test-coverage.log:430:# pass 2
+> qa-diagnostico\test-coverage.log:431:# fail 0
+  qa-diagnostico\test-coverage.log:432:# cancelled 0
+  qa-diagnostico\test-coverage.log:433:# skipped 0
+  qa-diagnostico\test-coverage.log:434:# todo 0
+  qa-diagnostico\test-coverage.log:435:# duration_ms 1347.3418
+  qa-diagnostico\test-coverage.log:436:
+  qa-diagnostico\test-coverage.log:437:[NOVZI QA] 
+apps\api\src\domain\access-policy.test.ts
+  qa-diagnostico\test-coverage.log:438:TAP version 13
+  qa-diagnostico\test-coverage.log:439:# Subtest: Analista funcional no recibe C3 
+ni endpoint t├®cnico en el documento
+  qa-diagnostico\test-coverage.log:490:# pass 8
+> qa-diagnostico\test-coverage.log:491:# fail 0
+  qa-diagnostico\test-coverage.log:492:# cancelled 0
+  qa-diagnostico\test-coverage.log:493:# skipped 0
+  qa-diagnostico\test-coverage.log:494:# todo 0
+  qa-diagnostico\test-coverage.log:495:# duration_ms 4251.637
+  qa-diagnostico\test-coverage.log:496:
+  qa-diagnostico\test-coverage.log:497:[NOVZI QA] 
+apps\api\src\domain\document-policy.extended.unit.test.ts
+  qa-diagnostico\test-coverage.log:498:TAP version 13
+  qa-diagnostico\test-coverage.log:499:# Subtest: edici├│n de nombre, resumen, 
+responsable, estado, enlaces y campos conservada
+  qa-diagnostico\test-coverage.log:742:# pass 40
+> qa-diagnostico\test-coverage.log:743:# fail 0
+  qa-diagnostico\test-coverage.log:744:# cancelled 0
+  qa-diagnostico\test-coverage.log:745:# skipped 0
+  qa-diagnostico\test-coverage.log:746:# todo 0
+  qa-diagnostico\test-coverage.log:747:# duration_ms 4280.3173
+  qa-diagnostico\test-coverage.log:748:
+  qa-diagnostico\test-coverage.log:749:[NOVZI QA] 
+apps\api\src\domain\document.test.ts
+  qa-diagnostico\test-coverage.log:750:TAP version 13
+  qa-diagnostico\test-coverage.log:751:# Subtest: documento NOVZI demo valido
+  qa-diagnostico\test-coverage.log:778:# pass 4
+> qa-diagnostico\test-coverage.log:779:# fail 0
+  qa-diagnostico\test-coverage.log:780:# cancelled 0
+  qa-diagnostico\test-coverage.log:781:# skipped 0
+  qa-diagnostico\test-coverage.log:782:# todo 0
+  qa-diagnostico\test-coverage.log:783:# duration_ms 3817.9468
+  qa-diagnostico\test-coverage.log:784:
+  qa-diagnostico\test-coverage.log:785:[NOVZI QA] 
+apps\api\src\domain\import-scope.unit.test.ts
+  qa-diagnostico\test-coverage.log:786:TAP version 13
+  qa-diagnostico\test-coverage.log:787:# Subtest: IMP alcance expl├¡cito y 
+retrocompatibilidad
+  qa-diagnostico\test-coverage.log:850:# pass 10
+> qa-diagnostico\test-coverage.log:851:# fail 0
+  qa-diagnostico\test-coverage.log:852:# cancelled 0
+  qa-diagnostico\test-coverage.log:853:# skipped 0
+  qa-diagnostico\test-coverage.log:854:# todo 0
+  qa-diagnostico\test-coverage.log:855:# duration_ms 4505.1307
+  qa-diagnostico\test-coverage.log:856:
+  qa-diagnostico\test-coverage.log:857:[NOVZI QA] 
+apps\api\src\domain\permission-matrix.unit.test.ts
+  qa-diagnostico\test-coverage.log:858:TAP version 13
+  qa-diagnostico\test-coverage.log:859:# Subtest: ACL matriz c1: vista permitida, 
+creaci├│n denegada si falta permiso y autorizada cuando se concede
+  qa-diagnostico\test-coverage.log:1450:# pass 98
+> qa-diagnostico\test-coverage.log:1451:# fail 0
+  qa-diagnostico\test-coverage.log:1452:# cancelled 0
+  qa-diagnostico\test-coverage.log:1453:# skipped 0
+  qa-diagnostico\test-coverage.log:1454:# todo 0
+  qa-diagnostico\test-coverage.log:1455:# duration_ms 4429.4785
+  qa-diagnostico\test-coverage.log:1456:
+  qa-diagnostico\test-coverage.log:1457:[NOVZI QA] 
+apps\api\src\domain\sequence-persistence.unit.test.ts
+  qa-diagnostico\test-coverage.log:1458:TAP version 13
+  qa-diagnostico\test-coverage.log:1459:# Subtest: SEQ-T08 owner alta, proyecci├│n 
+y roundtrip ├¡ntegros; lector no modifica
+  qa-diagnostico\test-coverage.log:1774:# pass 52
+> qa-diagnostico\test-coverage.log:1775:# fail 0
+  qa-diagnostico\test-coverage.log:1776:# cancelled 0
+  qa-diagnostico\test-coverage.log:1777:# skipped 0
+  qa-diagnostico\test-coverage.log:1778:# todo 0
+  qa-diagnostico\test-coverage.log:1779:# duration_ms 5669.9377
+  qa-diagnostico\test-coverage.log:1780:
+  qa-diagnostico\test-coverage.log:1781:[NOVZI QA] 
+apps\api\src\domain\uml-activity-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:1782:TAP version 13
+  qa-diagnostico\test-coverage.log:1783:# Subtest: ACT-07 fixture integral alta, 
+proyecci├│n y roundtrip owner; rechazo lector
+  qa-diagnostico\test-coverage.log:2026:# pass 40
+> qa-diagnostico\test-coverage.log:2027:# fail 0
+  qa-diagnostico\test-coverage.log:2028:# cancelled 0
+  qa-diagnostico\test-coverage.log:2029:# skipped 0
+  qa-diagnostico\test-coverage.log:2030:# todo 0
+  qa-diagnostico\test-coverage.log:2031:# duration_ms 5817.8221
+  qa-diagnostico\test-coverage.log:2032:
+  qa-diagnostico\test-coverage.log:2033:[NOVZI QA] 
+apps\api\src\domain\uml-class-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:2034:TAP version 13
+  qa-diagnostico\test-coverage.log:2035:# Subtest: T02 API documento nuevo: no 
+bypass de matriz mediante alta de vista
+  qa-diagnostico\test-coverage.log:2170:# pass 22
+> qa-diagnostico\test-coverage.log:2171:# fail 0
+  qa-diagnostico\test-coverage.log:2172:# cancelled 0
+  qa-diagnostico\test-coverage.log:2173:# skipped 0
+  qa-diagnostico\test-coverage.log:2174:# todo 0
+  qa-diagnostico\test-coverage.log:2175:# duration_ms 4203.3254
+  qa-diagnostico\test-coverage.log:2176:
+  qa-diagnostico\test-coverage.log:2177:[NOVZI QA] 
+apps\api\src\domain\uml-component-persistence.unit.test.ts
+  qa-diagnostico\test-coverage.log:2178:TAP version 13
+  qa-diagnostico\test-coverage.log:2179:# Subtest: CMP-T07 alta, roundtrip, 
+actualizaci├│n y export SVG especializado
+  qa-diagnostico\test-coverage.log:2476:# pass 49
+> qa-diagnostico\test-coverage.log:2477:# fail 0
+  qa-diagnostico\test-coverage.log:2478:# cancelled 0
+  qa-diagnostico\test-coverage.log:2479:# skipped 0
+  qa-diagnostico\test-coverage.log:2480:# todo 0
+  qa-diagnostico\test-coverage.log:2481:# duration_ms 5337.2619
+  qa-diagnostico\test-coverage.log:2482:
+  qa-diagnostico\test-coverage.log:2483:[NOVZI QA] 
+apps\api\src\domain\uml-deployment-persistence.unit.test.ts
+  qa-diagnostico\test-coverage.log:2484:TAP version 13
+  qa-diagnostico\test-coverage.log:2485:# Subtest: DEP-07 alta, roundtrip, 
+importaci├│n, SVG especializado
+  qa-diagnostico\test-coverage.log:2764:# pass 46
+> qa-diagnostico\test-coverage.log:2765:# fail 0
+  qa-diagnostico\test-coverage.log:2766:# cancelled 0
+  qa-diagnostico\test-coverage.log:2767:# skipped 0
+  qa-diagnostico\test-coverage.log:2768:# todo 0
+  qa-diagnostico\test-coverage.log:2769:# duration_ms 5255.6423
+  qa-diagnostico\test-coverage.log:2770:
+  qa-diagnostico\test-coverage.log:2771:[NOVZI QA] 
+apps\api\src\domain\uml-scoped.unit.test.ts
+  qa-diagnostico\test-coverage.log:2772:TAP version 13
+  qa-diagnostico\test-coverage.log:2773:# (node:30128) 
+[MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of 
+file:///C:/Users/MSI1/Desktop/novzi/qa/uml-scoped-fixtures.ts is not specified and 
+it doesn't parse as CommonJS.
+  qa-diagnostico\test-coverage.log:2870:# pass 15
+> qa-diagnostico\test-coverage.log:2871:# fail 0
+  qa-diagnostico\test-coverage.log:2872:# cancelled 0
+  qa-diagnostico\test-coverage.log:2873:# skipped 0
+  qa-diagnostico\test-coverage.log:2874:# todo 0
+  qa-diagnostico\test-coverage.log:2875:# duration_ms 4756.9404
+  qa-diagnostico\test-coverage.log:2876:
+  qa-diagnostico\test-coverage.log:2877:[NOVZI QA] 
+apps\api\src\domain\uml-usecase-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:2878:TAP version 13
+  qa-diagnostico\test-coverage.log:2879:# Subtest: T07 API acepta funcional sin 
+permisos t├®cnicos y bloquea lector
+  qa-diagnostico\test-coverage.log:3044:# pass 27
+> qa-diagnostico\test-coverage.log:3045:# fail 0
+  qa-diagnostico\test-coverage.log:3046:# cancelled 0
+  qa-diagnostico\test-coverage.log:3047:# skipped 0
+  qa-diagnostico\test-coverage.log:3048:# todo 0
+  qa-diagnostico\test-coverage.log:3049:# duration_ms 4585.4068
+  qa-diagnostico\test-coverage.log:3050:
+  qa-diagnostico\test-coverage.log:3051:[NOVZI QA] 
+apps\api\src\modules\access\presentation\controller-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:3052:TAP version 13
+  qa-diagnostico\test-coverage.log:3053:# node:internal/modules/run_main:123
+  qa-diagnostico\test-coverage.log:3069:# Subtest: C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\modules\\access\\presentation\\controller-boundaries.unit.test.ts
+> qa-diagnostico\test-coverage.log:3070:not ok 1 - C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\modules\\access\\presentation\\controller-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:3071:  ---
+  qa-diagnostico\test-coverage.log:3072:  duration_ms: 2254.3231
+  qa-diagnostico\test-coverage.log:3073:  type: 'test'
+  qa-diagnostico\test-coverage.log:3074:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\api\\src\\modules\\access\\presentation\\controller-boundaries.unit.test.ts:
+1:1'
+> qa-diagnostico\test-coverage.log:3075:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-coverage.log:3076:  exitCode: 1
+  qa-diagnostico\test-coverage.log:3077:  signal: ~
+> qa-diagnostico\test-coverage.log:3078:  error: 'test failed'
+> qa-diagnostico\test-coverage.log:3079:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-coverage.log:3080:  ...
+  qa-diagnostico\test-coverage.log:3081:1..1
+  qa-diagnostico\test-coverage.log:3082:# tests 1
+  qa-diagnostico\test-coverage.log:3083:# suites 0
+  qa-diagnostico\test-coverage.log:3084:# pass 0
+> qa-diagnostico\test-coverage.log:3085:# fail 1
+  qa-diagnostico\test-coverage.log:3086:# cancelled 0
+  qa-diagnostico\test-coverage.log:3087:# skipped 0
+  qa-diagnostico\test-coverage.log:3088:# todo 0
+  qa-diagnostico\test-coverage.log:3089:# duration_ms 2264.3602
+  qa-diagnostico\test-coverage.log:3090:[FALL├ô] 
+apps\api\src\modules\access\presentation\controller-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:3091:
+  qa-diagnostico\test-coverage.log:3092:[NOVZI QA] 
+apps\api\src\modules\admin\presentation\demo-registration.unit.test.ts
+  qa-diagnostico\test-coverage.log:3093:TAP version 13
+  qa-diagnostico\test-coverage.log:3111:# Subtest: C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\modules\\admin\\presentation\\demo-registration.unit.test.ts
+> qa-diagnostico\test-coverage.log:3112:not ok 1 - C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\modules\\admin\\presentation\\demo-registration.unit.test.ts
+  qa-diagnostico\test-coverage.log:3113:  ---
+  qa-diagnostico\test-coverage.log:3114:  duration_ms: 1530.3208
+  qa-diagnostico\test-coverage.log:3115:  type: 'test'
+  qa-diagnostico\test-coverage.log:3116:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\api\\src\\modules\\admin\\presentation\\demo-registration.unit.test.ts:1:1'
+> qa-diagnostico\test-coverage.log:3117:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-coverage.log:3118:  exitCode: 1
+  qa-diagnostico\test-coverage.log:3119:  signal: ~
+> qa-diagnostico\test-coverage.log:3120:  error: 'test failed'
+> qa-diagnostico\test-coverage.log:3121:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-coverage.log:3122:  ...
+  qa-diagnostico\test-coverage.log:3123:1..1
+  qa-diagnostico\test-coverage.log:3124:# tests 1
+  qa-diagnostico\test-coverage.log:3125:# suites 0
+  qa-diagnostico\test-coverage.log:3126:# pass 0
+> qa-diagnostico\test-coverage.log:3127:# fail 1
+  qa-diagnostico\test-coverage.log:3128:# cancelled 0
+  qa-diagnostico\test-coverage.log:3129:# skipped 0
+  qa-diagnostico\test-coverage.log:3130:# todo 0
+  qa-diagnostico\test-coverage.log:3131:# duration_ms 1540.5536
+  qa-diagnostico\test-coverage.log:3132:[FALL├ô] 
+apps\api\src\modules\admin\presentation\demo-registration.unit.test.ts
+  qa-diagnostico\test-coverage.log:3133:
+  qa-diagnostico\test-coverage.log:3134:[NOVZI QA] 
+apps\api\src\modules\exports\advanced-document.unit.test.ts
+  qa-diagnostico\test-coverage.log:3135:TAP version 13
+  qa-diagnostico\test-coverage.log:3181:# pass 7
+> qa-diagnostico\test-coverage.log:3182:# fail 0
+  qa-diagnostico\test-coverage.log:3183:# cancelled 0
+  qa-diagnostico\test-coverage.log:3184:# skipped 0
+  qa-diagnostico\test-coverage.log:3185:# todo 0
+  qa-diagnostico\test-coverage.log:3186:# duration_ms 3943.5698
+  qa-diagnostico\test-coverage.log:3187:
+  qa-diagnostico\test-coverage.log:3188:[NOVZI QA] 
+apps\api\src\modules\exports\diagram-documents.unit.test.ts
+  qa-diagnostico\test-coverage.log:3189:TAP version 13
+  qa-diagnostico\test-coverage.log:3190:# Subtest: fichas separadas exportan 
+exclusivamente campos elegidos, relaciones y datos del servidor
+  qa-diagnostico\test-coverage.log:3217:# pass 4
+> qa-diagnostico\test-coverage.log:3218:# fail 0
+  qa-diagnostico\test-coverage.log:3219:# cancelled 0
+  qa-diagnostico\test-coverage.log:3220:# skipped 0
+  qa-diagnostico\test-coverage.log:3221:# todo 0
+  qa-diagnostico\test-coverage.log:3222:# duration_ms 3995.1277
+  qa-diagnostico\test-coverage.log:3223:
+  qa-diagnostico\test-coverage.log:3224:[NOVZI QA] 
+apps\api\src\modules\exports\exports-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:3225:TAP version 13
+  qa-diagnostico\test-coverage.log:3226:# Subtest: exportaci├│n HTTP: valida 
+modelo, versi├│n, licencia y requisitos de captura antes de firmar
+  qa-diagnostico\test-coverage.log:3247:# pass 3
+> qa-diagnostico\test-coverage.log:3248:# fail 0
+  qa-diagnostico\test-coverage.log:3249:# cancelled 0
+  qa-diagnostico\test-coverage.log:3250:# skipped 0
+  qa-diagnostico\test-coverage.log:3251:# todo 0
+  qa-diagnostico\test-coverage.log:3252:# duration_ms 5065.4309
+  qa-diagnostico\test-coverage.log:3253:
+  qa-diagnostico\test-coverage.log:3254:[NOVZI QA] 
+apps\api\src\modules\exports\provenance-validation.unit.test.ts
+  qa-diagnostico\test-coverage.log:3255:TAP version 13
+  qa-diagnostico\test-coverage.log:3256:# Subtest: detecta PNG sin firma, truncado, 
+doble firma y cabecera inv├ílida
+  qa-diagnostico\test-coverage.log:3271:# pass 2
+> qa-diagnostico\test-coverage.log:3272:# fail 0
+  qa-diagnostico\test-coverage.log:3273:# cancelled 0
+  qa-diagnostico\test-coverage.log:3274:# skipped 0
+  qa-diagnostico\test-coverage.log:3275:# todo 0
+  qa-diagnostico\test-coverage.log:3276:# duration_ms 1247.9733
+  qa-diagnostico\test-coverage.log:3277:
+  qa-diagnostico\test-coverage.log:3278:[NOVZI QA] 
+apps\api\src\modules\exports\provenance.unit.test.ts
+  qa-diagnostico\test-coverage.log:3279:TAP version 13
+  qa-diagnostico\test-coverage.log:3280:# Subtest: renderiza un diagrama completo 
+con etiquetas y marca comercial en plan gratuito
+  qa-diagnostico\test-coverage.log:3307:# pass 4
+> qa-diagnostico\test-coverage.log:3308:# fail 0
+  qa-diagnostico\test-coverage.log:3309:# cancelled 0
+  qa-diagnostico\test-coverage.log:3310:# skipped 0
+  qa-diagnostico\test-coverage.log:3311:# todo 0
+  qa-diagnostico\test-coverage.log:3312:# duration_ms 4092.3932
+  qa-diagnostico\test-coverage.log:3313:
+  qa-diagnostico\test-coverage.log:3314:[NOVZI QA] 
+apps\api\src\modules\exports\raster-export.unit.test.ts
+  qa-diagnostico\test-coverage.log:3315:TAP version 13
+  qa-diagnostico\test-coverage.log:3316:# Subtest: la exportaci├│n visual conserva 
+la geometr├¡a exacta de la captura PNG sin licencia
+  qa-diagnostico\test-coverage.log:3355:# pass 6
+> qa-diagnostico\test-coverage.log:3356:# fail 0
+  qa-diagnostico\test-coverage.log:3357:# cancelled 0
+  qa-diagnostico\test-coverage.log:3358:# skipped 0
+  qa-diagnostico\test-coverage.log:3359:# todo 0
+  qa-diagnostico\test-coverage.log:3360:# duration_ms 1384.5504
+  qa-diagnostico\test-coverage.log:3361:
+  qa-diagnostico\test-coverage.log:3362:[NOVZI QA] 
+apps\api\src\modules\exports\render-svg.unit.test.ts
+  qa-diagnostico\test-coverage.log:3363:TAP version 13
+  qa-diagnostico\test-coverage.log:3364:# Subtest: SVG auxiliar escapa texto, 
+incluye nodos, enlaces y relaciones paralelas con estilos
+  qa-diagnostico\test-coverage.log:3385:# pass 3
+> qa-diagnostico\test-coverage.log:3386:# fail 0
+  qa-diagnostico\test-coverage.log:3387:# cancelled 0
+  qa-diagnostico\test-coverage.log:3388:# skipped 0
+  qa-diagnostico\test-coverage.log:3389:# todo 0
+  qa-diagnostico\test-coverage.log:3390:# duration_ms 3804.092
+  qa-diagnostico\test-coverage.log:3391:
+  qa-diagnostico\test-coverage.log:3392:[NOVZI QA] 
+apps\api\src\modules\functional\functional-asis.unit.test.ts
+  qa-diagnostico\test-coverage.log:3393:TAP version 13
+  qa-diagnostico\test-coverage.log:3394:# Subtest: AS-IS captura solo los diagramas 
+vinculados y sus elementos, no todo el proyecto
+  qa-diagnostico\test-coverage.log:3415:# pass 3
+> qa-diagnostico\test-coverage.log:3416:# fail 0
+  qa-diagnostico\test-coverage.log:3417:# cancelled 0
+  qa-diagnostico\test-coverage.log:3418:# skipped 0
+  qa-diagnostico\test-coverage.log:3419:# todo 0
+  qa-diagnostico\test-coverage.log:3420:# duration_ms 1215.1579
+  qa-diagnostico\test-coverage.log:3421:
+  qa-diagnostico\test-coverage.log:3422:[NOVZI QA] 
+apps\api\src\modules\functional\functional-schemas17.unit.test.ts
+  qa-diagnostico\test-coverage.log:3423:TAP version 13
+  qa-diagnostico\test-coverage.log:3424:# Subtest: Tipos amplios de formulario: 
+tabla, lista, selecci├│n m├║ltiple, fecha y hora, imagen y moneda
+  qa-diagnostico\test-coverage.log:3463:# pass 6
+> qa-diagnostico\test-coverage.log:3464:# fail 0
+  qa-diagnostico\test-coverage.log:3465:# cancelled 0
+  qa-diagnostico\test-coverage.log:3466:# skipped 0
+  qa-diagnostico\test-coverage.log:3467:# todo 0
+  qa-diagnostico\test-coverage.log:3468:# duration_ms 1528.7953
+  qa-diagnostico\test-coverage.log:3469:
+  qa-diagnostico\test-coverage.log:3470:[NOVZI QA] 
+apps\api\src\modules\functional\functional-template-pages.unit.test.ts
+  qa-diagnostico\test-coverage.log:3471:TAP version 13
+  qa-diagnostico\test-coverage.log:3472:# Subtest: Plantillas legadas contin├║an 
+con una sola p├ígina
+  qa-diagnostico\test-coverage.log:3517:# pass 7
+> qa-diagnostico\test-coverage.log:3518:# fail 0
+  qa-diagnostico\test-coverage.log:3519:# cancelled 0
+  qa-diagnostico\test-coverage.log:3520:# skipped 0
+  qa-diagnostico\test-coverage.log:3521:# todo 0
+  qa-diagnostico\test-coverage.log:3522:# duration_ms 1677.639
+  qa-diagnostico\test-coverage.log:3523:
+  qa-diagnostico\test-coverage.log:3524:[NOVZI QA] 
+apps\api\src\modules\functional\functional.policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:3525:TAP version 13
+  qa-diagnostico\test-coverage.log:3526:# Subtest: HAL secuencial por tipo y 
+c├│digos independientes
+  qa-diagnostico\test-coverage.log:3613:# pass 14
+> qa-diagnostico\test-coverage.log:3614:# fail 0
+  qa-diagnostico\test-coverage.log:3615:# cancelled 0
+  qa-diagnostico\test-coverage.log:3616:# skipped 0
+  qa-diagnostico\test-coverage.log:3617:# todo 0
+  qa-diagnostico\test-coverage.log:3618:# duration_ms 1433.457
+  qa-diagnostico\test-coverage.log:3619:
+  qa-diagnostico\test-coverage.log:3620:[NOVZI QA] 
+apps\api\src\modules\licensing\licensing.unit.test.ts
+  qa-diagnostico\test-coverage.log:3621:TAP version 13
+  qa-diagnostico\test-coverage.log:3622:# Subtest: sin registro de licencia: imagen 
+habilitada, marca de agua obligatoria
+  qa-diagnostico\test-coverage.log:3649:# pass 4
+> qa-diagnostico\test-coverage.log:3650:# fail 0
+  qa-diagnostico\test-coverage.log:3651:# cancelled 0
+  qa-diagnostico\test-coverage.log:3652:# skipped 0
+  qa-diagnostico\test-coverage.log:3653:# todo 0
+  qa-diagnostico\test-coverage.log:3654:# duration_ms 1129.2341
+  qa-diagnostico\test-coverage.log:3655:
+  qa-diagnostico\test-coverage.log:3656:[NOVZI QA] 
+apps\api\src\modules\projects\application\projects.service.unit.test.ts
+  qa-diagnostico\test-coverage.log:3657:TAP version 13
+  qa-diagnostico\test-coverage.log:3658:# Subtest: proyecto inaccesible: todas las 
+lecturas y operaciones hist├│ricas fallan antes de consultar documentos
+  qa-diagnostico\test-coverage.log:3679:# pass 3
+> qa-diagnostico\test-coverage.log:3680:# fail 0
+  qa-diagnostico\test-coverage.log:3681:# cancelled 0
+  qa-diagnostico\test-coverage.log:3682:# skipped 0
+  qa-diagnostico\test-coverage.log:3683:# todo 0
+  qa-diagnostico\test-coverage.log:3684:# duration_ms 4266.6806
+  qa-diagnostico\test-coverage.log:3685:
+> qa-diagnostico\test-coverage.log:3686:[NOVZI QA] 
+apps\api\src\modules\projects\infrastructure\repository-failures.unit.test.ts
+  qa-diagnostico\test-coverage.log:3687:TAP version 13
+  qa-diagnostico\test-coverage.log:3688:# Subtest: repositorios: consultas sin 
+filas conservan ausencia y no fabrican resultados
+  qa-diagnostico\test-coverage.log:3689:ok 1 - repositorios: consultas sin filas 
+conservan ausencia y no fabrican resultados
+  qa-diagnostico\test-coverage.log:3690:  ---
+  qa-diagnostico\test-coverage.log:3691:  duration_ms: 1.8645
+  qa-diagnostico\test-coverage.log:3692:  type: 'test'
+  qa-diagnostico\test-coverage.log:3693:  ...
+  qa-diagnostico\test-coverage.log:3694:# Subtest: repositorios: rol presente se 
+devuelve sin elevar permisos
+  qa-diagnostico\test-coverage.log:3805:# pass 19
+> qa-diagnostico\test-coverage.log:3806:# fail 0
+  qa-diagnostico\test-coverage.log:3807:# cancelled 0
+  qa-diagnostico\test-coverage.log:3808:# skipped 0
+  qa-diagnostico\test-coverage.log:3809:# todo 0
+  qa-diagnostico\test-coverage.log:3810:# duration_ms 4243.9962
+  qa-diagnostico\test-coverage.log:3811:
+  qa-diagnostico\test-coverage.log:3812:[NOVZI QA] apps\api\src\modules\projects\inf
+rastructure\repository-security-branches.unit.test.ts
+  qa-diagnostico\test-coverage.log:3813:TAP version 13
+  qa-diagnostico\test-coverage.log:3814:# Subtest: Repositorios: listados devuelven 
+├║nicamente filas autorizadas sin fabricar metadatos
+  qa-diagnostico\test-coverage.log:3841:# pass 4
+> qa-diagnostico\test-coverage.log:3842:# fail 0
+  qa-diagnostico\test-coverage.log:3843:# cancelled 0
+  qa-diagnostico\test-coverage.log:3844:# skipped 0
+  qa-diagnostico\test-coverage.log:3845:# todo 0
+  qa-diagnostico\test-coverage.log:3846:# duration_ms 4324.733
+  qa-diagnostico\test-coverage.log:3847:
+  qa-diagnostico\test-coverage.log:3848:[NOVZI QA] 
+apps\api\src\modules\projects\presentation\member-delegation.unit.test.ts
+  qa-diagnostico\test-coverage.log:3849:TAP version 13
+  qa-diagnostico\test-coverage.log:3850:# Subtest: membres├¡a delegada: impide 
+escalamiento de privilegios
+  qa-diagnostico\test-coverage.log:3871:# pass 3
+> qa-diagnostico\test-coverage.log:3872:# fail 0
+  qa-diagnostico\test-coverage.log:3873:# cancelled 0
+  qa-diagnostico\test-coverage.log:3874:# skipped 0
+  qa-diagnostico\test-coverage.log:3875:# todo 0
+  qa-diagnostico\test-coverage.log:3876:# duration_ms 4282.9545
+  qa-diagnostico\test-coverage.log:3877:
+  qa-diagnostico\test-coverage.log:3878:[NOVZI QA] 
+apps\api\src\modules\projects\realtime\project-events.unit.test.ts
+  qa-diagnostico\test-coverage.log:3879:TAP version 13
+  qa-diagnostico\test-coverage.log:3880:# (node:36488) ExperimentalWarning: The 
+MockTimers API is an experimental feature and might change at any time
+  qa-diagnostico\test-coverage.log:3933:# pass 8
+> qa-diagnostico\test-coverage.log:3934:# fail 0
+  qa-diagnostico\test-coverage.log:3935:# cancelled 0
+  qa-diagnostico\test-coverage.log:3936:# skipped 0
+  qa-diagnostico\test-coverage.log:3937:# todo 0
+  qa-diagnostico\test-coverage.log:3938:# duration_ms 1281.0825
+  qa-diagnostico\test-coverage.log:3939:
+  qa-diagnostico\test-coverage.log:3940:[NOVZI QA] 
+apps\api\src\security\cookie.unit.test.ts
+  qa-diagnostico\test-coverage.log:3941:TAP version 13
+  qa-diagnostico\test-coverage.log:3942:# Subtest: cookie NOVZI incluye HttpOnly, 
+SameSite Lax y ruta limitada a la API
+  qa-diagnostico\test-coverage.log:3969:# pass 4
+> qa-diagnostico\test-coverage.log:3970:# fail 0
+  qa-diagnostico\test-coverage.log:3971:# cancelled 0
+  qa-diagnostico\test-coverage.log:3972:# skipped 0
+  qa-diagnostico\test-coverage.log:3973:# todo 0
+  qa-diagnostico\test-coverage.log:3974:# duration_ms 1306.058
+  qa-diagnostico\test-coverage.log:3975:
+  qa-diagnostico\test-coverage.log:3976:[NOVZI QA] 
+apps\api\src\security\project-access.unit.test.ts
+  qa-diagnostico\test-coverage.log:3977:TAP version 13
+  qa-diagnostico\test-coverage.log:3978:# Subtest: miembro del espacio sin acceso 
+expl├¡cito no puede leer proyectos
+  qa-diagnostico\test-coverage.log:3999:# pass 3
+> qa-diagnostico\test-coverage.log:4000:# fail 0
+  qa-diagnostico\test-coverage.log:4001:# cancelled 0
+  qa-diagnostico\test-coverage.log:4002:# skipped 0
+  qa-diagnostico\test-coverage.log:4003:# todo 0
+  qa-diagnostico\test-coverage.log:4004:# duration_ms 3668.7243
+  qa-diagnostico\test-coverage.log:4005:
+  qa-diagnostico\test-coverage.log:4006:[NOVZI QA] 
+apps\api\src\security\security.unit.test.ts
+  qa-diagnostico\test-coverage.log:4007:TAP version 13
+  qa-diagnostico\test-coverage.log:4008:# Subtest: contrase├▒as: hash con salt 
+individual, verificaci├│n, credencial equivocada
+  qa-diagnostico\test-coverage.log:4056:# Subtest: presets: cada permiso pertenece 
+al cat├ílogo, sin entradas duplicadas
+> qa-diagnostico\test-coverage.log:4057:not ok 9 - presets: cada permiso pertenece 
+al cat├ílogo, sin entradas duplicadas
+  qa-diagnostico\test-coverage.log:4058:  ---
+  qa-diagnostico\test-coverage.log:4059:  duration_ms: 1.1321
+  qa-diagnostico\test-coverage.log:4060:  type: 'test'
+  qa-diagnostico\test-coverage.log:4061:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\api\\src\\security\\security.unit.test.ts:49:1'
+> qa-diagnostico\test-coverage.log:4062:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:4063:  error: |-
+  qa-diagnostico\test-coverage.log:4064:    Permisos duplicados en owner
+  qa-diagnostico\test-coverage.log:4065:    
+  qa-diagnostico\test-coverage.log:4066:    431 !== 419
+  qa-diagnostico\test-coverage.log:4067:    
+  qa-diagnostico\test-coverage.log:4068:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:4069:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:4070:  expected: 419
+  qa-diagnostico\test-coverage.log:4071:  actual: 431
+  qa-diagnostico\test-coverage.log:4072:  operator: 'strictEqual'
+  qa-diagnostico\test-coverage.log:4073:  stack: |-
+  qa-diagnostico\test-coverage.log:4074:    TestContext.<anonymous> 
+(C:\Users\MSI1\Desktop\novzi\apps\api\src\security\security.unit.test.ts:52:10)
+  qa-diagnostico\test-coverage.log:4075:    Test.runInAsyncScope 
+(node:async_hooks:214:14)
+  qa-diagnostico\test-coverage.log:4076:    Test.run 
+(node:internal/test_runner/test:1047:25)
+  qa-diagnostico\test-coverage.log:4077:    Test.processPendingSubtests 
+(node:internal/test_runner/test:744:18)
+  qa-diagnostico\test-coverage.log:4085:# pass 8
+> qa-diagnostico\test-coverage.log:4086:# fail 1
+  qa-diagnostico\test-coverage.log:4087:# cancelled 0
+  qa-diagnostico\test-coverage.log:4088:# skipped 0
+  qa-diagnostico\test-coverage.log:4089:# todo 0
+  qa-diagnostico\test-coverage.log:4090:# duration_ms 5007.6084
+  qa-diagnostico\test-coverage.log:4091:[FALL├ô] 
+apps\api\src\security\security.unit.test.ts
+  qa-diagnostico\test-coverage.log:4092:
+  qa-diagnostico\test-coverage.log:4093:[NOVZI QA] 
+apps\web\src\features\editor\domain\diagram-beautify.unit.test.ts
+  qa-diagnostico\test-coverage.log:4094:TAP version 13
+  qa-diagnostico\test-coverage.log:4095:# Subtest: beautify separa cajas, preserva 
+identidades y no cambia la sem├íntica
+> qa-diagnostico\test-coverage.log:4096:not ok 1 - beautify separa cajas, preserva 
+identidades y no cambia la sem├íntica
+  qa-diagnostico\test-coverage.log:4097:  ---
+  qa-diagnostico\test-coverage.log:4098:  duration_ms: 3.8922
+  qa-diagnostico\test-coverage.log:4099:  type: 'test'
+  qa-diagnostico\test-coverage.log:4100:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\web\\src\\features\\editor\\domain\\diagram-beautify.unit.test.ts:6:1'
+> qa-diagnostico\test-coverage.log:4101:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:4102:  error: |-
+  qa-diagnostico\test-coverage.log:4103:    Values have same structure but are not 
+reference-equal:
+  qa-diagnostico\test-coverage.log:4104:    
+  qa-diagnostico\test-coverage.log:4105:    [
+  qa-diagnostico\test-coverage.log:4106:      {
+  qa-diagnostico\test-coverage.log:4107:        id: 'ab',
+  qa-diagnostico\test-coverage.log:4108:        source: 'a',
+  qa-diagnostico\test-coverage.log:4109:        sourceHandle: 'right',
+  qa-diagnostico\test-coverage.log:4110:        target: 'b',
+  qa-diagnostico\test-coverage.log:4122:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:4123:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:4124:  expected:
+  qa-diagnostico\test-coverage.log:4125:    0:
+  qa-diagnostico\test-coverage.log:4126:      id: 'ab'
+  qa-diagnostico\test-coverage.log:4127:      source: 'a'
+  qa-diagnostico\test-coverage.log:4128:      target: 'b'
+  qa-diagnostico\test-coverage.log:4129:      sourceHandle: 'right'
+  qa-diagnostico\test-coverage.log:4130:      targetHandle: 'left'
+  qa-diagnostico\test-coverage.log:4131:    1:
+  qa-diagnostico\test-coverage.log:4179:# pass 3
+> qa-diagnostico\test-coverage.log:4180:# fail 1
+  qa-diagnostico\test-coverage.log:4181:# cancelled 0
+  qa-diagnostico\test-coverage.log:4182:# skipped 0
+  qa-diagnostico\test-coverage.log:4183:# todo 0
+  qa-diagnostico\test-coverage.log:4184:# duration_ms 3661.2268
+  qa-diagnostico\test-coverage.log:4185:[FALL├ô] 
+apps\web\src\features\editor\domain\diagram-beautify.unit.test.ts
+  qa-diagnostico\test-coverage.log:4186:
+  qa-diagnostico\test-coverage.log:4187:[NOVZI QA] 
+apps\web\src\features\editor\domain\diagram-routing.ux12.unit.test.ts
+  qa-diagnostico\test-coverage.log:4188:TAP version 13
+  qa-diagnostico\test-coverage.log:4195:# Subtest: Organizar deja corredores 
+amplios, pero conserva todas las relaciones y fichas
+> qa-diagnostico\test-coverage.log:4196:not ok 2 - Organizar deja corredores 
+amplios, pero conserva todas las relaciones y fichas
+  qa-diagnostico\test-coverage.log:4197:  ---
+  qa-diagnostico\test-coverage.log:4198:  duration_ms: 3.0592
+  qa-diagnostico\test-coverage.log:4199:  type: 'test'
+  qa-diagnostico\test-coverage.log:4200:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\web\\src\\features\\editor\\domain\\diagram-routing.ux12.unit.test.ts:20:1'
+> qa-diagnostico\test-coverage.log:4201:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:4202:  error: |-
+  qa-diagnostico\test-coverage.log:4203:    Expected "actual" to be reference-equal 
+to "expected":
+  qa-diagnostico\test-coverage.log:4204:    + actual - expected
+  qa-diagnostico\test-coverage.log:4205:    
+  qa-diagnostico\test-coverage.log:4206:      [
+  qa-diagnostico\test-coverage.log:4207:        {
+  qa-diagnostico\test-coverage.log:4208:          id: '1',
+  qa-diagnostico\test-coverage.log:4209:          label: 'Requiere validaci├│n 
+manual de la relaci├│n',
+  qa-diagnostico\test-coverage.log:4210:          source: 'a',
+  qa-diagnostico\test-coverage.log:4225:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:4226:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:4227:  expected:
+  qa-diagnostico\test-coverage.log:4228:    0:
+  qa-diagnostico\test-coverage.log:4229:      id: '1'
+  qa-diagnostico\test-coverage.log:4230:      source: 'a'
+  qa-diagnostico\test-coverage.log:4231:      target: 'b'
+  qa-diagnostico\test-coverage.log:4232:      label: 'Requiere validaci├│n manual 
+de la relaci├│n'
+  qa-diagnostico\test-coverage.log:4233:    1:
+  qa-diagnostico\test-coverage.log:4234:      id: '2'
+  qa-diagnostico\test-coverage.log:4266:# pass 1
+> qa-diagnostico\test-coverage.log:4267:# fail 1
+  qa-diagnostico\test-coverage.log:4268:# cancelled 0
+  qa-diagnostico\test-coverage.log:4269:# skipped 0
+  qa-diagnostico\test-coverage.log:4270:# todo 0
+  qa-diagnostico\test-coverage.log:4271:# duration_ms 3707.8578
+  qa-diagnostico\test-coverage.log:4272:[FALL├ô] 
+apps\web\src\features\editor\domain\diagram-routing.ux12.unit.test.ts
+  qa-diagnostico\test-coverage.log:4273:
+  qa-diagnostico\test-coverage.log:4274:[NOVZI QA] 
+apps\web\src\features\editor\domain\document-commands.unit.test.ts
+  qa-diagnostico\test-coverage.log:4275:TAP version 13
+  qa-diagnostico\test-coverage.log:4339:# pass 10
+> qa-diagnostico\test-coverage.log:4340:# fail 0
+  qa-diagnostico\test-coverage.log:4341:# cancelled 0
+  qa-diagnostico\test-coverage.log:4342:# skipped 0
+  qa-diagnostico\test-coverage.log:4343:# todo 0
+  qa-diagnostico\test-coverage.log:4344:# duration_ms 4127.7762
+  qa-diagnostico\test-coverage.log:4345:
+  qa-diagnostico\test-coverage.log:4346:[NOVZI QA] 
+apps\web\src\features\editor\domain\graph-selection.unit.test.ts
+  qa-diagnostico\test-coverage.log:4347:TAP version 13
+  qa-diagnostico\test-coverage.log:4348:# Subtest: solo muestra procesos 
+seleccionados sin dependencias
+  qa-diagnostico\test-coverage.log:4393:# pass 7
+> qa-diagnostico\test-coverage.log:4394:# fail 0
+  qa-diagnostico\test-coverage.log:4395:# cancelled 0
+  qa-diagnostico\test-coverage.log:4396:# skipped 0
+  qa-diagnostico\test-coverage.log:4397:# todo 0
+  qa-diagnostico\test-coverage.log:4398:# duration_ms 3619.0457
+  qa-diagnostico\test-coverage.log:4399:
+  qa-diagnostico\test-coverage.log:4400:[NOVZI QA] 
+apps\web\src\features\editor\domain\reconnect-relation.ux.unit.test.ts
+  qa-diagnostico\test-coverage.log:4401:TAP version 13
+  qa-diagnostico\test-coverage.log:4402:# Subtest: reconexi├│n visual conserva 
+identidad, etiquetas y descripci├│n y no muta el original
+  qa-diagnostico\test-coverage.log:4429:# pass 4
+> qa-diagnostico\test-coverage.log:4430:# fail 0
+  qa-diagnostico\test-coverage.log:4431:# cancelled 0
+  qa-diagnostico\test-coverage.log:4432:# skipped 0
+  qa-diagnostico\test-coverage.log:4433:# todo 0
+  qa-diagnostico\test-coverage.log:4434:# duration_ms 3981.5002
+  qa-diagnostico\test-coverage.log:4435:
+  qa-diagnostico\test-coverage.log:4436:[NOVZI QA] 
+apps\web\src\features\editor\uml\RelationModalUx.unit.test.ts
+  qa-diagnostico\test-coverage.log:4437:TAP version 13
+  qa-diagnostico\test-coverage.log:4438:# Subtest: modal UML permite cambiar 
+destino sin borrar relaci├│n, con control accesible
+  qa-diagnostico\test-coverage.log:4447:# pass 1
+> qa-diagnostico\test-coverage.log:4448:# fail 0
+  qa-diagnostico\test-coverage.log:4449:# cancelled 0
+  qa-diagnostico\test-coverage.log:4450:# skipped 0
+  qa-diagnostico\test-coverage.log:4451:# todo 0
+  qa-diagnostico\test-coverage.log:4452:# duration_ms 5386.4319
+  qa-diagnostico\test-coverage.log:4453:
+  qa-diagnostico\test-coverage.log:4454:[NOVZI QA] 
+apps\web\src\shared\api\http.unit.test.ts
+  qa-diagnostico\test-coverage.log:4455:TAP version 13
+  qa-diagnostico\test-coverage.log:4456:# Subtest: cliente HTTP: GET env├¡a cookies 
+y no env├¡a CSRF
+  qa-diagnostico\test-coverage.log:4483:# pass 4
+> qa-diagnostico\test-coverage.log:4484:# fail 0
+  qa-diagnostico\test-coverage.log:4485:# cancelled 0
+  qa-diagnostico\test-coverage.log:4486:# skipped 0
+  qa-diagnostico\test-coverage.log:4487:# todo 0
+  qa-diagnostico\test-coverage.log:4488:# duration_ms 1243.0804
+  qa-diagnostico\test-coverage.log:4489:
+  qa-diagnostico\test-coverage.log:4490:[NOVZI QA] 
+packages\contracts\src\collaboration.unit.test.ts
+  qa-diagnostico\test-coverage.log:4491:TAP version 13
+  qa-diagnostico\test-coverage.log:4492:# Subtest: colaboraci├│n: ediciones 
+simult├íneas en C1 y C2 se fusionan, sin pisarse
+  qa-diagnostico\test-coverage.log:4561:# pass 11
+> qa-diagnostico\test-coverage.log:4562:# fail 0
+  qa-diagnostico\test-coverage.log:4563:# cancelled 0
+  qa-diagnostico\test-coverage.log:4564:# skipped 0
+  qa-diagnostico\test-coverage.log:4565:# todo 0
+  qa-diagnostico\test-coverage.log:4566:# duration_ms 3659.7019
+  qa-diagnostico\test-coverage.log:4567:
+  qa-diagnostico\test-coverage.log:4568:[NOVZI QA] 
+packages\contracts\src\contracts.unit.test.ts
+  qa-diagnostico\test-coverage.log:4569:TAP version 13
+  qa-diagnostico\test-coverage.log:4570:# Subtest: documento inicial y fixture son 
+v├ílidos y serializables
+  qa-diagnostico\test-coverage.log:4597:# pass 4
+> qa-diagnostico\test-coverage.log:4598:# fail 0
+  qa-diagnostico\test-coverage.log:4599:# cancelled 0
+  qa-diagnostico\test-coverage.log:4600:# skipped 0
+  qa-diagnostico\test-coverage.log:4601:# todo 0
+  qa-diagnostico\test-coverage.log:4602:# duration_ms 3683.553
+  qa-diagnostico\test-coverage.log:4603:
+  qa-diagnostico\test-coverage.log:4604:[NOVZI QA] 
+packages\contracts\src\coverage-deployment-notation-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:4605:TAP version 13
+  qa-diagnostico\test-coverage.log:4606:# Subtest: Notaci├│n: palabras reservadas y 
+relaciones sin etiqueta hist├│rica no admiten t├¡tulos libres de usuario
+  qa-diagnostico\test-coverage.log:4645:# pass 6
+> qa-diagnostico\test-coverage.log:4646:# fail 0
+  qa-diagnostico\test-coverage.log:4647:# cancelled 0
+  qa-diagnostico\test-coverage.log:4648:# skipped 0
+  qa-diagnostico\test-coverage.log:4649:# todo 0
+  qa-diagnostico\test-coverage.log:4650:# duration_ms 3580.7862
+  qa-diagnostico\test-coverage.log:4651:
+  qa-diagnostico\test-coverage.log:4652:[NOVZI QA] 
+packages\contracts\src\coverage-geometry.unit.test.ts
+  qa-diagnostico\test-coverage.log:4653:TAP version 13
+  qa-diagnostico\test-coverage.log:4654:# Subtest: tama├▒os m├¡nimos protegidos 
+para puertos, par├ímetros, invariantes y regiones
+  qa-diagnostico\test-coverage.log:4693:# pass 6
+> qa-diagnostico\test-coverage.log:4694:# fail 0
+  qa-diagnostico\test-coverage.log:4695:# cancelled 0
+  qa-diagnostico\test-coverage.log:4696:# skipped 0
+  qa-diagnostico\test-coverage.log:4697:# todo 0
+  qa-diagnostico\test-coverage.log:4698:# duration_ms 3617.2513
+  qa-diagnostico\test-coverage.log:4699:
+  qa-diagnostico\test-coverage.log:4700:[NOVZI QA] 
+packages\contracts\src\coverage-label-geometry-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:4701:TAP version 13
+  qa-diagnostico\test-coverage.log:4702:# Subtest: Notaci├│n UML: alias de clase y 
+par├ímetros tipados resuelven fichas existentes y faltantes sin mutar modelo
+  qa-diagnostico\test-coverage.log:4735:# pass 5
+> qa-diagnostico\test-coverage.log:4736:# fail 0
+  qa-diagnostico\test-coverage.log:4737:# cancelled 0
+  qa-diagnostico\test-coverage.log:4738:# skipped 0
+  qa-diagnostico\test-coverage.log:4739:# todo 0
+  qa-diagnostico\test-coverage.log:4740:# duration_ms 3897.4587
+  qa-diagnostico\test-coverage.log:4741:
+  qa-diagnostico\test-coverage.log:4742:[NOVZI QA] 
+packages\contracts\src\coverage-model.unit.test.ts
+  qa-diagnostico\test-coverage.log:4743:TAP version 13
+  qa-diagnostico\test-coverage.log:4744:# Subtest: Deployment: recursos de tipo e 
+instancia conservan anclajes definidos por el contorno visible
+  qa-diagnostico\test-coverage.log:4801:# pass 9
+> qa-diagnostico\test-coverage.log:4802:# fail 0
+  qa-diagnostico\test-coverage.log:4803:# cancelled 0
+  qa-diagnostico\test-coverage.log:4804:# skipped 0
+  qa-diagnostico\test-coverage.log:4805:# todo 0
+  qa-diagnostico\test-coverage.log:4806:# duration_ms 3729.3101
+  qa-diagnostico\test-coverage.log:4807:
+  qa-diagnostico\test-coverage.log:4808:[NOVZI QA] 
+packages\contracts\src\coverage-notation-scenes.unit.test.ts
+  qa-diagnostico\test-coverage.log:4809:TAP version 13
+  qa-diagnostico\test-coverage.log:4810:# Subtest: Ensamblaje: ruta recta larga 
+prioriza tramo estable, curvas mantienen punto y tangente
+  qa-diagnostico\test-coverage.log:4849:# pass 6
+> qa-diagnostico\test-coverage.log:4850:# fail 0
+  qa-diagnostico\test-coverage.log:4851:# cancelled 0
+  qa-diagnostico\test-coverage.log:4852:# skipped 0
+  qa-diagnostico\test-coverage.log:4853:# todo 0
+  qa-diagnostico\test-coverage.log:4854:# duration_ms 3713.8904
+  qa-diagnostico\test-coverage.log:4855:
+  qa-diagnostico\test-coverage.log:4856:[NOVZI QA] 
+packages\contracts\src\coverage-policy-boundaries.unit.test.ts
+  qa-diagnostico\test-coverage.log:4857:TAP version 13
+  qa-diagnostico\test-coverage.log:4858:# Subtest: Notaci├│n UML: relaci├│n 
+prohibida conserva historial y la correcci├│n can├│nica preserva identidad y 
+descripci├│n
+  qa-diagnostico\test-coverage.log:4939:# pass 13
+> qa-diagnostico\test-coverage.log:4940:# fail 0
+  qa-diagnostico\test-coverage.log:4941:# cancelled 0
+  qa-diagnostico\test-coverage.log:4942:# skipped 0
+  qa-diagnostico\test-coverage.log:4943:# todo 0
+  qa-diagnostico\test-coverage.log:4944:# duration_ms 3674.0675
+  qa-diagnostico\test-coverage.log:4945:
+  qa-diagnostico\test-coverage.log:4946:[NOVZI QA] 
+packages\contracts\src\document-validation.unit.test.ts
+  qa-diagnostico\test-coverage.log:4947:TAP version 13
+  qa-diagnostico\test-coverage.log:4948:# Subtest: validaci├│n JSON admite 
+dimensiones, filtros y relaciones v├ílidos y rechaza cada tipo de corrupci├│n
+  qa-diagnostico\test-coverage.log:4963:# pass 2
+> qa-diagnostico\test-coverage.log:4964:# fail 0
+  qa-diagnostico\test-coverage.log:4965:# cancelled 0
+  qa-diagnostico\test-coverage.log:4966:# skipped 0
+  qa-diagnostico\test-coverage.log:4967:# todo 0
+  qa-diagnostico\test-coverage.log:4968:# duration_ms 3677.0267
+  qa-diagnostico\test-coverage.log:4969:
+  qa-diagnostico\test-coverage.log:4970:[NOVZI QA] 
+packages\contracts\src\permissions-labels.unit.test.ts
+  qa-diagnostico\test-coverage.log:4971:TAP version 13
+  qa-diagnostico\test-coverage.log:4972:# Subtest: el cat├ílogo de permisos tiene 
+etiquetas legibles y no duplica claves
+> qa-diagnostico\test-coverage.log:4973:not ok 1 - el cat├ílogo de permisos tiene 
+etiquetas legibles y no duplica claves
+  qa-diagnostico\test-coverage.log:4974:  ---
+  qa-diagnostico\test-coverage.log:4975:  duration_ms: 2.1121
+  qa-diagnostico\test-coverage.log:4976:  type: 'test'
+  qa-diagnostico\test-coverage.log:4977:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\packages\\contracts\\src\\permissions-labels.unit.test.ts:4:1'
+> qa-diagnostico\test-coverage.log:4978:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-coverage.log:4979:  error: |-
+  qa-diagnostico\test-coverage.log:4980:    Expected values to be strictly equal:
+  qa-diagnostico\test-coverage.log:4981:    
+  qa-diagnostico\test-coverage.log:4982:    419 !== 431
+  qa-diagnostico\test-coverage.log:4983:    
+  qa-diagnostico\test-coverage.log:4984:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-coverage.log:4985:  name: 'AssertionError'
+  qa-diagnostico\test-coverage.log:4986:  expected: 431
+  qa-diagnostico\test-coverage.log:4987:  actual: 419
+  qa-diagnostico\test-coverage.log:4988:  operator: 'strictEqual'
+  qa-diagnostico\test-coverage.log:4989:  stack: |-
+  qa-diagnostico\test-coverage.log:4990:    TestContext.<anonymous> (C:\Users\MSI1\D
+esktop\novzi\packages\contracts\src\permissions-labels.unit.test.ts:5:9)
+  qa-diagnostico\test-coverage.log:4991:    Test.runInAsyncScope 
+(node:async_hooks:214:14)
+  qa-diagnostico\test-coverage.log:4992:    Test.run 
+(node:internal/test_runner/test:1047:25)
+  qa-diagnostico\test-coverage.log:4993:    Test.start 
+(node:internal/test_runner/test:944:17)
+  qa-diagnostico\test-coverage.log:5005:# pass 1
+> qa-diagnostico\test-coverage.log:5006:# fail 1
+  qa-diagnostico\test-coverage.log:5007:# cancelled 0
+  qa-diagnostico\test-coverage.log:5008:# skipped 0
+  qa-diagnostico\test-coverage.log:5009:# todo 0
+  qa-diagnostico\test-coverage.log:5010:# duration_ms 1207.0889
+  qa-diagnostico\test-coverage.log:5011:[FALL├ô] 
+packages\contracts\src\permissions-labels.unit.test.ts
+  qa-diagnostico\test-coverage.log:5012:
+  qa-diagnostico\test-coverage.log:5013:[NOVZI QA] 
+packages\contracts\src\uml-activity-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:5014:TAP version 13
+  qa-diagnostico\test-coverage.log:5162:# pass 24
+> qa-diagnostico\test-coverage.log:5163:# fail 0
+  qa-diagnostico\test-coverage.log:5164:# cancelled 0
+  qa-diagnostico\test-coverage.log:5165:# skipped 0
+  qa-diagnostico\test-coverage.log:5166:# todo 0
+  qa-diagnostico\test-coverage.log:5167:# duration_ms 3735.2728
+  qa-diagnostico\test-coverage.log:5168:
+  qa-diagnostico\test-coverage.log:5169:[NOVZI QA] 
+packages\contracts\src\uml-class-audit.unit.test.ts
+  qa-diagnostico\test-coverage.log:5170:TAP version 13
+  qa-diagnostico\test-coverage.log:5171:# Subtest: AUD-CL-001 attribute: solo 
+clasificadores existentes
+  qa-diagnostico\test-coverage.log:5540:# pass 61
+> qa-diagnostico\test-coverage.log:5541:# fail 0
+  qa-diagnostico\test-coverage.log:5542:# cancelled 0
+  qa-diagnostico\test-coverage.log:5543:# skipped 0
+  qa-diagnostico\test-coverage.log:5544:# todo 0
+  qa-diagnostico\test-coverage.log:5545:# duration_ms 3848.9209
+  qa-diagnostico\test-coverage.log:5546:
+  qa-diagnostico\test-coverage.log:5547:[NOVZI QA] 
+packages\contracts\src\uml-class-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:5548:TAP version 13
+  qa-diagnostico\test-coverage.log:5549:# Subtest: T01 cat├ílogo completo, 
+roundtrip de cada tipo y capacidades espec├¡ficas
+  qa-diagnostico\test-coverage.log:5732:# pass 30
+> qa-diagnostico\test-coverage.log:5733:# fail 0
+  qa-diagnostico\test-coverage.log:5734:# cancelled 0
+  qa-diagnostico\test-coverage.log:5735:# skipped 0
+  qa-diagnostico\test-coverage.log:5736:# todo 0
+  qa-diagnostico\test-coverage.log:5737:# duration_ms 3830.2153
+  qa-diagnostico\test-coverage.log:5738:
+  qa-diagnostico\test-coverage.log:5739:[NOVZI QA] 
+packages\contracts\src\uml-component-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:5740:TAP version 13
+  qa-diagnostico\test-coverage.log:5741:# Subtest: CMP-T01/T09 fixture 
+NOVZI_QA_UML_COMPONENTES.json
+  qa-diagnostico\test-coverage.log:6104:# pass 60
+> qa-diagnostico\test-coverage.log:6105:# fail 0
+  qa-diagnostico\test-coverage.log:6106:# cancelled 0
+  qa-diagnostico\test-coverage.log:6107:# skipped 0
+  qa-diagnostico\test-coverage.log:6108:# todo 0
+  qa-diagnostico\test-coverage.log:6109:# duration_ms 4207.0149
+  qa-diagnostico\test-coverage.log:6110:
+  qa-diagnostico\test-coverage.log:6111:[NOVZI QA] 
+packages\contracts\src\uml-deployment-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:6112:TAP version 13
+  qa-diagnostico\test-coverage.log:6113:# Subtest: DEP-01 a 06 fixture 
+autocontenido integral
+  qa-diagnostico\test-coverage.log:6464:# pass 58
+> qa-diagnostico\test-coverage.log:6465:# fail 0
+  qa-diagnostico\test-coverage.log:6466:# cancelled 0
+  qa-diagnostico\test-coverage.log:6467:# skipped 0
+  qa-diagnostico\test-coverage.log:6468:# todo 0
+  qa-diagnostico\test-coverage.log:6469:# duration_ms 4250.1526
+  qa-diagnostico\test-coverage.log:6470:
+  qa-diagnostico\test-coverage.log:6471:[NOVZI QA] 
+packages\contracts\src\uml-quality.unit.test.ts
+  qa-diagnostico\test-coverage.log:6472:TAP version 13
+  qa-diagnostico\test-coverage.log:6473:# Subtest: dimensiones de los s├¡mbolos, 
+contenedores y cajas conservan sus m├¡nimos y tama├▒os expl├¡citos
+  qa-diagnostico\test-coverage.log:6536:# pass 10
+> qa-diagnostico\test-coverage.log:6537:# fail 0
+  qa-diagnostico\test-coverage.log:6538:# cancelled 0
+  qa-diagnostico\test-coverage.log:6539:# skipped 0
+  qa-diagnostico\test-coverage.log:6540:# todo 0
+  qa-diagnostico\test-coverage.log:6541:# duration_ms 3959.3291
+  qa-diagnostico\test-coverage.log:6542:
+  qa-diagnostico\test-coverage.log:6543:[NOVZI QA] 
+packages\contracts\src\uml-sequence-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:6544:TAP version 13
+  qa-diagnostico\test-coverage.log:6545:# Subtest: SEQ-T01 cat├ílogo nativo exacto, 
+sin caja de mensaje ni actor duplicado
+  qa-diagnostico\test-coverage.log:6974:# pass 71
+> qa-diagnostico\test-coverage.log:6975:# fail 0
+  qa-diagnostico\test-coverage.log:6976:# cancelled 0
+  qa-diagnostico\test-coverage.log:6977:# skipped 0
+  qa-diagnostico\test-coverage.log:6978:# todo 0
+  qa-diagnostico\test-coverage.log:6979:# duration_ms 5003.1996
+  qa-diagnostico\test-coverage.log:6980:
+  qa-diagnostico\test-coverage.log:6981:[NOVZI QA] 
+packages\contracts\src\uml-usecase-policy.unit.test.ts
+  qa-diagnostico\test-coverage.log:6982:TAP version 13
+  qa-diagnostico\test-coverage.log:6983:# Subtest: T01 creaci├│n solo seis UML y 
+diagramas NOVZI; cat├ílogo hist├│rico conserva tipos
+  qa-diagnostico\test-coverage.log:7100:# pass 19
+> qa-diagnostico\test-coverage.log:7101:# fail 0
+  qa-diagnostico\test-coverage.log:7102:# cancelled 0
+  qa-diagnostico\test-coverage.log:7103:# skipped 0
+  qa-diagnostico\test-coverage.log:7104:# todo 0
+  qa-diagnostico\test-coverage.log:7105:# duration_ms 3739.2063
+  qa-diagnostico\test-coverage.log:7106:[NOVZI COVERAGE] Fase unit fall├│ (estado 
+1, se├▒al ninguna). Conserva el primer 
+  qa-diagnostico\test-coverage.log:7107:error.
+  qa-diagnostico\test-coverage.log:7108:
+  qa-diagnostico\test-coverage.log:7109:[NOVZI COVERAGE] Fase integration: 
+ejecuci├│n bajo un mismo recolector V8
+  qa-diagnostico\test-coverage.log:7131:# Subtest: 
+C:\\Users\\MSI1\\Desktop\\novzi\\apps\\api\\src\\tests\\api.integration.test.ts
+> qa-diagnostico\test-coverage.log:7132:not ok 1 - 
+C:\\Users\\MSI1\\Desktop\\novzi\\apps\\api\\src\\tests\\api.integration.test.ts
+  qa-diagnostico\test-coverage.log:7133:  ---
+  qa-diagnostico\test-coverage.log:7134:  duration_ms: 4895.4604
+  qa-diagnostico\test-coverage.log:7135:  type: 'test'
+  qa-diagnostico\test-coverage.log:7136:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\api\\src\\tests\\api.integration.test.ts:1:1'
+> qa-diagnostico\test-coverage.log:7137:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-coverage.log:7138:  exitCode: 1
+  qa-diagnostico\test-coverage.log:7139:  signal: ~
+> qa-diagnostico\test-coverage.log:7140:  error: 'test failed'
+> qa-diagnostico\test-coverage.log:7141:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-coverage.log:7142:  ...
+  qa-diagnostico\test-coverage.log:7143:1..1
+  qa-diagnostico\test-coverage.log:7144:# tests 1
+  qa-diagnostico\test-coverage.log:7145:# suites 0
+  qa-diagnostico\test-coverage.log:7146:# pass 0
+> qa-diagnostico\test-coverage.log:7147:# fail 1
+  qa-diagnostico\test-coverage.log:7148:# cancelled 0
+  qa-diagnostico\test-coverage.log:7149:# skipped 0
+  qa-diagnostico\test-coverage.log:7150:# todo 0
+  qa-diagnostico\test-coverage.log:7151:# duration_ms 4911.7312
+  qa-diagnostico\test-coverage.log:7152:[FALL├ô] 
+apps\api\src\tests\api.integration.test.ts
+  qa-diagnostico\test-coverage.log:7153:
+  qa-diagnostico\test-coverage.log:7154:[NOVZI QA] 
+apps\api\src\tests\integration.test.ts
+  qa-diagnostico\test-coverage.log:7155:TAP version 13
+  qa-diagnostico\test-coverage.log:7165:# pass 1
+> qa-diagnostico\test-coverage.log:7166:# fail 0
+  qa-diagnostico\test-coverage.log:7167:# cancelled 0
+  qa-diagnostico\test-coverage.log:7168:# skipped 0
+  qa-diagnostico\test-coverage.log:7169:# todo 0
+  qa-diagnostico\test-coverage.log:7170:# duration_ms 5165.7705
+  qa-diagnostico\test-coverage.log:7171:
+  qa-diagnostico\test-coverage.log:7172:[NOVZI QA] 
+apps\api\src\tests\uml-scoped.integration.test.ts
+  qa-diagnostico\test-coverage.log:7173:TAP version 13
+  qa-diagnostico\test-coverage.log:7174:# (node:23144) 
+[MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of 
+file:///C:/Users/MSI1/Desktop/novzi/qa/uml-scoped-fixtures.ts is not specified and 
+it doesn't parse as CommonJS.
+  qa-diagnostico\test-coverage.log:7194:# Subtest: C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\tests\\uml-scoped.integration.test.ts
+> qa-diagnostico\test-coverage.log:7195:not ok 1 - C:\\Users\\MSI1\\Desktop\\novzi\\
+apps\\api\\src\\tests\\uml-scoped.integration.test.ts
+  qa-diagnostico\test-coverage.log:7196:  ---
+  qa-diagnostico\test-coverage.log:7197:  duration_ms: 4765.4989
+  qa-diagnostico\test-coverage.log:7198:  type: 'test'
+  qa-diagnostico\test-coverage.log:7199:  location: 'C:\\Users\\MSI1\\Desktop\\novzi
+\\apps\\api\\src\\tests\\uml-scoped.integration.test.ts:1:1'
+> qa-diagnostico\test-coverage.log:7200:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-coverage.log:7201:  exitCode: 1
+  qa-diagnostico\test-coverage.log:7202:  signal: ~
+> qa-diagnostico\test-coverage.log:7203:  error: 'test failed'
+> qa-diagnostico\test-coverage.log:7204:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-coverage.log:7205:  ...
+  qa-diagnostico\test-coverage.log:7206:1..1
+  qa-diagnostico\test-coverage.log:7207:# tests 1
+  qa-diagnostico\test-coverage.log:7208:# suites 0
+  qa-diagnostico\test-coverage.log:7209:# pass 0
+> qa-diagnostico\test-coverage.log:7210:# fail 1
+  qa-diagnostico\test-coverage.log:7211:# cancelled 0
+  qa-diagnostico\test-coverage.log:7212:# skipped 0
+  qa-diagnostico\test-coverage.log:7213:# todo 0
+  qa-diagnostico\test-coverage.log:7214:# duration_ms 4779.7504
+  qa-diagnostico\test-coverage.log:7215:[FALL├ô] 
+apps\api\src\tests\uml-scoped.integration.test.ts
+  qa-diagnostico\test-coverage.log:7216:[NOVZI COVERAGE] Fase integration fall├│ 
+(estado 1, se├▒al ninguna). Conserva el 
+  qa-diagnostico\test-coverage.log:7217:primer error.
+  qa-diagnostico\test-coverage.log:7218:
+  qa-diagnostico\test-coverage.log:7250:
+> qa-diagnostico\test-coverage.log:7251:AssertionError [ERR_ASSERTION]: bootstrap 
+sin credenciales: resultado inesperado
+  qa-diagnostico\test-coverage.log:7252:    at cmd 
+  qa-diagnostico\test-coverage.log:7253:(file:///C:/Users/MSI1/Desktop/novzi/scripts
+/coverage-operational.mjs:37:27)
+  qa-diagnostico\test-coverage.log:7254:    at 
+file:///C:/Users/MSI1/Desktop/novzi/scripts/coverage-operational.mjs:87:1
+  qa-diagnostico\test-coverage.log:7255:    at ModuleJob.run 
+(node:internal/modules/esm/module_job:343:25)
+  qa-diagnostico\test-coverage.log:7256:    at async 
+onImport.tracePromise.__proto__ 
+  qa-diagnostico\test-coverage.log:7257:(node:internal/modules/esm/loader:647:26)
+  qa-diagnostico\test-coverage.log:7258:    at async 
+asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) 
+  qa-diagnostico\test-coverage.log:7259:{
+  qa-diagnostico\test-e2e-local.log:81:
+> qa-diagnostico\test-e2e-local.log:82:    Error: 
+expect(locator).toHaveValue(expected) failed
+  qa-diagnostico\test-e2e-local.log:83:
+  qa-diagnostico\test-e2e-local.log:84:    Locator:  getByLabel('Descripci├│n')
+  qa-diagnostico\test-e2e-local.log:85:    Expected: "Edici├│n A 1795030929319"
+  qa-diagnostico\test-e2e-local.log:86:    Received: "Edici├│n B 1795030930717"
+  qa-diagnostico\test-e2e-local.log:87:    Timeout:  12000ms
+  qa-diagnostico\test-e2e-local.log:88:
+  qa-diagnostico\test-e2e-local.log:89:    Call log:
+  qa-diagnostico\test-e2e-local.log:90:      - Expect "toHaveValue" 
+getByLabel('Descripci├│n') with timeout 12000ms
+  qa-diagnostico\test-e2e-local.log:105:    attachment #1: screenshot (image/png) Ôö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇ
+> qa-diagnostico\test-e2e-local.log:106:    test-results\e2e-batches\batch-01\artifa
+cts\collaboration-dos-usuarios-ea513--y-el-rol-limitado-no-ve-C3-chromium\test-faile
+d-1.png
+  qa-diagnostico\test-e2e-local.log:107:    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  qa-diagnostico\test-e2e-local.log:108:
+  qa-diagnostico\test-e2e-local.log:109:    attachment #2: screenshot (image/png) Ôö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇ
+> qa-diagnostico\test-e2e-local.log:110:    test-results\e2e-batches\batch-01\artifa
+cts\collaboration-dos-usuarios-ea513--y-el-rol-limitado-no-ve-C3-chromium\test-faile
+d-2.png
+  qa-diagnostico\test-e2e-local.log:111:    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  qa-diagnostico\test-e2e-local.log:112:
+  qa-diagnostico\test-e2e-local.log:113:    Error Context: test-results\e2e-batches\
+batch-01\artifacts\collaboration-dos-usuarios-ea513--y-el-rol-limitado-no-ve-C3-chro
+mium\error-context.md
+  qa-diagnostico\test-e2e-local.log:114:
+  qa-diagnostico\test-e2e-local.log:115:    attachment #4: trace (application/zip) Ô
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇ
+  qa-diagnostico\test-e2e-local.log:116:    test-results\e2e-batches\batch-01\artifa
+cts\collaboration-dos-usuarios-ea513--y-el-rol-limitado-no-ve-C3-chromium\trace.zip
+  qa-diagnostico\test-e2e-local.log:117:    Usage:
+  qa-diagnostico\test-e2e-local.log:118:
+  qa-diagnostico\test-e2e-local.log:122:
+> qa-diagnostico\test-e2e-local.log:123:  1 failed
+  qa-diagnostico\test-e2e-local.log:124:    [chromium] ÔÇ║ 
+tests\e2e\collaboration.spec.ts:14:1 ÔÇ║ dos usuarios diferentes: cambios 
+independientes sobreviven y el rol limitado no ve C3 
+  qa-diagnostico\test-e2e-local.log:125:
+  qa-diagnostico\test-e2e-local.log:126:To open last HTML report run:
+  qa-diagnostico\test-e2e-local.log:127:[36m[39m
+  qa-diagnostico\test-e2e-local.log:128:[36m  npx playwright show-report 
+test-results\e2e-batches\batch-01\html[39m
+  qa-diagnostico\test-e2e-local.log:129:[36m[39m
+  qa-diagnostico\test-e2e-local.log:130:
+  qa-diagnostico\test-e2e-local.log:131:[NOVZI QA] batch-02: 4 pruebas; servidor 
+real independiente
+  qa-diagnostico\test-e2e-local.log:170:
+> qa-diagnostico\test-e2e-local.log:171:    Error: expect(locator).toBeVisible() 
+failed
+  qa-diagnostico\test-e2e-local.log:172:
+  qa-diagnostico\test-e2e-local.log:173:    Locator: getByRole('heading', { name: 
+/C2 ┬À Contenedores/ })
+  qa-diagnostico\test-e2e-local.log:174:    Expected: visible
+  qa-diagnostico\test-e2e-local.log:175:    Timeout: 12000ms
+> qa-diagnostico\test-e2e-local.log:176:    Error: element(s) not found
+  qa-diagnostico\test-e2e-local.log:177:
+  qa-diagnostico\test-e2e-local.log:178:    Call log:
+  qa-diagnostico\test-e2e-local.log:179:      - Expect "toBeVisible" 
+getByRole('heading', { name: /C2 ┬À Contenedores/ }) with timeout 12000ms
+  qa-diagnostico\test-e2e-local.log:180:      - waiting for getByRole('heading', { 
+name: /C2 ┬À Contenedores/ })
+  qa-diagnostico\test-e2e-local.log:181:
+  qa-diagnostico\test-e2e-local.log:182:
+  qa-diagnostico\test-e2e-local.log:183:      45 |  await 
+expect(page.getByRole('heading',{name:/C1 ┬À Contexto/})).toBeVisible()
+  qa-diagnostico\test-e2e-local.log:184:      46 |  await 
+page.getByRole('button',{name:/C2 ┬À Contenedores/}).first().click()
+  qa-diagnostico\test-e2e-local.log:192:    attachment #1: screenshot (image/png) Ôö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇ
+> qa-diagnostico\test-e2e-local.log:193:    test-results\e2e-batches\batch-04\artifa
+cts\novzi-login-v├ílido-C1-y-navegaci├│n-entre-vistas-ya-guardadas-chromium\test-fai
+led-1.png
+  qa-diagnostico\test-e2e-local.log:194:    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  qa-diagnostico\test-e2e-local.log:195:
+  qa-diagnostico\test-e2e-local.log:196:    Error Context: test-results\e2e-batches\
+batch-04\artifacts\novzi-login-v├ílido-C1-y-navegaci├│n-entre-vistas-ya-guardadas-ch
+romium\error-context.md
+  qa-diagnostico\test-e2e-local.log:197:
+  qa-diagnostico\test-e2e-local.log:198:    attachment #3: trace (application/zip) Ô
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇ
+  qa-diagnostico\test-e2e-local.log:199:    test-results\e2e-batches\batch-04\artifa
+cts\novzi-login-v├ílido-C1-y-navegaci├│n-entre-vistas-ya-guardadas-chromium\trace.zi
+p
+  qa-diagnostico\test-e2e-local.log:200:    Usage:
+  qa-diagnostico\test-e2e-local.log:201:
+  qa-diagnostico\test-e2e-local.log:207:
+> qa-diagnostico\test-e2e-local.log:208:    Test timeout of 45000ms exceeded.
+  qa-diagnostico\test-e2e-local.log:209:
+> qa-diagnostico\test-e2e-local.log:210:    Error: locator.click: Test timeout of 
+45000ms exceeded.
+  qa-diagnostico\test-e2e-local.log:211:    Call log:
+  qa-diagnostico\test-e2e-local.log:212:      - waiting for getByRole('button', { 
+name: 'QA Proceso 1795030993284' }).first()
+  qa-diagnostico\test-e2e-local.log:213:
+  qa-diagnostico\test-e2e-local.log:214:
+  qa-diagnostico\test-e2e-local.log:215:      69 |  await page.reload()
+  qa-diagnostico\test-e2e-local.log:216:      70 |  await openQaDemo(page)
+  qa-diagnostico\test-e2e-local.log:217:    > 71 |  await 
+page.getByRole('button',{name}).first().click()
+  qa-diagnostico\test-e2e-local.log:218:         |                                  
+              ^
+  qa-diagnostico\test-e2e-local.log:224:    attachment #1: screenshot (image/png) Ôö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇ
+> qa-diagnostico\test-e2e-local.log:225:    test-results\e2e-batches\batch-04\artifa
+cts\novzi-crear-diagrama-y-caj-81250--ficha-y-comprobar-guardado-chromium\test-faile
+d-1.png
+  qa-diagnostico\test-e2e-local.log:226:    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  qa-diagnostico\test-e2e-local.log:227:
+  qa-diagnostico\test-e2e-local.log:228:    Error Context: test-results\e2e-batches\
+batch-04\artifacts\novzi-crear-diagrama-y-caj-81250--ficha-y-comprobar-guardado-chro
+mium\error-context.md
+  qa-diagnostico\test-e2e-local.log:229:
+  qa-diagnostico\test-e2e-local.log:230:    attachment #3: trace (application/zip) Ô
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇ
+  qa-diagnostico\test-e2e-local.log:231:    test-results\e2e-batches\batch-04\artifa
+cts\novzi-crear-diagrama-y-caj-81250--ficha-y-comprobar-guardado-chromium\trace.zip
+  qa-diagnostico\test-e2e-local.log:232:    Usage:
+  qa-diagnostico\test-e2e-local.log:233:
+  qa-diagnostico\test-e2e-local.log:237:
+> qa-diagnostico\test-e2e-local.log:238:  2 failed
+  qa-diagnostico\test-e2e-local.log:239:    [chromium] ÔÇ║ 
+tests\e2e\novzi.spec.ts:40:1 ÔÇ║ login v├ílido, C1 y navegaci├│n entre vistas ya 
+guardadas 
+  qa-diagnostico\test-e2e-local.log:240:    [chromium] ÔÇ║ 
+tests\e2e\novzi.spec.ts:49:1 ÔÇ║ crear diagrama y caja, actualizar ficha y 
+comprobar guardado 
+  qa-diagnostico\test-e2e-local.log:241:  1 passed (1.2m)
+  qa-diagnostico\test-e2e-local.log:242:
+  qa-diagnostico\test-e2e-local.log:243:To open last HTML report run:
+  qa-diagnostico\test-e2e-local.log:244:[36m[39m
+  qa-diagnostico\test-e2e-local.log:245:[36m  npx playwright show-report 
+test-results\e2e-batches\batch-04\html[39m
+  qa-diagnostico\test-e2e-local.log:246:[36m[39m
+  qa-diagnostico\test-e2e-local.log:270:
+> qa-diagnostico\test-e2e-local.log:271:    Test timeout of 90000ms exceeded.
+  qa-diagnostico\test-e2e-local.log:272:
+> qa-diagnostico\test-e2e-local.log:273:    Error: locator.click: Test timeout of 
+90000ms exceeded.
+  qa-diagnostico\test-e2e-local.log:274:    Call log:
+  qa-diagnostico\test-e2e-local.log:275:      - waiting for getByRole('button', { 
+name: /Estados QA real/ })
+  qa-diagnostico\test-e2e-local.log:276:
+  qa-diagnostico\test-e2e-local.log:277:
+  qa-diagnostico\test-e2e-local.log:278:      152 |  await 
+page.getByRole('button',{name:/Secuencia QA real/}).click()
+  qa-diagnostico\test-e2e-local.log:279:      153 |  await 
+expect(page.locator('.react-flow__edge')).toHaveCount(3)
+  qa-diagnostico\test-e2e-local.log:280:    > 154 |  await 
+page.getByRole('button',{name:/Estados QA real/}).click()
+  qa-diagnostico\test-e2e-local.log:281:          |                                 
+                         ^
+  qa-diagnostico\test-e2e-local.log:287:    attachment #1: screenshot (image/png) Ôö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö
+ÇÔöÇ
+> qa-diagnostico\test-e2e-local.log:288:    test-results\e2e-batches\batch-06\artifa
+cts\novzi-UML-en-Chromium-mens-28847-tencia-y-s├¡mbolos-de-estado-chromium\test-fail
+ed-1.png
+  qa-diagnostico\test-e2e-local.log:289:    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  qa-diagnostico\test-e2e-local.log:290:
+  qa-diagnostico\test-e2e-local.log:291:    Error Context: test-results\e2e-batches\
+batch-06\artifacts\novzi-UML-en-Chromium-mens-28847-tencia-y-s├¡mbolos-de-estado-chr
+omium\error-context.md
+  qa-diagnostico\test-e2e-local.log:292:
+  qa-diagnostico\test-e2e-local.log:293:    attachment #3: trace (application/zip) Ô
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔ
+öÇ
+  qa-diagnostico\test-e2e-local.log:294:    test-results\e2e-batches\batch-06\artifa
+cts\novzi-UML-en-Chromium-mens-28847-tencia-y-s├¡mbolos-de-estado-chromium\trace.zip
+  qa-diagnostico\test-e2e-local.log:295:    Usage:
+  qa-diagnostico\test-e2e-local.log:296:
+  qa-diagnostico\test-e2e-local.log:300:
+> qa-diagnostico\test-e2e-local.log:301:  1 failed
+  qa-diagnostico\test-e2e-local.log:302:    [chromium] ÔÇ║ 
+tests\e2e\novzi.spec.ts:99:1 ÔÇ║ UML en Chromium: mensajes laterales m├║ltiples, 
+persistencia y s├¡mbolos de estado 
+  qa-diagnostico\test-e2e-local.log:303:
+  qa-diagnostico\test-e2e-local.log:304:To open last HTML report run:
+  qa-diagnostico\test-e2e-local.log:305:[36m[39m
+  qa-diagnostico\test-e2e-local.log:306:[36m  npx playwright show-report 
+test-results\e2e-batches\batch-06\html[39m
+  qa-diagnostico\test-e2e-local.log:307:[36m[39m
+  qa-diagnostico\test-e2e-local.log:308:
+  qa-diagnostico\test-e2e-local.log:309:[NOVZI QA] batch-07: 1 pruebas; servidor 
+real independiente
+  qa-diagnostico\test-export.log:159:# pass 25
+> qa-diagnostico\test-export.log:160:# fail 0
+  qa-diagnostico\test-export.log:161:# cancelled 0
+  qa-diagnostico\test-export.log:162:# skipped 0
+  qa-diagnostico\test-export.log:163:# todo 0
+  qa-diagnostico\test-export.log:164:# duration_ms 669.1478
+  qa-diagnostico\test-ui.log:3695:
+> qa-diagnostico\test-ui.log:3696: [31mÔØ»[39m 
+src/features/editor/NovziEditor.behavior.browser.test.tsx [2m([22m[2m219 
+tests[22m[2m | [22m[31m56 failed[39m[2m)[22m[33m 171513[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3697:     [33m[2mÔ£ô[22m[39m muestra el tutorial 
+de NOVZI desde el editor sin modificar el proyecto [33m 811[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3698:     [33m[2mÔ£ô[22m[39m tutorial permanece 
+disponible al abrir un formulario y reanuda al cerrarlo [33m 658[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3699:     [33m[2mÔ£ô[22m[39m ocultar y mostrar 
+men├║ lateral preserva el lienzo y el proyecto abierto [33m 443[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3700:     [33m[2mÔ£ô[22m[39m ampliar ├írea de 
+trabajo y restaurar distribuci├│n conservan el editor [33m 497[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3701:     [33m[2mÔ£ô[22m[39m si el ├írea est├í 
+ampliada, mostrar men├║ lateral recupera la distribuci├│n normal [33m 
+470[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3702:     [33m[2mÔ£ô[22m[39m ampliar el ├írea 
+oculta t├¡tulo y filtros, deja una restauraci├│n accesible en el lienzo [33m 
+347[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3703:     [33m[2mÔ£ô[22m[39m agregar caja est├í 
+junto a pantalla completa y disponible en la alternativa fullscreen [33m 
+438[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3704:     [32mÔ£ô[39m agregar caja muestra su 
+di├ílogo dentro del elemento fullscreen nativo[32m 268[2mms[22m[39m
+  qa-diagnostico\test-ui.log:3916:
+> qa-diagnostico\test-ui.log:3917:[31mÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[39m[1m[41m Failed 
+Tests 56 
+  qa-diagnostico\test-ui.log:3918:[49m[22m[31mÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[39m
+  qa-diagnostico\test-ui.log:3919:
+> qa-diagnostico\test-ui.log:3920:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:3921:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mEditor 
+  qa-diagnostico\test-ui.log:3922:conectado a API ÔÇö recorridos de 
+comportamiento[2m > [22mnavega por doble clic 
+  qa-diagnostico\test-ui.log:3923:del nodo y vuelve con el men├║ sin alterar el 
+documento
+  qa-diagnostico\test-ui.log:3924:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:3925:with the role "button" and name "Tipo C1 C1 ┬À 
+Contexto de Zercano"
+  qa-diagnostico\test-ui.log:3926:
+  qa-diagnostico\test-ui.log:3927:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:3928:
+  qa-diagnostico\test-ui.log:4756:
+> qa-diagnostico\test-ui.log:4757:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:4758:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mEditor 
+  qa-diagnostico\test-ui.log:4759:conectado a API ÔÇö recorridos de 
+comportamiento[2m > [22mconserva campos y 
+  qa-diagnostico\test-ui.log:4760:valores de lista al editar un requerimiento 
+compartido
+  qa-diagnostico\test-ui.log:4761:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:4762:with the role "button" and name "Tipo TRACE 
+Trazabilidad ┬À Pago"
+  qa-diagnostico\test-ui.log:4763:
+  qa-diagnostico\test-ui.log:4764:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:4765:
+  qa-diagnostico\test-ui.log:5543:
+> qa-diagnostico\test-ui.log:5544:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:5545:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mEditor 
+  qa-diagnostico\test-ui.log:5546:conectado a API ÔÇö recorridos de 
+comportamiento[2m > [22minforma un fallo de 
+  qa-diagnostico\test-ui.log:5547:exportaci├│n sin perder el documento local
+  qa-diagnostico\test-ui.log:5548:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:5549:with the role "button" and name "Descargar JSON"
+  qa-diagnostico\test-ui.log:5550:
+  qa-diagnostico\test-ui.log:5551:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:5552:
+  qa-diagnostico\test-ui.log:5899:
+> qa-diagnostico\test-ui.log:5900:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:5901:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mEditor 
+  qa-diagnostico\test-ui.log:5902:conectado a API ÔÇö recorridos de 
+comportamiento[2m > [22mlos filtros de procesos 
+  qa-diagnostico\test-ui.log:5903:permiten ocultar y recuperar grupos sin escribir 
+en PostgreSQL
+  qa-diagnostico\test-ui.log:5904:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:5905:with the role "button" and name "Tipo PROCESS 
+Proceso ┬À Autenticaci├│n y pagos"
+  qa-diagnostico\test-ui.log:5906:
+  qa-diagnostico\test-ui.log:5907:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:5908:
+  qa-diagnostico\test-ui.log:6685:
+> qa-diagnostico\test-ui.log:6686:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:6687:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mRegresi├│n 
+  qa-diagnostico\test-ui.log:6688:funcional de UML y selecci├│n de ├írea[2m > 
+[22mcrea tres mensajes de secuencia, 
+  qa-diagnostico\test-ui.log:6689:proh├¡be conexi├│n vertical y persiste identidades
+  qa-diagnostico\test-ui.log:6690:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:6691:with the role "button" and name `/Secuencia de 
+QA/`
+  qa-diagnostico\test-ui.log:6692:
+  qa-diagnostico\test-ui.log:6693:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:6694:
+  qa-diagnostico\test-ui.log:7471:
+> qa-diagnostico\test-ui.log:7472:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:7473:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mfragmentos 
+  qa-diagnostico\test-ui.log:7474:combinados conservan operador y guardas en 
+documento persistido
+  qa-diagnostico\test-ui.log:7475:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:7476:with the role "button" and name `/Fragmentos QA/`
+  qa-diagnostico\test-ui.log:7477:
+  qa-diagnostico\test-ui.log:7478:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:7479:
+  qa-diagnostico\test-ui.log:7480:  complementary:
+  qa-diagnostico\test-ui.log:8256:
+> qa-diagnostico\test-ui.log:8257:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:8258:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mdescarga una 
+  qa-diagnostico\test-ui.log:8259:copia JSON autorizada sin mutar ni guardar el 
+documento
+  qa-diagnostico\test-ui.log:8260:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:8261:with the role "button" and name "Descargar JSON"
+  qa-diagnostico\test-ui.log:8262:
+  qa-diagnostico\test-ui.log:8263:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:8264:
+  qa-diagnostico\test-ui.log:8265:  heading:
+  qa-diagnostico\test-ui.log:8600:
+> qa-diagnostico\test-ui.log:8601:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:8602:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22masigna 
+  qa-diagnostico\test-ui.log:8603:propiedades de relaci├│n UML de clases y preserva 
+extremos
+  qa-diagnostico\test-ui.log:8604:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:8605:with the role "button" and name `/Clases QA04/`
+  qa-diagnostico\test-ui.log:8606:
+  qa-diagnostico\test-ui.log:8607:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:8608:
+  qa-diagnostico\test-ui.log:8609:  complementary:
+  qa-diagnostico\test-ui.log:9385:
+> qa-diagnostico\test-ui.log:9386:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:9387:src/features/editor/NovziEditor.behavior.browser.t
+est.tsx[2m > [22mpermite 
+  qa-diagnostico\test-ui.log:9388:cambiar iconos UML de despliegue sin cambiar los 
+identificadores
+  qa-diagnostico\test-ui.log:9389:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:9390:with the role "button" and name `/Despliegue 
+QA04/`
+  qa-diagnostico\test-ui.log:9391:
+  qa-diagnostico\test-ui.log:9392:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:9393:
+  qa-diagnostico\test-ui.log:9394:  complementary:
+  qa-diagnostico\test-ui.log:10191:
+> qa-diagnostico\test-ui.log:10192:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:10193:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mexportaci├│n 
+  qa-diagnostico\test-ui.log:10194:JSON rechazada informa error y no crea una 
+descarga ficticia
+  qa-diagnostico\test-ui.log:10195:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:10196:with the role "button" and name "Descargar JSON"
+  qa-diagnostico\test-ui.log:10197:
+  qa-diagnostico\test-ui.log:10198:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:10199:
+  qa-diagnostico\test-ui.log:10200:  heading:
+  qa-diagnostico\test-ui.log:10535:
+> qa-diagnostico\test-ui.log:10536:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:10537:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mun subpaquete 
+  qa-diagnostico\test-ui.log:10538:se crea dentro del paquete seleccionado y 
+persiste su visibilidad UML
+  qa-diagnostico\test-ui.log:10539:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:10540:with the role "button" and name `/Paquetes QA07/`
+  qa-diagnostico\test-ui.log:10541:
+  qa-diagnostico\test-ui.log:10542:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:10543:
+  qa-diagnostico\test-ui.log:10544:  complementary:
+  qa-diagnostico\test-ui.log:11341:
+> qa-diagnostico\test-ui.log:11342:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:11343:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mun subpaquete 
+  qa-diagnostico\test-ui.log:11344:sin contenedor no se crea ni guarda
+  qa-diagnostico\test-ui.log:11345:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:11346:with the role "button" and name `/Paquetes 
+vac├¡os QA07/`
+  qa-diagnostico\test-ui.log:11347:
+  qa-diagnostico\test-ui.log:11348:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:11349:
+  qa-diagnostico\test-ui.log:11350:  complementary:
+  qa-diagnostico\test-ui.log:12147:
+> qa-diagnostico\test-ui.log:12148:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:12149:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA08 acopla 
+  qa-diagnostico\test-ui.log:12150:por arrastre una clase al paquete UML y permite 
+desvincularla desde el inspector
+  qa-diagnostico\test-ui.log:12151:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:12152:with the role "button" and name `/Clases QA08/`
+  qa-diagnostico\test-ui.log:12153:
+  qa-diagnostico\test-ui.log:12154:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:12155:
+  qa-diagnostico\test-ui.log:12156:  complementary:
+  qa-diagnostico\test-ui.log:12932:
+> qa-diagnostico\test-ui.log:12933:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:12934:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA08 rechaza 
+  qa-diagnostico\test-ui.log:12935:relaciones UML que nacen de un nodo final de 
+actividad
+  qa-diagnostico\test-ui.log:12936:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:12937:with the role "button" and name `/Actividades 
+QA08/`
+  qa-diagnostico\test-ui.log:12938:
+  qa-diagnostico\test-ui.log:12939:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:12940:
+  qa-diagnostico\test-ui.log:12941:  complementary:
+  qa-diagnostico\test-ui.log:13738:
+> qa-diagnostico\test-ui.log:13739:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:13740:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 crea 
+  qa-diagnostico\test-ui.log:13741:fragmento combinado con operador alt y guardas 
+iniciales
+  qa-diagnostico\test-ui.log:13742:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:13743:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:13744:
+  qa-diagnostico\test-ui.log:13745:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:13746:[36m<body>[39m
+  qa-diagnostico\test-ui.log:13747:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:14122:
+> qa-diagnostico\test-ui.log:14123:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:14124:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 rechaza 
+  qa-diagnostico\test-ui.log:14125:ejecuci├│n nueva sin participante y mantiene 
+formulario
+  qa-diagnostico\test-ui.log:14126:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:14127:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:14128:
+  qa-diagnostico\test-ui.log:14129:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:14130:[36m<body>[39m
+  qa-diagnostico\test-ui.log:14131:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:14506:
+> qa-diagnostico\test-ui.log:14507:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:14508:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 reutiliza 
+  qa-diagnostico\test-ui.log:14509:ejecuci├│n existente dentro del participante 
+seleccionado
+  qa-diagnostico\test-ui.log:14510:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:14511:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:14512:
+  qa-diagnostico\test-ui.log:14513:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:14514:[36m<body>[39m
+  qa-diagnostico\test-ui.log:14515:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:14890:
+> qa-diagnostico\test-ui.log:14891:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:14892:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 
+  qa-diagnostico\test-ui.log:14893:reutilizar ejecuci├│n sin participante no 
+duplica ni guarda el cat├ílogo
+  qa-diagnostico\test-ui.log:14894:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:14895:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:14896:
+  qa-diagnostico\test-ui.log:14897:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:14898:[36m<body>[39m
+  qa-diagnostico\test-ui.log:14899:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:15274:
+> qa-diagnostico\test-ui.log:15275:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:15276:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 
+  qa-diagnostico\test-ui.log:15277:reutilizar subpaquete sin paquete no guarda una 
+jerarqu├¡a inv├ílida
+  qa-diagnostico\test-ui.log:15278:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:15279:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:15280:
+  qa-diagnostico\test-ui.log:15281:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:15282:[36m<body>[39m
+  qa-diagnostico\test-ui.log:15283:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:15658:
+> qa-diagnostico\test-ui.log:15659:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:15660:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 
+  qa-diagnostico\test-ui.log:15661:ejecuci├│n arrastrada dentro de su participante 
+conserva acoplamiento y ficha
+  qa-diagnostico\test-ui.log:15662:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:15663:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:15664:
+  qa-diagnostico\test-ui.log:15665:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:15666:[36m<body>[39m
+  qa-diagnostico\test-ui.log:15667:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:16042:
+> qa-diagnostico\test-ui.log:16043:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:16044:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 establece 
+  qa-diagnostico\test-ui.log:16045:dependencia UML de componente a artefacto con 
+notaci├│n del est├índar
+  qa-diagnostico\test-ui.log:16046:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:16047:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:16048:
+  qa-diagnostico\test-ui.log:16049:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:16050:[36m<body>[39m
+  qa-diagnostico\test-ui.log:16051:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:16426:
+> qa-diagnostico\test-ui.log:16427:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:16428:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 destino 
+  qa-diagnostico\test-ui.log:16429:vertical de ejecuci├│n es rechazado sin 
+persistencia
+  qa-diagnostico\test-ui.log:16430:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:16431:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:16432:
+  qa-diagnostico\test-ui.log:16433:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:16434:[36m<body>[39m
+  qa-diagnostico\test-ui.log:16435:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:16810:
+> qa-diagnostico\test-ui.log:16811:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:16812:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 lector no 
+  qa-diagnostico\test-ui.log:16813:puede abrir relaci├│n ni importar mediante 
+evento diferido del archivo
+  qa-diagnostico\test-ui.log:16814:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an element with the 
+  qa-diagnostico\test-ui.log:16815:text: Importaci├│n no permitida. This could be 
+because the text is broken up by 
+  qa-diagnostico\test-ui.log:16816:multiple elements. In this case, you can provide 
+a function for your text matcher 
+  qa-diagnostico\test-ui.log:16817:to make your matcher more flexible.
+  qa-diagnostico\test-ui.log:16818:
+  qa-diagnostico\test-ui.log:16819:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:17194:
+> qa-diagnostico\test-ui.log:17195:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:17196:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 
+  qa-diagnostico\test-ui.log:17197:exportaci├│n de un proyecto sin diagramas ofrece 
+JSON y deshabilita im├ígenes
+> qa-diagnostico\test-ui.log:17198:[31m[1mAssertionError[22m: expected <select 
+ÔÇª(1)>ÔÇª(4)</select> to have 
+  qa-diagnostico\test-ui.log:17199:property "value" with value 'json'[39m
+  qa-diagnostico\test-ui.log:17200:
+  qa-diagnostico\test-ui.log:17201:Expected: [32m"json"[39m
+  qa-diagnostico\test-ui.log:17202:Received: [31m"[7mproject-[27mjson"[39m
+  qa-diagnostico\test-ui.log:17203:
+  qa-diagnostico\test-ui.log:17204:[36m [2mÔØ»[22m 
+  qa-diagnostico\test-ui.log:17205:src/features/editor/NovziEditor.behavior.browser.
+test.tsx:[2m1567:386[22m[39m
+  qa-diagnostico\test-ui.log:17206:
+  qa-diagnostico\test-ui.log:17210:
+> qa-diagnostico\test-ui.log:17211:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:17212:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 cat├ílogo 
+  qa-diagnostico\test-ui.log:17213:de m├íquina de estados muestra s├¡mbolos 
+espec├¡ficos de UML y no cambia el modelo
+  qa-diagnostico\test-ui.log:17214:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:17215:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:17216:
+  qa-diagnostico\test-ui.log:17217:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:17218:[36m<body>[39m
+  qa-diagnostico\test-ui.log:17219:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:17594:
+> qa-diagnostico\test-ui.log:17595:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:17596:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 
+  qa-diagnostico\test-ui.log:17597:comunicaci├│n UML presenta participantes y marco 
+de interacci├│n
+  qa-diagnostico\test-ui.log:17598:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:17599:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:17600:
+  qa-diagnostico\test-ui.log:17601:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:17602:[36m<body>[39m
+  qa-diagnostico\test-ui.log:17603:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:17978:
+> qa-diagnostico\test-ui.log:17979:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:17980:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 puerto 
+  qa-diagnostico\test-ui.log:17981:compuesto arrastrado conserva anclaje al 
+clasificador
+  qa-diagnostico\test-ui.log:17982:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:17983:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:17984:
+  qa-diagnostico\test-ui.log:17985:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:17986:[36m<body>[39m
+  qa-diagnostico\test-ui.log:17987:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:18362:
+> qa-diagnostico\test-ui.log:18363:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:18364:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 crear 
+  qa-diagnostico\test-ui.log:18365:caso de uso dentro del sujeto preserva los 
+dem├ís diagramas
+  qa-diagnostico\test-ui.log:18366:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:18367:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:18368:
+  qa-diagnostico\test-ui.log:18369:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:18370:[36m<body>[39m
+  qa-diagnostico\test-ui.log:18371:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:18746:
+> qa-diagnostico\test-ui.log:18747:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:18748:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 perfil 
+  qa-diagnostico\test-ui.log:18749:UML permite seleccionar su contenedor y cambiar 
+visibilidad del estereotipo
+  qa-diagnostico\test-ui.log:18750:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:18751:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:18752:
+  qa-diagnostico\test-ui.log:18753:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:18754:[36m<body>[39m
+  qa-diagnostico\test-ui.log:18755:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:19130:
+> qa-diagnostico\test-ui.log:19131:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:19132:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 paquete 
+  qa-diagnostico\test-ui.log:19133:padre no ofrece descendientes como candidatos de 
+contenci├│n
+  qa-diagnostico\test-ui.log:19134:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:19135:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:19136:
+  qa-diagnostico\test-ui.log:19137:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:19138:[36m<body>[39m
+  qa-diagnostico\test-ui.log:19139:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:19514:
+> qa-diagnostico\test-ui.log:19515:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:19516:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 relaci├│n 
+  qa-diagnostico\test-ui.log:19517:de clase heredada sin notaci├│n expl├¡cita abre 
+configuraci├│n can├│nica
+  qa-diagnostico\test-ui.log:19518:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:19519:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:19520:
+  qa-diagnostico\test-ui.log:19521:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:19522:[36m<body>[39m
+  qa-diagnostico\test-ui.log:19523:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:19898:
+> qa-diagnostico\test-ui.log:19899:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:19900:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 editar 
+  qa-diagnostico\test-ui.log:19901:relaci├│n de caso de uso no presenta 
+multiplicidades de clase
+  qa-diagnostico\test-ui.log:19902:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:19903:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:19904:
+  qa-diagnostico\test-ui.log:19905:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:19906:[36m<body>[39m
+  qa-diagnostico\test-ui.log:19907:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:20282:
+> qa-diagnostico\test-ui.log:20283:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:20284:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 relaci├│n 
+  qa-diagnostico\test-ui.log:20285:hist├│rica de despliegue se identifica sin 
+reescribir la notaci├│n
+  qa-diagnostico\test-ui.log:20286:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:20287:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:20288:
+  qa-diagnostico\test-ui.log:20289:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:20290:[36m<body>[39m
+  qa-diagnostico\test-ui.log:20291:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:20666:
+> qa-diagnostico\test-ui.log:20667:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:20668:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 la vista 
+  qa-diagnostico\test-ui.log:20669:t├®cnica de despliegue sin edici├│n presenta 
+icono y metadatos bloqueados
+  qa-diagnostico\test-ui.log:20670:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:20671:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:20672:
+  qa-diagnostico\test-ui.log:20673:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:20674:[36m<body>[39m
+  qa-diagnostico\test-ui.log:20675:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:21050:
+> qa-diagnostico\test-ui.log:21051:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:21052:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 persiste 
+  qa-diagnostico\test-ui.log:21053:atributos UML desde ficha y conserva posiciones
+  qa-diagnostico\test-ui.log:21054:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:21055:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:21056:
+  qa-diagnostico\test-ui.log:21057:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:21058:[36m<body>[39m
+  qa-diagnostico\test-ui.log:21059:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:21434:
+> qa-diagnostico\test-ui.log:21435:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:21436:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 cambia 
+  qa-diagnostico\test-ui.log:21437:asociaci├│n a dependencia con notaci├│n can├│nica
+  qa-diagnostico\test-ui.log:21438:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:21439:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:21440:
+  qa-diagnostico\test-ui.log:21441:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:21442:[36m<body>[39m
+  qa-diagnostico\test-ui.log:21443:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:21818:
+> qa-diagnostico\test-ui.log:21819:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:21820:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 crea 
+  qa-diagnostico\test-ui.log:21821:ejecuci├│n nueva con participante disponible
+  qa-diagnostico\test-ui.log:21822:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:21823:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:21824:
+  qa-diagnostico\test-ui.log:21825:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:21826:[36m<body>[39m
+  qa-diagnostico\test-ui.log:21827:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:22202:
+> qa-diagnostico\test-ui.log:22203:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:22204:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 reutiliza 
+  qa-diagnostico\test-ui.log:22205:subpaquete dentro de paquete v├ílido
+  qa-diagnostico\test-ui.log:22206:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:22207:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:22208:
+  qa-diagnostico\test-ui.log:22209:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:22210:[36m<body>[39m
+  qa-diagnostico\test-ui.log:22211:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:22586:
+> qa-diagnostico\test-ui.log:22587:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:22588:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 relaci├│n 
+  qa-diagnostico\test-ui.log:22589:sin etiqueta confirma eliminaci├│n con nombre 
+alternativo
+  qa-diagnostico\test-ui.log:22590:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:22591:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:22592:
+  qa-diagnostico\test-ui.log:22593:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:22594:[36m<body>[39m
+  qa-diagnostico\test-ui.log:22595:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:22970:
+> qa-diagnostico\test-ui.log:22971:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:22972:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 deja 
+  qa-diagnostico\test-ui.log:22973:intacta navegaci├│n al resolver foco de una 
+vista ya abandonada
+  qa-diagnostico\test-ui.log:22974:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find an accessible element 
+  qa-diagnostico\test-ui.log:22975:with the role "button" and name `/C1 ┬À Contexto 
+de Zercano/`
+  qa-diagnostico\test-ui.log:22976:
+  qa-diagnostico\test-ui.log:22977:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:22978:
+  qa-diagnostico\test-ui.log:22979:  complementary:
+  qa-diagnostico\test-ui.log:23886:
+> qa-diagnostico\test-ui.log:23887:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:23888:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 permisos 
+  qa-diagnostico\test-ui.log:23889:de metadatos sin edici├│n t├®cnica bloquean 
+propiedades UML
+  qa-diagnostico\test-ui.log:23890:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:23891:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:23892:
+  qa-diagnostico\test-ui.log:23893:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:23894:[36m<body>[39m
+  qa-diagnostico\test-ui.log:23895:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:24270:
+> qa-diagnostico\test-ui.log:24271:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:24272:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 paquete 
+  qa-diagnostico\test-ui.log:24273:en profundidad m├íxima no ofrece subpaquete 
+adicional
+  qa-diagnostico\test-ui.log:24274:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:24275:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:24276:
+  qa-diagnostico\test-ui.log:24277:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:24278:[36m<body>[39m
+  qa-diagnostico\test-ui.log:24279:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:24654:
+> qa-diagnostico\test-ui.log:24655:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:24656:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 relaci├│n 
+  qa-diagnostico\test-ui.log:24657:v├ílida entre clases nace con asociaci├│n sin 
+trazo discontinuo
+  qa-diagnostico\test-ui.log:24658:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:24659:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:24660:
+  qa-diagnostico\test-ui.log:24661:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:24662:[36m<body>[39m
+  qa-diagnostico\test-ui.log:24663:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:25038:
+> qa-diagnostico\test-ui.log:25039:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:25040:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 relaci├│n 
+  qa-diagnostico\test-ui.log:25041:hist├│rica de paquete conserva etiqueta de 
+notaci├│n original
+  qa-diagnostico\test-ui.log:25042:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:25043:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:25044:
+  qa-diagnostico\test-ui.log:25045:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:25046:[36m<body>[39m
+  qa-diagnostico\test-ui.log:25047:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:25422:
+> qa-diagnostico\test-ui.log:25423:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:25424:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 fragmento 
+  qa-diagnostico\test-ui.log:25425:hist├│rico sin operador reconocido presenta 
+alternativa alt y guarda opt
+  qa-diagnostico\test-ui.log:25426:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:25427:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:25428:
+  qa-diagnostico\test-ui.log:25429:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:25430:[36m<body>[39m
+  qa-diagnostico\test-ui.log:25431:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:25806:
+> qa-diagnostico\test-ui.log:25807:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:25808:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 permisos 
+  qa-diagnostico\test-ui.log:25809:de edici├│n funcional no permiten reutilizar 
+ficha no visible
+  qa-diagnostico\test-ui.log:25810:[31m[1mTestingLibraryElementError[22m: Unable 
+to find an accessible element with 
+  qa-diagnostico\test-ui.log:25811:the role "button" and name `/Ficha hist├│rica 
+QA11/`
+  qa-diagnostico\test-ui.log:25812:
+  qa-diagnostico\test-ui.log:25813:Here are the accessible roles:
+  qa-diagnostico\test-ui.log:25814:
+  qa-diagnostico\test-ui.log:25815:  heading:
+  qa-diagnostico\test-ui.log:25955:
+> qa-diagnostico\test-ui.log:25956:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:25957:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA11 relaci├│n 
+  qa-diagnostico\test-ui.log:25958:de secuencia entre l├¡neas de vida no fuerza 
+puertos de ejecuci├│n
+  qa-diagnostico\test-ui.log:25959:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:25960:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:25961:
+  qa-diagnostico\test-ui.log:25962:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:25963:[36m<body>[39m
+  qa-diagnostico\test-ui.log:25964:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:26339:
+> qa-diagnostico\test-ui.log:26340:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:26341:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mAUD-CL-UX UML 
+  qa-diagnostico\test-ui.log:26342:clases no presenta perspectivas ni diagn├│stico; 
+C1 conserva selector y filtros
+  qa-diagnostico\test-ui.log:26343:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:26344:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:26345:
+  qa-diagnostico\test-ui.log:26346:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:26347:[36m<body>[39m
+  qa-diagnostico\test-ui.log:26348:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:26723:
+> qa-diagnostico\test-ui.log:26724:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:26725:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mAUD-CL-UX UML 
+  qa-diagnostico\test-ui.log:26726:actividad no muestra perspectivas incluso tras 
+navegar desde C1
+  qa-diagnostico\test-ui.log:26727:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:26728:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:26729:
+  qa-diagnostico\test-ui.log:26730:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:26731:[36m<body>[39m
+  qa-diagnostico\test-ui.log:26732:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:27105:
+> qa-diagnostico\test-ui.log:27106:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:27107:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mQA10 crear 
+  qa-diagnostico\test-ui.log:27108:caso de uso: UC-01 inspector funcional y 
+estructural conserva identidad al cambiar 
+  qa-diagnostico\test-ui.log:27109:selecci├│n sin claves duplicadas
+  qa-diagnostico\test-ui.log:27110:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:27111:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:27112:
+  qa-diagnostico\test-ui.log:27113:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:27114:[36m<body>[39m
+  qa-diagnostico\test-ui.log:27490:
+> qa-diagnostico\test-ui.log:27491:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:27492:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mUC cat├ílogo 
+  qa-diagnostico\test-ui.log:27493:de casos de uso: crear solo tipos nativos y 
+reutilizar contexto existente
+  qa-diagnostico\test-ui.log:27494:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:27495:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:27496:
+  qa-diagnostico\test-ui.log:27497:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:27498:[36m<body>[39m
+  qa-diagnostico\test-ui.log:27499:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:27874:
+> qa-diagnostico\test-ui.log:27875:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:27876:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mUC cat├ílogo 
+  qa-diagnostico\test-ui.log:27877:casos de uso: clase de asociaci├│n permanece 
+creable en UML clases
+  qa-diagnostico\test-ui.log:27878:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:27879:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:27880:
+  qa-diagnostico\test-ui.log:27881:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:27882:[36m<body>[39m
+  qa-diagnostico\test-ui.log:27883:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:28258:
+> qa-diagnostico\test-ui.log:28259:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:28260:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mUC cat├ílogo 
+  qa-diagnostico\test-ui.log:28261:AUD-UC-005 ficha aislada recargada reutiliza 
+elementId con nueva ocurrencia
+  qa-diagnostico\test-ui.log:28262:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:28263:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:28264:
+  qa-diagnostico\test-ui.log:28265:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:28266:[36m<body>[39m
+  qa-diagnostico\test-ui.log:28267:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:28642:
+> qa-diagnostico\test-ui.log:28643:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:28644:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mUC cat├ílogo 
+  qa-diagnostico\test-ui.log:28645:AUD-UC-005 borrar ficha es acci├│n expl├¡cita 
+con confirmaci├│n; cancelar no guarda
+  qa-diagnostico\test-ui.log:28646:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:28647:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:28648:
+  qa-diagnostico\test-ui.log:28649:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:28650:[36m<body>[39m
+  qa-diagnostico\test-ui.log:28651:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:29026:
+> qa-diagnostico\test-ui.log:29027:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:29028:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mIMP 
+  qa-diagnostico\test-ui.log:29029:importaci├│n de diagrama rechaza clases desde 
+casos de uso sin llamar API
+  qa-diagnostico\test-ui.log:29030:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:29031:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:29032:
+  qa-diagnostico\test-ui.log:29033:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:29034:[36m<body>[39m
+  qa-diagnostico\test-ui.log:29035:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:29410:
+> qa-diagnostico\test-ui.log:29411:[41m[1m FAIL [22m[49m 
+  qa-diagnostico\test-ui.log:29412:src/features/editor/NovziEditor.behavior.browser.
+test.tsx[2m > [22mIMP 
+  qa-diagnostico\test-ui.log:29413:importaci├│n de diagrama filtra tipos, exige 
+elecci├│n y conserva vista activa
+  qa-diagnostico\test-ui.log:29414:[31m[1mTestingLibraryElementError[22m[39m: 
+Unable to find role="button" and 
+  qa-diagnostico\test-ui.log:29415:name `/Vista espec├¡fica QA10/`
+  qa-diagnostico\test-ui.log:29416:
+  qa-diagnostico\test-ui.log:29417:Ignored nodes: comments, script, style
+  qa-diagnostico\test-ui.log:29418:[36m<body>[39m
+  qa-diagnostico\test-ui.log:29419:  [36m<div>[39m
+  qa-diagnostico\test-ui.log:29664:
+> qa-diagnostico\test-ui.log:29665:[2m Test Files [22m [1m[31m1 
+failed[39m[22m[2m | [22m[1m[32m52 passed[39m[22m[90m (53)[39m
+> qa-diagnostico\test-ui.log:29666:[2m      Tests [22m [1m[31m56 
+failed[39m[22m[2m | [22m[1m[32m682 passed[39m[22m[90m (738)[39m
+  qa-diagnostico\test-ui.log:29667:[2m   Start at [22m 14:33:32
+  qa-diagnostico\test-ui.log:29668:[2m   Duration [22m 176.12s[2m (transform 
+5.90s, setup 23.37s, import 14.45s, tests 200.65s, environment 78.90s)[22m
+  qa-diagnostico\test-ui.log:29669:
+  qa-diagnostico\test-ui.log:29670:            [36m</small>[39m
+  qa-diagnostico\test-ui.log:29671:          [36m</div>[39m
+  qa-diagnostico\test-ui.log:29672:        [36m</div>[39m
+  qa-diagnostico\test-ui.log:29673:        [36m<div[39m
+  qa-diagnostico\test-ui.log:29674:          
+[33mclass[39m=[32m"workspace-switch"[39m
+  qa-diagnostico\test-ui.log:29800:
+> qa-diagnostico\test-ui.log:29801:npm error Lifecycle script `test:ui` failed with 
+error:
+  qa-diagnostico\test-ui.log:29802:npm error code 1
+  qa-diagnostico\test-ui.log:29803:npm error path 
+C:\Users\MSI1\Desktop\novzi\apps\web
+  qa-diagnostico\test-ui.log:29804:npm error workspace @novzi/web@4.8.1
+  qa-diagnostico\test-ui.log:29805:npm error location 
+C:\Users\MSI1\Desktop\novzi\apps\web
+> qa-diagnostico\test-ui.log:29806:npm error command failed
+  qa-diagnostico\test-ui.log:29807:npm error command C:\WINDOWS\system32\cmd.exe /d 
+/s /c vitest run --config 
+  qa-diagnostico\test-ui.log:29808:vitest.config.ts
+  qa-diagnostico\test-unit.log:126:# pass 19
+> qa-diagnostico\test-unit.log:127:# fail 0
+  qa-diagnostico\test-unit.log:128:# cancelled 0
+  qa-diagnostico\test-unit.log:129:# skipped 0
+  qa-diagnostico\test-unit.log:130:# todo 0
+  qa-diagnostico\test-unit.log:131:# duration_ms 301.2343
+  qa-diagnostico\test-unit.log:132:
+  qa-diagnostico\test-unit.log:133:[NOVZI QA] 
+apps\api\src\db\demo-provision.unit.test.ts
+  qa-diagnostico\test-unit.log:134:TAP version 13
+  qa-diagnostico\test-unit.log:135:# Subtest: demo inicial reproduce el JSON QA 
+completo con vistas y referencias entre cajas
+  qa-diagnostico\test-unit.log:150:# pass 2
+> qa-diagnostico\test-unit.log:151:# fail 0
+  qa-diagnostico\test-unit.log:152:# cancelled 0
+  qa-diagnostico\test-unit.log:153:# skipped 0
+  qa-diagnostico\test-unit.log:154:# todo 0
+  qa-diagnostico\test-unit.log:155:# duration_ms 527.9406
+  qa-diagnostico\test-unit.log:156:
+  qa-diagnostico\test-unit.log:157:[NOVZI QA] 
+apps\api\src\db\entrypoints.unit.test.ts
+  qa-diagnostico\test-unit.log:158:TAP version 13
+  qa-diagnostico\test-unit.log:159:# Subtest: CLI QA aislado: migration-new
+  qa-diagnostico\test-unit.log:246:# pass 14
+> qa-diagnostico\test-unit.log:247:# fail 0
+  qa-diagnostico\test-unit.log:248:# cancelled 0
+  qa-diagnostico\test-unit.log:249:# skipped 0
+  qa-diagnostico\test-unit.log:250:# todo 0
+  qa-diagnostico\test-unit.log:251:# duration_ms 7610.0757
+  qa-diagnostico\test-unit.log:252:
+  qa-diagnostico\test-unit.log:253:[NOVZI QA] apps\api\src\db\pool.unit.test.ts
+  qa-diagnostico\test-unit.log:254:TAP version 13
+  qa-diagnostico\test-unit.log:255:# Subtest: pool configura los l├¡mites, 
+identidad y TLS del entorno sin abrir conexiones
+  qa-diagnostico\test-unit.log:270:# pass 2
+> qa-diagnostico\test-unit.log:271:# fail 0
+  qa-diagnostico\test-unit.log:272:# cancelled 0
+  qa-diagnostico\test-unit.log:273:# skipped 0
+  qa-diagnostico\test-unit.log:274:# todo 0
+  qa-diagnostico\test-unit.log:275:# duration_ms 321.6905
+  qa-diagnostico\test-unit.log:276:
+  qa-diagnostico\test-unit.log:277:[NOVZI QA] 
+apps\api\src\domain\access-policy.test.ts
+  qa-diagnostico\test-unit.log:278:TAP version 13
+  qa-diagnostico\test-unit.log:279:# Subtest: Analista funcional no recibe C3 ni 
+endpoint t├®cnico en el documento
+  qa-diagnostico\test-unit.log:330:# pass 8
+> qa-diagnostico\test-unit.log:331:# fail 0
+  qa-diagnostico\test-unit.log:332:# cancelled 0
+  qa-diagnostico\test-unit.log:333:# skipped 0
+  qa-diagnostico\test-unit.log:334:# todo 0
+  qa-diagnostico\test-unit.log:335:# duration_ms 484.2859
+  qa-diagnostico\test-unit.log:336:
+  qa-diagnostico\test-unit.log:337:[NOVZI QA] 
+apps\api\src\domain\document-policy.extended.unit.test.ts
+  qa-diagnostico\test-unit.log:338:TAP version 13
+  qa-diagnostico\test-unit.log:339:# Subtest: edici├│n de nombre, resumen, 
+responsable, estado, enlaces y campos conservada
+  qa-diagnostico\test-unit.log:582:# pass 40
+> qa-diagnostico\test-unit.log:583:# fail 0
+  qa-diagnostico\test-unit.log:584:# cancelled 0
+  qa-diagnostico\test-unit.log:585:# skipped 0
+  qa-diagnostico\test-unit.log:586:# todo 0
+  qa-diagnostico\test-unit.log:587:# duration_ms 579.2804
+  qa-diagnostico\test-unit.log:588:
+  qa-diagnostico\test-unit.log:589:[NOVZI QA] apps\api\src\domain\document.test.ts
+  qa-diagnostico\test-unit.log:590:TAP version 13
+  qa-diagnostico\test-unit.log:591:# Subtest: documento NOVZI demo valido
+  qa-diagnostico\test-unit.log:618:# pass 4
+> qa-diagnostico\test-unit.log:619:# fail 0
+  qa-diagnostico\test-unit.log:620:# cancelled 0
+  qa-diagnostico\test-unit.log:621:# skipped 0
+  qa-diagnostico\test-unit.log:622:# todo 0
+  qa-diagnostico\test-unit.log:623:# duration_ms 339.5403
+  qa-diagnostico\test-unit.log:624:
+  qa-diagnostico\test-unit.log:625:[NOVZI QA] 
+apps\api\src\domain\import-scope.unit.test.ts
+  qa-diagnostico\test-unit.log:626:TAP version 13
+  qa-diagnostico\test-unit.log:627:# Subtest: IMP alcance expl├¡cito y 
+retrocompatibilidad
+  qa-diagnostico\test-unit.log:690:# pass 10
+> qa-diagnostico\test-unit.log:691:# fail 0
+  qa-diagnostico\test-unit.log:692:# cancelled 0
+  qa-diagnostico\test-unit.log:693:# skipped 0
+  qa-diagnostico\test-unit.log:694:# todo 0
+  qa-diagnostico\test-unit.log:695:# duration_ms 614.2696
+  qa-diagnostico\test-unit.log:696:
+  qa-diagnostico\test-unit.log:697:[NOVZI QA] 
+apps\api\src\domain\permission-matrix.unit.test.ts
+  qa-diagnostico\test-unit.log:698:TAP version 13
+  qa-diagnostico\test-unit.log:699:# Subtest: ACL matriz c1: vista permitida, 
+creaci├│n denegada si falta permiso y autorizada cuando se concede
+  qa-diagnostico\test-unit.log:1290:# pass 98
+> qa-diagnostico\test-unit.log:1291:# fail 0
+  qa-diagnostico\test-unit.log:1292:# cancelled 0
+  qa-diagnostico\test-unit.log:1293:# skipped 0
+  qa-diagnostico\test-unit.log:1294:# todo 0
+  qa-diagnostico\test-unit.log:1295:# duration_ms 600.3015
+  qa-diagnostico\test-unit.log:1296:
+  qa-diagnostico\test-unit.log:1297:[NOVZI QA] 
+apps\api\src\domain\sequence-persistence.unit.test.ts
+  qa-diagnostico\test-unit.log:1298:TAP version 13
+  qa-diagnostico\test-unit.log:1299:# Subtest: SEQ-T08 owner alta, proyecci├│n y 
+roundtrip ├¡ntegros; lector no modifica
+  qa-diagnostico\test-unit.log:1614:# pass 52
+> qa-diagnostico\test-unit.log:1615:# fail 0
+  qa-diagnostico\test-unit.log:1616:# cancelled 0
+  qa-diagnostico\test-unit.log:1617:# skipped 0
+  qa-diagnostico\test-unit.log:1618:# todo 0
+  qa-diagnostico\test-unit.log:1619:# duration_ms 1644.4958
+  qa-diagnostico\test-unit.log:1620:
+  qa-diagnostico\test-unit.log:1621:[NOVZI QA] 
+apps\api\src\domain\uml-activity-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:1622:TAP version 13
+  qa-diagnostico\test-unit.log:1623:# Subtest: ACT-07 fixture integral alta, 
+proyecci├│n y roundtrip owner; rechazo lector
+  qa-diagnostico\test-unit.log:1866:# pass 40
+> qa-diagnostico\test-unit.log:1867:# fail 0
+  qa-diagnostico\test-unit.log:1868:# cancelled 0
+  qa-diagnostico\test-unit.log:1869:# skipped 0
+  qa-diagnostico\test-unit.log:1870:# todo 0
+  qa-diagnostico\test-unit.log:1871:# duration_ms 1041.4504
+  qa-diagnostico\test-unit.log:1872:
+  qa-diagnostico\test-unit.log:1873:[NOVZI QA] 
+apps\api\src\domain\uml-class-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:1874:TAP version 13
+  qa-diagnostico\test-unit.log:1875:# Subtest: T02 API documento nuevo: no bypass 
+de matriz mediante alta de vista
+  qa-diagnostico\test-unit.log:2010:# pass 22
+> qa-diagnostico\test-unit.log:2011:# fail 0
+  qa-diagnostico\test-unit.log:2012:# cancelled 0
+  qa-diagnostico\test-unit.log:2013:# skipped 0
+  qa-diagnostico\test-unit.log:2014:# todo 0
+  qa-diagnostico\test-unit.log:2015:# duration_ms 493.3466
+  qa-diagnostico\test-unit.log:2016:
+  qa-diagnostico\test-unit.log:2017:[NOVZI QA] 
+apps\api\src\domain\uml-component-persistence.unit.test.ts
+  qa-diagnostico\test-unit.log:2018:TAP version 13
+  qa-diagnostico\test-unit.log:2019:# Subtest: CMP-T07 alta, roundtrip, 
+actualizaci├│n y export SVG especializado
+  qa-diagnostico\test-unit.log:2316:# pass 49
+> qa-diagnostico\test-unit.log:2317:# fail 0
+  qa-diagnostico\test-unit.log:2318:# cancelled 0
+  qa-diagnostico\test-unit.log:2319:# skipped 0
+  qa-diagnostico\test-unit.log:2320:# todo 0
+  qa-diagnostico\test-unit.log:2321:# duration_ms 1093.9309
+  qa-diagnostico\test-unit.log:2322:
+  qa-diagnostico\test-unit.log:2323:[NOVZI QA] 
+apps\api\src\domain\uml-deployment-persistence.unit.test.ts
+  qa-diagnostico\test-unit.log:2324:TAP version 13
+  qa-diagnostico\test-unit.log:2325:# Subtest: DEP-07 alta, roundtrip, 
+importaci├│n, SVG especializado
+  qa-diagnostico\test-unit.log:2604:# pass 46
+> qa-diagnostico\test-unit.log:2605:# fail 0
+  qa-diagnostico\test-unit.log:2606:# cancelled 0
+  qa-diagnostico\test-unit.log:2607:# skipped 0
+  qa-diagnostico\test-unit.log:2608:# todo 0
+  qa-diagnostico\test-unit.log:2609:# duration_ms 801.7468
+  qa-diagnostico\test-unit.log:2610:
+  qa-diagnostico\test-unit.log:2611:[NOVZI QA] 
+apps\api\src\domain\uml-scoped.unit.test.ts
+  qa-diagnostico\test-unit.log:2612:TAP version 13
+  qa-diagnostico\test-unit.log:2613:# Subtest: [uml-class] contrato, conexi├│n, 
+pol├¡tica de guardado y roundtrip
+  qa-diagnostico\test-unit.log:2706:# pass 15
+> qa-diagnostico\test-unit.log:2707:# fail 0
+  qa-diagnostico\test-unit.log:2708:# cancelled 0
+  qa-diagnostico\test-unit.log:2709:# skipped 0
+  qa-diagnostico\test-unit.log:2710:# todo 0
+  qa-diagnostico\test-unit.log:2711:# duration_ms 560.81
+  qa-diagnostico\test-unit.log:2712:
+  qa-diagnostico\test-unit.log:2713:[NOVZI QA] 
+apps\api\src\domain\uml-usecase-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:2714:TAP version 13
+  qa-diagnostico\test-unit.log:2715:# Subtest: T07 API acepta funcional sin 
+permisos t├®cnicos y bloquea lector
+  qa-diagnostico\test-unit.log:2880:# pass 27
+> qa-diagnostico\test-unit.log:2881:# fail 0
+  qa-diagnostico\test-unit.log:2882:# cancelled 0
+  qa-diagnostico\test-unit.log:2883:# skipped 0
+  qa-diagnostico\test-unit.log:2884:# todo 0
+  qa-diagnostico\test-unit.log:2885:# duration_ms 673.3826
+  qa-diagnostico\test-unit.log:2886:
+  qa-diagnostico\test-unit.log:2887:[NOVZI QA] 
+apps\api\src\modules\access\presentation\controller-boundaries.unit.test.ts
+  qa-diagnostico\test-unit.log:2888:TAP version 13
+  qa-diagnostico\test-unit.log:2889:# Subtest: auditor├¡a no propietaria limita 
+proyectos por membres├¡a y elimina atributos internos
+  qa-diagnostico\test-unit.log:2922:# pass 5
+> qa-diagnostico\test-unit.log:2923:# fail 0
+  qa-diagnostico\test-unit.log:2924:# cancelled 0
+  qa-diagnostico\test-unit.log:2925:# skipped 0
+  qa-diagnostico\test-unit.log:2926:# todo 0
+  qa-diagnostico\test-unit.log:2927:# duration_ms 1342.5269
+  qa-diagnostico\test-unit.log:2928:
+  qa-diagnostico\test-unit.log:2929:[NOVZI QA] 
+apps\api\src\modules\admin\presentation\demo-registration.unit.test.ts
+  qa-diagnostico\test-unit.log:2930:TAP version 13
+  qa-diagnostico\test-unit.log:2931:# Subtest: alta privada: usuario, workspace y 
+19 diagramas se crean de forma at├│mica
+  qa-diagnostico\test-unit.log:2946:# pass 2
+> qa-diagnostico\test-unit.log:2947:# fail 0
+  qa-diagnostico\test-unit.log:2948:# cancelled 0
+  qa-diagnostico\test-unit.log:2949:# skipped 0
+  qa-diagnostico\test-unit.log:2950:# todo 0
+  qa-diagnostico\test-unit.log:2951:# duration_ms 1603.7511
+  qa-diagnostico\test-unit.log:2952:
+  qa-diagnostico\test-unit.log:2953:[NOVZI QA] 
+apps\api\src\modules\exports\advanced-document.unit.test.ts
+  qa-diagnostico\test-unit.log:2954:TAP version 13
+  qa-diagnostico\test-unit.log:2955:# Subtest: campos exportables incluyen 
+relaciones e inspector personalizado del documento persistido
+  qa-diagnostico\test-unit.log:3000:# pass 7
+> qa-diagnostico\test-unit.log:3001:# fail 0
+  qa-diagnostico\test-unit.log:3002:# cancelled 0
+  qa-diagnostico\test-unit.log:3003:# skipped 0
+  qa-diagnostico\test-unit.log:3004:# todo 0
+  qa-diagnostico\test-unit.log:3005:# duration_ms 343.8108
+  qa-diagnostico\test-unit.log:3006:
+  qa-diagnostico\test-unit.log:3007:[NOVZI QA] 
+apps\api\src\modules\exports\diagram-documents.unit.test.ts
+  qa-diagnostico\test-unit.log:3008:TAP version 13
+  qa-diagnostico\test-unit.log:3009:# Subtest: fichas separadas exportan 
+exclusivamente campos elegidos, relaciones y datos del servidor
+  qa-diagnostico\test-unit.log:3036:# pass 4
+> qa-diagnostico\test-unit.log:3037:# fail 0
+  qa-diagnostico\test-unit.log:3038:# cancelled 0
+  qa-diagnostico\test-unit.log:3039:# skipped 0
+  qa-diagnostico\test-unit.log:3040:# todo 0
+  qa-diagnostico\test-unit.log:3041:# duration_ms 377.27
+  qa-diagnostico\test-unit.log:3042:
+  qa-diagnostico\test-unit.log:3043:[NOVZI QA] 
+apps\api\src\modules\exports\exports-boundaries.unit.test.ts
+  qa-diagnostico\test-unit.log:3044:TAP version 13
+  qa-diagnostico\test-unit.log:3045:# Subtest: exportaci├│n HTTP: valida modelo, 
+versi├│n, licencia y requisitos de captura antes de firmar
+  qa-diagnostico\test-unit.log:3066:# pass 3
+> qa-diagnostico\test-unit.log:3067:# fail 0
+  qa-diagnostico\test-unit.log:3068:# cancelled 0
+  qa-diagnostico\test-unit.log:3069:# skipped 0
+  qa-diagnostico\test-unit.log:3070:# todo 0
+  qa-diagnostico\test-unit.log:3071:# duration_ms 977.3682
+  qa-diagnostico\test-unit.log:3072:
+  qa-diagnostico\test-unit.log:3073:[NOVZI QA] 
+apps\api\src\modules\exports\provenance-validation.unit.test.ts
+  qa-diagnostico\test-unit.log:3074:TAP version 13
+  qa-diagnostico\test-unit.log:3075:# Subtest: detecta PNG sin firma, truncado, 
+doble firma y cabecera inv├ílida
+  qa-diagnostico\test-unit.log:3090:# pass 2
+> qa-diagnostico\test-unit.log:3091:# fail 0
+  qa-diagnostico\test-unit.log:3092:# cancelled 0
+  qa-diagnostico\test-unit.log:3093:# skipped 0
+  qa-diagnostico\test-unit.log:3094:# todo 0
+  qa-diagnostico\test-unit.log:3095:# duration_ms 302.2663
+  qa-diagnostico\test-unit.log:3096:
+  qa-diagnostico\test-unit.log:3097:[NOVZI QA] 
+apps\api\src\modules\exports\provenance.unit.test.ts
+  qa-diagnostico\test-unit.log:3098:TAP version 13
+  qa-diagnostico\test-unit.log:3099:# Subtest: renderiza un diagrama completo con 
+etiquetas y marca comercial en plan gratuito
+  qa-diagnostico\test-unit.log:3126:# pass 4
+> qa-diagnostico\test-unit.log:3127:# fail 0
+  qa-diagnostico\test-unit.log:3128:# cancelled 0
+  qa-diagnostico\test-unit.log:3129:# skipped 0
+  qa-diagnostico\test-unit.log:3130:# todo 0
+  qa-diagnostico\test-unit.log:3131:# duration_ms 501.5266
+  qa-diagnostico\test-unit.log:3132:
+  qa-diagnostico\test-unit.log:3133:[NOVZI QA] 
+apps\api\src\modules\exports\raster-export.unit.test.ts
+  qa-diagnostico\test-unit.log:3134:TAP version 13
+  qa-diagnostico\test-unit.log:3135:# Subtest: la exportaci├│n visual conserva la 
+geometr├¡a exacta de la captura PNG sin licencia
+  qa-diagnostico\test-unit.log:3174:# pass 6
+> qa-diagnostico\test-unit.log:3175:# fail 0
+  qa-diagnostico\test-unit.log:3176:# cancelled 0
+  qa-diagnostico\test-unit.log:3177:# skipped 0
+  qa-diagnostico\test-unit.log:3178:# todo 0
+  qa-diagnostico\test-unit.log:3179:# duration_ms 470.8512
+  qa-diagnostico\test-unit.log:3180:
+  qa-diagnostico\test-unit.log:3181:[NOVZI QA] 
+apps\api\src\modules\exports\render-svg.unit.test.ts
+  qa-diagnostico\test-unit.log:3182:TAP version 13
+  qa-diagnostico\test-unit.log:3183:# Subtest: SVG auxiliar escapa texto, incluye 
+nodos, enlaces y relaciones paralelas con estilos
+  qa-diagnostico\test-unit.log:3204:# pass 3
+> qa-diagnostico\test-unit.log:3205:# fail 0
+  qa-diagnostico\test-unit.log:3206:# cancelled 0
+  qa-diagnostico\test-unit.log:3207:# skipped 0
+  qa-diagnostico\test-unit.log:3208:# todo 0
+  qa-diagnostico\test-unit.log:3209:# duration_ms 332.767
+  qa-diagnostico\test-unit.log:3210:
+  qa-diagnostico\test-unit.log:3211:[NOVZI QA] 
+apps\api\src\modules\functional\functional-asis.unit.test.ts
+  qa-diagnostico\test-unit.log:3212:TAP version 13
+  qa-diagnostico\test-unit.log:3213:# Subtest: AS-IS captura solo los diagramas 
+vinculados y sus elementos, no todo el proyecto
+  qa-diagnostico\test-unit.log:3234:# pass 3
+> qa-diagnostico\test-unit.log:3235:# fail 0
+  qa-diagnostico\test-unit.log:3236:# cancelled 0
+  qa-diagnostico\test-unit.log:3237:# skipped 0
+  qa-diagnostico\test-unit.log:3238:# todo 0
+  qa-diagnostico\test-unit.log:3239:# duration_ms 253.3632
+  qa-diagnostico\test-unit.log:3240:
+  qa-diagnostico\test-unit.log:3241:[NOVZI QA] 
+apps\api\src\modules\functional\functional-schemas17.unit.test.ts
+  qa-diagnostico\test-unit.log:3242:TAP version 13
+  qa-diagnostico\test-unit.log:3243:# Subtest: Tipos amplios de formulario: tabla, 
+lista, selecci├│n m├║ltiple, fecha y hora, imagen y moneda
+  qa-diagnostico\test-unit.log:3282:# pass 6
+> qa-diagnostico\test-unit.log:3283:# fail 0
+  qa-diagnostico\test-unit.log:3284:# cancelled 0
+  qa-diagnostico\test-unit.log:3285:# skipped 0
+  qa-diagnostico\test-unit.log:3286:# todo 0
+  qa-diagnostico\test-unit.log:3287:# duration_ms 274.7633
+  qa-diagnostico\test-unit.log:3288:
+  qa-diagnostico\test-unit.log:3289:[NOVZI QA] 
+apps\api\src\modules\functional\functional-template-pages.unit.test.ts
+  qa-diagnostico\test-unit.log:3290:TAP version 13
+  qa-diagnostico\test-unit.log:3291:# Subtest: Plantillas legadas contin├║an con 
+una sola p├ígina
+  qa-diagnostico\test-unit.log:3336:# pass 7
+> qa-diagnostico\test-unit.log:3337:# fail 0
+  qa-diagnostico\test-unit.log:3338:# cancelled 0
+  qa-diagnostico\test-unit.log:3339:# skipped 0
+  qa-diagnostico\test-unit.log:3340:# todo 0
+  qa-diagnostico\test-unit.log:3341:# duration_ms 467.5436
+  qa-diagnostico\test-unit.log:3342:
+  qa-diagnostico\test-unit.log:3343:[NOVZI QA] 
+apps\api\src\modules\functional\functional.policy.unit.test.ts
+  qa-diagnostico\test-unit.log:3344:TAP version 13
+  qa-diagnostico\test-unit.log:3345:# Subtest: HAL secuencial por tipo y c├│digos 
+independientes
+  qa-diagnostico\test-unit.log:3432:# pass 14
+> qa-diagnostico\test-unit.log:3433:# fail 0
+  qa-diagnostico\test-unit.log:3434:# cancelled 0
+  qa-diagnostico\test-unit.log:3435:# skipped 0
+  qa-diagnostico\test-unit.log:3436:# todo 0
+  qa-diagnostico\test-unit.log:3437:# duration_ms 269.9724
+  qa-diagnostico\test-unit.log:3438:
+  qa-diagnostico\test-unit.log:3439:[NOVZI QA] 
+apps\api\src\modules\licensing\licensing.unit.test.ts
+  qa-diagnostico\test-unit.log:3440:TAP version 13
+  qa-diagnostico\test-unit.log:3441:# Subtest: sin registro de licencia: imagen 
+habilitada, marca de agua obligatoria
+  qa-diagnostico\test-unit.log:3468:# pass 4
+> qa-diagnostico\test-unit.log:3469:# fail 0
+  qa-diagnostico\test-unit.log:3470:# cancelled 0
+  qa-diagnostico\test-unit.log:3471:# skipped 0
+  qa-diagnostico\test-unit.log:3472:# todo 0
+  qa-diagnostico\test-unit.log:3473:# duration_ms 270.4839
+  qa-diagnostico\test-unit.log:3474:
+  qa-diagnostico\test-unit.log:3475:[NOVZI QA] 
+apps\api\src\modules\projects\application\projects.service.unit.test.ts
+  qa-diagnostico\test-unit.log:3476:TAP version 13
+  qa-diagnostico\test-unit.log:3477:# Subtest: proyecto inaccesible: todas las 
+lecturas y operaciones hist├│ricas fallan antes de consultar documentos
+  qa-diagnostico\test-unit.log:3498:# pass 3
+> qa-diagnostico\test-unit.log:3499:# fail 0
+  qa-diagnostico\test-unit.log:3500:# cancelled 0
+  qa-diagnostico\test-unit.log:3501:# skipped 0
+  qa-diagnostico\test-unit.log:3502:# todo 0
+  qa-diagnostico\test-unit.log:3503:# duration_ms 464.2111
+  qa-diagnostico\test-unit.log:3504:
+> qa-diagnostico\test-unit.log:3505:[NOVZI QA] 
+apps\api\src\modules\projects\infrastructure\repository-failures.unit.test.ts
+  qa-diagnostico\test-unit.log:3506:TAP version 13
+  qa-diagnostico\test-unit.log:3507:# Subtest: repositorios: consultas sin filas 
+conservan ausencia y no fabrican resultados
+  qa-diagnostico\test-unit.log:3508:ok 1 - repositorios: consultas sin filas 
+conservan ausencia y no fabrican resultados
+  qa-diagnostico\test-unit.log:3509:  ---
+  qa-diagnostico\test-unit.log:3510:  duration_ms: 1.2862
+  qa-diagnostico\test-unit.log:3511:  type: 'test'
+  qa-diagnostico\test-unit.log:3512:  ...
+  qa-diagnostico\test-unit.log:3513:# Subtest: repositorios: rol presente se 
+devuelve sin elevar permisos
+  qa-diagnostico\test-unit.log:3624:# pass 19
+> qa-diagnostico\test-unit.log:3625:# fail 0
+  qa-diagnostico\test-unit.log:3626:# cancelled 0
+  qa-diagnostico\test-unit.log:3627:# skipped 0
+  qa-diagnostico\test-unit.log:3628:# todo 0
+  qa-diagnostico\test-unit.log:3629:# duration_ms 455.3627
+  qa-diagnostico\test-unit.log:3630:
+  qa-diagnostico\test-unit.log:3631:[NOVZI QA] apps\api\src\modules\projects\infrast
+ructure\repository-security-branches.unit.test.ts
+  qa-diagnostico\test-unit.log:3632:TAP version 13
+  qa-diagnostico\test-unit.log:3633:# Subtest: Repositorios: listados devuelven 
+├║nicamente filas autorizadas sin fabricar metadatos
+  qa-diagnostico\test-unit.log:3660:# pass 4
+> qa-diagnostico\test-unit.log:3661:# fail 0
+  qa-diagnostico\test-unit.log:3662:# cancelled 0
+  qa-diagnostico\test-unit.log:3663:# skipped 0
+  qa-diagnostico\test-unit.log:3664:# todo 0
+  qa-diagnostico\test-unit.log:3665:# duration_ms 435.4662
+  qa-diagnostico\test-unit.log:3666:
+  qa-diagnostico\test-unit.log:3667:[NOVZI QA] 
+apps\api\src\modules\projects\presentation\member-delegation.unit.test.ts
+  qa-diagnostico\test-unit.log:3668:TAP version 13
+  qa-diagnostico\test-unit.log:3669:# Subtest: membres├¡a delegada: impide 
+escalamiento de privilegios
+  qa-diagnostico\test-unit.log:3690:# pass 3
+> qa-diagnostico\test-unit.log:3691:# fail 0
+  qa-diagnostico\test-unit.log:3692:# cancelled 0
+  qa-diagnostico\test-unit.log:3693:# skipped 0
+  qa-diagnostico\test-unit.log:3694:# todo 0
+  qa-diagnostico\test-unit.log:3695:# duration_ms 843.7753
+  qa-diagnostico\test-unit.log:3696:
+  qa-diagnostico\test-unit.log:3697:[NOVZI QA] 
+apps\api\src\modules\projects\realtime\project-events.unit.test.ts
+  qa-diagnostico\test-unit.log:3698:TAP version 13
+  qa-diagnostico\test-unit.log:3699:# (node:19820) ExperimentalWarning: The 
+MockTimers API is an experimental feature and might change at any time
+  qa-diagnostico\test-unit.log:3752:# pass 8
+> qa-diagnostico\test-unit.log:3753:# fail 0
+  qa-diagnostico\test-unit.log:3754:# cancelled 0
+  qa-diagnostico\test-unit.log:3755:# skipped 0
+  qa-diagnostico\test-unit.log:3756:# todo 0
+  qa-diagnostico\test-unit.log:3757:# duration_ms 256.582
+  qa-diagnostico\test-unit.log:3758:
+  qa-diagnostico\test-unit.log:3759:[NOVZI QA] 
+apps\api\src\security\cookie.unit.test.ts
+  qa-diagnostico\test-unit.log:3760:TAP version 13
+  qa-diagnostico\test-unit.log:3761:# Subtest: cookie NOVZI incluye HttpOnly, 
+SameSite Lax y ruta limitada a la API
+  qa-diagnostico\test-unit.log:3788:# pass 4
+> qa-diagnostico\test-unit.log:3789:# fail 0
+  qa-diagnostico\test-unit.log:3790:# cancelled 0
+  qa-diagnostico\test-unit.log:3791:# skipped 0
+  qa-diagnostico\test-unit.log:3792:# todo 0
+  qa-diagnostico\test-unit.log:3793:# duration_ms 328.9887
+  qa-diagnostico\test-unit.log:3794:
+  qa-diagnostico\test-unit.log:3795:[NOVZI QA] 
+apps\api\src\security\project-access.unit.test.ts
+  qa-diagnostico\test-unit.log:3796:TAP version 13
+  qa-diagnostico\test-unit.log:3797:# Subtest: miembro del espacio sin acceso 
+expl├¡cito no puede leer proyectos
+  qa-diagnostico\test-unit.log:3818:# pass 3
+> qa-diagnostico\test-unit.log:3819:# fail 0
+  qa-diagnostico\test-unit.log:3820:# cancelled 0
+  qa-diagnostico\test-unit.log:3821:# skipped 0
+  qa-diagnostico\test-unit.log:3822:# todo 0
+  qa-diagnostico\test-unit.log:3823:# duration_ms 418.551
+  qa-diagnostico\test-unit.log:3824:
+  qa-diagnostico\test-unit.log:3825:[NOVZI QA] 
+apps\api\src\security\security.unit.test.ts
+  qa-diagnostico\test-unit.log:3826:TAP version 13
+  qa-diagnostico\test-unit.log:3827:# Subtest: contrase├▒as: hash con salt 
+individual, verificaci├│n, credencial equivocada
+  qa-diagnostico\test-unit.log:3875:# Subtest: presets: cada permiso pertenece al 
+cat├ílogo, sin entradas duplicadas
+> qa-diagnostico\test-unit.log:3876:not ok 9 - presets: cada permiso pertenece al 
+cat├ílogo, sin entradas duplicadas
+  qa-diagnostico\test-unit.log:3877:  ---
+  qa-diagnostico\test-unit.log:3878:  duration_ms: 1.1172
+  qa-diagnostico\test-unit.log:3879:  type: 'test'
+  qa-diagnostico\test-unit.log:3880:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\\ap
+ps\\api\\src\\security\\security.unit.test.ts:49:1'
+> qa-diagnostico\test-unit.log:3881:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-unit.log:3882:  error: |-
+  qa-diagnostico\test-unit.log:3883:    Permisos duplicados en owner
+  qa-diagnostico\test-unit.log:3884:    
+  qa-diagnostico\test-unit.log:3885:    431 !== 419
+  qa-diagnostico\test-unit.log:3886:    
+  qa-diagnostico\test-unit.log:3887:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-unit.log:3888:  name: 'AssertionError'
+  qa-diagnostico\test-unit.log:3889:  expected: 419
+  qa-diagnostico\test-unit.log:3890:  actual: 431
+  qa-diagnostico\test-unit.log:3891:  operator: 'strictEqual'
+  qa-diagnostico\test-unit.log:3892:  stack: |-
+  qa-diagnostico\test-unit.log:3893:    TestContext.<anonymous> 
+(C:\Users\MSI1\Desktop\novzi\apps\api\src\security\security.unit.test.ts:52:10)
+  qa-diagnostico\test-unit.log:3894:    Test.runInAsyncScope 
+(node:async_hooks:214:14)
+  qa-diagnostico\test-unit.log:3895:    Test.run 
+(node:internal/test_runner/test:1047:25)
+  qa-diagnostico\test-unit.log:3896:    Test.processPendingSubtests 
+(node:internal/test_runner/test:744:18)
+  qa-diagnostico\test-unit.log:3904:# pass 8
+> qa-diagnostico\test-unit.log:3905:# fail 1
+  qa-diagnostico\test-unit.log:3906:# cancelled 0
+  qa-diagnostico\test-unit.log:3907:# skipped 0
+  qa-diagnostico\test-unit.log:3908:# todo 0
+  qa-diagnostico\test-unit.log:3909:# duration_ms 1817.2706
+  qa-diagnostico\test-unit.log:3910:npm.cmd : [FALL├ô] 
+apps\api\src\security\security.unit.test.ts
+  qa-diagnostico\test-unit.log:3911:En línea: 8 Carácter: 5
+  qa-diagnostico\test-unit.log:3912:+     & npm.cmd run $prueba 2>&1 |
+  qa-diagnostico\test-unit.log:3913:+     ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  qa-diagnostico\test-unit.log:3921:# Subtest: beautify separa cajas, preserva 
+identidades y no cambia la sem├íntica
+> qa-diagnostico\test-unit.log:3922:not ok 1 - beautify separa cajas, preserva 
+identidades y no cambia la sem├íntica
+  qa-diagnostico\test-unit.log:3923:  ---
+  qa-diagnostico\test-unit.log:3924:  duration_ms: 2.8805
+  qa-diagnostico\test-unit.log:3925:  type: 'test'
+  qa-diagnostico\test-unit.log:3926:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\\ap
+ps\\web\\src\\features\\editor\\domain\\diagram-beautify.unit.test.ts:6:1'
+> qa-diagnostico\test-unit.log:3927:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-unit.log:3928:  error: |-
+  qa-diagnostico\test-unit.log:3929:    Values have same structure but are not 
+reference-equal:
+  qa-diagnostico\test-unit.log:3930:    
+  qa-diagnostico\test-unit.log:3931:    [
+  qa-diagnostico\test-unit.log:3932:      {
+  qa-diagnostico\test-unit.log:3933:        id: 'ab',
+  qa-diagnostico\test-unit.log:3934:        source: 'a',
+  qa-diagnostico\test-unit.log:3935:        sourceHandle: 'right',
+  qa-diagnostico\test-unit.log:3936:        target: 'b',
+  qa-diagnostico\test-unit.log:3948:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-unit.log:3949:  name: 'AssertionError'
+  qa-diagnostico\test-unit.log:3950:  expected:
+  qa-diagnostico\test-unit.log:3951:    0:
+  qa-diagnostico\test-unit.log:3952:      id: 'ab'
+  qa-diagnostico\test-unit.log:3953:      source: 'a'
+  qa-diagnostico\test-unit.log:3954:      target: 'b'
+  qa-diagnostico\test-unit.log:3955:      sourceHandle: 'right'
+  qa-diagnostico\test-unit.log:3956:      targetHandle: 'left'
+  qa-diagnostico\test-unit.log:3957:    1:
+  qa-diagnostico\test-unit.log:4005:# pass 3
+> qa-diagnostico\test-unit.log:4006:# fail 1
+  qa-diagnostico\test-unit.log:4007:# cancelled 0
+  qa-diagnostico\test-unit.log:4008:# skipped 0
+  qa-diagnostico\test-unit.log:4009:# todo 0
+  qa-diagnostico\test-unit.log:4010:# duration_ms 333.2804
+  qa-diagnostico\test-unit.log:4011:[FALL├ô] 
+apps\web\src\features\editor\domain\diagram-beautify.unit.test.ts
+  qa-diagnostico\test-unit.log:4012:
+  qa-diagnostico\test-unit.log:4013:[NOVZI QA] 
+apps\web\src\features\editor\domain\diagram-routing.ux12.unit.test.ts
+  qa-diagnostico\test-unit.log:4014:TAP version 13
+  qa-diagnostico\test-unit.log:4021:# Subtest: Organizar deja corredores amplios, 
+pero conserva todas las relaciones y fichas
+> qa-diagnostico\test-unit.log:4022:not ok 2 - Organizar deja corredores amplios, 
+pero conserva todas las relaciones y fichas
+  qa-diagnostico\test-unit.log:4023:  ---
+  qa-diagnostico\test-unit.log:4024:  duration_ms: 2.5334
+  qa-diagnostico\test-unit.log:4025:  type: 'test'
+  qa-diagnostico\test-unit.log:4026:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\\ap
+ps\\web\\src\\features\\editor\\domain\\diagram-routing.ux12.unit.test.ts:20:1'
+> qa-diagnostico\test-unit.log:4027:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-unit.log:4028:  error: |-
+  qa-diagnostico\test-unit.log:4029:    Expected "actual" to be reference-equal to 
+"expected":
+  qa-diagnostico\test-unit.log:4030:    + actual - expected
+  qa-diagnostico\test-unit.log:4031:    
+  qa-diagnostico\test-unit.log:4032:      [
+  qa-diagnostico\test-unit.log:4033:        {
+  qa-diagnostico\test-unit.log:4034:          id: '1',
+  qa-diagnostico\test-unit.log:4035:          label: 'Requiere validaci├│n manual 
+de la relaci├│n',
+  qa-diagnostico\test-unit.log:4036:          source: 'a',
+  qa-diagnostico\test-unit.log:4051:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-unit.log:4052:  name: 'AssertionError'
+  qa-diagnostico\test-unit.log:4053:  expected:
+  qa-diagnostico\test-unit.log:4054:    0:
+  qa-diagnostico\test-unit.log:4055:      id: '1'
+  qa-diagnostico\test-unit.log:4056:      source: 'a'
+  qa-diagnostico\test-unit.log:4057:      target: 'b'
+  qa-diagnostico\test-unit.log:4058:      label: 'Requiere validaci├│n manual de la 
+relaci├│n'
+  qa-diagnostico\test-unit.log:4059:    1:
+  qa-diagnostico\test-unit.log:4060:      id: '2'
+  qa-diagnostico\test-unit.log:4092:# pass 1
+> qa-diagnostico\test-unit.log:4093:# fail 1
+  qa-diagnostico\test-unit.log:4094:# cancelled 0
+  qa-diagnostico\test-unit.log:4095:# skipped 0
+  qa-diagnostico\test-unit.log:4096:# todo 0
+  qa-diagnostico\test-unit.log:4097:# duration_ms 394.7503
+  qa-diagnostico\test-unit.log:4098:[FALL├ô] 
+apps\web\src\features\editor\domain\diagram-routing.ux12.unit.test.ts
+  qa-diagnostico\test-unit.log:4099:
+  qa-diagnostico\test-unit.log:4100:[NOVZI QA] 
+apps\web\src\features\editor\domain\document-commands.unit.test.ts
+  qa-diagnostico\test-unit.log:4101:TAP version 13
+  qa-diagnostico\test-unit.log:4165:# pass 10
+> qa-diagnostico\test-unit.log:4166:# fail 0
+  qa-diagnostico\test-unit.log:4167:# cancelled 0
+  qa-diagnostico\test-unit.log:4168:# skipped 0
+  qa-diagnostico\test-unit.log:4169:# todo 0
+  qa-diagnostico\test-unit.log:4170:# duration_ms 368.7066
+  qa-diagnostico\test-unit.log:4171:
+  qa-diagnostico\test-unit.log:4172:[NOVZI QA] 
+apps\web\src\features\editor\domain\graph-selection.unit.test.ts
+  qa-diagnostico\test-unit.log:4173:TAP version 13
+  qa-diagnostico\test-unit.log:4174:# Subtest: solo muestra procesos seleccionados 
+sin dependencias
+  qa-diagnostico\test-unit.log:4219:# pass 7
+> qa-diagnostico\test-unit.log:4220:# fail 0
+  qa-diagnostico\test-unit.log:4221:# cancelled 0
+  qa-diagnostico\test-unit.log:4222:# skipped 0
+  qa-diagnostico\test-unit.log:4223:# todo 0
+  qa-diagnostico\test-unit.log:4224:# duration_ms 393.0543
+  qa-diagnostico\test-unit.log:4225:
+  qa-diagnostico\test-unit.log:4226:[NOVZI QA] 
+apps\web\src\features\editor\domain\reconnect-relation.ux.unit.test.ts
+  qa-diagnostico\test-unit.log:4227:TAP version 13
+  qa-diagnostico\test-unit.log:4228:# Subtest: reconexi├│n visual conserva 
+identidad, etiquetas y descripci├│n y no muta el original
+  qa-diagnostico\test-unit.log:4255:# pass 4
+> qa-diagnostico\test-unit.log:4256:# fail 0
+  qa-diagnostico\test-unit.log:4257:# cancelled 0
+  qa-diagnostico\test-unit.log:4258:# skipped 0
+  qa-diagnostico\test-unit.log:4259:# todo 0
+  qa-diagnostico\test-unit.log:4260:# duration_ms 330.5572
+  qa-diagnostico\test-unit.log:4261:
+  qa-diagnostico\test-unit.log:4262:[NOVZI QA] 
+apps\web\src\features\editor\uml\RelationModalUx.unit.test.ts
+  qa-diagnostico\test-unit.log:4263:TAP version 13
+  qa-diagnostico\test-unit.log:4264:# C:\\Users\\MSI1\\Desktop\\novzi\\apps\\web\\sr
+c\\features\\editor\\uml\\ClassRelationDialog.tsx:7
+  qa-diagnostico\test-unit.log:4266:#                  ^
+> qa-diagnostico\test-unit.log:4267:# ReferenceError: React is not defined
+  qa-diagnostico\test-unit.log:4268:#     at <anonymous> (C:\\Users\\MSI1\\Desktop\\
+novzi\\apps\\web\\src\\features\\editor\\uml\\ClassRelationDialog.tsx:7:18)
+  qa-diagnostico\test-unit.log:4269:#     at ModuleJob.run 
+(node:internal/modules/esm/module_job:343:25)
+  qa-diagnostico\test-unit.log:4270:#     at async onImport.tracePromise.__proto__ 
+(node:internal/modules/esm/loader:647:26)
+  qa-diagnostico\test-unit.log:4271:#     at async asyncRunEntryPointWithESMLoader 
+(node:internal/modules/run_main:117:5)
+  qa-diagnostico\test-unit.log:4272:# Node.js v22.18.0
+  qa-diagnostico\test-unit.log:4273:# Subtest: C:\\Users\\MSI1\\Desktop\\novzi\\apps
+\\web\\src\\features\\editor\\uml\\RelationModalUx.unit.test.ts
+> qa-diagnostico\test-unit.log:4274:not ok 1 - C:\\Users\\MSI1\\Desktop\\novzi\\apps
+\\web\\src\\features\\editor\\uml\\RelationModalUx.unit.test.ts
+  qa-diagnostico\test-unit.log:4275:  ---
+  qa-diagnostico\test-unit.log:4276:  duration_ms: 1776.9661
+  qa-diagnostico\test-unit.log:4277:  type: 'test'
+  qa-diagnostico\test-unit.log:4278:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\\ap
+ps\\web\\src\\features\\editor\\uml\\RelationModalUx.unit.test.ts:1:1'
+> qa-diagnostico\test-unit.log:4279:  failureType: 'testCodeFailure'
+  qa-diagnostico\test-unit.log:4280:  exitCode: 1
+  qa-diagnostico\test-unit.log:4281:  signal: ~
+> qa-diagnostico\test-unit.log:4282:  error: 'test failed'
+> qa-diagnostico\test-unit.log:4283:  code: 'ERR_TEST_FAILURE'
+  qa-diagnostico\test-unit.log:4284:  ...
+  qa-diagnostico\test-unit.log:4285:1..1
+  qa-diagnostico\test-unit.log:4286:# tests 1
+  qa-diagnostico\test-unit.log:4287:# suites 0
+  qa-diagnostico\test-unit.log:4288:# pass 0
+> qa-diagnostico\test-unit.log:4289:# fail 1
+  qa-diagnostico\test-unit.log:4290:# cancelled 0
+  qa-diagnostico\test-unit.log:4291:# skipped 0
+  qa-diagnostico\test-unit.log:4292:# todo 0
+  qa-diagnostico\test-unit.log:4293:# duration_ms 1790.8056
+  qa-diagnostico\test-unit.log:4294:[FALL├ô] 
+apps\web\src\features\editor\uml\RelationModalUx.unit.test.ts
+  qa-diagnostico\test-unit.log:4295:
+  qa-diagnostico\test-unit.log:4296:[NOVZI QA] 
+apps\web\src\shared\api\http.unit.test.ts
+  qa-diagnostico\test-unit.log:4297:TAP version 13
+  qa-diagnostico\test-unit.log:4325:# pass 4
+> qa-diagnostico\test-unit.log:4326:# fail 0
+  qa-diagnostico\test-unit.log:4327:# cancelled 0
+  qa-diagnostico\test-unit.log:4328:# skipped 0
+  qa-diagnostico\test-unit.log:4329:# todo 0
+  qa-diagnostico\test-unit.log:4330:# duration_ms 291.4209
+  qa-diagnostico\test-unit.log:4331:
+  qa-diagnostico\test-unit.log:4332:[NOVZI QA] 
+packages\contracts\src\collaboration.unit.test.ts
+  qa-diagnostico\test-unit.log:4333:TAP version 13
+  qa-diagnostico\test-unit.log:4334:# Subtest: colaboraci├│n: ediciones 
+simult├íneas en C1 y C2 se fusionan, sin pisarse
+  qa-diagnostico\test-unit.log:4403:# pass 11
+> qa-diagnostico\test-unit.log:4404:# fail 0
+  qa-diagnostico\test-unit.log:4405:# cancelled 0
+  qa-diagnostico\test-unit.log:4406:# skipped 0
+  qa-diagnostico\test-unit.log:4407:# todo 0
+  qa-diagnostico\test-unit.log:4408:# duration_ms 364.9198
+  qa-diagnostico\test-unit.log:4409:
+  qa-diagnostico\test-unit.log:4410:[NOVZI QA] 
+packages\contracts\src\contracts.unit.test.ts
+  qa-diagnostico\test-unit.log:4411:TAP version 13
+  qa-diagnostico\test-unit.log:4412:# Subtest: documento inicial y fixture son 
+v├ílidos y serializables
+  qa-diagnostico\test-unit.log:4439:# pass 4
+> qa-diagnostico\test-unit.log:4440:# fail 0
+  qa-diagnostico\test-unit.log:4441:# cancelled 0
+  qa-diagnostico\test-unit.log:4442:# skipped 0
+  qa-diagnostico\test-unit.log:4443:# todo 0
+  qa-diagnostico\test-unit.log:4444:# duration_ms 354.1882
+  qa-diagnostico\test-unit.log:4445:
+  qa-diagnostico\test-unit.log:4446:[NOVZI QA] 
+packages\contracts\src\coverage-deployment-notation-boundaries.unit.test.ts
+  qa-diagnostico\test-unit.log:4447:TAP version 13
+  qa-diagnostico\test-unit.log:4448:# Subtest: Notaci├│n: palabras reservadas y 
+relaciones sin etiqueta hist├│rica no admiten t├¡tulos libres de usuario
+  qa-diagnostico\test-unit.log:4487:# pass 6
+> qa-diagnostico\test-unit.log:4488:# fail 0
+  qa-diagnostico\test-unit.log:4489:# cancelled 0
+  qa-diagnostico\test-unit.log:4490:# skipped 0
+  qa-diagnostico\test-unit.log:4491:# todo 0
+  qa-diagnostico\test-unit.log:4492:# duration_ms 360.9719
+  qa-diagnostico\test-unit.log:4493:
+  qa-diagnostico\test-unit.log:4494:[NOVZI QA] 
+packages\contracts\src\coverage-geometry.unit.test.ts
+  qa-diagnostico\test-unit.log:4495:TAP version 13
+  qa-diagnostico\test-unit.log:4496:# Subtest: tama├▒os m├¡nimos protegidos para 
+puertos, par├ímetros, invariantes y regiones
+  qa-diagnostico\test-unit.log:4535:# pass 6
+> qa-diagnostico\test-unit.log:4536:# fail 0
+  qa-diagnostico\test-unit.log:4537:# cancelled 0
+  qa-diagnostico\test-unit.log:4538:# skipped 0
+  qa-diagnostico\test-unit.log:4539:# todo 0
+  qa-diagnostico\test-unit.log:4540:# duration_ms 353.2704
+  qa-diagnostico\test-unit.log:4541:
+  qa-diagnostico\test-unit.log:4542:[NOVZI QA] 
+packages\contracts\src\coverage-label-geometry-boundaries.unit.test.ts
+  qa-diagnostico\test-unit.log:4543:TAP version 13
+  qa-diagnostico\test-unit.log:4544:# Subtest: Notaci├│n UML: alias de clase y 
+par├ímetros tipados resuelven fichas existentes y faltantes sin mutar modelo
+  qa-diagnostico\test-unit.log:4577:# pass 5
+> qa-diagnostico\test-unit.log:4578:# fail 0
+  qa-diagnostico\test-unit.log:4579:# cancelled 0
+  qa-diagnostico\test-unit.log:4580:# skipped 0
+  qa-diagnostico\test-unit.log:4581:# todo 0
+  qa-diagnostico\test-unit.log:4582:# duration_ms 332.1896
+  qa-diagnostico\test-unit.log:4583:
+  qa-diagnostico\test-unit.log:4584:[NOVZI QA] 
+packages\contracts\src\coverage-model.unit.test.ts
+  qa-diagnostico\test-unit.log:4585:TAP version 13
+  qa-diagnostico\test-unit.log:4586:# Subtest: Deployment: recursos de tipo e 
+instancia conservan anclajes definidos por el contorno visible
+  qa-diagnostico\test-unit.log:4643:# pass 9
+> qa-diagnostico\test-unit.log:4644:# fail 0
+  qa-diagnostico\test-unit.log:4645:# cancelled 0
+  qa-diagnostico\test-unit.log:4646:# skipped 0
+  qa-diagnostico\test-unit.log:4647:# todo 0
+  qa-diagnostico\test-unit.log:4648:# duration_ms 370.6424
+  qa-diagnostico\test-unit.log:4649:
+  qa-diagnostico\test-unit.log:4650:[NOVZI QA] 
+packages\contracts\src\coverage-notation-scenes.unit.test.ts
+  qa-diagnostico\test-unit.log:4651:TAP version 13
+  qa-diagnostico\test-unit.log:4652:# Subtest: Ensamblaje: ruta recta larga 
+prioriza tramo estable, curvas mantienen punto y tangente
+  qa-diagnostico\test-unit.log:4691:# pass 6
+> qa-diagnostico\test-unit.log:4692:# fail 0
+  qa-diagnostico\test-unit.log:4693:# cancelled 0
+  qa-diagnostico\test-unit.log:4694:# skipped 0
+  qa-diagnostico\test-unit.log:4695:# todo 0
+  qa-diagnostico\test-unit.log:4696:# duration_ms 390.7782
+  qa-diagnostico\test-unit.log:4697:
+  qa-diagnostico\test-unit.log:4698:[NOVZI QA] 
+packages\contracts\src\coverage-policy-boundaries.unit.test.ts
+  qa-diagnostico\test-unit.log:4699:TAP version 13
+  qa-diagnostico\test-unit.log:4700:# Subtest: Notaci├│n UML: relaci├│n prohibida 
+conserva historial y la correcci├│n can├│nica preserva identidad y descripci├│n
+  qa-diagnostico\test-unit.log:4781:# pass 13
+> qa-diagnostico\test-unit.log:4782:# fail 0
+  qa-diagnostico\test-unit.log:4783:# cancelled 0
+  qa-diagnostico\test-unit.log:4784:# skipped 0
+  qa-diagnostico\test-unit.log:4785:# todo 0
+  qa-diagnostico\test-unit.log:4786:# duration_ms 358.8242
+  qa-diagnostico\test-unit.log:4787:
+  qa-diagnostico\test-unit.log:4788:[NOVZI QA] 
+packages\contracts\src\document-validation.unit.test.ts
+  qa-diagnostico\test-unit.log:4789:TAP version 13
+  qa-diagnostico\test-unit.log:4790:# Subtest: validaci├│n JSON admite dimensiones, 
+filtros y relaciones v├ílidos y rechaza cada tipo de corrupci├│n
+  qa-diagnostico\test-unit.log:4805:# pass 2
+> qa-diagnostico\test-unit.log:4806:# fail 0
+  qa-diagnostico\test-unit.log:4807:# cancelled 0
+  qa-diagnostico\test-unit.log:4808:# skipped 0
+  qa-diagnostico\test-unit.log:4809:# todo 0
+  qa-diagnostico\test-unit.log:4810:# duration_ms 331.9032
+  qa-diagnostico\test-unit.log:4811:
+  qa-diagnostico\test-unit.log:4812:[NOVZI QA] 
+packages\contracts\src\permissions-labels.unit.test.ts
+  qa-diagnostico\test-unit.log:4813:TAP version 13
+  qa-diagnostico\test-unit.log:4814:# Subtest: el cat├ílogo de permisos tiene 
+etiquetas legibles y no duplica claves
+> qa-diagnostico\test-unit.log:4815:not ok 1 - el cat├ílogo de permisos tiene 
+etiquetas legibles y no duplica claves
+  qa-diagnostico\test-unit.log:4816:  ---
+  qa-diagnostico\test-unit.log:4817:  duration_ms: 2.4711
+  qa-diagnostico\test-unit.log:4818:  type: 'test'
+  qa-diagnostico\test-unit.log:4819:  location: 'C:\\Users\\MSI1\\Desktop\\novzi\\pa
+ckages\\contracts\\src\\permissions-labels.unit.test.ts:4:1'
+> qa-diagnostico\test-unit.log:4820:  failureType: 'testCodeFailure'
+> qa-diagnostico\test-unit.log:4821:  error: |-
+  qa-diagnostico\test-unit.log:4822:    Expected values to be strictly equal:
+  qa-diagnostico\test-unit.log:4823:    
+  qa-diagnostico\test-unit.log:4824:    419 !== 431
+  qa-diagnostico\test-unit.log:4825:    
+  qa-diagnostico\test-unit.log:4826:  code: 'ERR_ASSERTION'
+> qa-diagnostico\test-unit.log:4827:  name: 'AssertionError'
+  qa-diagnostico\test-unit.log:4828:  expected: 431
+  qa-diagnostico\test-unit.log:4829:  actual: 419
+  qa-diagnostico\test-unit.log:4830:  operator: 'strictEqual'
+  qa-diagnostico\test-unit.log:4831:  stack: |-
+  qa-diagnostico\test-unit.log:4832:    TestContext.<anonymous> (C:\Users\MSI1\Deskt
+op\novzi\packages\contracts\src\permissions-labels.unit.test.ts:5:9)
+  qa-diagnostico\test-unit.log:4833:    Test.runInAsyncScope 
+(node:async_hooks:214:14)
+  qa-diagnostico\test-unit.log:4834:    Test.run 
+(node:internal/test_runner/test:1047:25)
+  qa-diagnostico\test-unit.log:4835:    Test.start 
+(node:internal/test_runner/test:944:17)
+  qa-diagnostico\test-unit.log:4847:# pass 1
+> qa-diagnostico\test-unit.log:4848:# fail 1
+  qa-diagnostico\test-unit.log:4849:# cancelled 0
+  qa-diagnostico\test-unit.log:4850:# skipped 0
+  qa-diagnostico\test-unit.log:4851:# todo 0
+  qa-diagnostico\test-unit.log:4852:# duration_ms 264.9977
+  qa-diagnostico\test-unit.log:4853:[FALL├ô] 
+packages\contracts\src\permissions-labels.unit.test.ts
+  qa-diagnostico\test-unit.log:4854:
+  qa-diagnostico\test-unit.log:4855:[NOVZI QA] 
+packages\contracts\src\uml-activity-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:4856:TAP version 13
+  qa-diagnostico\test-unit.log:5004:# pass 24
+> qa-diagnostico\test-unit.log:5005:# fail 0
+  qa-diagnostico\test-unit.log:5006:# cancelled 0
+  qa-diagnostico\test-unit.log:5007:# skipped 0
+  qa-diagnostico\test-unit.log:5008:# todo 0
+  qa-diagnostico\test-unit.log:5009:# duration_ms 376.7433
+  qa-diagnostico\test-unit.log:5010:
+  qa-diagnostico\test-unit.log:5011:[NOVZI QA] 
+packages\contracts\src\uml-class-audit.unit.test.ts
+  qa-diagnostico\test-unit.log:5012:TAP version 13
+  qa-diagnostico\test-unit.log:5013:# Subtest: AUD-CL-001 attribute: solo 
+clasificadores existentes
+  qa-diagnostico\test-unit.log:5382:# pass 61
+> qa-diagnostico\test-unit.log:5383:# fail 0
+  qa-diagnostico\test-unit.log:5384:# cancelled 0
+  qa-diagnostico\test-unit.log:5385:# skipped 0
+  qa-diagnostico\test-unit.log:5386:# todo 0
+  qa-diagnostico\test-unit.log:5387:# duration_ms 442.2954
+  qa-diagnostico\test-unit.log:5388:
+  qa-diagnostico\test-unit.log:5389:[NOVZI QA] 
+packages\contracts\src\uml-class-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:5390:TAP version 13
+  qa-diagnostico\test-unit.log:5391:# Subtest: T01 cat├ílogo completo, roundtrip de 
+cada tipo y capacidades espec├¡ficas
+  qa-diagnostico\test-unit.log:5574:# pass 30
+> qa-diagnostico\test-unit.log:5575:# fail 0
+  qa-diagnostico\test-unit.log:5576:# cancelled 0
+  qa-diagnostico\test-unit.log:5577:# skipped 0
+  qa-diagnostico\test-unit.log:5578:# todo 0
+  qa-diagnostico\test-unit.log:5579:# duration_ms 374.7122
+  qa-diagnostico\test-unit.log:5580:
+  qa-diagnostico\test-unit.log:5581:[NOVZI QA] 
+packages\contracts\src\uml-component-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:5582:TAP version 13
+  qa-diagnostico\test-unit.log:5583:# Subtest: CMP-T01/T09 fixture 
+NOVZI_QA_UML_COMPONENTES.json
+  qa-diagnostico\test-unit.log:5946:# pass 60
+> qa-diagnostico\test-unit.log:5947:# fail 0
+  qa-diagnostico\test-unit.log:5948:# cancelled 0
+  qa-diagnostico\test-unit.log:5949:# skipped 0
+  qa-diagnostico\test-unit.log:5950:# todo 0
+  qa-diagnostico\test-unit.log:5951:# duration_ms 578.0286
+  qa-diagnostico\test-unit.log:5952:
+  qa-diagnostico\test-unit.log:5953:[NOVZI QA] 
+packages\contracts\src\uml-deployment-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:5954:TAP version 13
+  qa-diagnostico\test-unit.log:5955:# Subtest: DEP-01 a 06 fixture autocontenido 
+integral
+  qa-diagnostico\test-unit.log:6306:# pass 58
+> qa-diagnostico\test-unit.log:6307:# fail 0
+  qa-diagnostico\test-unit.log:6308:# cancelled 0
+  qa-diagnostico\test-unit.log:6309:# skipped 0
+  qa-diagnostico\test-unit.log:6310:# todo 0
+  qa-diagnostico\test-unit.log:6311:# duration_ms 449.4364
+  qa-diagnostico\test-unit.log:6312:
+  qa-diagnostico\test-unit.log:6313:[NOVZI QA] 
+packages\contracts\src\uml-quality.unit.test.ts
+  qa-diagnostico\test-unit.log:6314:TAP version 13
+  qa-diagnostico\test-unit.log:6315:# Subtest: dimensiones de los s├¡mbolos, 
+contenedores y cajas conservan sus m├¡nimos y tama├▒os expl├¡citos
+  qa-diagnostico\test-unit.log:6378:# pass 10
+> qa-diagnostico\test-unit.log:6379:# fail 0
+  qa-diagnostico\test-unit.log:6380:# cancelled 0
+  qa-diagnostico\test-unit.log:6381:# skipped 0
+  qa-diagnostico\test-unit.log:6382:# todo 0
+  qa-diagnostico\test-unit.log:6383:# duration_ms 342.7676
+  qa-diagnostico\test-unit.log:6384:
+  qa-diagnostico\test-unit.log:6385:[NOVZI QA] 
+packages\contracts\src\uml-sequence-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:6386:TAP version 13
+  qa-diagnostico\test-unit.log:6387:# Subtest: SEQ-T01 cat├ílogo nativo exacto, sin 
+caja de mensaje ni actor duplicado
+  qa-diagnostico\test-unit.log:6816:# pass 71
+> qa-diagnostico\test-unit.log:6817:# fail 0
+  qa-diagnostico\test-unit.log:6818:# cancelled 0
+  qa-diagnostico\test-unit.log:6819:# skipped 0
+  qa-diagnostico\test-unit.log:6820:# todo 0
+  qa-diagnostico\test-unit.log:6821:# duration_ms 1224.7867
+  qa-diagnostico\test-unit.log:6822:
+  qa-diagnostico\test-unit.log:6823:[NOVZI QA] 
+packages\contracts\src\uml-usecase-policy.unit.test.ts
+  qa-diagnostico\test-unit.log:6824:TAP version 13
+  qa-diagnostico\test-unit.log:6825:# Subtest: T01 creaci├│n solo seis UML y 
+diagramas NOVZI; cat├ílogo hist├│rico conserva tipos
+  qa-diagnostico\test-unit.log:6942:# pass 19
+> qa-diagnostico\test-unit.log:6943:# fail 0
+  qa-diagnostico\test-unit.log:6944:# cancelled 0
+  qa-diagnostico\test-unit.log:6945:# skipped 0
+  qa-diagnostico\test-unit.log:6946:# todo 0
+  qa-diagnostico\test-unit.log:6947:# duration_ms 439.8356
+
+

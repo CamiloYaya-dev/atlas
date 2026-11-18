@@ -3,6 +3,7 @@ import {identity} from '../../../security/identity'
 import {assertUUID,DomainError} from '../../../domain/errors'
 import {ProjectsService} from '../application/projects.service'
 import {projectEvents} from '../realtime/project-events'
+import {projectAccess} from '../../../security/roles'
 const service=new ProjectsService()
 const object=(v:unknown):Record<string,unknown>=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new DomainError('JSON requerido',400);return v as Record<string,unknown>}
 export async function registerProjectController(app:FastifyInstance){
@@ -32,8 +33,8 @@ export async function registerProjectController(app:FastifyInstance){
    'X-Content-Type-Options':'nosniff',
    'Access-Control-Allow-Credentials':'true',
   })
-  reply.raw.write(': ATLAS live\n\n')
-  projectEvents.subscribe(req.params.projectId,clientId,actor.id,actor.displayName,reply.raw,snapshot.version,async()=>{await identity(req);await service.assertReadable(req.params.projectId,actor.id)})
+  reply.raw.write(': NOVZI live\n\n')
+  projectEvents.subscribe(req.params.projectId,clientId,actor.id,actor.displayName,reply.raw,snapshot.version,async()=>{await identity(req);const current=await service.loadDocument(req.params.projectId,actor.id);if(!current)throw new DomainError('Proyecto no encontrado',404);projectEvents.updateVisibility(req.params.projectId,clientId,new Set(current.document.diagrams.map(d=>d.id)),new Set(Object.keys(current.document.elements)))},{diagrams:new Set(snapshot.document.diagrams.map(d=>d.id)),elements:new Set(Object.keys(snapshot.document.elements))})
  })
  app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/presence',async req=>{
   assertUUID(req.params.projectId)
@@ -50,6 +51,31 @@ export async function registerProjectController(app:FastifyInstance){
   projectEvents.updatePresence(req.params.projectId,clientId,actor.id,diagramId as string|null,elementId as string|null)
   return {ok:true}
  })
+ app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/access',async req=>{
+  assertUUID(req.params.projectId);const a=await projectAccess(req.params.projectId,(await identity(req)).id)
+  return {roleId:a.roleId,roleKey:a.roleKey,roleName:a.roleName,permissions:[...a.permissions]}
+ })
+ app.delete<{Params:{projectId:string}}>('/api/v1/projects/:projectId',async req=>{
+  assertUUID(req.params.projectId);return service.delete(req.params.projectId,(await identity(req)).id)
+ })
+ app.patch<{Params:{projectId:string}}>('/api/v1/projects/:projectId',async req=>{
+  assertUUID(req.params.projectId)
+  return service.rename(req.params.projectId,object(req.body).name,(await identity(req)).id)
+ })
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore',async req=>{
+  assertUUID(req.params.projectId)
+  const actor=await identity(req),b=object(req.body)
+  if(projectEvents.hasOtherParticipants(req.params.projectId,actor.id))throw new DomainError('Hay otra persona conectada. Prepara una rama y revisa los cambios antes de restaurar.',409)
+  const restored=await service.restoreVersion(req.params.projectId,b.sourceVersion,b.expectedVersion,actor.id)
+  projectEvents.publishVersion(req.params.projectId,restored.version)
+  return restored
+ })
+ // Reviewable restoration branches: immutable historical source + expected-version CAS.
+ app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore-branches',async req=>{assertUUID(req.params.projectId);return service.listRestoreBranches(req.params.projectId,(await identity(req)).id)})
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/restore-branches',async req=>{assertUUID(req.params.projectId);return service.createRestoreBranch(req.params.projectId,object(req.body).sourceVersion,(await identity(req)).id)})
+ app.get<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId/preview',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);return service.previewRestoreBranch(req.params.projectId,req.params.branchId,(await identity(req)).id)})
+ app.post<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId/apply',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);const actor=await identity(req),body=object(req.body);if(body.mode==='replace'&&projectEvents.hasOtherParticipants(req.params.projectId,actor.id))throw new DomainError('No puedes reemplazar todo mientras otra persona está conectada. Usa fusión.',409);const restored=await service.applyRestoreBranch(req.params.projectId,req.params.branchId,actor.id,body);projectEvents.publishVersion(req.params.projectId,restored.version);return restored})
+ app.delete<{Params:{projectId:string;branchId:string}}>('/api/v1/projects/:projectId/restore-branches/:branchId',async req=>{assertUUID(req.params.projectId);assertUUID(req.params.branchId);return service.discardRestoreBranch(req.params.projectId,req.params.branchId,(await identity(req)).id)})
  app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/export',async req=>{assertUUID(req.params.projectId);return service.exportDocument(req.params.projectId,(await identity(req)).id)})
  app.put<{Params:{projectId:string}}>('/api/v1/projects/:projectId/document',async req=>{
   assertUUID(req.params.projectId)
@@ -63,5 +89,5 @@ export async function registerProjectController(app:FastifyInstance){
   projectEvents.publishVersion(req.params.projectId,version)
   return {version}
  })
- app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/import',async req=>{assertUUID(req.params.projectId);const b=object(req.body);const actor=await identity(req);const version=await service.saveDocument(req.params.projectId,b.document,b.expectedVersion,actor.id,'import');projectEvents.publishVersion(req.params.projectId,version);return {version}})
+ app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/import',async req=>{assertUUID(req.params.projectId);const b=object(req.body);const actor=await identity(req);const version=await service.saveDocument(req.params.projectId,b.document,b.expectedVersion,actor.id,'import',b.scope);projectEvents.publishVersion(req.params.projectId,version);return {version}})
 }

@@ -3,7 +3,7 @@ import App from './App'
 import {demoDocument} from './demo'
 import * as compat from './lib'
 import {emptyDoc,diagramLabels,createElement} from './types'
-import {demoDocument as fixture} from '@atlas/fixtures'
+import {demoDocument as fixture} from '@novzi/fixtures'
 import {request} from './shared/api/http'
 
 // Garantiza que los puntos públicos de entrada y compatibilidad V3 conservan
@@ -11,7 +11,7 @@ import {request} from './shared/api/http'
 describe('Entrypoints web y compatibilidad hacia atrás',()=>{
  it('App expone el editor real y no lo sustituye por un modo demo',()=>{
   expect(typeof App).toBe('function')
-  expect(App.name).toBe('AtlasEditor')
+  expect(App.name).toBe('NovziEditor')
  })
  it('demo conserva la misma fábrica reutilizable del paquete fixtures',()=>{
   expect(demoDocument).toBe(fixture)

@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels} from '@atlas/contracts'
-import type {DiagramEdge} from '@atlas/contracts'
+import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels,diagramCreationEnabled} from '@novzi/contracts'
+import type {DiagramEdge} from '@novzi/contracts'
 import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
 function fixture(){
  const a=createElement('Iniciar sesión','activity'),b=createElement('Verificar credenciales','activity')
@@ -18,8 +18,12 @@ test('catálogos de vistas, elementos y campos disponibles',()=>{
 })
 test('crear y renombrar diagramas C1/C2/C3/C4/procesos/secuencias/datos/trazabilidad',()=>{
  let d=emptyDoc()
- for(const [i,type] of Object.keys(diagramLabels).entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type:type as keyof typeof diagramLabels,date:'2026-01-01'})
- assert.equal(d.diagrams.length,Object.keys(diagramLabels).length)
+ const types=Object.keys(diagramLabels) as (keyof typeof diagramLabels)[]
+ const enabled=types.filter(diagramCreationEnabled),disabled=types.filter(t=>!diagramCreationEnabled(t))
+ assert.equal(enabled.length,15);assert.equal(disabled.length,8)
+ for(const [i,type] of enabled.entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type,date:'2026-01-01'})
+ assert.equal(d.diagrams.length,enabled.length)
+ for(const type of disabled)assert.throws(()=>createDiagram(d,{id:'blocked-'+type,name:'Histórica',type,date:'2026-01-01'}),/deshabilitada/)
  d=editDiagram(d,'id0',{name:'Contexto',description:'Visión ejecutiva'})
  assert.equal(d.diagrams[0].name,'Contexto');assert.equal(d.diagrams[0].description,'Visión ejecutiva')
 })
@@ -47,14 +51,15 @@ test('conectar, modificar nodos y eliminar caja conserva catálogo y elimina rel
  assert.equal(d.diagrams[0].edges.length,0)
  assert.ok(d.elements.auth,'el elemento no se borra al retirarlo de una vista')
 })
-test('conexiones no permiten duplicados, autoconexión ni extremos huérfanos',()=>{
+test('relaciones paralelas tienen identidades propias; autoconexiones y extremos huérfanos se rechazan',()=>{
  const d=fixture(),e:DiagramEdge={id:'r1',source:'n1',target:'n2'}
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'n1'}),/Autoconexión/)
  assert.throws(()=>connectNodes(d,'d1',{id:'r0',source:'n1',target:'missing'}),/inexistentes/)
  const x=connectNodes(d,'d1',e)
- assert.throws(()=>connectNodes(x,'d1',{...e,id:'r2'}),/duplicada/)
- assert.throws(()=>connectNodes(x,'d1',{...e,source:'n2',target:'n1'}),/duplicada/)
- assert.equal(x.diagrams[0].edges.length,1)
+ assert.throws(()=>connectNodes(x,'d1',e),/duplicad/)
+ const two=connectNodes(x,'d1',{...e,id:'r2',sourceHandle:'top-1',targetHandle:'bottom-3'})
+ const three=connectNodes(two,'d1',{...e,id:'r3',source:'n2',target:'n1'})
+ assert.equal(three.diagrams[0].edges.length,3)
 })
 test('validación de movimiento y eliminación de diagramas referenciados',()=>{
  let d=fixture()

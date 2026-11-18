@@ -2,11 +2,11 @@
 -- Sustituye los marcadores por valores secretos de cada ambiente.
 -- Es recomendable crear este rol DESPUES de aplicar las migraciones como postgres/migrator.
 -- El password nunca debe confirmarse en un commit de Git.
--- CREATE ROLE atlas_app LOGIN PASSWORD '<SECRETO_ALEATORIO>'';
--- GRANT CONNECT ON DATABASE postgres TO atlas_app;
--- GRANT USAGE ON SCHEMA public TO atlas_app;
--- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO atlas_app;
--- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO atlas_app;
--- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO atlas_app;
--- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT USAGE,SELECT ON SEQUENCES TO atlas_app;
+-- CREATE ROLE novzi_app LOGIN PASSWORD '<SECRETO_ALEATORIO>'';
+-- GRANT CONNECT ON DATABASE postgres TO novzi_app;
+-- GRANT USAGE ON SCHEMA public TO novzi_app;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO novzi_app;
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO novzi_app;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO novzi_app;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT USAGE,SELECT ON SEQUENCES TO novzi_app;
 -- NOTA: ajustar nombre de la base de datos / roles migradores al proyecto real.
