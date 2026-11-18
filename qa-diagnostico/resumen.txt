@@ -1,0 +1,6 @@
+typecheck | ExitCode: 0
+test:unit | ExitCode: 1
+test:export | ExitCode: 0
+test:ui | ExitCode: 1
+test:coverage | ExitCode: 1
+test:e2e:local | ExitCode: 1

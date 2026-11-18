@@ -1,4 +1,5 @@
-import {useState} from 'react'
+import * as React from 'react'
+const {useState}=React
 import {CLASS_RELATIONS,CLASS_FAMILIES,classEndpointValid,classImportAliasAllowed,classTemplateArgumentAllowed,classEndProperties,classSelfAllowed,canonicalUmlEdge,isAssociation,umlRelationNameLocked,umlRelationNotation,newClassIssues,replaceClassRelationAcrossViews,uid,umlRelationLabel} from '@novzi/contracts'
 import type {Diagram,DiagramEdge,ProjectDocument,UmlAssociationEnd} from '@novzi/contracts'
 import {Overlay,Field} from '../../../components/molecules/Overlay'

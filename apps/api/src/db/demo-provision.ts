@@ -6,7 +6,7 @@ import type {PoolClient} from 'pg'
 import {isProjectDocument} from '@novzi/contracts'
 import type {ProjectDocument} from '@novzi/contracts'
 import {initializeWorkspaceRoles} from '../security/roles'
-import novziDemoJson from './novzi-demo-project.json'
+import novziDemoJson from './novzi-demo-project.json' with {type:'json'}
 
 export const DEMO_WORKSPACE_NAME='NOVZI · DEMO'
 export const DEMO_PROJECT_NAME='NOVZI · Proyecto de exploración'

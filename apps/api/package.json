@@ -16,7 +16,9 @@
     "admin:status": "tsx src/db/admin-status.ts",
     "test:policy": "tsx --test src/domain/access-policy.test.ts",
     "e2e:seed": "tsx src/db/e2e-seed.ts",
-    "db:migrations:status": "tsx src/db/migration-status.ts"
+    "db:migrations:status": "tsx src/db/migration-status.ts",
+    "db:reset:demo": "tsx src/db/reset-demo.ts",
+    "db:demo:status": "tsx src/db/demo-status.ts"
   },
   "dependencies": {
     "@novzi/contracts": "*",

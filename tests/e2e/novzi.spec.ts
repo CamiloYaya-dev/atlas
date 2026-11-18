@@ -41,9 +41,9 @@ test('login válido, C1 y navegación entre vistas ya guardadas',async({page})=>
  await signIn(page)
  await openQaDemo(page)
  await expect(page.getByText('DIAGRAMAS', {exact:true})).toBeVisible()
- await page.getByRole('button',{name:/C1 · Contexto/}).first().click()
+ await openQaDiagram(page,'C1 · Contexto de Zercano','C1 · Contexto')
  await expect(page.getByRole('heading',{name:/C1 · Contexto/})).toBeVisible()
- await page.getByRole('button',{name:/C2 · Contenedores/}).first().click()
+ await openQaDiagram(page,'C2 · Contenedores','C2 · Contenedores')
  await expect(page.getByRole('heading',{name:/C2 · Contenedores/})).toBeVisible()
 })
 test('crear diagrama y caja, actualizar ficha y comprobar guardado',async({page})=>{
@@ -64,12 +64,24 @@ test('crear diagrama y caja, actualizar ficha y comprobar guardado',async({page}
  await nodeDialog.getByLabel('Tipo de elemento').selectOption('activity')
  await nodeDialog.getByRole('button',{name:'Agregar al lienzo'}).click()
  await expect(page.getByText('Actividad QA')).toBeVisible()
- await page.getByLabel('Resumen').fill('Validación automática de edición')
- await expect(page.getByText('Guardado', {exact:true})).toBeVisible({timeout:20000})
+ const summary='Validación automática de edición'
+ // Wait for the actual committed version containing the edited element; a
+ // pre-existing "Guardado" badge can refer to an older write in flight.
+ const [saved]=await Promise.all([
+  page.waitForResponse(async r=>{
+   if(r.request().method()!=='PUT'||!/\/api\/v1\/projects\/[^/]+\/document$/.test(new URL(r.url()).pathname)||!r.ok())return false
+   const json=await r.json().catch(()=>null)
+   return Object.values(json?.document?.elements||{}).some((e:unknown)=>{
+    const element=e as {name?:string;summary?:string};return element.name==='Actividad QA'&&element.summary===summary
+   })
+  },{timeout:20000}),
+  page.getByLabel('Resumen').fill(summary)
+ ])
+ expect(saved.ok()).toBe(true)
+ await expect(page.locator('.save-chip.saved')).toBeVisible({timeout:20000})
  await page.reload()
  await openQaDemo(page)
- await page.getByRole('button',{name}).first().click()
- await expect(page.getByRole('heading',{name})).toBeVisible()
+ await openQaDiagram(page,name,'Libres')
  await expect(page.getByText('Actividad QA')).toBeVisible()
 })
 test('administrador abre políticas y encuentra roles y permisos por operación',async({page})=>{
@@ -149,9 +161,9 @@ test('UML en Chromium: mensajes laterales múltiples, persistencia y símbolos d
  await expect(page.getByText('Guardado',{exact:true})).toBeVisible({timeout:20000})
  await page.reload()
  await page.getByRole('button',{name,exact:true}).click()
- await page.getByRole('button',{name:/Secuencia QA real/}).click()
+ await openQaDiagram(page,'Secuencia QA real','UML · Secuencia')
  await expect(page.locator('.react-flow__edge')).toHaveCount(3)
- await page.getByRole('button',{name:/Estados QA real/}).click()
+ await openQaDiagram(page,'Estados QA real','UML · Máquina de estados')
  await expect(page.locator('.react-flow__node .novzi-uml-control')).toHaveCount(8)
  await expect(page.locator('.react-flow__node[data-id="choice"] polygon')).toHaveCount(1)
  await expect(page.locator('.react-flow__node[data-id="history"] svg text')).toHaveText('H')
@@ -177,5 +189,5 @@ test('UML Clases QA: parámetros legibles, scroll local y corrección de multipl
  const [saved]=await Promise.all([page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname===documentPath,{timeout:20000}),multiplicity.fill('1..*')]);expect(saved.ok(),'El servidor debe aceptar la multiplicidad corregida').toBe(true)
  const persisted=await saved.json();expect(persisted.document.elements.pedido.uml.operations[0].parameters[0].multiplicity).toBe('1..*');expect(persisted.document.elements.pedido.uml.operations[0].parameters[1].name).toBe('moneda')
  await expect(multiplicity).toHaveAttribute('aria-invalid','false');await expect(page.locator('.save-chip')).toHaveText('Guardado',{timeout:20000})
- await page.reload();await openQaDemo(page);const project=page.getByRole('button',{name,exact:true});await project.click();await expect(project).toHaveClass(/\bon\b/);await openQaDiagram(page,'Clases QA scroll');await page.locator('.react-flow__node[data-id="node"]').click();await expect(page.getByLabel('Multiplicidad parámetro p1')).toHaveValue('1..*');await expect(page.getByLabel('Nombre parámetro p2')).toHaveValue('moneda')
+ await page.reload();await openQaDemo(page);const project=page.getByRole('button',{name,exact:true});await project.click();await expect(project).toHaveClass(/\bon\b/);await openQaDiagram(page,'Clases QA scroll','UML · Clases');await page.locator('.react-flow__node[data-id="node"]').click();await expect(page.getByLabel('Multiplicidad parámetro p1')).toHaveValue('1..*');await expect(page.getByLabel('Nombre parámetro p2')).toHaveValue('moneda')
 })

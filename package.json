@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "env:init": "node scripts/init-env.mjs",
-    "setup": "npm run env:init && npm run db:up && npm run db:migrate && npm run db:seed",
+    "setup": "npm run env:init && npm run db:up && npm run db:migrate && npm run demo:backfill",
     "dev:all": "npm run setup && npm run admin:ensure && npm run typecheck && npm run dev",
     "dev": "concurrently -k -n API,WEB -c cyan,green \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "node scripts/dev-api.mjs",
@@ -81,7 +81,9 @@
     "qa:uml:tiempos": "node scripts/qa-uml.mjs tiempos",
     "qa:uml:clases:rapido": "node scripts/qa-uml.mjs clases --fast",
     "demo:backfill": "node node_modules/tsx/dist/cli.mjs apps/api/src/db/demo-backfill.ts",
-    "db:migrations:status": "npm run db:migrations:status -w @novzi/api"
+    "db:migrations:status": "npm run db:migrations:status -w @novzi/api",
+    "db:reset:demo": "npm run db:reset:demo -w @novzi/api --",
+    "db:demo:status": "npm run db:demo:status -w @novzi/api"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

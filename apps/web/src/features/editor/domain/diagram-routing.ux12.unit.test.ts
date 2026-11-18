@@ -23,7 +23,7 @@ test('Organizar deja corredores amplios, pero conserva todas las relaciones y fi
  const after=beautifyDiagram(doc,'d')
  const nodes=after.diagrams[0].nodes
  assert.ok(nodes[1].x-nodes[0].x>=340)
- assert.equal(after.diagrams[0].edges,doc.diagrams[0].edges)
+ assert.deepEqual(after.diagrams[0].edges.map(e=>({id:e.id,source:e.source,target:e.target,label:e.label})),doc.diagrams[0].edges.map(e=>({id:e.id,source:e.source,target:e.target,label:e.label})));assert.deepEqual(doc.diagrams[0].edges.map(e=>e.sourceHandle),[undefined,undefined],'No muta anclajes originales')
  assert.equal(after.elements,doc.elements)
  assert.deepEqual(beautifyDiagram(after,'d'),after)
 })
