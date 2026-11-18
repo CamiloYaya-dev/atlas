@@ -17,6 +17,12 @@ COPY packages/fixtures ./packages/fixtures
 RUN npm run build:api
 
 FROM node:22-bookworm-slim AS runtime
+
+# Herramienta necesaria para los healthchecks HTTP de Coolify.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3001
 WORKDIR /app
 
