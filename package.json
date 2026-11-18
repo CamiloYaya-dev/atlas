@@ -79,7 +79,8 @@
     "qa:uml:comunicacion": "node scripts/qa-uml.mjs comunicacion",
     "qa:uml:vista-interaccion": "node scripts/qa-uml.mjs vista-interaccion",
     "qa:uml:tiempos": "node scripts/qa-uml.mjs tiempos",
-    "qa:uml:clases:rapido": "node scripts/qa-uml.mjs clases --fast"
+    "qa:uml:clases:rapido": "node scripts/qa-uml.mjs clases --fast",
+    "demo:backfill": "node node_modules/tsx/dist/cli.mjs apps/api/src/db/demo-backfill.ts"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

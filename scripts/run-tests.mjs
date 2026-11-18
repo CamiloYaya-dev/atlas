@@ -1,6 +1,7 @@
 import {readdir,stat} from 'node:fs/promises'
 import {existsSync} from 'node:fs'
 import {resolve,relative} from 'node:path'
+import {pathToFileURL} from 'node:url'
 import {spawnSync} from 'node:child_process'
 const root=resolve(import.meta.dirname,'..')
 const tsx=resolve(root,'node_modules','tsx','dist','cli.mjs')
@@ -25,7 +26,8 @@ console.log(`[ATLAS QA] ${mode}: ${files.length} archivos de pruebas`)
 const safeEnv={...process.env,NODE_ENV:'test',AUTH_MODE:'local',ATLAS_CSRF_SECRET:process.env.ATLAS_CSRF_SECRET||'qa-secret-local-only-for-unit-tests-2026-01',DATABASE_URL:process.env.DATABASE_URL||'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'}
 let failed=false
 for(const file of files){
- const args=[tsx,'--test',...(coverage?['--experimental-test-coverage']:[]),file]
+ const loader=pathToFileURL(resolve(root,'scripts/coverage-ts-register.mjs')).href
+ const args=[...(process.env.ATLAS_QA_COVERAGE_TS==='1'?['--enable-source-maps','--import',loader]:[tsx]),'--test',...(coverage?['--experimental-test-coverage']:[]),file]
  console.log(`\n[ATLAS QA] ${relative(root,file)}`)
  const run=spawnSync(process.execPath,args,{cwd:root,stdio:'inherit',env:safeEnv,windowsHide:false})
  if(run.status!==0){failed=true;console.error(`[FALLÓ] ${relative(root,file)}`)}

@@ -1,3 +1,5 @@
+import {needsDetour,obstacleRoute,distinctEdgeRoute} from '../../features/editor/domain/diagram-beautify'
+import type {Rectangle} from '../../features/editor/domain/diagram-beautify'
 import type {sequenceEdgeGeometry} from '@atlas/contracts'
 /** UML 2.5.1: símbolos geométricos explícitos en los extremos del conector.
  * No usamos markerStart/markerEnd de React Flow para UML: un rombo o socket
@@ -9,7 +11,7 @@ import type {EdgePathStyle,UmlTerminal,DiagramType,ElementType} from '@atlas/con
 import {umlRelationNotation,classRelationRoute,activityInterruptPath,activityExceptionRoute,classEndTerminal,classEndLabel} from '@atlas/contracts'
 import {parallelRoute} from '../../features/editor/domain/parallel-edges'
 import {assemblyAnchor} from './uml-assembly'
-export type UmlEdgeData={componentAssembly?:'forward'|'reverse';sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
+export type UmlEdgeData={routeLane?:number;componentAssembly?:'forward'|'reverse';sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
 const INK='#506986'
 export function terminalAngle(side:string|undefined,x:number,y:number,otherX:number,otherY:number):number{
  // Vector hacia AFUERA del nodo. En izquierda/derecha se mantiene horizontal;
@@ -52,11 +54,16 @@ export function AtlasUmlEdge(props:EdgeProps){
  const input={sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,sourcePosition:props.sourcePosition,targetPosition:props.targetPosition,offset:data.parallelOffset||0,pathStyle:data.parallelPath||'straight' as const}
  const exception=data.diagramType==='uml-activity'&&data.relationKind==='exception-handler'
  const route=exception?activityExceptionRoute({x:props.sourceX,y:props.sourceY,side:props.sourcePosition},{x:props.targetX,y:props.targetY,side:props.targetPosition}):['uml-class','uml-usecase','uml-activity','uml-component','uml-deployment'].includes(data.diagramType||'')?classRelationRoute(input,props.source===props.target):parallelRoute(input)
+ const boxes=(data as UmlEdgeData & {routeObstacles?:Rectangle[];routeLane?:number}).routeObstacles||[]
+ const p1={x:props.sourceX,y:props.sourceY},p2={x:props.targetX,y:props.targetY}
+ const skipSmart=!!data.annotationPoint||!!data.extraEnds?.length||!!data.associationClassPoint||exception||data.relationKind==='assembly'||data.relationKind==='delegation'||props.source===props.target||!!data.sequenceGeometry
+ const smart=!skipSmart&&(!!data.routeLane||boxes.length&&needsDetour(p1,p2,boxes))?
+  (distinctEdgeRoute(p1,p2,boxes,{lane:data.routeLane||0,sourceSide:props.sourcePosition,targetSide:props.targetPosition})||obstacleRoute(p1,p2,boxes)):null
  const terminal=(side:'source'|'target'):UmlTerminal=>['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndTerminal(data,side):side==='source'?n.start:n.end
  const sourceLabel=['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndLabel({x:props.sourceX,y:props.sourceY},props.sourcePosition):{x:props.sourceX+20,y:props.sourceY-15}
  const targetLabel=['uml-class','uml-usecase','uml-deployment'].includes(data.diagramType||'')?classEndLabel({x:props.targetX,y:props.targetY},props.targetPosition):{x:props.targetX-20,y:props.targetY-15}
- const nary=!!data.extraEnds?.length,hub={x:route.labelX,y:route.labelY}
- const actualPath=data.annotationPoint?`M ${props.sourceX} ${props.sourceY} L ${data.annotationPoint.x} ${data.annotationPoint.y}`:nary?`M ${props.sourceX} ${props.sourceY} L ${hub.x} ${hub.y} L ${props.targetX} ${props.targetY}`:route.path
+ const nary=!!data.extraEnds?.length,hub={x:route.labelX,y:route.labelY},labelX=smart?.labelX??route.labelX,labelY=smart?.labelY??route.labelY
+ const actualPath=smart?.path||(data.annotationPoint?`M ${props.sourceX} ${props.sourceY} L ${data.annotationPoint.x} ${data.annotationPoint.y}`:nary?`M ${props.sourceX} ${props.sourceY} L ${hub.x} ${hub.y} L ${props.targetX} ${props.targetY}`:route.path)
  const sa=terminalAngle(props.sourcePosition,props.sourceX,props.sourceY,props.targetX,props.targetY)
  const ta=terminalAngle(props.targetPosition,props.targetX,props.targetY,props.sourceX,props.sourceY)
  const style={stroke:INK,strokeWidth:1.7,strokeDasharray:n.stroke==='dashed'?'7 5':n.stroke==='dotted'?'2 5':undefined,fill:'none'}
@@ -89,7 +96,7 @@ export function AtlasUmlEdge(props:EdgeProps){
   {!!data.extensionNote?.length&&<path data-uml-note-anchor="true" d={`M ${hub.x} ${hub.y} L ${hub.x} ${hub.y+15}`} stroke={INK} strokeDasharray="4 3" fill="none" pointerEvents="none"/>}
   {(displayLabel||data.sourceMultiplicity||data.targetMultiplicity||data.sourceRole||data.targetRole||data.extensionNote?.length)&&<EdgeLabelRenderer>
    {data.extensionNote?.length? <div className="uc-extension-note" style={{transform:`translate(-50%,0) translate(${route.labelX}px,${route.labelY+15}px)`}}>{data.extensionNote.map((line,i)=><div key={i}>{line}</div>)}</div>:null}
-   {displayLabel&&<div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${assemblyLabel?.x??route.labelX}px,${assemblyLabel?.y??route.labelY}px)`}}>{displayLabel}</div>}
+   {displayLabel&&<div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${assemblyLabel?.x??labelX}px,${assemblyLabel?.y??labelY}px)`}}>{displayLabel}</div>}
    {(data.sourceMultiplicity||data.sourceRole)&&<div className="atlas-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${sourceLabel.x}px,${sourceLabel.y}px)`}}>{data.sourceRole} {data.sourceMultiplicity}</div>}
    {(data.targetMultiplicity||data.targetRole)&&<div className="atlas-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${targetLabel.x}px,${targetLabel.y}px)`}}>{data.targetRole} {data.targetMultiplicity}</div>}
   </EdgeLabelRenderer>}

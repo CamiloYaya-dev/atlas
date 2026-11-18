@@ -1,6 +1,6 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels} from '@atlas/contracts'
+import {emptyDoc,createElement,diagramLabels,diagramCreationEnabled,elementLabels,fieldLabels} from '@atlas/contracts'
 import type {DiagramEdge} from '@atlas/contracts'
 import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,editRelation,removeRelation,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
 function fixture(){
@@ -18,8 +18,12 @@ test('catálogos de vistas, elementos y campos disponibles',()=>{
 })
 test('crear y renombrar diagramas C1/C2/C3/C4/procesos/secuencias/datos/trazabilidad',()=>{
  let d=emptyDoc()
- for(const [i,type] of Object.keys(diagramLabels).entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type:type as keyof typeof diagramLabels,date:'2026-01-01'})
- assert.equal(d.diagrams.length,Object.keys(diagramLabels).length)
+ const types=Object.keys(diagramLabels) as (keyof typeof diagramLabels)[]
+ const enabled=types.filter(diagramCreationEnabled),disabled=types.filter(t=>!diagramCreationEnabled(t))
+ assert.equal(enabled.length,15);assert.equal(disabled.length,8)
+ for(const [i,type] of enabled.entries())d=createDiagram(d,{id:`id${i}`,name:`Vista ${i}`,type,date:'2026-01-01'})
+ assert.equal(d.diagrams.length,enabled.length)
+ for(const type of disabled)assert.throws(()=>createDiagram(d,{id:'blocked-'+type,name:'Histórica',type,date:'2026-01-01'}),/deshabilitada/)
  d=editDiagram(d,'id0',{name:'Contexto',description:'Visión ejecutiva'})
  assert.equal(d.diagrams[0].name,'Contexto');assert.equal(d.diagrams[0].description,'Visión ejecutiva')
 })

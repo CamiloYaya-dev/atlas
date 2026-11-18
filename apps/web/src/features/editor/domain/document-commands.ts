@@ -3,7 +3,7 @@ import {setComponentRelation,newComponentIssues,componentPortSnap,componentPortR
 import {newSequenceIssues,pruneSequenceOccurrences,sequenceDefaults,SEQUENCE_TYPES,sequenceBox,sequenceLifeline,validSequenceRoot} from '@atlas/contracts'
 import {activityDefaults,newActivityIssues,activitySnapPin,retainActivityCatalog,activityCatalogReferenced} from '@atlas/contracts'
 import {adaptUseCaseDocument,canonicalSubjectId,diagramCreationEnabled,newUseCaseIssues,replaceUseCaseRelation,repairStoredUseCaseAnnotations,isUseCaseCatalogType,useCaseElementIsReferenced,retainUseCaseCatalog} from '@atlas/contracts'
-import {classSelfAllowed} from '@atlas/contracts'
+import {classSelfAllowed,newClassIssues,replaceClassRelationAcrossViews,umlRelationEndpointValid,isUmlDiagram} from '@atlas/contracts'
 /** Pure model operations used by the editor. Backend policy remains the authority. */
 import type {Diagram,DiagramEdge,DiagramType,FieldDefinition,ModelElement,ProjectDocument} from '@atlas/contracts'
 import {umlElementCreatable,umlElementReusable,umlContainerAllows,umlAbsolutePosition,umlAncestryValid,umlNodeDepth,umlSnapPort,atlasNodeSize,atlasNodeMinimum,validNodeDimension,sequenceSnapChild,sequenceIsAttachment,sequencePositionLocked} from '@atlas/contracts'
@@ -101,6 +101,54 @@ export function editRelation(doc:ProjectDocument,diagramId:string,edgeId:string,
  })
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-sequence'){const issue=newSequenceIssues(doc,next)[0];if(issue)throw Error(issue.message)}
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-component'){const issue=newComponentIssues(doc,next)[0];if(issue)throw Error(issue.message)}
+ return next
+}
+/** Reattach an existing edge without discarding its ID, metadata or history.
+ * Semantic registries and UML constraints remain authoritative; failures are atomic.
+ */
+export function reconnectRelation(doc:ProjectDocument,diagramId:string,edgeId:string,changes:Pick<DiagramEdge,'source'|'target'|'sourceHandle'|'targetHandle'>):ProjectDocument{
+ const diagram=doc.diagrams.find(d=>d.id===diagramId)
+ const edge=diagram?.edges.find(e=>e.id===edgeId)
+ if(!diagram||!edge)throw Error('Relación inexistente')
+ const source=diagram.nodes.find(n=>n.id===changes.source),target=diagram.nodes.find(n=>n.id===changes.target)
+ if(!source||!target)throw Error('Selecciona dos cajas existentes')
+ if(source.id===target.id&&!(diagram.type==='uml-class'&&classSelfAllowed(edge.relationKind)))throw Error('Autoconexión no permitida para este tipo de relación')
+ const a=doc.elements[source.elementId],b=doc.elements[target.elementId]
+ if(!a||!b)throw Error('Las cajas seleccionadas no tienen ficha visible')
+ if(isUmlDiagram(diagram.type)&&edge.relationKind&&!umlRelationEndpointValid(diagram.type,edge.relationKind,a.type,b.type))throw Error('Los nuevos extremos son incompatibles con la relación UML')
+ if(edge.source===changes.source&&edge.target===changes.target&&edge.sourceHandle===changes.sourceHandle&&edge.targetHandle===changes.targetHandle)return doc
+ const nextEdge:DiagramEdge={...edge,...changes}
+ // Preserve the identity of the first two ends of an n-ary association.
+ if(edge.associationEnds&&edge.associationEnds.length>=2)nextEdge.associationEnds=edge.associationEnds.map((end,index)=>index<2?{...end,nodeId:index===0?changes.source:changes.target,handle:index===0?changes.sourceHandle:changes.targetHandle}:end)
+ if(diagram.type==='uml-class'){
+  const next=replaceClassRelationAcrossViews(doc,diagramId,nextEdge)
+  const issue=newClassIssues(doc,next)[0]
+  if(issue)throw Error(issue.message)
+  return next
+ }
+ // These policies synchronize the semantic registry as well as the visual edge.
+ if(diagram.type==='uml-usecase')return editUseCaseRelation(doc,diagramId,nextEdge)
+ if(diagram.type==='uml-component')return setComponentRelation(doc,diagramId,nextEdge)
+ if(diagram.type==='uml-deployment')return setDeploymentRelation(doc,diagramId,nextEdge)
+ if(diagram.type==='uml-sequence'&&edge.sequenceEdge){
+  // The temporal interaction has its own composer; it must recalculate occurrence
+  // ownership instead of merely swapping screen coordinates.
+  throw Error('Abre el editor de secuencia para cambiar el emisor o receptor y validar las ocurrencias')
+ }
+ if(diagram.type==='uml-activity'){
+  const next=withDiagram(doc,diagramId,d=>({...d,edges:d.edges.map(e=>e.id===edgeId?nextEdge:e)}))
+  const issue=newActivityIssues(doc,next)[0]
+  if(issue)throw Error(issue.message)
+  return next
+ }
+ const next=withDiagram(doc,diagramId,d=>({...d,edges:d.edges.map(e=>e.id===edgeId?nextEdge:e)}))
+ if(diagram.type==='uml-sequence'){const issue=newSequenceIssues(doc,next)[0];if(issue)throw Error(issue.message)}
+ return next
+}
+function editUseCaseRelation(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
+ const next=replaceUseCaseRelation(doc,diagramId,edge)
+ const issue=newUseCaseIssues(doc,next)[0]
+ if(issue)throw Error(issue.message)
  return next
 }
 export function removeRelation(doc:ProjectDocument,diagramId:string,edgeId:string):ProjectDocument{

@@ -70,9 +70,16 @@ test('rechaza conexiones a nodos ausentes e identidades duplicadas',()=>{
  assert.throws(()=>mutate(d=>d.diagrams[0].nodes.push({...d.diagrams[0].nodes[0]})),/duplicad/)
  assert.throws(()=>mutate(d=>d.diagrams[0].edges.push({...d.diagrams[0].edges[0]})),/duplicad/)
 })
-test('bloquea cambio de identidad de nodos y cambio de extremos de relaciones existentes',()=>{
+test('bloquea cambio de identidad; reconecta extremos visibles con la identidad de relación intacta',()=>{
  assert.throws(()=>mutate(d=>{d.diagrams[0].nodes[0].elementId='b'}),/identidad/)
- assert.throws(()=>mutate(d=>{d.diagrams[0].edges[0].target='nc'}),/extremos/)
+ const changed=mutate(d=>{d.diagrams[0].edges[0].target='nc'})
+ assert.equal(changed.diagrams[0].edges[0].id,'e1')
+ assert.equal(changed.diagrams[0].edges[0].target,'nc')
+ assert.equal(changed.diagrams[0].edges.length,1)
+ const viewer=role('viewer'),stored=fixture(),visible=projectVisible(stored,viewer)
+ visible.diagrams[0].edges[0].target='nc'
+ assert.throws(()=>applyAuthorizedChange(stored,visible,viewer),/relation.edit.functional/)
+ assert.equal(stored.diagrams[0].edges[0].target,'nb')
 })
 test('impide eliminar elementos usados y diagramas vinculados',()=>{
  assert.throws(()=>mutate(d=>{delete d.elements.a}),/utilizado/)

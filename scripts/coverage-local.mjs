@@ -12,7 +12,7 @@ if(!['unit','full'].includes(mode))throw new Error('Uso: coverage-local.mjs unit
 for(const name of ['coverage-summary.json','coverage-layers.json','index.html','lcov.info'])
  rmSync(resolve(root,'coverage',name),{force:true})
 const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
-const env={...process.env,NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
+const env={...process.env,ATLAS_QA_COVERAGE_TS:'1',NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
  MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',ATLAS_ALLOW_DB_TESTS:'true',
  ATLAS_CSRF_SECRET:'atlas-local-qa-coverage-only-2026-not-production',
  ATLAS_EXPORT_SIGNING_KEY:'atlas-local-qa-export-signing-only-2026-not-production'}

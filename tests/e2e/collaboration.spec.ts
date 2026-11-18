@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test'
+import {openQaDemo,observeQaHttp} from './qa-navigation'
 const adminEmail=process.env.E2E_ADMIN_EMAIL||'',adminPassword=process.env.E2E_ADMIN_PASSWORD||''
 const editorEmail=process.env.E2E_EDITOR_EMAIL||'',editorPassword=process.env.E2E_EDITOR_PASSWORD||''
 if(!adminEmail||!adminPassword||!editorEmail||!editorPassword)throw Error('E2E requires two independent QA accounts')
@@ -8,10 +9,11 @@ async function enter(page:import('@playwright/test').Page,email:string,password:
  await page.getByLabel('Contraseña').fill(password)
  await page.getByRole('button',{name:/Entrar a ATLAS/}).click()
  await expect(page.getByText('API · PostgreSQL · Acceso cerrado')).toBeVisible()
- await expect(page.getByRole('button',{name:/C1 · Contexto/}).first()).toBeVisible()
+ await openQaDemo(page)
 }
 test('dos usuarios diferentes: cambios independientes sobreviven y el rol limitado no ve C3',async({browser})=>{
  const a=await browser.newContext(),b=await browser.newContext()
+ observeQaHttp(a);observeQaHttp(b)
  try{
   const pageA=await a.newPage(),pageB=await b.newPage()
   await enter(pageA,adminEmail,adminPassword)
@@ -35,6 +37,8 @@ test('dos usuarios diferentes: cambios independientes sobreviven y el rol limita
   // Persisted read in a fresh browser load complements the live assertions.
   await pageA.reload()
   await pageB.reload()
+  await openQaDemo(pageA)
+  await openQaDemo(pageB)
   await pageA.getByRole('button',{name:/C1 · Contexto/}).first().click()
   await pageB.getByRole('button',{name:/C2 · Contenedores/}).first().click()
   await expect(pageA.getByLabel('Descripción')).toHaveValue(contentA)

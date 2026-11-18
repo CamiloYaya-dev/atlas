@@ -290,8 +290,20 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     // A note attached to the same visible relation may change its auxiliary anchor,
     // not its semantic target or source. The shared deployment policy below validates
     // the new anchor against the actual endpoints; edit permissions still apply.
-    const deploymentAnnotationAnchor=d.type==='uml-deployment'&&oldE.relationKind==='annotation'&&e.relationKind==='annotation'&&oldE.source===e.source&&!!oldE.annotationTargetEdgeId&&oldE.annotationTargetEdgeId===e.annotationTargetEdgeId&&originalEdges.has(oldE.annotationTargetEdgeId)
-    if((oldE.source!==e.source||oldE.target!==e.target)&&!deploymentAnnotationAnchor&&d.type!=='uml-activity'&&!(d.type==='uml-deployment'&&oldE.relationKind==='communication-path'&&e.relationKind==='communication-path'&&oldE.deploymentRelationId===e.deploymentRelationId&&!!e.deploymentRelationId&&original.deploymentRelations?.[e.deploymentRelationId]?.kind==='communication-path'&&oldE.source===e.target&&oldE.target===e.source)&&!(d.type==='uml-component'&&oldE.componentRelationId&&oldE.componentRelationId===e.componentRelationId&&original.componentRelations?.[oldE.componentRelationId]?.wiring&&oldE.source===e.target&&oldE.target===e.source)&&!(d.type==='uml-component'&&oldE.relationKind==='annotation'&&e.relationKind==='annotation'&&oldE.source===e.source)&&!(d.type==='uml-sequence'&&e.sequenceEdge)&&!(['uml-class','uml-usecase'].includes(d.type)&&(oldE.source===e.target&&oldE.target===e.source||oldE.source===e.source&&oldE.relationKind==='annotation'&&(d.type==='uml-usecase'&&e.relationKind==='annotation'||e.annotationTargetEdgeId&&d.edges.some(target=>target.id===e.annotationTargetEdgeId&&target.source===e.target)))))fail('Para cambiar extremos, elimina y recrea la relación')
+    // UX-REL: reattachment retains the edge ID but NEVER bypasses the ACL.
+    // Both old and new scopes require edit rights (below); new endpoint nodes
+    // must be explicitly visible to this caller. Shared UML registries are
+    // validated independently after the full document is merged.
+    if(oldE.source!==e.source||oldE.target!==e.target){
+     for(const id of [oldE.source,oldE.target,e.source,e.target]){
+      const node=old.nodes.find(n=>n.id===id)||d.nodes.find(n=>n.id===id)
+      if(!node||!visible.elements[node.elementId])fail('No se puede reconectar una caja oculta')
+      const element=full.elements[node!.elementId]
+      if(!element)fail('El extremo de la relación no existe')
+      requirePermission(a,`element.view.${element!.type}`)
+     }
+     if(e.source===e.target&&!(d.type==='uml-class'&&classSelfAllowed(e.relationKind)))fail('Autoconexión no permitida')
+    }
     requirePermission(a,`relation.edit.${edgeKind(oldE,old,original)}`)
     requirePermission(a,`relation.edit.${edgeKind(e,d,full)}`)
     if(isUmlDiagram(d.type)&&!validUmlEdgeNotation(d.type,e))throw new DomainError('La relación UML no coincide con su dirección o trazo normativo',400)
@@ -345,7 +357,13 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
   const old=Object.hasOwn(oldRegistry,id)?oldRegistry[id]:undefined
   if(old&&!Object.hasOwn(visibleRegistry,id))fail('No se puede acceder a la relación compartida')
   if(!old||!equal(old,r)){
-   if(old){authorizeRecord(old,'edit');authorizeRecord(r,'edit');if(old.sourceElementId!==r.sourceElementId||old.targetElementId!==r.targetElementId)fail('No se pueden cambiar extremos semánticos de una relación')}
+   if(old){authorizeRecord(old,'edit');authorizeRecord(r,'edit');if(old.sourceElementId!==r.sourceElementId||old.targetElementId!==r.targetElementId){
+      // Every occurrence must be submitted; do not silently diverge a shared relation.
+      for(const view of original.diagrams.filter(v=>v.type==='uml-usecase'&&v.edges.some(e=>e.semanticRelationId===id))){
+       const submitted=incoming.diagrams.find(v=>v.id===view.id)
+       if(!submitted||!view.edges.filter(e=>e.semanticRelationId===id).every(e=>submitted.edges.some(x=>x.id===e.id&&x.semanticRelationId===id)))fail('Reconexion de relación compartida con apariciones no visibles')
+      }
+     }}
    else authorizeRecord(r,'create')
    registry.set(id,r)
   }

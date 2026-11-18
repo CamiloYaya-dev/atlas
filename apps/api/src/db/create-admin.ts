@@ -1,6 +1,7 @@
 import {pool} from './pool'
 import {hashPassword} from '../security/password'
 import {DEMO_USER_ID} from '../security/identity'
+import {provisionUserDemo} from './demo-provision'
 async function main(){
  const email=(process.env.ATLAS_ADMIN_EMAIL||'').trim().toLowerCase()
  const password=process.env.ATLAS_BOOTSTRAP_PASSWORD||''
@@ -15,6 +16,7 @@ async function main(){
   // Reutilizamos el usuario semilla de V4.1 para conservar sus workspaces y documentos.
   const {rows:created}=await client.query<{id:string}>(`INSERT INTO atlas_users(id,email,display_name,password_hash,platform_admin)
     VALUES($1,$2,$3,$4,true) RETURNING id`,[DEMO_USER_ID,email,name,pass])
+  await provisionUserDemo(client,created[0].id)
   await client.query('COMMIT')
   console.log(`Administrador creado: ${email} (${created[0].id}). El login es cerrado y no existe registro público.`)
  }catch(e){await client.query('ROLLBACK');throw e}finally{client.release();await pool.end()}

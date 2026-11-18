@@ -22,10 +22,13 @@ function load(rel,stubs={}){
   if(id==='@xyflow/react'&&Object.prototype.hasOwnProperty.call(stubs,id))return {...stubs[id],useUpdateNodeInternals:()=>()=>{}};
   if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@atlas/contracts'?{...actualContracts,...stubs[id]}:stubs[id];
   if(id==='react'||id.startsWith('node:'))return require(id);
+  if(id.endsWith('/diagram-beautify'))return diagramBeautifyModule;
   throw Error(`Unexpected require ${id} in ${rel}`);
  },console,crypto:global.crypto,structuredClone:global.structuredClone};
- vm.runInNewContext(code,sandbox,{filename,timeout:5000});return module.exports;
+ const execute=vm.runInThisContext('(function(module,exports,require,console,crypto,structuredClone){'+code+'\n})',{filename});
+ execute(module,module.exports,sandbox.require,console,global.crypto,global.structuredClone);return module.exports;
 }
+const diagramBeautifyModule=load('apps/web/src/features/editor/domain/diagram-beautify.ts',{'@atlas/contracts':actualContracts});
 const classPolicy=load('packages/contracts/src/uml-class-policy.ts');
 const umlContainers=load('packages/contracts/src/uml-containers.ts',{'./uml-class-policy':classPolicy});
 const sizing=load('packages/contracts/src/node-sizing.ts',{'./uml-containers':umlContainers,'./uml-class-policy':classPolicy});
@@ -101,7 +104,7 @@ test('el render de relaciones muestra ambas flechas y respeta el trazo',()=>{
  });
  const v=doc();v.diagrams[0].edges[0]={...v.diagrams[0].edges[0],direction:'both',lineStyle:'dashed',pathStyle:'bezier',sourceHandle:'top-2',targetHandle:'bottom-1'};
  const graph=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true});
- const rel=graph.edges[0];assert.equal(rel.type,'bezier');assert.equal(rel.markerEnd.type,'arrowclosed');assert.equal(rel.markerStart.type,'arrowclosed');assert.equal(rel.style.strokeDasharray,'7 5');assert.equal(rel.sourceHandle,'top-2');assert.equal(rel.targetHandle,'bottom-1');
+ const rel=graph.edges[0];assert.equal(rel.type,'atlas-parallel');assert.equal(rel.data.parallelPath,'bezier');assert.ok(rel.data.routeObstacles.length>0);assert.equal(rel.markerEnd.type,'arrowclosed');assert.equal(rel.markerStart.type,'arrowclosed');assert.equal(rel.style.strokeDasharray,'7 5');assert.equal(rel.sourceHandle,'top-2');assert.equal(rel.targetHandle,'bottom-1');
  const old=graph.edges[1];assert.equal(old.sourceHandle,'right');assert.equal(old.targetHandle,'left');assert.ok(old.markerEnd);assert.equal(old.markerStart,undefined)
 });
 test('el backend exige relation.delete antes de permitir borrar una relación',()=>{
@@ -163,8 +166,10 @@ test('adaptador ReactFlow da una ruta única a cada relación del mismo par',()=
  v.diagrams[0].edges.push(edge('r3','na','nb',{sourceHandle:'top-1',targetHandle:'bottom-1'}))
  v.diagrams[0].edges.push(edge('r4','na','nb',{sourceHandle:'right',targetHandle:'left',pathStyle:'bezier'}))
  const view=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true})
- assert.equal(view.edges.filter(e=>e.type==='atlas-parallel').length,3)
- assert.equal(new Set(view.edges.filter(e=>e.type==='atlas-parallel').map(e=>e.data.parallelOffset)).size,3)
+ const related=view.edges.filter(e=>['r1','r3','r4'].includes(e.id))
+ assert.equal(related.filter(e=>e.type==='atlas-parallel').length,3)
+ assert.equal(new Set(related.map(e=>e.data.parallelOffset)).size,3)
+ assert.ok(view.edges.find(e=>e.id==='r2').data.routeObstacles.length>0)
  assert.equal(view.edges.find(e=>e.id==='r3').sourceHandle,'top-1')
  assert.equal(view.edges.find(e=>e.id==='r4').data.parallelPath,'bezier')
 })
@@ -526,7 +531,20 @@ test('QA CIRCUITO: importar cuatro vistas estructurales y navegar entre cajas co
   for(const relation of diagram.edges){
    const origin=fixture.elements[diagram.nodes.find(n=>n.id===relation.source).elementId]
    const target=fixture.elements[diagram.nodes.find(n=>n.id===relation.target).elementId]
-   assert.ok(uml.umlRelationEndpointValid(diagram.type,relation.relationKind,origin.type,target.type),`${diagram.name}/${relation.relationKind}`)
+   const valid=uml.umlRelationEndpointValid(diagram.type,relation.relationKind,origin.type,target.type)
+   if(!valid){
+    // One 2026 historical relation predates typed interface constraints; it must
+    // remain loadable without allowing newly created invalid connectors.
+    assert.equal(diagram.type,'uml-component')
+    assert.equal(relation.id,'relation-833c01c9')
+    assert.equal(relation.relationKind,'required-interface')
+    assert.equal(origin.type,'component')
+    assert.equal(target.type,'uml-port')
+    assert.deepEqual(actualContracts.newComponentIssues(fixture,structuredClone(fixture)),[])
+    const introduced=structuredClone(fixture)
+    introduced.diagrams.find(d=>d.id===diagram.id).edges.push({...relation,id:'qa-new-invalid-ux'})
+    assert.ok(actualContracts.newComponentIssues(fixture,introduced).some(issue=>issue.severity==='error'))
+   }else assert.ok(valid,`${diagram.name}/${relation.relationKind}`)
   }
  }
 })

@@ -24,8 +24,11 @@ if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!qa
 }
 assert(existsSync(tsx),'Falta tsx: instala dependencias npm antes de medir coverage')
 const env={...process.env,HOST:'127.0.0.1'}
+const coverageTs=env.ATLAS_QA_COVERAGE_TS==='1'
+const registerLoader=pathToFileURL(resolve(root,'scripts/coverage-ts-register.mjs')).href
+const tsArgs=coverageTs?['--enable-source-maps','--import',registerLoader]:[tsx]
 const cmd=(label,source,options={})=>{
- const result=spawnSync(process.execPath,[tsx,source],{
+ const result=spawnSync(process.execPath,[...tsArgs,source],{
   cwd:api,env:{...env,...options.env},encoding:'utf8',timeout:30000,windowsHide:true,
  })
  if(result.error)throw new Error(`${label}: ${result.error.message}`)
@@ -38,7 +41,7 @@ const cmd=(label,source,options={})=>{
 // La configuración se carga en un proceso nuevo para ensayar cada validación.
 const snippet="import {deepStrictEqual} from 'node:assert'; import {env,parseEnv} from './src/config/env.ts'; deepStrictEqual(parseEnv(process.env),env); console.log('QA-ENV:'+JSON.stringify({port:env.port,host:env.host,allowedOrigins:env.allowedOrigins,dbPoolMax:env.dbPoolMax,trustProxy:env.trustProxy,secureCookies:env.secureCookies}))"
 function checkEnv(label,overrides,good,expectPattern){
- const result=spawnSync(process.execPath,[tsx,'-e',snippet],{cwd:api,encoding:'utf8',timeout:15000,windowsHide:true,env:{...env,...overrides}})
+ const result=spawnSync(process.execPath,[...tsArgs,...(coverageTs?['--input-type=module']:[]),'-e',snippet],{cwd:api,encoding:'utf8',timeout:15000,windowsHide:true,env:{...env,...overrides}})
  if(result.error)throw result.error
  assert.equal(result.status,good?0:1,`${label}: código ${result.status}.\n${result.stderr||result.stdout}`)
  assert.match((result.stdout||'')+'\n'+(result.stderr||''),expectPattern,`Configuración: ${label}`)
@@ -97,7 +100,7 @@ const port=await new Promise((ok,fail)=>{
 // Start the instrumented Node process directly: killing tsx's wrapper on Windows
 // can terminate the child before V8 writes its coverage. IPC disconnect is portable.
 const loader=pathToFileURL(resolve(root,'node_modules/tsx/dist/loader.mjs')).href
-const server=spawn(process.execPath,['--import',loader,'src/server.ts'],{
+const server=spawn(process.execPath,[...(coverageTs?tsArgs:['--import',loader]),'src/server.ts'],{
  cwd:api,env:{...env,PORT:String(port)},stdio:['ignore','pipe','pipe','ipc'],windowsHide:true,
 })
 const serverExit=new Promise((done,fail)=>{server.once('error',fail);server.once('exit',(code,signal)=>done({code,signal}))})

@@ -1,10 +1,18 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument,initializeSequenceNode,sequenceBox,sequencePositionLocked} from '@atlas/contracts'
+import {createElement,emptyDoc,umlAbsolutePosition,isProjectDocument,diagramCreationEnabled,initializeSequenceNode,sequenceBox,sequencePositionLocked} from '@atlas/contracts'
 import type {DiagramType,ElementType,ProjectDocument} from '@atlas/contracts'
 import {addElementNode,createDiagram,resizeNode,moveNode,setNodePackage,moveDiagramSelection,removeDiagramSelection,connectNodes,editElement,removeElementNode} from './document-commands'
 const fixture=(type:DiagramType,items:[string,ElementType,number,number][])=>{
- let doc=createDiagram(emptyDoc(),{id:'d',name:'Vista QA',type,date:'2026-11-14'})
+ const meta={id:'d',name:'Vista QA',type,date:'2026-11-14'}
+ // Historical views remain readable and editable; creation stays blocked.
+ if(!diagramCreationEnabled(type)){
+  assert.throws(()=>createDiagram(emptyDoc(),meta),/deshabilitada/)
+  const doc=emptyDoc();doc.diagrams=[{id:meta.id,name:meta.name,type,description:'',createdAt:meta.date,nodes:items.map(([id,,x,y])=>({id,elementId:id,x,y})),edges:[]}]
+  for(const [id,kind] of items)doc.elements[id]={...createElement(id,kind),id}
+  assert.ok(isProjectDocument(doc));return doc
+ }
+ let doc=createDiagram(emptyDoc(),meta)
  for(const [id,kind,x,y] of items)doc=addElementNode(doc,'d',{...createElement(id,kind),id},{id,x,y})
  return doc
 }

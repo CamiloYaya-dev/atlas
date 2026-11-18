@@ -89,7 +89,7 @@ it('representa fichas UML mínimas sin inventar propiedades ni contenido',()=>{
  rerender(<AtlasNode {...node('uml-stereotype','uml-profile')}/>);expect(container.querySelector('.uml-structural-compartment')).toBeNull()
  rerender(<AtlasNode {...node('uml-package','uml-package')}/>);expect(screen.getByText('Paquete')).toBeTruthy();expect(screen.getByText(/0 elementos contenidos/)).toBeTruthy()
  rerender(<AtlasNode {...node('uml-model','uml-package',{uml:{visibility:'public'}})}/>);expect(screen.getByText('«model»')).toBeTruthy();expect(screen.getByText(/Visibilidad: public/)).toBeTruthy()
- rerender(<AtlasNode {...node('uml-object-node','uml-activity')}/>);expect(container.querySelector('.uml-object-node-label small')).toBeNull()
+ rerender(<AtlasNode {...node('uml-object-node','uml-activity')}/>);expect(container.querySelector('.uml-object-node-label .atlas-uml-type-identifier')?.textContent).toBe('«Object Node»');expect(Array.from(container.querySelectorAll('.uml-object-node-label small:not(.atlas-uml-type-identifier)')).every(n=>!n.textContent?.trim())).toBe(true)
  rerender(<AtlasNode {...node('uml-state','uml-state')}/>);expect(container.querySelector('.uml-state-compartment')).toBeNull()
  rerender(<AtlasNode {...node('uml-region','uml-state')}/>);expect(container.querySelector('.uml-state-region-caption')).toBeNull()
  rerender(<AtlasNode {...node('uml-interaction','uml-sequence')}/>);expect(container.querySelector('.uml-interaction-ref-summary')).toBeNull()

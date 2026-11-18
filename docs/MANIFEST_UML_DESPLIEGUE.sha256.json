@@ -5,16 +5,16 @@
     ".gitignore": "71cadf5e9e5dd60cf77ed5abeaaa3c8d8f24fe765d1948a0a950d9e2087c0f41",
     "apps/api/src/domain/uml-deployment-persistence.unit.test.ts": "a1f60964f1b579c68de91f95e0019f7f74f067805fa3849da0b56ee97fa53a33",
     "apps/api/src/modules/exports/render-svg.ts": "4b1966eaecc58af73e1a5233c2a4da24591581c8f91b02e102b2c6a898cc7dda",
-    "apps/api/src/modules/projects/application/document-policy.ts": "17ed948b792e5d63e06094c809cf30a809a304288dbb2216c349ca20873acc60",
+    "apps/api/src/modules/projects/application/document-policy.ts": "6b0dc11f163a8886bd0107ade117b9580571f2803dc0f40dd81e771dc757946a",
     "apps/api/src/modules/projects/application/import-scope.ts": "0da25fc439939c084b4f87e63ac5d5e351458d7a97bea1459bc0205ebd161d52",
     "apps/api/src/modules/projects/infrastructure/projects.repository.ts": "95b4412a76552f1f390948fccceba68b0472dfcb65e69f9a95c996397d57cdf7",
     "apps/api/src/tests/uml-scoped.integration.test.ts": "be40dfb014fa4dd52df0b5a1ac7b4ee44848da9f9a67f0446297ffb1abc7dfe6",
     "apps/web/src/components/organisms/AtlasNode.tsx": "ad5c060c2da5cb5f56ca4176b85defa19f715bd3a671babf0efa4c304f7ddfde",
-    "apps/web/src/components/organisms/AtlasUmlEdge.tsx": "e4b2aa3b3306d49f73b595c7d9c962522e0528aeba52be833c14c6f8875f2646",
+    "apps/web/src/components/organisms/AtlasUmlEdge.tsx": "4797cb03ea2a86b8e75249b1aab5f0c0984ddc39448fe27b1aa9eae3f48de4ec",
     "apps/web/src/features/editor/AtlasEditor.behavior.browser.test.tsx": "67297cb9d762520b6077c12f4811ccf6e1ed4f8023a5b14d1bd2894d7994e29a",
-    "apps/web/src/features/editor/AtlasEditor.tsx": "fac34d8c17d4a510b97ac9e8dff7b0686fb9eab1425b96c1ccd1a49233a49d00",
-    "apps/web/src/features/editor/domain/document-commands.ts": "11b8ef9f223c1fc5a47abb32afe75ba35d60fdb2f80632ab92fb1fdd6d770f2e",
-    "apps/web/src/features/editor/hooks/useGraphView.ts": "4b9f4ea0cdc61b021dd8c7a4644a969cfb419c8d87ea843b8ed85c9e621dece6",
+    "apps/web/src/features/editor/AtlasEditor.tsx": "1d7ee79a71acac432cfd33fd3cd01da1faada45b15d3138fa47a380c8690c5f2",
+    "apps/web/src/features/editor/domain/document-commands.ts": "98ed85d8ad42dafad707095cccaf0b7411a8d9ff692f617047f25c650e417b73",
+    "apps/web/src/features/editor/hooks/useGraphView.ts": "0494843036c974eeead8cfa964c1b8798f6d5ba19053f5c6eb596995b534ae6b",
     "apps/web/src/features/editor/uml/DeploymentEditors.tsx": "8d1b96fc84a88668f2eb0b7c8b2358e0608ec83f4118729043fb393807742f8b",
     "apps/web/src/features/editor/uml/uml-deployment.browser.test.tsx": "44fdbf8feac7ce6a96eebbeec713e82ceb966e3c98cb5cb779f33de5297ed603",
     "docs/MATRIZ_UML_DESPLIEGUE.md": "06be05fe497611e5fa1cd746aa1ecf7f609c3af49dada3d609402f20b0370c41",
@@ -65,6 +65,6 @@
     "qa/uml-deployment-negative/29-aud-dep-007-enumeracion-orden.json": "5a0fb1c5e993285e1d309585ea5b0a9540572997d14bd2870b4b01d61287aee2",
     "qa/uml-deployment-negative/30-aud-dep-007-escalar-duplicado.json": "66e469ae6520349786f29eebf6ba733f76835858da516cc9f4ab8a4b8e9ec083",
     "qa/uml-scoped-fixtures.ts": "e15557b267addf5cbf559606c0a2c7a51770c8d56604aa38e6ea236b57de9c46",
-    "scripts/graph-regression.cjs": "c9116b7d89963ad283e00c44278117dad0cf57e64dca53af37c21d8c9a79334d"
+    "scripts/graph-regression.cjs": "a7d6ff250ef568be9c8c4f3346bcde728f690064b4d05c2a2446dfc8b94febcd"
   }
 }

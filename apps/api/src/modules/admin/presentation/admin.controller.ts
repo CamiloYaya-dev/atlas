@@ -2,6 +2,7 @@ import type {FastifyInstance} from 'fastify'
 import {pool} from '../../../db/pool'
 import {identity} from '../../../security/identity'
 import {hashPassword} from '../../../security/password'
+import {provisionUserDemo} from '../../../db/demo-provision'
 import {DomainError,forbidden,assertUUID} from '../../../domain/errors'
 function obj(x:unknown):Record<string,unknown>{if(!x||typeof x!=='object'||Array.isArray(x))throw new DomainError('Objeto JSON esperado',400);return x as Record<string,unknown>}
 async function admin(req:Parameters<typeof identity>[0]){const actor=await identity(req);if(!actor.platformAdmin)throw forbidden();return actor}
@@ -16,11 +17,19 @@ export async function registerAdminController(app:FastifyInstance){
   const email=String(b.email||'').trim().toLowerCase(),name=String(b.name||'').trim()
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||name.length<2||name.length>120)throw new DomainError('Nombre o email inválido',400)
   const hash=await hashPassword(String(b.password||''))
+  const client=await pool.connect()
   try{
-   const {rows}=await pool.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,created_by)
+   await client.query('BEGIN')
+   const {rows}=await client.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,created_by)
       VALUES ($1,$2,$3,$4) RETURNING id`,[email,name,hash,actor.id])
-   return reply.code(201).send({id:rows[0].id,email,name,active:true})
-  }catch(e){if((e as {code?:string}).code==='23505')throw new DomainError('El correo ya está registrado',409);throw e}
+   const demo=await provisionUserDemo(client,rows[0].id)
+   await client.query('COMMIT')
+   return reply.code(201).send({id:rows[0].id,email,name,active:true,demoWorkspaceId:demo.workspaceId,demoProjectId:demo.projectId})
+  }catch(e){
+   await client.query('ROLLBACK')
+   if((e as {code?:string}).code==='23505')throw new DomainError('El correo ya está registrado',409)
+   throw e
+  }finally{client.release()}
  })
  app.patch<{Params:{userId:string}}>('/api/v1/admin/users/:userId',async(req)=>{
   const actor=await admin(req);assertUUID(req.params.userId)

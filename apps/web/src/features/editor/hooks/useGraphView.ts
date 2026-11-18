@@ -1,3 +1,4 @@
+import {needsDetour} from '../domain/diagram-beautify'
 import {deploymentGlyph,deploymentEdgePresentation,deploymentCube,deploymentPort,deploymentFacingPort} from '@atlas/contracts'
 import {componentGlyph,componentContract,componentAssemblyDirection,componentHandle} from '@atlas/contracts'
 import {sequenceBox,sequenceGlyphMarkup,sequenceEdgeGeometry,sequenceFrameBounds,sequencePositionLocked} from '@atlas/contracts'
@@ -105,13 +106,45 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
   for(const e of visibleEdges){const key=[e.source,e.target].sort().join('\u0000');counts.set(key,(counts.get(key)||0)+1)}
   const bounds=(nodeId:string)=>{if(!visibleIds.has(nodeId))return undefined;const node=diagram.nodes.find(n=>n.id===nodeId);if(!node)return undefined;const el=doc.elements[node.elementId];if(!el)return undefined;const p=diagram.type==='uml-activity'?activityDisplayPosition(doc,diagram,node,activityFrame):umlAbsolutePosition(diagram,node),size=atlasNodeSize(diagram.type,el,node,umlNodeDepth(diagram,node),visibleNodes.some(n=>n.parentNodeId===node.id));return {...p,...size,element:el}}
   const hub=(e:Diagram['edges'][number])=>{const a=bounds(e.source),b=bounds(e.target);if(!a||!b)return undefined;const from=diagram.type==='uml-activity'?activityPort(a,a.element,e.sourceHandle,true):diagram.type==='uml-usecase'?useCasePort(a,a.element,classEndProperties(e,'source').handle,true):diagram.type==='uml-deployment'?deploymentPort(a,deploymentCube(doc,a.element),classEndProperties(e,'source').handle,true):classPort(a,classEndProperties(e,'source').handle,true),to=diagram.type==='uml-activity'?activityPort(b,b.element,e.targetHandle,false):diagram.type==='uml-usecase'?useCasePort(b,b.element,classEndProperties(e,'target').handle,false):diagram.type==='uml-deployment'?deploymentPort(b,deploymentCube(doc,b.element),classEndProperties(e,'target').handle,false):classPort(b,classEndProperties(e,'target').handle,false),route=diagram.type==='uml-activity'&&e.relationKind==='exception-handler'?activityExceptionRoute(from,to):classRelationRoute({sourceX:from.x,sourceY:from.y,targetX:to.x,targetY:to.y,sourcePosition:from.side,targetPosition:to.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||(diagram.type==='uml-usecase'?'straight':'smoothstep')},e.source===e.target);return {x:route.labelX,y:route.labelY}}
+  // Reserve lanes only when an edge REALLY needs to detour around obstacles.
+  // Otherwise keep the visually shortest route and let the base path renderer work.
+  const routeLanes=new Map<string,number>()
+  const detourEdges=[...visibleEdges].map(relation=>{
+   const a=bounds(relation.source),b=bounds(relation.target)
+   if(!a||!b)return null
+   const isAttached=(id:string,endpoint:string)=>{let n=diagram.nodes.find(x=>x.id===endpoint);const seen=new Set<string>();while(n?.parentNodeId&&!seen.has(n.id)){seen.add(n.id);if(n.parentNodeId===id)return true;n=diagram.nodes.find(x=>x.id===n?.parentNodeId)}return false}
+   const obstacles=visibleNodes.filter(n=>n.id!==relation.source&&n.id!==relation.target&&!isAttached(n.id,relation.source)&&!isAttached(n.id,relation.target)).flatMap(n=>{const r=bounds(n.id);return r?[{id:n.id,x:r.x,y:r.y,width:r.width,height:r.height}]:[]})
+   const from={x:a.x+a.width/2,y:a.y+a.height/2},to={x:b.x+b.width/2,y:b.y+b.height/2}
+   const needs=!!relation.annotationTargetEdgeId?false:relation.source!==relation.target&&needsDetour(from,to,obstacles)
+   return needs?{id:relation.id,source:relation.source,target:relation.target,x0:Math.min(from.x,to.x),x1:Math.max(from.x,to.x),y:(from.y+to.y)/2}:null
+  }).filter(Boolean) as {id:string;source:string;target:string;x0:number;x1:number;y:number}[]
+  const assigned:{id:string;x0:number;x1:number;y:number;source:string;target:string;lane:number}[]=[]
+  for(const relation of detourEdges.sort((a,b)=>a.id.localeCompare(b.id))){
+   const neighbors=assigned.filter(q=>relation.source===q.source||relation.source===q.target||relation.target===q.source||relation.target===q.target||
+    (Math.min(relation.x1,q.x1)-Math.max(relation.x0,q.x0)>-40&&Math.abs(relation.y-q.y)<145))
+   const occupied=new Set(neighbors.map(q=>q.lane))
+   let lane=0
+   for(let n=0;n<=24;n++){
+    const trial=n===0?0:Math.ceil(n/2)*(n%2?1:-1)
+    if(!occupied.has(trial)){lane=trial;break}
+   }
+   routeLanes.set(relation.id,lane)
+   assigned.push({...relation,lane})
+  }
   const edges:Edge[]=visibleEdges.map(raw=>{
    const e=diagram.type==='uml-deployment'?deploymentEdgePresentation(doc,diagram,raw):raw;
    const key=[e.source,e.target].sort().join('\u0000')
    const parallel=(counts.get(key)||0)>1
+   const routeLane=routeLanes.get(e.id)||0
    const route=e.pathStyle||defaultPaths[diagram.type]||'smoothstep'
    const semantic=e.relationKind||(isUmlDiagram(diagram.type)?UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'':'')
    const uml=isUmlDiagram(diagram.type)
+   const sourceBounds=bounds(e.source),targetBounds=bounds(e.target)
+   // Exclude the edge's own endpoints and their containers: crossing an enclosing
+   // node's border is deliberate UML containment, not an obstacle.
+   const isAttached=(id:string,endpoint:string)=>{let n=diagram.nodes.find(x=>x.id===endpoint);const seen=new Set<string>();while(n?.parentNodeId&&!seen.has(n.id)){seen.add(n.id);if(n.parentNodeId===id)return true;n=diagram.nodes.find(x=>x.id===n?.parentNodeId)}return false}
+   const routeObstacles=sourceBounds&&targetBounds?visibleNodes.filter(n=>n.id!==e.source&&n.id!==e.target&&!isAttached(n.id,e.source)&&!isAttached(n.id,e.target)).flatMap(n=>{const r=bounds(n.id);return r?[{id:n.id,x:r.x,y:r.y,width:r.width,height:r.height}]:[]}):[]
+   const shouldAvoid=!!sourceBounds&&!!targetBounds&&!e.annotationTargetEdgeId&&e.source!==e.target&&needsDetour({x:sourceBounds.x+sourceBounds.width/2,y:sourceBounds.y+sourceBounds.height/2},{x:targetBounds.x+targetBounds.width/2,y:targetBounds.y+targetBounds.height/2},routeObstacles)
    const notation=umlRelationNotation(semantic)
    const dashed=['include','extend','dependency','realization','import','merge','stereotype-application','manifestation','interaction-ref','required-interface'].includes(semantic)
    const noArrow=['association','link','assembly','connector','communication-path','containment','composition','aggregation'].includes(semantic)
@@ -119,9 +152,9 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const classData=['uml-class','uml-usecase','uml-deployment'].includes(diagram.type)?(()=>{const source=classEndProperties(e,'source'),target=classEndProperties(e,'target'),center=hub(e),link=e.annotationTargetEdgeId&&visibleEdges.find(x=>x.id===e.annotationTargetEdgeId),cls=e.associationClassId&&visibleNodes.find(n=>n.elementId===e.associationClassId),box=cls?bounds(cls.id):undefined;return {sourceMultiplicity:source.multiplicity,targetMultiplicity:target.multiplicity,sourceRole:source.role,targetRole:target.role,sourceNavigability:source.navigability,targetNavigability:target.navigability,semanticDisplayLabel:relationLabel,extensionNote:diagram.type==='uml-usecase'?useCaseExtensionNote(doc,diagram,e):undefined,extraEnds:e.associationEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId);if(!r||!center)return [];const p=diagram.type==='uml-deployment'?(end.handle?deploymentPort(r,deploymentCube(doc,r.element),end.handle,false):deploymentFacingPort(r,deploymentCube(doc,r.element),center)):end.handle?classPort(r,end.handle,false):classFacingPort(r,center);return [{...p,id:end.id,navigability:end.navigability,label:[end.role,end.multiplicity].filter(Boolean).join(' ')}]}),associationClassPoint:box&&center?classFacingPort(box,center):undefined,annotationPoint:link?hub(link):undefined}})():{}
    return ({
     id:e.id,source:e.source,target:e.target,sourceHandle:diagram.type==='uml-class'?classEndProperties(e,'source').handle||'right':sequenceHandle(e,'source'),targetHandle:diagram.type==='uml-usecase'&&e.relationKind==='annotation'&&doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type==='uml-subject'?'uc-annotation':diagram.type==='uml-class'?classEndProperties(e,'target').handle||'left':sequenceHandle(e,'target'),label:relationLabel,
-    type:uml?'atlas-uml':parallel?'atlas-parallel':route,
+    type:uml?'atlas-uml':parallel||shouldAvoid||routeLane!==0?'atlas-parallel':route,
     ...(['uml-component','uml-deployment'].includes(diagram.type)?{zIndex:Math.max(1,Math.min(...[e.source,e.target].map(id=>{const n=diagram.nodes.find(x=>x.id===id);return n?umlNodeDepth(diagram,n):0}))*10+1)}:{}),
-    data:uml?{parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole,wholeEnd:e.wholeEnd,sourceNavigability:e.sourceNavigability,targetNavigability:e.targetNavigability,...classData,...(diagram.type==='uml-component'?{componentAssembly:componentAssemblyDirection(doc,diagram,e),semanticDisplayLabel:relationLabel,extraEnds:e.componentEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId),center=hub(e);if(!r||!center)return [];return [{...(end.handle?classPort(r,end.handle,false):classFacingPort(r,center)),id:end.id,label:''}]}),annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}:{}),...(sequenceTyped?{sequenceGeometry:sequenceEdgeGeometry(doc,diagram,e)}:{}),...(diagram.type==='uml-activity'?{activityInterrupted:!!e.activityEdge?.interruptingRegionId&&e.relationKind!=='exception-handler',annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}: {})}:parallel?{parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
+    data:uml?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole,wholeEnd:e.wholeEnd,sourceNavigability:e.sourceNavigability,targetNavigability:e.targetNavigability,...classData,...(diagram.type==='uml-component'?{componentAssembly:componentAssemblyDirection(doc,diagram,e),semanticDisplayLabel:relationLabel,extraEnds:e.componentEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId),center=hub(e);if(!r||!center)return [];return [{...(end.handle?classPort(r,end.handle,false):classFacingPort(r,center)),id:end.id,label:''}]}),annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}:{}),...(sequenceTyped?{sequenceGeometry:sequenceEdgeGeometry(doc,diagram,e)}:{}),...(diagram.type==='uml-activity'?{activityInterrupted:!!e.activityEdge?.interruptingRegionId&&e.relationKind!=='exception-handler',annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}: {})}:parallel||shouldAvoid||routeLane!==0?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
     animated:diagram.type==='sequence',
     labelStyle:{fontSize:11,fill:'#70809c',fontWeight:600},labelBgStyle:{fill:'#fff',fillOpacity:.95},
     style:{stroke:'#8e9cb0',strokeWidth:1.7,strokeDasharray:uml?notation.stroke==='dashed'?'7 5':notation.stroke==='dotted'?'2 5':undefined:e.lineStyle==='dashed'||!e.lineStyle&&dashed?'7 5':e.lineStyle==='dotted'?'2 5':undefined},
