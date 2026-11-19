@@ -3,6 +3,7 @@ import {pool} from '../../../db/pool'
 import {identity} from '../../../security/identity'
 import {access,allowed,requirePermission,requireValidPermissions} from '../../../security/roles'
 import {DomainError,assertUUID} from '../../../domain/errors'
+import {requireOrganizationManagerForWorkspace} from '../../organizations/organization-access-policy'
 import {projectEvents} from '../../projects/realtime/project-events'
 function obj(x:unknown):Record<string,unknown>{if(!x||typeof x!=='object'||Array.isArray(x))throw new DomainError('Objeto JSON requerido',400);return x as Record<string,unknown>}
 function validateIds(ids:string[]){ids.forEach(assertUUID)}
@@ -63,6 +64,7 @@ export async function registerAccessController(app:FastifyInstance){
   assertUUID(req.params.workspaceId)
   const who=await access(req.params.workspaceId,(await identity(req)).id)
   requirePermission(who,'workspace.roles.manage')
+  await requireOrganizationManagerForWorkspace(req.params.workspaceId,(await identity(req)).id)
   const b=obj(req.body),name=String(b.name||'').trim(),roleKey=String(b.roleKey||'').trim().toLowerCase()
   if(name.length<2||name.length>100||!/^[a-z][a-z0-9_-]{1,39}$/.test(roleKey))throw new DomainError('Nombre o identificador del rol inválido',400)
   const perms=requireValidPermissions(b.permissions||[])
@@ -82,6 +84,7 @@ export async function registerAccessController(app:FastifyInstance){
   const actor=await identity(req)
   const who=await access(req.params.workspaceId,actor.id)
   requirePermission(who,'workspace.roles.manage')
+  await requireOrganizationManagerForWorkspace(req.params.workspaceId,(await identity(req)).id)
   const b=obj(req.body),permissions=requireValidPermissions(b.permissions)
   if(permissions.includes('workspace.delete')&&who.roleKey!=='owner')throw new DomainError('Solo el propietario puede conceder la eliminación de espacios',403)
   const c=await pool.connect()
@@ -110,12 +113,21 @@ export async function registerAccessController(app:FastifyInstance){
   assertUUID(req.params.workspaceId)
   const actor=await identity(req),who=await access(req.params.workspaceId,actor.id)
   requirePermission(who,'workspace.members.manage')
+  await requireOrganizationManagerForWorkspace(req.params.workspaceId,actor.id)
   const b=obj(req.body),userId=String(b.userId||''),roleId=String(b.roleId||'');validateIds([userId,roleId])
   const c=await pool.connect()
   try{
    await c.query('BEGIN')
    const target=await c.query('SELECT id FROM novzi_users WHERE id=$1 AND active=true',[userId])
    if(!target.rows[0])throw new DomainError('Usuario no existe o está inactivo',404)
+   // En organizaciones nuevas, el espacio solo puede invitar miembros del directorio privado.
+   const organization=await c.query<{organization_id:string|null}>('SELECT organization_id FROM workspaces WHERE id=$1',[req.params.workspaceId])
+   if(!organization.rows[0])throw new DomainError('Espacio no encontrado',404)
+   if(organization.rows[0].organization_id){
+    const belongs=await c.query('SELECT user_id FROM organization_members WHERE organization_id=$1 AND user_id=$2',
+     [organization.rows[0].organization_id,userId])
+    if(!belongs.rows[0])throw new DomainError('Invita primero al usuario a la organización',403)
+   }
    const role=await c.query<{role_key:string}>('SELECT role_key FROM workspace_roles WHERE workspace_id=$1 AND id=$2',[req.params.workspaceId,roleId])
    if(!role.rows[0]||role.rows[0].role_key==='owner')throw new DomainError('No puedes asignar el rol propietario',403)
    await c.query(`INSERT INTO workspace_members(workspace_id,user_id,role,role_id) VALUES($1,$2,'editor',$3)
@@ -130,6 +142,7 @@ export async function registerAccessController(app:FastifyInstance){
   validateIds([req.params.workspaceId,req.params.userId])
   const actor=await identity(req),who=await access(req.params.workspaceId,actor.id)
   requirePermission(who,'workspace.members.manage')
+  await requireOrganizationManagerForWorkspace(req.params.workspaceId,actor.id)
   const affected=await pool.query<{project_id:string}>('SELECT project_id FROM project_members WHERE workspace_id=$1 AND user_id=$2',[req.params.workspaceId,req.params.userId])
   const {rowCount}=await pool.query(`DELETE FROM workspace_members WHERE workspace_id=$1 AND user_id=$2 AND role <> 'owner'`,[req.params.workspaceId,req.params.userId])
   if(!rowCount)throw new DomainError('Miembro no encontrado o propietario protegido',404)

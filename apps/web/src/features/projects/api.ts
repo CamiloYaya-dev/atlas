@@ -31,7 +31,7 @@ export type ProjectMember={id:string;email:string;name:string;role_id:string;rol
 export type ProjectCandidate={id:string;email:string;name:string}
 export type ProjectRole={id:string;role_key:string;name:string;permissions:string[]}
 export const projectMembers=(id:string)=>request<ProjectMember[]>(`/projects/${encodeURIComponent(id)}/members`)
-export const projectCandidates=(id:string)=>request<{users:ProjectCandidate[];roles:ProjectRole[]}>(`/projects/${encodeURIComponent(id)}/candidates`)
+export const projectCandidates=(id:string,q="")=>request<{users:ProjectCandidate[];roles:ProjectRole[]}>(`/projects/${encodeURIComponent(id)}/candidates${q?`?q=${encodeURIComponent(q)}`:''}`)
 export const assignProjectMember=(id:string,userId:string,roleId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'PUT',body:JSON.stringify({roleId})})
 export const removeProjectMember=(id:string,userId:string)=>request<{ok:boolean}>(`/projects/${encodeURIComponent(id)}/members/${encodeURIComponent(userId)}`,{method:'DELETE'})
 

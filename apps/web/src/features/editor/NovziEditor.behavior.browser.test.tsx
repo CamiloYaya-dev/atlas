@@ -11,6 +11,7 @@ import {useReactFlow} from '@xyflow/react'
 import {captureDiagramPng} from './capture-diagram'
 import * as auth from '../security/api'
 import * as workspaces from '../workspaces/api'
+import * as organizations from '../organizations/api'
 import * as projects from '../projects/api'
 import * as audit from '../audit/api'
 
@@ -63,13 +64,15 @@ vi.mock('@xyflow/react',async()=>{
  }
 })
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn(),workspaceRoles:vi.fn(),workspaceMembers:vi.fn(),usersList:vi.fn()}))
+vi.mock('../organizations/api',()=>({listOrganizations:vi.fn(),createOrganization:vi.fn(),createOrganizationWorkspace:vi.fn(),organizationMembers:vi.fn(),myOrganizationInvitations:vi.fn(),inviteToOrganization:vi.fn(),acceptOrganizationInvitation:vi.fn(),declineOrganizationInvitation:vi.fn(),createOrganizationUser:vi.fn(),updateOrganizationMember:vi.fn(),removeOrganizationMember:vi.fn(),organizationAccessTree:vi.fn(),organizationMemberGrants:vi.fn(),assignOrganizationGrants:vi.fn(),removeOrganizationGrant:vi.fn(),organizationRoles:vi.fn(),organizationCreateRole:vi.fn(),organizationUpdateRole:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))
 vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),sendPresence:vi.fn(),workspaceLicense:vi.fn(),exportDiagramImage:vi.fn(),setWorkspaceLicense:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
 vi.mock('../audit/api',()=>({listAuditEvents:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
 const reader:WorkspaceAccess={roleId:'r-reader',roleKey:'viewer',roleName:'Lector',permissions:['project.read','diagram.view.c1','element.view.actor','element.view.system','element.view.external']}
-const workspace={id:'w-qa',name:'Espacio QA',role:'owner'}
+const organization={id:'o-qa',name:'Zercano',role:'owner' as const,created_by:'u-qa',workspace_count:1}
+const workspace={id:'w-qa',name:'Espacio QA',role:'owner',organization_id:'o-qa'}
 const project={id:'p-qa',name:'Proyecto QA',workspace_id:'w-qa'}
 const user={id:'u-qa',email:'qa@novzi.test',name:'QA',platformAdmin:true}
 
@@ -88,6 +91,11 @@ beforeEach(()=>{
  vi.mocked(auth.session).mockResolvedValue(user)
  vi.mocked(auth.workspaceAccess).mockResolvedValue(owner)
  vi.mocked(auth.logout).mockResolvedValue(undefined)
+ vi.mocked(organizations.listOrganizations).mockResolvedValue([organization])
+ vi.mocked(organizations.organizationMembers).mockResolvedValue([])
+ vi.mocked(organizations.organizationAccessTree).mockResolvedValue([])
+ vi.mocked(organizations.organizationMemberGrants).mockResolvedValue({workspaces:[],projects:[]})
+ vi.mocked(organizations.myOrganizationInvitations).mockResolvedValue([])
  vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace])
  vi.mocked(projects.listProjects).mockResolvedValue([project])
  vi.mocked(projects.projectAccess).mockResolvedValue(owner)
@@ -391,15 +399,15 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   await waitFor(()=>expect(screen.getByRole('button',{name:fresh.name})).toBeTruthy())
  })
  it('crea otro espacio de trabajo desde la interfaz administrativa',async()=>{
-  const second={id:'w-new',name:'Área de innovación',role:'owner'}
-  vi.mocked(workspaces.createWorkspace).mockResolvedValue(second.id)
+  const second={id:'w-new',name:'Área de innovación',role:'owner',organization_id:'o-qa'}
+  vi.mocked(organizations.createOrganizationWorkspace).mockResolvedValue(second.id)
   vi.mocked(workspaces.listWorkspaces).mockResolvedValueOnce([workspace]).mockResolvedValue([workspace,second])
   await openEditor()
   fireEvent.click(screen.getByTitle('Nuevo espacio'))
   const modal=screen.getByRole('dialog',{name:'Crear espacio de trabajo'})
-  fireEvent.change(within(modal).getByLabelText('Nombre de la organización'),{target:{value:second.name}})
+  fireEvent.change(within(modal).getByLabelText('Nombre del espacio'),{target:{value:second.name}})
   fireEvent.click(within(modal).getByRole('button',{name:/^Crear$/}))
-  await waitFor(()=>expect(workspaces.createWorkspace).toHaveBeenCalledWith(second.name))
+  await waitFor(()=>expect(organizations.createOrganizationWorkspace).toHaveBeenCalledWith('o-qa',second.name))
   await waitFor(()=>expect((screen.getByRole('combobox',{name:'Espacio de trabajo'}) as HTMLSelectElement).value).toBe(second.id))
  })
  it('navega a la vista C2 vinculada desde una caja de C1',async()=>{
@@ -777,11 +785,11 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(screen.getByRole('button',{name:'Proyecto QA'})).toBeTruthy()
  })
  it('la API rechazada durante creación de espacio no altera la membresía actual',async()=>{
-  vi.mocked(workspaces.createWorkspace).mockRejectedValue(new Error('Sin acceso para crear espacios'))
+  vi.mocked(organizations.createOrganizationWorkspace).mockRejectedValue(new Error('Sin acceso para crear espacios'))
   await openEditor()
   fireEvent.click(screen.getByTitle('Nuevo espacio'))
   const modal=screen.getByRole('dialog',{name:'Crear espacio de trabajo'})
-  fireEvent.change(within(modal).getByLabelText('Nombre de la organización'),{target:{value:'Área no autorizada'}})
+  fireEvent.change(within(modal).getByLabelText('Nombre del espacio'),{target:{value:'Área no autorizada'}})
   fireEvent.click(within(modal).getByRole('button',{name:/^Crear$/}))
   expect(await screen.findByText(/Sin acceso para crear espacios/)).toBeTruthy()
   expect((screen.getByRole('combobox',{name:'Espacio de trabajo'}) as HTMLSelectElement).value).toBe('w-qa')
@@ -1504,8 +1512,8 @@ it('QA09 lee relación con permiso de borrado pero no de edición y permite canc
 it('QA09 cerrar filtros por el control de cabecera no modifica categorías',async()=>{
  await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Filtros'}));const modal=await screen.findByRole('dialog',{name:/Filtros:/});fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.queryByRole('dialog',{name:/Filtros:/})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
-it('QA09 cerrar accesos vuelve a consultar política de organización sin guardar',async()=>{
- await openEditor();const count=vi.mocked(auth.workspaceAccess).mock.calls.length;fireEvent.click(screen.getByRole('button',{name:'Administrar accesos del espacio'}));const modal=await screen.findByRole('dialog',{name:'Usuarios y políticas de acceso'});await waitFor(()=>expect(auth.workspaceRoles).toHaveBeenCalledWith(workspace.id));fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));await waitFor(()=>expect(auth.workspaceAccess).toHaveBeenCalledTimes(count+1));expect(screen.queryByRole('dialog')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
+it('QA09 usuarios y accesos están centralizados en organización y cerrar no guarda el documento',async()=>{
+ await openEditor();expect(screen.queryByRole('button',{name:'Administrar accesos del espacio'})).toBeNull();expect(screen.queryByRole('button',{name:'Cuentas de la plataforma'})).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Usuarios y accesos de la organización'}));const modal=await screen.findByRole('dialog',{name:'Usuarios y accesos de la organización'});await waitFor(()=>expect(organizations.organizationAccessTree).toHaveBeenCalledWith(organization.id));fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.queryByRole('dialog')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 seleccionar caja de destino enlaza una aparición sin alterar catálogos de otras vistas',async()=>{
  const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const link=screen.getByLabelText('Vista vinculada (doble clic)');const destination=screen.getByLabelText('Caja de destino (opcional)');fireEvent.change(destination,{target:{value:target.nodes[0].id}});await waitFor(()=>expect(vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].elements.platform.childNodeId).toBe(target.nodes[0].id),{timeout:4500});await screen.findByRole('button',{name:'Historial · v2'});vi.mocked(projects.saveDocument).mockResolvedValueOnce(3);fireEvent.change(link,{target:{value:''}});await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements.platform.childNodeId).toBeUndefined();expect(saved?.elements.platform.childDiagramId).toBeUndefined();expect(saved?.diagrams).toEqual(doc.diagrams)}, {timeout:4500})

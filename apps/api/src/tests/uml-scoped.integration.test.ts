@@ -109,5 +109,11 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
    assert.deepEqual((await send('GET',base+'/versions/'+version)).json().document,initial);
    const complete=await send('POST',base+'/import',{document:doc,expectedVersion:version+1,scope:{mode:'project'}});assert.equal(complete.statusCode,200,complete.body);assert.deepEqual((await send('GET',base+'/document')).json().document,doc);
   }
- }finally{try{if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]);if(userId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[userId])}finally{await app.close()}}
+ }finally{try{
+  if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId])
+  if(userId){
+   await pool.query('DELETE FROM organizations WHERE created_by=$1',[userId])
+   await pool.query('DELETE FROM novzi_users WHERE id=$1',[userId])
+  }
+ }finally{await app.close()}}
 })

@@ -15,6 +15,22 @@ const equal=(a:unknown,b:unknown)=>isDeepStrictEqual(a,b)
 const fail=(message:string):never=>{throw new DomainError(message,403)}
 const isObj=(o:unknown):o is Record<string,unknown>=>!!o&&typeof o==='object'&&!Array.isArray(o)
 export function projectVisible(document:ProjectDocument,a:Access):ProjectDocument{
+ // Proyectar el subconjunto ANTES de resolver catálogos o referencias cruzadas.
+ // Un editor restringido nunca recibe fichas compartidas exclusivas de diagramas ocultos.
+ if(a.diagramIds){
+  const selected=document.diagrams.filter(d=>a.diagramIds!.has(d.id))
+  const kept=new Set(selected.flatMap(d=>d.nodes.map(n=>n.elementId)))
+  const selectedDiagramIds=new Set(selected.map(d=>d.id))
+  document={...document,diagrams:selected,
+   elements:Object.fromEntries(Object.entries(document.elements).filter(([id])=>kept.has(id)).map(([id,e])=>[id,{
+    ...e,...(e.childDiagramId&&!selectedDiagramIds.has(e.childDiagramId)?{childDiagramId:undefined,childNodeId:undefined}:{}),
+    ...(e.semanticOwnerId&&!kept.has(e.semanticOwnerId)?{semanticOwnerId:undefined}:{})
+   }])),
+   componentRelations:Object.fromEntries(Object.entries(document.componentRelations||{}).filter(([,r])=>componentRelationRefs(r).every(id=>kept.has(id)))),
+   deploymentRelations:Object.fromEntries(Object.entries(document.deploymentRelations||{}).filter(([,r])=>deploymentRefs(r).every(id=>kept.has(id)))),
+   useCaseRelations:Object.fromEntries(Object.entries(document.useCaseRelations||{}).filter(([,r])=>kept.has(r.sourceElementId)&&kept.has(r.targetElementId))),
+   fieldDefinitions:document.fieldDefinitions}
+ }
  document=repairStoredUseCaseAnnotations(adaptUseCaseDocument(document))
  const diagrams=document.diagrams.filter(d=>allowed(a,`diagram.view.${d.type}`))
  const visibleIds=new Set(diagrams.flatMap(d=>d.nodes.map(n=>n.elementId)))

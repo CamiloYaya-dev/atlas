@@ -28,7 +28,7 @@ const transactionalFailures=[
 for(const [name,invoke,expectedQuery,isMissing] of transactionalFailures){
  test('repositorios: '+name+' revierte la transacción y libera el cliente',async t=>{
   const seen:string[]=[],failure=new Error('Fallo SQL controlado QA')
-  const client={query:async(sql:string)=>{seen.push(sql.trim());if(isMissing)return {rows:[],rowCount:0};if(sql.includes(expectedQuery))throw failure;return {rows:[],rowCount:0}},release:()=>{seen.push('RELEASE')}}
+  const client={query:async(sql:string)=>{seen.push(sql.trim());if(isMissing)return {rows:[],rowCount:0};if(sql.includes(expectedQuery))throw failure;if(sql.startsWith('INSERT INTO organizations'))return {rows:[{id:'o-qa'}],rowCount:1};return {rows:[],rowCount:0}},release:()=>{seen.push('RELEASE')}}
   t.mock.method(pool,'connect',async()=>client)
   const action=invoke(new ProjectsRepository(),new WorkspacesRepository())
   if(isMissing)await assert.rejects(action,{statusCode:404});else await assert.rejects(action,error=>error===failure)
