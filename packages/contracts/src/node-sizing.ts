@@ -4,7 +4,7 @@ import {activityActionSize,activityPinSize} from './uml-activity-layout'
 /** Node dimensions belong to each appearance in a diagram, not to the shared element. */
 import type {DiagramType,ElementType,DiagramNode,ModelElement} from './index'
 import {umlContainerSize} from './uml-containers'
-export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
+export function novziNodeMinimum(diagram:DiagramType,type:ElementType){
  if(diagram==='uml-component'&&type==='uml-port')return COMPONENT_PORT_SIZE
  if(diagram==='uml-activity'&&type==='uml-activity-pin')return {width:24,height:24}
  if(diagram==='uml-activity'&&type==='uml-activity-parameter')return {width:95,height:48}
@@ -30,7 +30,7 @@ export function atlasNodeMinimum(diagram:DiagramType,type:ElementType){
  if(diagram==='uml-composite'&&type==='uml-port')return {width:110,height:64}
  return {width:95,height:65}
 }
-export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pick<DiagramNode,'width'|'height'>,depth=0,hasChildren=false){
+export function novziNodeSize(diagram:DiagramType,element:ModelElement,node?:Pick<DiagramNode,'width'|'height'>,depth=0,hasChildren=false){
  let width=250,height=125
  const type=element.type
  if(diagram==='uml-component'&&type==='uml-port')return COMPONENT_PORT_SIZE
@@ -42,7 +42,7 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
   const titleRows=rows(element.name)+(detail.stereotype?rows(detail.stereotype):0)+((detail.leaf??element.uml?.leaf)?1:0),pointRows=points.reduce((n,p)=>n+rows(p.name+(p.description?`: ${p.description}`:'')),0)
   height=actor?Math.max(150,105+titleRows*16):Math.max(105,62+titleRows*17+(points.length?22+pointRows*20:0)+members*21)
   // Explicit per-occurrence width is retained. Height never clips names/points.
-  return {width:Math.max(atlasNodeMinimum(diagram,type).width,actualWidth),height:Math.max(height,node?.height||0)}
+  return {width:Math.max(novziNodeMinimum(diagram,type).width,actualWidth),height:Math.max(height,node?.height||0)}
  }
  else if(diagram==='uml-activity'&&['uml-partition','uml-activity-interruptible-region'].includes(type)){width=570;height=380}
  else if(diagram==='uml-activity'&&type==='uml-activity-pin'){return activityPinSize(node)}
@@ -76,6 +76,6 @@ export function atlasNodeSize(diagram:DiagramType,element:ModelElement,node?:Pic
  else if(type==='uml-lifeline'){width=170;height=260}
  else if(diagram==='uml-sequence'&&type==='uml-activation'){width=48;height=120}
  else if(diagram==='uml-sequence'&&type==='uml-destruction'){width=48;height=48}
- const min=atlasNodeMinimum(diagram,type)
+ const min=novziNodeMinimum(diagram,type)
  return {width:Math.max(min.width,node?.width??width),height:Math.max(min.height,node?.height??height)}
 }

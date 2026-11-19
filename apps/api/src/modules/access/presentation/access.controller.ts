@@ -38,7 +38,7 @@ export async function registerAccessController(app:FastifyInstance){
   const limitParam=bind(limit+1)
   const {rows}=await pool.query<{id:string;event_type:string;actor_name:string|null;actor_email:string|null;resource_id:string|null;resource_name:string|null;detail:Record<string,unknown>;created_at:string}>(`
    SELECT a.id::text,a.event_type,u.display_name AS actor_name,u.email AS actor_email,a.resource_id,p.name AS resource_name,a.detail,a.created_at
-   FROM audit_events a LEFT JOIN atlas_users u ON u.id=a.actor_id
+   FROM audit_events a LEFT JOIN novzi_users u ON u.id=a.actor_id
    LEFT JOIN projects p ON p.id=a.resource_id AND p.workspace_id=a.workspace_id
    WHERE ${conditions.join(' AND ')} ORDER BY a.id DESC LIMIT ${limitParam}`,params)
   const page=rows.slice(0,limit).map(row=>({
@@ -102,7 +102,7 @@ export async function registerAccessController(app:FastifyInstance){
   const who=await access(req.params.workspaceId,(await identity(req)).id)
   requirePermission(who,'workspace.members.manage')
   const {rows}=await pool.query(`SELECT u.id,u.email,u.display_name AS name,u.active,r.id AS role_id,r.role_key,r.name AS role_name
-    FROM workspace_members m JOIN atlas_users u ON u.id=m.user_id
+    FROM workspace_members m JOIN novzi_users u ON u.id=m.user_id
     JOIN workspace_roles r ON r.id=m.role_id WHERE m.workspace_id=$1 ORDER BY u.email`,[req.params.workspaceId])
   return rows
  })
@@ -114,7 +114,7 @@ export async function registerAccessController(app:FastifyInstance){
   const c=await pool.connect()
   try{
    await c.query('BEGIN')
-   const target=await c.query('SELECT id FROM atlas_users WHERE id=$1 AND active=true',[userId])
+   const target=await c.query('SELECT id FROM novzi_users WHERE id=$1 AND active=true',[userId])
    if(!target.rows[0])throw new DomainError('Usuario no existe o está inactivo',404)
    const role=await c.query<{role_key:string}>('SELECT role_key FROM workspace_roles WHERE workspace_id=$1 AND id=$2',[req.params.workspaceId,roleId])
    if(!role.rows[0]||role.rows[0].role_key==='owner')throw new DomainError('No puedes asignar el rol propietario',403)

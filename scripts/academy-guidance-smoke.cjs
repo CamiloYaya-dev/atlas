@@ -13,7 +13,7 @@ const React=require('react');const {render,fireEvent,screen,cleanup,waitFor}=req
 const Academy=require('../apps/web/src/features/academy/AcademyMissions.tsx')
 const {assessAcademy}=require('../apps/web/src/features/academy/progress.ts')
 const f=()=>{};
-function props(overrides={}){return {lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia ATLAS',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Laboratorio'}],catalogLoading:false,activeWorkspaceId:'w',activeProjectId:'p',doc:{schema:1,elements:{},diagrams:[],fieldDefinitions:[]},saveStatus:'saved',mode:'functional',diagramId:'',busy:false,error:'',onClose:f,onStartTour:f,onCreateWorkspace:f,onCreateProject:f,onGoToLab:f,onOpenDiagram:f,onSelectDiagram:f,onOpenNode:f,onReuse:f,onMixed:f,onOpenFields:f,onInspectElement:f,...overrides}}
+function props(overrides={}){return {lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia NOVZI',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Laboratorio'}],catalogLoading:false,activeWorkspaceId:'w',activeProjectId:'p',doc:{schema:1,elements:{},diagrams:[],fieldDefinitions:[]},saveStatus:'saved',mode:'functional',diagramId:'',busy:false,error:'',onClose:f,onStartTour:f,onCreateWorkspace:f,onCreateProject:f,onGoToLab:f,onOpenDiagram:f,onSelectDiagram:f,onOpenNode:f,onReuse:f,onMixed:f,onOpenFields:f,onInspectElement:f,...overrides}}
 let position='down'
 HTMLElement.prototype.getBoundingClientRect=function(){
  const rect=this.classList.contains('academy-missions-content')?{top:100,bottom:400}:this.closest?.('[data-academy-check=\"c1\"]')?position==='down'?{top:460,bottom:530}:position==='up'?{top:10,bottom:55}:{top:190,bottom:230}:{top:0,bottom:0}
@@ -48,7 +48,7 @@ global.setTimeout=(fn,ms,...args)=>originalTimer(fn,ms>=60_000?30:ms,...args)
   const calls=[]
   const actions=props({lab:null,workspaces:[],projects:[],activeWorkspaceId:'',activeProjectId:'',doc:null,onCreateWorkspace:(name)=>calls.push(name)})
   render(React.createElement(Academy.default,actions))
-  assert.equal(calls.length,0);fireEvent.click(screen.getByRole('button',{name:/Crear mi organización/}));assert.equal(calls[0],'ATLAS · Academia personal')
+  assert.equal(calls.length,0);fireEvent.click(screen.getByRole('button',{name:/Crear mi organización/}));assert.equal(calls[0],'NOVZI · Academia personal')
   console.log('PASS Academy remains an explicit, non-automatic action')
   cleanup()
   const doc=props().doc;doc.fieldDefinitions=[{id:'c',label:'Canal de solicitud',forType:'requirement',kind:'select',options:['Web','Móvil','API']}]

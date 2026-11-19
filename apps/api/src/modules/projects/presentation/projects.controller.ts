@@ -33,7 +33,7 @@ export async function registerProjectController(app:FastifyInstance){
    'X-Content-Type-Options':'nosniff',
    'Access-Control-Allow-Credentials':'true',
   })
-  reply.raw.write(': ATLAS live\n\n')
+  reply.raw.write(': NOVZI live\n\n')
   projectEvents.subscribe(req.params.projectId,clientId,actor.id,actor.displayName,reply.raw,snapshot.version,async()=>{await identity(req);const current=await service.loadDocument(req.params.projectId,actor.id);if(!current)throw new DomainError('Proyecto no encontrado',404);projectEvents.updateVisibility(req.params.projectId,clientId,new Set(current.document.diagrams.map(d=>d.id)),new Set(Object.keys(current.document.elements)))},{diagrams:new Set(snapshot.document.diagrams.map(d=>d.id)),elements:new Set(Object.keys(snapshot.document.elements))})
  })
  app.post<{Params:{projectId:string}}>('/api/v1/projects/:projectId/presence',async req=>{

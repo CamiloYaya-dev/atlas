@@ -5,7 +5,7 @@ import {FUNCTIONAL_KINDS,validateField,validateTemplate} from './functional.poli
 import {resolveTemplateFields} from './functional-template-fields'
 import type {FunctionalKind,TemplateElement} from './functional.policy'
 
-export const TRANSFER_FORMAT='ATLAS-FUNCTIONAL-SCHEMAS'
+export const TRANSFER_FORMAT='NOVZI-FUNCTIONAL-SCHEMAS'
 export type Scope='none'|'form'|'template'|'both'
 export type TransferSelection=Record<FunctionalKind,Scope>
 export type PortableField={id:string;name:string;fieldType:string;required:boolean;options:string[];scope:'global'|'template'}

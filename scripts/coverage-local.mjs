@@ -11,29 +11,29 @@ if(!['unit','full'].includes(mode))throw new Error('Uso: coverage-local.mjs unit
 // backend/frontend de diagnóstico ni otros archivos del usuario.
 for(const name of ['coverage-summary.json','coverage-layers.json','index.html','lcov.info'])
  rmSync(resolve(root,'coverage',name),{force:true})
-const qaUrl='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
-const env={...process.env,ATLAS_QA_COVERAGE_TS:'1',NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
- MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',ATLAS_ALLOW_DB_TESTS:'true',
- ATLAS_CSRF_SECRET:'atlas-local-qa-coverage-only-2026-not-production',
- ATLAS_EXPORT_SIGNING_KEY:'atlas-local-qa-export-signing-only-2026-not-production'}
+const qaUrl='postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test'
+const env={...process.env,NOVZI_QA_COVERAGE_TS:'1',NODE_ENV:'test',AUTH_MODE:'local',DATABASE_URL:qaUrl,
+ MIGRATIONS_DATABASE_URL:qaUrl,DB_SSL:'false',NOVZI_ALLOW_DB_TESTS:'true',
+ NOVZI_CSRF_SECRET:'novzi-local-qa-coverage-only-2026-not-production',
+ NOVZI_EXPORT_SIGNING_KEY:'novzi-local-qa-export-signing-only-2026-not-production'}
 function exec(label,bin,args){
- console.log(`\n[ATLAS COVERAGE] ${label}`)
+ console.log(`\n[NOVZI COVERAGE] ${label}`)
  // Windows requires a shell for npm.cmd, but an absolute node.exe path MUST NOT
  // pass through cmd.exe ("C:\\Program Files" would otherwise be split).
  const result=spawnSync(bin,args,{cwd:root,stdio:'inherit',env,
   shell:process.platform==='win32'&&bin!==process.execPath})
  if(result.error)throw result.error
  if(result.status!==0){
-  console.error('[ATLAS COVERAGE] EJECUCIÓN INCOMPLETA: el resumen global anterior fue invalidado. Corrige el fallo y repite npm run test:coverage.')
+  console.error('[NOVZI COVERAGE] EJECUCIÓN INCOMPLETA: el resumen global anterior fue invalidado. Corrige el fallo y repite npm run test:coverage.')
   process.exit(result.status||1)
  }
 }
 if(mode==='full'){
  // CI already starts its own PostgreSQL service on port 5433; do not
  // attempt to bind a second Docker container to that port.
- if(process.env.ATLAS_COVERAGE_USE_EXISTING_DB!=='true')
+ if(process.env.NOVZI_COVERAGE_USE_EXISTING_DB!=='true')
   exec('Iniciar exclusivamente PostgreSQL QA, puerto 5433','docker',['compose','--profile','test','up','-d','--wait','db_test'])
- exec('Aplicar migraciones exclusivamente en atlas_test','npm',['run','db:migrate'])
+ exec('Aplicar migraciones exclusivamente en novzi_test','npm',['run','db:migrate'])
 }
 const c8=resolve(root,'node_modules','c8','bin','c8.js')
 if(!existsSync(c8)){
@@ -42,7 +42,7 @@ if(!existsSync(c8)){
 }
 exec(`Medir cobertura AGREGADA de ${mode==='full'?'unitarias + integración':'unitarias'}`,
  process.execPath,[c8,process.execPath,'scripts/coverage-suite.mjs',mode])
-exec('Medir coverage React con Vitest', 'npm', ['run','test:ui:coverage','-w','@atlas/web'])
+exec('Medir coverage React con Vitest', 'npm', ['run','test:ui:coverage','-w','@novzi/web'])
 exec('Consolidar frontend + backend + contratos',process.execPath,['scripts/coverage-merge.mjs'])
-console.log('\n[ATLAS COVERAGE] Reportes generados en coverage/index.html, coverage/lcov.info y coverage/coverage-summary.json')
-console.log(`[ATLAS COVERAGE] Para aplicar umbral global y por archivo de ${COVERAGE_TARGET}%: npm run coverage:check`)
+console.log('\n[NOVZI COVERAGE] Reportes generados en coverage/index.html, coverage/lcov.info y coverage/coverage-summary.json')
+console.log(`[NOVZI COVERAGE] Para aplicar umbral global y por archivo de ${COVERAGE_TARGET}%: npm run coverage:check`)

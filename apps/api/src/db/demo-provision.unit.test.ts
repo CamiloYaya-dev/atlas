@@ -45,6 +45,6 @@ test('provisionar es idempotente, privado por usuario y no reescribe demos edita
  assert.equal(b.created,true)
  assert.notEqual(b.workspaceId,a.workspaceId)
  assert.notEqual(b.projectId,a.projectId)
- assert.equal(DEMO_WORKSPACE_NAME,'ATLAS · DEMO')
+ assert.equal(DEMO_WORKSPACE_NAME,'NOVZI · DEMO')
  assert.match(DEMO_PROJECT_NAME,/exploración/)
 })

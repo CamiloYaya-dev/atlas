@@ -1,5 +1,5 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest'
-import {emptyDoc} from '@atlas/contracts'
+import {emptyDoc} from '@novzi/contracts'
 import {request,requestFile} from '../../shared/api/http'
 import {listProjects,createProject,loadDocument,saveDocument,exportProject,importProject,listDocumentVersions,loadDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch,workspaceLicense,exportDiagramImage} from './api'
 vi.mock('../../shared/api/http',()=>({request:vi.fn(),requestFile:vi.fn()}))
@@ -11,8 +11,8 @@ describe('Contratos HTTP de proyectos',()=>{
  })
  it('crea proyecto con documento y nombre',async()=>{
   const doc=emptyDoc()
-  await createProject('w1','ATLAS',doc)
-  expect(request).toHaveBeenCalledWith('/workspaces/w1/projects',{method:'POST',body:JSON.stringify({name:'ATLAS',document:doc})})
+  await createProject('w1','NOVZI',doc)
+  expect(request).toHaveBeenCalledWith('/workspaces/w1/projects',{method:'POST',body:JSON.stringify({name:'NOVZI',document:doc})})
  })
  it('carga y guarda con control de versión optimista',async()=>{
   const doc=emptyDoc()

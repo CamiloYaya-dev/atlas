@@ -1,7 +1,7 @@
 import {it,expect} from 'vitest'
 import {render,screen} from '@testing-library/react'
-import {emptyDoc,createElement} from '@atlas/contracts'
-import type {Diagram} from '@atlas/contracts'
+import {emptyDoc,createElement} from '@novzi/contracts'
+import type {Diagram} from '@novzi/contracts'
 import VersionDiagramPreview from './VersionDiagramPreview'
 it('una versión vacía no inventa cajas ni relaciones',()=>{
  const doc=emptyDoc(),diagram:Diagram={id:'d',name:'Vacío',description:'',createdAt:'2026-01-01',type:'c1',nodes:[],edges:[]}

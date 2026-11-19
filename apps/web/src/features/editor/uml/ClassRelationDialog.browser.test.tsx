@@ -1,7 +1,7 @@
 import {render,screen,fireEvent,within} from '@testing-library/react'
 import {it,expect,vi} from 'vitest'
-import {emptyDoc,createElement} from '@atlas/contracts'
-import type {DiagramEdge,ElementType} from '@atlas/contracts'
+import {emptyDoc,createElement} from '@novzi/contracts'
+import type {DiagramEdge,ElementType} from '@novzi/contracts'
 import ClassRelationDialog from './ClassRelationDialog'
 function fixture(){const doc=emptyDoc();for(const [id,type] of [['a','uml-class'],['b','uml-class'],['c','uml-class'],['p','uml-package'],['i','uml-interface'],['ac','uml-association-class']] as [string,ElementType][]){doc.elements[id]={...createElement(id,type),id}}const diagram={id:'class',name:'Clases',type:'uml-class' as const,description:'',createdAt:'2026-11-16',nodes:Object.keys(doc.elements).map((id,i)=>({id:`n${id}`,elementId:id,x:i*300,y:0})),edges:[] as DiagramEdge[]};doc.diagrams.push(diagram);return {doc,diagram}}
 function open(initial:Partial<DiagramEdge>={},disabled=false){const {doc,diagram}=fixture(),save=vi.fn(),close=vi.fn();render(<ClassRelationDialog doc={doc} diagram={diagram} initial={{id:'edge',source:'na',target:'nb',relationKind:'association',...initial}} onSave={save} onClose={close} disabled={disabled}/>);return {save,close,doc,diagram}}

@@ -3,19 +3,19 @@
  * without a demo, no shared ownership, and no password/authentication changes.
  */
 import type {PoolClient} from 'pg'
-import {isProjectDocument} from '@atlas/contracts'
-import type {ProjectDocument} from '@atlas/contracts'
+import {isProjectDocument} from '@novzi/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import {initializeWorkspaceRoles} from '../security/roles'
-import atlasDemoJson from './atlas-demo-project.json'
+import novziDemoJson from './novzi-demo-project.json' with {type:'json'}
 
-export const DEMO_WORKSPACE_NAME='ATLAS · DEMO'
-export const DEMO_PROJECT_NAME='ATLAS · Proyecto de exploración'
+export const DEMO_WORKSPACE_NAME='NOVZI · DEMO'
+export const DEMO_PROJECT_NAME='NOVZI · Proyecto de exploración'
 
 /** Fail closed if the packaged example becomes incompatible with the editor. */
 export function onboardingDemoDocument():ProjectDocument {
- if(!isProjectDocument(atlasDemoJson))throw new Error('El proyecto de demostración de ATLAS tiene un esquema incompatible')
+ if(!isProjectDocument(novziDemoJson))throw new Error('El proyecto de demostración de NOVZI tiene un esquema incompatible')
  // Every registered user receives an isolated copy, never a shared mutable object.
- return structuredClone(atlasDemoJson) as ProjectDocument
+ return structuredClone(novziDemoJson) as ProjectDocument
 }
 
 /** Idempotent provisioning: do NOT reset a demo a person has already edited. */

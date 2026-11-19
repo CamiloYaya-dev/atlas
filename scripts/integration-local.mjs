@@ -6,12 +6,12 @@ if (code !== 0) {
   process.exit(1);
 }
 const testEnv = {
-  DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
-  MIGRATIONS_DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
+  DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
+  MIGRATIONS_DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
   NODE_ENV:'test',
   AUTH_MODE:'local',
-  ATLAS_CSRF_SECRET:'qa-local-secret-key-atlas-integration-2026-not-production',
-  ATLAS_ALLOW_DB_TESTS:'true',
+  NOVZI_CSRF_SECRET:'qa-local-secret-key-novzi-integration-2026-not-production',
+  NOVZI_ALLOW_DB_TESTS:'true',
 };
 console.log('Migrando EXCLUSIVAMENTE la base de prueba local en puerto 5433...');
 const migrate = await npm(['run','db:migrate'],testEnv);

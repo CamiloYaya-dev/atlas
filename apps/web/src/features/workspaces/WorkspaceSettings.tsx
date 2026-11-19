@@ -3,7 +3,7 @@ import { Overlay, Field } from '../../components/molecules/Overlay'
 import { DeleteConfirmation } from '../../components/molecules/DeleteConfirmation'
 import { renameWorkspace, deleteWorkspace } from './api'
 import { listProjects } from '../projects/api'
-import type { Workspace, Project } from '@atlas/contracts'
+import type { Workspace, Project } from '@novzi/contracts'
 import type { WorkspaceAccess } from '../security/types'
 interface Props { workspace: Workspace; access: WorkspaceAccess | null; onClose: () => void; onRenamed: (id: string, name: string) => void; onDeleted: (id: string) => void }
 export default function WorkspaceSettings({ workspace, access, onClose, onRenamed, onDeleted }: Props) {
@@ -35,7 +35,7 @@ export default function WorkspaceSettings({ workspace, access, onClose, onRename
                 {notice && <div className="sec-notice" role="status">{notice}</div>}
                 <Field label="Nombre del espacio"><input value={name} disabled={!can('workspace.rename') || busy} onChange={e => setName(e.target.value)} /></Field>
                 <div className="modal-actions"><button onClick={onClose}>Cerrar</button>{can('workspace.rename') && <button className="primary" disabled={busy || name.trim().length < 2 || name.trim() === workspace.name} onClick={() => void rename()}>Guardar nombre</button>}</div>
-                {can('workspace.delete') && <div className="sec-create-role"><h4>Eliminar espacio</h4><p className="sec-help">La eliminación requiere una confirmación dentro de ATLAS. Si contiene proyectos, solo su propietario puede eliminar el espacio completo y todo su contenido.</p><button className="danger outlined" disabled={busy} onClick={() => void requestDeletion()}>Eliminar espacio…</button></div>}
+                {can('workspace.delete') && <div className="sec-create-role"><h4>Eliminar espacio</h4><p className="sec-help">La eliminación requiere una confirmación dentro de NOVZI. Si contiene proyectos, solo su propietario puede eliminar el espacio completo y todo su contenido.</p><button className="danger outlined" disabled={busy} onClick={() => void requestDeletion()}>Eliminar espacio…</button></div>}
             </div>
         </Overlay>}
         {confirmDelete && <DeleteConfirmation

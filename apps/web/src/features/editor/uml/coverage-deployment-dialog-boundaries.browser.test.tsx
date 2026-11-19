@@ -1,8 +1,8 @@
 import {afterEach,it} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup} from '@testing-library/react'
-import type {ProjectDocument} from '@atlas/contracts'
-import fixture from '../../../../../../qa/ATLAS_QA_UML_DESPLIEGUE.json'
+import type {ProjectDocument} from '@novzi/contracts'
+import fixture from '../../../../../../qa/NOVZI_QA_UML_DESPLIEGUE.json'
 import {DeploymentCatalog,DeploymentDetails,DeploymentRelationDialog} from './DeploymentEditors'
 
 afterEach(cleanup)

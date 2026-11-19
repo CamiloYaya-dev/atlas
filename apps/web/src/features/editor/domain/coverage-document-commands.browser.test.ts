@@ -1,12 +1,12 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,atlasNodeSize,sequenceBox,umlAbsolutePosition} from '@atlas/contracts'
-import type {ProjectDocument} from '@atlas/contracts'
+import {emptyDoc,createElement,novziNodeSize,sequenceBox,umlAbsolutePosition} from '@novzi/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import {createDiagram,editDiagram,addElementNode,reuseElementNode,connectNodes,editRelation,removeRelation,resizeNode,moveNode,moveDiagramSelection,removeDiagramSelection,deleteDetachedUseCaseElement,deleteDetachedActivityElement,removeElementNode,editElement,addFieldDefinition} from './document-commands'
-import deployments from '../../../../../../qa/ATLAS_QA_UML_DESPLIEGUE.json'
-import components from '../../../../../../qa/ATLAS_QA_UML_COMPONENTES.json'
-import activities from '../../../../../../qa/ATLAS_QA_UML_ACTIVIDADES.json'
-import usecases from '../../../../../../qa/ATLAS_QA_UML_CASOS_DE_USO.json'
+import deployments from '../../../../../../qa/NOVZI_QA_UML_DESPLIEGUE.json'
+import components from '../../../../../../qa/NOVZI_QA_UML_COMPONENTES.json'
+import activities from '../../../../../../qa/NOVZI_QA_UML_ACTIVIDADES.json'
+import usecases from '../../../../../../qa/NOVZI_QA_UML_CASOS_DE_USO.json'
 const copy=(x:unknown)=>structuredClone(x) as ProjectDocument
 const date='2026-11-16',node=(d:ProjectDocument,id:string,view=0)=>d.diagrams[view].nodes.find(n=>n.id===id)!
 
@@ -20,7 +20,7 @@ test('Componente: quitar aparición del propietario retira puertos y aristas, no
  const d=copy(components),v=d.diagrams[0],before=structuredClone(d);const next=removeDiagramSelection(d,v.id,['web'],[]);assert.equal(next.diagrams[0].nodes.some(n=>n.id==='web'||n.id==='web-port'),false);assert.equal(next.diagrams[0].edges.some(e=>e.source==='web-port'||e.target==='web-port'||e.source==='web'||e.target==='web'),false);assert.deepEqual(next.componentRelations,d.componentRelations);assert.equal(next.elements['web-port'].semanticOwnerId,'web');assert.deepEqual(next.diagrams[1],d.diagrams[1]);assert.deepEqual(d,before)
 })
 test('Componente: redimensionar puerto fijo se bloquea; ampliar propietario conserva lado del puerto',()=>{
- const d=copy(components),v=d.diagrams[0],before=structuredClone(d),p=node(d,'web'),port=node(d,'web-port'),sz=atlasNodeSize(v.type,d.elements.web,p,0,true);assert.throws(()=>resizeNode(d,v.id,'web-port',48,48),/tamaño fijo/);const next=resizeNode(d,v.id,'web',sz.width+120,sz.height+100);const moved=node(next,'web-port');assert.equal(moved.parentNodeId,port.parentNodeId);assert.deepEqual(next.elements,d.elements);assert.deepEqual(d,before);const candidate=moveNode(next,v.id,'web-port',-10,40);const snapped=node(candidate,'web-port');assert.equal(snapped.x,-8);assert.equal(snapped.y,40);assert.equal(candidate.elements['web-port'].semanticOwnerId,'web')
+ const d=copy(components),v=d.diagrams[0],before=structuredClone(d),p=node(d,'web'),port=node(d,'web-port'),sz=novziNodeSize(v.type,d.elements.web,p,0,true);assert.throws(()=>resizeNode(d,v.id,'web-port',48,48),/tamaño fijo/);const next=resizeNode(d,v.id,'web',sz.width+120,sz.height+100);const moved=node(next,'web-port');assert.equal(moved.parentNodeId,port.parentNodeId);assert.deepEqual(next.elements,d.elements);assert.deepEqual(d,before);const candidate=moveNode(next,v.id,'web-port',-10,40);const snapped=node(candidate,'web-port');assert.equal(snapped.x,-8);assert.equal(snapped.y,40);assert.equal(candidate.elements['web-port'].semanticOwnerId,'web')
 })
 test('Actividad: edición de flujo mantiene identidad y rechaza duplicado, extremo ausente y peso inválido',()=>{
  const d=copy(activities),v=d.diagrams[0],edge=v.edges.find(e=>e.id==='c1')!,before=structuredClone(d);assert.throws(()=>connectNodes(d,v.id,edge),/duplicado/);assert.throws(()=>connectNodes(d,v.id,{...edge,id:'x',target:'missing'}),/Extremos/);assert.throws(()=>editRelation(d,v.id,'missing',{description:'x'}),/inexistente/);assert.throws(()=>editRelation(d,v.id,edge.id,{activityEdge:{...edge.activityEdge,weight:0}}));const next=editRelation(d,v.id,edge.id,{description:'Paso validado',pathStyle:'step'});assert.equal(next.diagrams[0].edges.find(e=>e.id===edge.id)?.description,'Paso validado');assert.deepEqual(d,before)

@@ -1,4 +1,4 @@
-# Protocolo de aceptación de seguridad ATLAS V4.2
+# Protocolo de aceptación de seguridad NOVZI V4.2
 
 ## A. Administración e inicio de sesión
 

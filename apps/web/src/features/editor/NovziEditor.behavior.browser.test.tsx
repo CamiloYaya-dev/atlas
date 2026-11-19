@@ -2,11 +2,11 @@ vi.mock('./capture-diagram',()=>({captureDiagramPng:vi.fn()}))
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest'
 import {act,fireEvent,render,screen,waitFor,within} from '@testing-library/react'
 import type {ReactNode} from 'react'
-import {demoDocument} from '@atlas/fixtures'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {Diagram,ElementType,ProjectDocument} from '@atlas/contracts'
+import {demoDocument} from '@novzi/fixtures'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {Diagram,ElementType,ProjectDocument} from '@novzi/contracts'
 import type {WorkspaceAccess} from '../security/types'
-import AtlasEditor from './AtlasEditor'
+import NovziEditor from './NovziEditor'
 import {useReactFlow} from '@xyflow/react'
 import {captureDiagramPng} from './capture-diagram'
 import * as auth from '../security/api'
@@ -15,7 +15,7 @@ import * as projects from '../projects/api'
 import * as audit from '../audit/api'
 
 // The mock renders actual filtered graph nodes, while events reach the real
-// AtlasEditor handlers. Only XYFlow's canvas renderer is replaced by buttons.
+// NovziEditor handlers. Only XYFlow's canvas renderer is replaced by buttons.
 vi.mock('@xyflow/react',async()=>{
  const React=await import('react')
  return {
@@ -71,13 +71,13 @@ const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propieta
 const reader:WorkspaceAccess={roleId:'r-reader',roleKey:'viewer',roleName:'Lector',permissions:['project.read','diagram.view.c1','element.view.actor','element.view.system','element.view.external']}
 const workspace={id:'w-qa',name:'Espacio QA',role:'owner'}
 const project={id:'p-qa',name:'Proyecto QA',workspace_id:'w-qa'}
-const user={id:'u-qa',email:'qa@atlas.test',name:'QA',platformAdmin:true}
+const user={id:'u-qa',email:'qa@novzi.test',name:'QA',platformAdmin:true}
 
 afterEach(()=>{vi.restoreAllMocks()})
 beforeEach(()=>{
- localStorage.removeItem('atlas.navigation.collapsed')
- localStorage.removeItem('atlas.minimap.visible')
- localStorage.removeItem('atlas.tutorial.progress.v1')
+ localStorage.removeItem('novzi.navigation.collapsed')
+ localStorage.removeItem('novzi.minimap.visible')
+ localStorage.removeItem('novzi.tutorial.progress.v1')
  vi.resetAllMocks()
  vi.mocked(useReactFlow).mockImplementation(()=>({getNode:()=>undefined,fitView:async()=>true,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>))
  vi.mocked(auth.workspaceRoles).mockResolvedValue([])
@@ -102,15 +102,26 @@ beforeEach(()=>{
  vi.mocked(projects.projectCandidates).mockResolvedValue({users:[],roles:[]})
  vi.mocked(audit.listAuditEvents).mockResolvedValue({items:[],nextCursor:null})
 })
+// Abrir explícitamente la carpeta de la vista a seleccionar: la navegación
+// agrupa por tipo y contrae automáticamente grupos no activos.
+function ensureDiagramFolderOpen(label:string){
+ const collapsed=screen.queryByRole('button',{name:`Expandir carpeta ${label}`})
+ if(collapsed)fireEvent.click(collapsed)
+ expect(screen.getByRole('button',{name:`Contraer carpeta ${label}`})).toBeTruthy()
+}
 async function openEditor(){
- render(<AtlasEditor/>)
+ render(<NovziEditor/>)
  await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'})
+ // Las pruebas de interacción seleccionan diagramas de varios tipos. El menú ahora
+ // usa carpetas contraídas por tipo; abrirlas en la preparación mantiene las
+ // selecciones reales sin modificar la experiencia de usuario de producción.
+ for(const button of screen.queryAllByRole('button',{name:/^Expandir carpeta /}))fireEvent.click(button)
 }
 
 // Wait for project initialization and the actual projected graph before sending
 // selection events. The heading can precede the passive diagram reset.
 async function openAreaSelectionQA(control:'Seleccionar dos QA'|'Seleccionar relación QA08'='Seleccionar dos QA'){
- await act(async()=>{render(<AtlasEditor/>)})
+ await act(async()=>{render(<NovziEditor/>)})
  await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'},{timeout:4500})
  const graph=within(await screen.findByTestId('graph-renderer'))
  await graph.findByRole('button',{name:'Usuario final'},{timeout:4500})
@@ -127,18 +138,18 @@ async function openAreaSelectionQA(control:'Seleccionar dos QA'|'Seleccionar rel
 }
 
 describe('Editor conectado a API — recorridos de comportamiento',()=>{
- it('muestra el tutorial de ATLAS desde el editor sin modificar el proyecto',async()=>{
-  localStorage.removeItem('atlas.tutorial.complete.v1')
+ it('muestra el tutorial de NOVZI desde el editor sin modificar el proyecto',async()=>{
+  localStorage.removeItem('novzi.tutorial.complete.v1')
   await openEditor()
   const graph=screen.getByTestId('graph-renderer')
   fireEvent.click(screen.getByRole('button',{name:'Abrir tutorial desde el menú lateral'}))
-  expect(screen.getByRole('dialog',{name:'Bienvenido a ATLAS'})).toBeTruthy()
-  expect(screen.queryByRole('button',{name:'Aprender ATLAS'})).toBeNull()
+  expect(screen.getByRole('dialog',{name:'Bienvenido a NOVZI'})).toBeTruthy()
+  expect(screen.queryByRole('button',{name:'Aprender NOVZI'})).toBeNull()
   fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
   expect(screen.getByRole('dialog',{name:'1. Organización = espacio de trabajo'})).toBeTruthy()
   expect(screen.getByTestId('graph-renderer')).toBe(graph)
   fireEvent.click(screen.getByRole('button',{name:'Cerrar tutorial'}))
-  expect(screen.queryByTestId('atlas-guided-tutorial')).toBeNull()
+  expect(screen.queryByTestId('novzi-guided-tutorial')).toBeNull()
   expect(projects.saveDocument).not.toHaveBeenCalled()
   expect(projects.importProject).not.toHaveBeenCalled()
  })
@@ -152,7 +163,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
   fireEvent.click(screen.getByRole('button',{name:'Agregar caja'}))
   expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
-  expect(screen.queryByTestId('atlas-guided-tutorial')).toBeNull()
+  expect(screen.queryByTestId('novzi-guided-tutorial')).toBeNull()
   fireEvent.click(screen.getByRole('button',{name:'Cancelar'}))
   expect(screen.getByRole('dialog',{name:'6. Agrega elementos de distintos tipos'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -168,11 +179,11 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(screen.getByRole('button',{name:'Mostrar menú lateral'}).getAttribute('aria-expanded')).toBe('false')
   expect(screen.getByTestId('graph-renderer')).toBe(graph)
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
-  expect(localStorage.getItem('atlas.navigation.collapsed')).toBe('1')
+  expect(localStorage.getItem('novzi.navigation.collapsed')).toBe('1')
   fireEvent.click(screen.getByRole('button',{name:'Mostrar menú lateral'}))
   expect(layout.classList.contains('expanded')).toBe(false)
   expect(screen.getByTestId('graph-renderer')).toBe(graph)
-  expect(localStorage.getItem('atlas.navigation.collapsed')).toBe('0')
+  expect(localStorage.getItem('novzi.navigation.collapsed')).toBe('0')
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('ampliar área de trabajo y restaurar distribución conservan el editor',async()=>{
@@ -224,13 +235,13 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   expect(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'})).toBeTruthy()
   expect(screen.getAllByRole('button',{name:'Agregar caja'})).toHaveLength(1)
   fireEvent.click(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'}))
-  await waitFor(()=>expect(frame.className).toContain('atlas-fullscreen-fallback'))
+  await waitFor(()=>expect(frame.className).toContain('novzi-fullscreen-fallback'))
   fireEvent.click(within(actions).getByRole('button',{name:'Agregar caja'}))
   expect(within(frame).getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
   fireEvent.click(within(frame).getByRole('button',{name:'Cancelar'}))
   expect(frame.querySelector('[role="dialog"]')).toBeNull()
   fireEvent.click(within(actions).getByRole('button',{name:'Salir de pantalla completa'}))
-  await waitFor(()=>expect(frame.className).not.toContain('atlas-fullscreen-fallback'))
+  await waitFor(()=>expect(frame.className).not.toContain('novzi-fullscreen-fallback'))
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('agregar caja muestra su diálogo dentro del elemento fullscreen nativo',async()=>{
@@ -346,7 +357,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('cierre de sesión regresa al login y revoca sesión por API',async()=>{
   await openEditor()
-  fireEvent.click(screen.getByRole('button',{name:/qa@atlas\.test/}))
+  fireEvent.click(screen.getByRole('button',{name:/qa@novzi\.test/}))
   await waitFor(()=>expect(auth.logout).toHaveBeenCalledOnce())
   await screen.findByRole('heading',{name:'Iniciar sesión'})
  })
@@ -487,6 +498,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   await screen.findByRole('button',{name:'Plataforma Zercano'})
   fireEvent.click(screen.getByRole('button',{name:'Profundizar QA'}))
   expect(screen.getByRole('heading',{name:'C2 · Contenedores'})).toBeTruthy()
+  ensureDiagramFolderOpen('C1 · Contexto')
   fireEvent.click(screen.getByRole('button',{name:'Tipo C1 C1 · Contexto de Zercano'}))
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -561,9 +573,9 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   await openEditor()
   const frame=document.querySelector('.canvas-frame')!
   fireEvent.click(screen.getAllByRole('button',{name:'Pantalla completa del diagrama'})[0])
-  await waitFor(()=>expect(frame.className).toContain('atlas-fullscreen-fallback'))
+  await waitFor(()=>expect(frame.className).toContain('novzi-fullscreen-fallback'))
   fireEvent.click(screen.getByRole('button',{name:'Salir de pantalla completa'}))
-  await waitFor(()=>expect(frame.className).not.toContain('atlas-fullscreen-fallback'))
+  await waitFor(()=>expect(frame.className).not.toContain('novzi-fullscreen-fallback'))
   expect(projects.saveDocument).not.toHaveBeenCalled()
  })
  it('colapsa navegación y alterna minimapa sin guardar cambios',async()=>{
@@ -723,30 +735,30 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  it('valida las credenciales en login privado y muestra errores sin abrir registro público',async()=>{
   vi.mocked(auth.session).mockRejectedValue(new Error('No autenticado'))
   vi.mocked(auth.login).mockRejectedValue(new Error('Credenciales inválidas'))
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByRole('heading',{name:'Iniciar sesión'})
-  fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@atlas.test'}})
+  fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@novzi.test'}})
   fireEvent.change(screen.getByLabelText('Contraseña'),{target:{value:'Credencial-de-prueba-2026'}})
-  fireEvent.click(screen.getByRole('button',{name:'Entrar a ATLAS'}))
+  fireEvent.click(screen.getByRole('button',{name:'Entrar a NOVZI'}))
   expect(await screen.findByRole('alert')).toHaveProperty('textContent','Credenciales inválidas')
   expect(screen.queryByText('Crear cuenta')).toBeNull()
  })
  it('una sesión inexistente abre login y un login exitoso carga proyectos autorizados',async()=>{
   vi.mocked(auth.session).mockRejectedValue(new Error('No autenticado'))
   vi.mocked(auth.login).mockResolvedValue(user)
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByRole('heading',{name:'Iniciar sesión'})
-  fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@atlas.test'}})
+  fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@novzi.test'}})
   fireEvent.change(screen.getByLabelText('Contraseña'),{target:{value:'Contraseña-muy-segura'}})
-  fireEvent.click(screen.getByRole('button',{name:'Entrar a ATLAS'}))
+  fireEvent.click(screen.getByRole('button',{name:'Entrar a NOVZI'}))
   await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'})
-  expect(auth.login).toHaveBeenCalledWith('qa@atlas.test','Contraseña-muy-segura')
-  expect(screen.getByText('qa@atlas.test')).toBeTruthy()
+  expect(auth.login).toHaveBeenCalledWith('qa@novzi.test','Contraseña-muy-segura')
+  expect(screen.getByText('qa@novzi.test')).toBeTruthy()
  })
  it('una instalación sin diagramas permite crear el primero conservando el documento vacío',async()=>{
   const initial={...demoDocument(),diagrams:[]}
   vi.mocked(projects.loadDocument).mockResolvedValue({document:initial,version:1})
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByText('No hay diagramas todavía')
   fireEvent.click(screen.getByRole('button',{name:'Crear mi primer diagrama'}))
   const dialog=screen.getByRole('dialog',{name:'Nuevo diagrama'})
@@ -777,7 +789,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  it('permite seleccionar PNG/JPG e informa la marca de agua que decide la API',async()=>{
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Exportar'}))
-  const modal=screen.getByRole('dialog',{name:'Exportar desde ATLAS'})
+  const modal=screen.getByRole('dialog',{name:'Exportar desde NOVZI'})
   expect(await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/)).toBeTruthy()
   fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'jpg'}})
   expect(within(modal).getByRole('button',{name:'Descargar JPG'})).toBeTruthy()
@@ -787,9 +799,9 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   vi.mocked(projects.exportProject).mockRejectedValue(new Error('Exportación bloqueada'))
   await openEditor()
   fireEvent.click(screen.getByRole('button',{name:'Exportar'}))
-  const modal=screen.getByRole('dialog',{name:'Exportar desde ATLAS'})
-  fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'json'}})
-  fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON'}))
+  const modal=screen.getByRole('dialog',{name:'Exportar desde NOVZI'})
+  fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'project-json'}})
+  fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON del proyecto'}))
   expect(await screen.findByText(/Exportación: Exportación bloqueada/)).toBeTruthy()
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
  })
@@ -809,7 +821,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}))
   for(const [label,value] of [
    ['Texto QA','Datos verificados'],['Largo QA','Descripción funcional ampliada'],
-   ['URL QA','https://atlas.example/qa'],['Fecha QA','2026-11-11'],
+   ['URL QA','https://novzi.example/qa'],['Fecha QA','2026-11-11'],
    ['Número QA','7'],['Lista QA','Aprobado']
   ])fireEvent.change(screen.getByLabelText(label),{target:{value}})
   const checkbox=document.querySelector<HTMLInputElement>('.inspector .switch-field input[type="checkbox"]')
@@ -819,7 +831,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
    const fields=saves.at(-1)![1].elements['platform'].fields
-   expect(fields).toMatchObject({'qa-text':'Datos verificados','qa-long':'Descripción funcional ampliada','qa-link':'https://atlas.example/qa','qa-date':'2026-11-11','qa-num':'7','qa-choice':'Aprobado','qa-bool':true})
+   expect(fields).toMatchObject({'qa-text':'Datos verificados','qa-long':'Descripción funcional ampliada','qa-link':'https://novzi.example/qa','qa-date':'2026-11-11','qa-num':'7','qa-choice':'Aprobado','qa-bool':true})
   },{timeout:4500})
  })
  it('oculta el campo técnico a un rol funcional, incluso si puede editar metadatos',async()=>{
@@ -843,7 +855,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('un usuario sin espacios ve los primeros pasos sin acceder a proyectos ajenos',async()=>{
   vi.mocked(workspaces.listWorkspaces).mockResolvedValue([])
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByRole('heading',{name:'Crea tu primer espacio'})
   expect(screen.queryByRole('button',{name:'Proyecto QA'})).toBeNull()
   expect(projects.loadDocument).not.toHaveBeenCalled()
@@ -851,14 +863,14 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
  })
  it('un workspace sin proyectos permite crear su primero sin mostrar datos ficticios',async()=>{
   vi.mocked(projects.listProjects).mockResolvedValue([])
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByRole('heading',{name:'Crea tu primer proyecto'})
   expect(screen.queryByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeNull()
   expect(screen.getByRole('button',{name:'Crear proyecto'})).toBeTruthy()
  })
  it('cuando la API de proyectos falla se informa el error y no se inventa una vista',async()=>{
   vi.mocked(projects.listProjects).mockRejectedValue(new Error('Conexión rechazada al listar proyectos'))
-  render(<AtlasEditor/>)
+  render(<NovziEditor/>)
   await screen.findByText(/Conexión rechazada al listar proyectos/)
   expect(projects.loadDocument).not.toHaveBeenCalled()
  })
@@ -910,7 +922,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   const fixture=demoDocument()
   vi.mocked(projects.importProject).mockResolvedValue(5)
   await openEditor()
-  const file=new File([JSON.stringify({document:fixture})],'modelo-atlas.json',{type:'application/json'})
+  const file=new File([JSON.stringify({document:fixture})],'modelo-novzi.json',{type:'application/json'})
   Object.defineProperty(file,'text',{value:async()=>JSON.stringify({document:fixture})})
   fireEvent.change(document.querySelector<HTMLInputElement>('input[type="file"]')!,{target:{files:[file]}})
   const modal=await screen.findByRole('dialog',{name:'Confirmar importación'})
@@ -973,7 +985,7 @@ describe('Colaboración en vivo y guardado seguro',()=>{
   }
   vi.stubGlobal('EventSource',QAEventStream)
   try{
-   const view=render(<AtlasEditor/>);await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});await waitFor(()=>expect(streams.length).toBeGreaterThan(0));const stream=streams.at(-1)!
+   const view=render(<NovziEditor/>);await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});await waitFor(()=>expect(streams.length).toBeGreaterThan(0));const stream=streams.at(-1)!
    expect(stream.options?.withCredentials).toBe(true);act(()=>stream.onopen?.());expect(await screen.findByText('0 personas en línea')).toBeTruthy()
    act(()=>{stream.emit('presence',{participants:[{clientId:'other',userId:'other-user',name:'Colaborador QA',diagramId:null,elementId:null}]});stream.dispatchEvent(new MessageEvent('presence',{data:'bad-json'}));stream.emit('version',{version:1})})
    expect(await screen.findByText('1 persona en línea')).toBeTruthy();await waitFor(()=>expect(projects.sendPresence).toHaveBeenCalled())
@@ -1075,14 +1087,14 @@ it('cancelar el editor de una relación descarta sus cambios sin persistirlos',a
 
 
 it('licencia no disponible impide descargar imagen, pero permite cancelar sin cambios',async()=>{
- vi.mocked(projects.workspaceLicense).mockRejectedValue(new Error('Licencia no disponible QA'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'})
+ vi.mocked(projects.workspaceLicense).mockRejectedValue(new Error('Licencia no disponible QA'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'})
  await screen.findByText(/Estado de licencia: Licencia no disponible QA/);expect((within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement).disabled).toBe(true);fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.exportDiagramImage).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 },15000)
 it('descarga una copia JSON autorizada sin mutar ni guardar el documento',async()=>{
- const doc=demoDocument();vi.mocked(projects.exportProject).mockResolvedValue({format:'ATLAS',exportedAt:'2026-11-14',document:doc})
+ const doc=demoDocument();vi.mocked(projects.exportProject).mockResolvedValue({format:'NOVZI',exportedAt:'2026-11-14',document:doc})
  const originalCreate=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),originalRevoke=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const create=vi.fn(()=> 'blob:qa-json'),revoke=vi.fn(),click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{})
  Object.defineProperty(URL,'createObjectURL',{configurable:true,value:create});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke})
- try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'json'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON'}));await waitFor(()=>expect(create).toHaveBeenCalledOnce());expect(projects.exportProject).toHaveBeenCalledWith(project.id);expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa-json');expect(projects.saveDocument).not.toHaveBeenCalled()}
+ try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'project-json'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON del proyecto'}));await waitFor(()=>expect(create).toHaveBeenCalledOnce());expect(projects.exportProject).toHaveBeenCalledWith(project.id);expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa-json');expect(projects.saveDocument).not.toHaveBeenCalled()}
  finally{if(originalCreate)Object.defineProperty(URL,'createObjectURL',originalCreate);else Reflect.deleteProperty(URL,'createObjectURL');if(originalRevoke)Object.defineProperty(URL,'revokeObjectURL',originalRevoke);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 
@@ -1094,7 +1106,7 @@ for(const [mode,format,documentFormat] of [['embedded','png','pdf'],['both','jpg
   const blob=new Blob(['QA']);vi.mocked(projects.exportDiagramImage).mockResolvedValue({blob,exportId:'qa-export'})
   const originalCreate=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),originalRevoke=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const create=vi.fn(()=> 'blob:qa-export'),revoke=vi.fn();let filename='';vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download})
   Object.defineProperty(URL,'createObjectURL',{configurable:true,value:create});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke})
-  try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});await within(modal).findByText(/Licencia activa: sin marca de agua/)
+  try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Licencia activa: sin marca de agua/)
    fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:format}});fireEvent.change(within(modal).getByLabelText('Contenido de exportación'),{target:{value:mode}})
    if(mode==='both')fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:documentFormat}})
    fireEvent.click(within(modal).getByRole('button',{name:'Todos en imagen'}));fireEvent.click(within(modal).getByRole('button',{name:'Descargar '+format.toUpperCase()}))
@@ -1130,17 +1142,17 @@ it('permite cambiar iconos UML de despliegue sin cambiar los identificadores',as
  await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements['qa-device'].uml?.deviceIcon).toBe('network');expect(saved?.elements['qa-runtime'].uml?.runtimeIcon).toBe('docker');expect(saved?.diagrams.find(d=>d.id===diagram.id)).toEqual(diagram)},{timeout:4500})
 },15000)
 it('si falla captura visual no se firma ni descarga una imagen inexistente',async()=>{
- vi.mocked(captureDiagramPng).mockRejectedValue(new Error('Captura no disponible QA04'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});await waitFor(()=>expect((within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement).disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));expect(await screen.findByText(/Captura no disponible QA04/)).toBeTruthy();expect(projects.exportDiagramImage).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Exportar desde ATLAS'})).toBeTruthy()
+ vi.mocked(captureDiagramPng).mockRejectedValue(new Error('Captura no disponible QA04'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await waitFor(()=>expect((within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement).disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));expect(await screen.findByText(/Captura no disponible QA04/)).toBeTruthy();expect(projects.exportDiagramImage).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Exportar desde NOVZI'})).toBeTruthy()
 },15000)
 
 it('Academy no crea organización automáticamente y comunica rechazo de API sin perder proyecto abierto',async()=>{
- const key='atlas.academy.lab.v1.'+user.id;localStorage.removeItem(key);vi.mocked(workspaces.createWorkspace).mockRejectedValue(new Error('Organización no disponible QA05'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de ATLAS'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de ATLAS'});const create=within(academy).getByRole('button',{name:/Crear mi organización/}) as HTMLButtonElement;expect(workspaces.createWorkspace).not.toHaveBeenCalled();fireEvent.change(within(academy).getByLabelText('Nombre del espacio de formación'),{target:{value:' '}});expect(create.disabled).toBe(true);fireEvent.change(within(academy).getByLabelText('Nombre del espacio de formación'),{target:{value:'  Academia QA05  '}});fireEvent.click(create);expect(await within(academy).findByText('Organización no disponible QA05')).toBeTruthy();expect(workspaces.createWorkspace).toHaveBeenCalledWith('Academia QA05');expect(localStorage.getItem(key)).toBeNull();expect(projects.createProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(academy).getByRole('button',{name:'Cerrar misiones'}));expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
+ const key='novzi.academy.lab.v1.'+user.id;localStorage.removeItem(key);vi.mocked(workspaces.createWorkspace).mockRejectedValue(new Error('Organización no disponible QA05'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de NOVZI'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de NOVZI'});const create=within(academy).getByRole('button',{name:/Crear mi organización/}) as HTMLButtonElement;expect(workspaces.createWorkspace).not.toHaveBeenCalled();fireEvent.change(within(academy).getByLabelText('Nombre del espacio de formación'),{target:{value:' '}});expect(create.disabled).toBe(true);fireEvent.change(within(academy).getByLabelText('Nombre del espacio de formación'),{target:{value:'  Academia QA05  '}});fireEvent.click(create);expect(await within(academy).findByText('Organización no disponible QA05')).toBeTruthy();expect(workspaces.createWorkspace).toHaveBeenCalledWith('Academia QA05');expect(localStorage.getItem(key)).toBeNull();expect(projects.createProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(academy).getByRole('button',{name:'Cerrar misiones'}));expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
 },15000)
 it('Academy recupera el laboratorio autorizado y prepara formulario de caja sin guardar hasta confirmación',async()=>{
- const key='atlas.academy.lab.v1.'+user.id;localStorage.setItem(key,JSON.stringify({workspaceId:workspace.id,projectId:project.id}));try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de ATLAS'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de ATLAS'});const recipe=await within(academy).findByRole('button',{name:/Persona solicitante/});await waitFor(()=>expect((recipe as HTMLButtonElement).disabled).toBe(false));fireEvent.click(recipe);const dialog=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});expect(within(dialog).getByDisplayValue('Persona solicitante')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(dialog).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Misiones prácticas de ATLAS'})).toBeTruthy()}finally{localStorage.removeItem(key)}
+ const key='novzi.academy.lab.v1.'+user.id;localStorage.setItem(key,JSON.stringify({workspaceId:workspace.id,projectId:project.id}));try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de NOVZI'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de NOVZI'});const recipe=await within(academy).findByRole('button',{name:/Persona solicitante/});await waitFor(()=>expect((recipe as HTMLButtonElement).disabled).toBe(false));fireEvent.click(recipe);const dialog=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});expect(within(dialog).getByDisplayValue('Persona solicitante')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(dialog).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Misiones prácticas de NOVZI'})).toBeTruthy()}finally{localStorage.removeItem(key)}
 },15000)
 it('Academy transfiere al tutorial explicativo y cerrar no modifica el documento',async()=>{
- await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de ATLAS'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de ATLAS'});fireEvent.click(within(academy).getByRole('button',{name:/Primero ver el recorrido explicativo/}));expect(await screen.findByTestId('atlas-guided-tutorial')).toBeTruthy();expect(screen.queryByRole('dialog',{name:'Misiones prácticas de ATLAS'})).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Cerrar tutorial'}));expect(projects.saveDocument).not.toHaveBeenCalled();expect(projects.createProject).not.toHaveBeenCalled()
+ await openEditor();fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de NOVZI'}));const academy=await screen.findByRole('dialog',{name:'Misiones prácticas de NOVZI'});fireEvent.click(within(academy).getByRole('button',{name:/Primero ver el recorrido explicativo/}));expect(await screen.findByTestId('novzi-guided-tutorial')).toBeTruthy();expect(screen.queryByRole('dialog',{name:'Misiones prácticas de NOVZI'})).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Cerrar tutorial'}));expect(projects.saveDocument).not.toHaveBeenCalled();expect(projects.createProject).not.toHaveBeenCalled()
 },15000)
 
 // QA06: restoration is a real interaction from the editor through VersionHistory.
@@ -1157,7 +1169,7 @@ it('importación rechazada conserva la vista y el diálogo permite cancelar sin 
 },15000)
 
 it('exportación JSON rechazada informa error y no crea una descarga ficticia',async()=>{
- vi.mocked(projects.exportProject).mockRejectedValue(new Error('Exportación denegada QA06'));const click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'json'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON'}));expect(await screen.findByText(/Exportación: Exportación denegada QA06/)).toBeTruthy();expect(projects.exportProject).toHaveBeenCalledWith(project.id);expect(click).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.queryByRole('dialog',{name:'Exportar desde ATLAS'})).toBeNull()
+ vi.mocked(projects.exportProject).mockRejectedValue(new Error('Exportación denegada QA06'));const click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});fireEvent.change(within(modal).getByLabelText('Formato de exportación'),{target:{value:'project-json'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar JSON del proyecto'}));expect(await screen.findByText(/Exportación: Exportación denegada QA06/)).toBeTruthy();expect(projects.exportProject).toHaveBeenCalledWith(project.id);expect(click).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.queryByRole('dialog',{name:'Exportar desde NOVZI'})).toBeNull()
 },15000)
 
 // QA07: cover editor integration across actual modal callbacks and persistence boundaries.
@@ -1171,17 +1183,17 @@ it('Escape restaura la pantalla completa alternativa sin escribir el modelo',asy
  const requestFullscreen=vi.fn(async()=>{throw new Error('Fullscreen API rechazada en QA07')})
  Object.defineProperty(frame,'requestFullscreen',{configurable:true,value:requestFullscreen})
  fireEvent.click(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'}))
- await waitFor(()=>expect(frame.classList.contains('atlas-fullscreen-fallback')).toBe(true))
+ await waitFor(()=>expect(frame.classList.contains('novzi-fullscreen-fallback')).toBe(true))
  expect(requestFullscreen).toHaveBeenCalledOnce()
  expect(within(actions).getByRole('button',{name:'Salir de pantalla completa'})).toBeTruthy()
  fireEvent.keyDown(document,{key:'Escape'})
- await waitFor(()=>expect(frame.classList.contains('atlas-fullscreen-fallback')).toBe(false))
+ await waitFor(()=>expect(frame.classList.contains('novzi-fullscreen-fallback')).toBe(false))
  expect(within(actions).getByRole('button',{name:'Pantalla completa del diagrama'})).toBeTruthy()
  expect(within(actions).queryByRole('button',{name:'Salir de pantalla completa'})).toBeNull()
  expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('el login pendiente deshabilita el envío y un rechazo textual aparece en el formulario',async()=>{
- vi.mocked(auth.session).mockRejectedValue(new Error('Sin sesión'));let rejectLogin!:(reason:string)=>void;vi.mocked(auth.login).mockImplementation(()=>new Promise((_resolve,reject)=>{rejectLogin=reject}));render(<AtlasEditor/>);await screen.findByRole('heading',{name:'Iniciar sesión'});fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@atlas.test'}});fireEvent.change(screen.getByLabelText('Contraseña'),{target:{value:'QA-no-es-una-clave-real'}});fireEvent.click(screen.getByRole('button',{name:'Entrar a ATLAS'}));const pending=await screen.findByRole('button',{name:'Validando...'}) as HTMLButtonElement;expect(pending.disabled).toBe(true);fireEvent.click(pending);expect(auth.login).toHaveBeenCalledOnce();await act(async()=>rejectLogin('Autenticación textual QA07'));expect((await screen.findByRole('alert')).textContent).toBe('Autenticación textual QA07');expect((screen.getByRole('button',{name:'Entrar a ATLAS'}) as HTMLButtonElement).disabled).toBe(false);expect(projects.loadDocument).not.toHaveBeenCalled()
+ vi.mocked(auth.session).mockRejectedValue(new Error('Sin sesión'));let rejectLogin!:(reason:string)=>void;vi.mocked(auth.login).mockImplementation(()=>new Promise((_resolve,reject)=>{rejectLogin=reject}));render(<NovziEditor/>);await screen.findByRole('heading',{name:'Iniciar sesión'});fireEvent.change(screen.getByLabelText('Correo electrónico'),{target:{value:'qa@novzi.test'}});fireEvent.change(screen.getByLabelText('Contraseña'),{target:{value:'QA-no-es-una-clave-real'}});fireEvent.click(screen.getByRole('button',{name:'Entrar a NOVZI'}));const pending=await screen.findByRole('button',{name:'Validando...'}) as HTMLButtonElement;expect(pending.disabled).toBe(true);fireEvent.click(pending);expect(auth.login).toHaveBeenCalledOnce();await act(async()=>rejectLogin('Autenticación textual QA07'));expect((await screen.findByRole('alert')).textContent).toBe('Autenticación textual QA07');expect((screen.getByRole('button',{name:'Entrar a NOVZI'}) as HTMLButtonElement).disabled).toBe(false);expect(projects.loadDocument).not.toHaveBeenCalled()
 })
 it('renombrar el espacio actual actualiza la navegación sin cambiar el proyecto',async()=>{
  vi.mocked(workspaces.renameWorkspace).mockResolvedValue({id:workspace.id,name:'Espacio renombrado QA07'});await openEditor();fireEvent.click(screen.getByTitle('Administrar espacio'));const modal=await screen.findByRole('dialog',{name:'Administrar espacio: Espacio QA'});fireEvent.change(within(modal).getByLabelText('Nombre del espacio'),{target:{value:'Espacio renombrado QA07'}});fireEvent.click(within(modal).getByRole('button',{name:'Guardar nombre'}));expect(await screen.findByRole('dialog',{name:'Administrar espacio: Espacio renombrado QA07'})).toBeTruthy();expect(workspaces.renameWorkspace).toHaveBeenCalledWith(workspace.id,'Espacio renombrado QA07');expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1194,7 +1206,7 @@ it('eliminar la organización con proyectos exige reconocer la eliminación en c
 })
 it('la copia de recuperación conserva el borrador no guardado, y cancelar recarga mantiene los cambios',async()=>{
  vi.mocked(projects.saveDocument).mockRejectedValue(new Error('Conflicto de colaboración QA07'));const descriptor=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDescriptor=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const create=vi.fn((_blob:Blob)=>'blob:qa07-recovery'),revoke=vi.fn();const click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});Object.defineProperty(URL,'createObjectURL',{configurable:true,value:create});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke})
- try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));await screen.findByText('No se guardaron los cambios.');fireEvent.click(screen.getByRole('button',{name:'Descargar mis cambios'}));expect(create).toHaveBeenCalledOnce();const blob=create.mock.calls[0][0];const content=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsText(blob)});const parsed=JSON.parse(content);expect(parsed.format).toBe('ATLAS-LOCAL-UNSAVED');expect(parsed.expectedVersion).toBe(1);expect(parsed.document).toEqual(JSON.parse(JSON.stringify(vi.mocked(projects.saveDocument).mock.calls[0][1])));expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa07-recovery');fireEvent.click(screen.getByRole('button',{name:'Recargar desde servidor'}));const modal=await screen.findByRole('dialog',{name:'Descartar borrador local'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(screen.queryByRole('dialog',{name:'Descartar borrador local'})).toBeNull();expect(screen.getByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1)}finally{if(descriptor)Object.defineProperty(URL,'createObjectURL',descriptor);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDescriptor)Object.defineProperty(URL,'revokeObjectURL',revokeDescriptor);else Reflect.deleteProperty(URL,'revokeObjectURL')}
+ try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));await screen.findByText('No se guardaron los cambios.');fireEvent.click(screen.getByRole('button',{name:'Descargar mis cambios'}));expect(create).toHaveBeenCalledOnce();const blob=create.mock.calls[0][0];const content=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsText(blob)});const parsed=JSON.parse(content);expect(parsed.format).toBe('NOVZI-LOCAL-UNSAVED');expect(parsed.expectedVersion).toBe(1);expect(parsed.document).toEqual(JSON.parse(JSON.stringify(vi.mocked(projects.saveDocument).mock.calls[0][1])));expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa07-recovery');fireEvent.click(screen.getByRole('button',{name:'Recargar desde servidor'}));const modal=await screen.findByRole('dialog',{name:'Descartar borrador local'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(screen.queryByRole('dialog',{name:'Descartar borrador local'})).toBeNull();expect(screen.getByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1)}finally{if(descriptor)Object.defineProperty(URL,'createObjectURL',descriptor);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDescriptor)Object.defineProperty(URL,'revokeObjectURL',revokeDescriptor);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 it('un subpaquete se crea dentro del paquete seleccionado y persiste su visibilidad UML',async()=>{
  const initial=demoDocument(),element={...createElement('Paquete QA07','uml-package'),id:'qa07-package'};initial.elements[element.id]=element;const diagram:Diagram={id:'qa07-packages',type:'uml-package',name:'Paquetes QA07',description:'',createdAt:'2026-11-14',nodes:[{id:'qa07-parent',elementId:element.id,x:0,y:0}],edges:[]};initial.diagrams.push(diagram);vi.mocked(projects.loadDocument).mockResolvedValue({document:initial,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Paquetes QA07/}));fireEvent.click(await screen.findByRole('button',{name:'Paquete QA07'}));fireEvent.change(screen.getByLabelText('Visibilidad UML del elemento'),{target:{value:'protected'}});fireEvent.click(screen.getByRole('button',{name:'Crear subpaquete dentro de este paquete'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements[element.id].uml?.visibility).toBe('protected');const sub=Object.values(saved?.elements||{}).find(e=>e.name==='Nuevo subpaquete');expect(sub?.type).toBe('uml-subpackage');expect(saved?.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.elementId===sub?.id)?.parentNodeId).toBe('qa07-parent')},{timeout:4500})
@@ -1216,14 +1228,14 @@ it('renombrar un filtro a vacío o a otra categoría existente no altera el docu
  const original=demoDocument();original.diagrams[0].filters=[{id:'qa07-a',label:'Categoría A QA07'},{id:'qa07-b',label:'Categoría B QA07'}];vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Filtros'}));const modal=screen.getByRole('dialog',{name:/Filtros:/});const rename=within(modal).getByLabelText('Nombre de filtro Categoría A QA07');const action=within(rename.parentElement!).getByRole('button',{name:'Guardar'});fireEvent.change(rename,{target:{value:' '}});fireEvent.click(action);expect(await screen.findByText('El nombre del filtro no puede quedar vacío')).toBeTruthy();fireEvent.change(rename,{target:{value:'categoría b qa07'}});fireEvent.click(action);expect(await screen.findByText('Ya existe otro filtro con ese nombre')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(modal).getByRole('button',{name:'Cerrar filtros'}));expect(screen.queryByRole('dialog',{name:/Filtros:/})).toBeNull()
 },15000)
 it('no permite exportar una imagen de un borrador mientras el guardado está pendiente',async()=>{
- let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador QA07'}});fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);const download=within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement;expect(download.disabled).toBe(true);fireEvent.click(download);expect(captureDiagramPng).not.toHaveBeenCalled();expect(projects.exportDiagramImage).not.toHaveBeenCalled();await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});await act(async()=>finish(2));await waitFor(()=>expect(download.disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.exportDiagramImage).not.toHaveBeenCalled()
+ let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador QA07'}});fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);const download=within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement;expect(download.disabled).toBe(true);fireEvent.click(download);expect(captureDiagramPng).not.toHaveBeenCalled();expect(projects.exportDiagramImage).not.toHaveBeenCalled();await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});await act(async()=>finish(2));await waitFor(()=>expect(download.disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.exportDiagramImage).not.toHaveBeenCalled()
 },15000)
 
 // QA08: real Academy actions reaching the editor, not mock callback assertions.
 function qa08AcademyFixture():ProjectDocument{
  const doc:ProjectDocument={schema:1,elements:{},diagrams:[],fieldDefinitions:[]}
  const addElement=(id:string,type:ElementType,name=id,technical='')=>{
-  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'ATLAS',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
+  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'NOVZI',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
  }
  const addDiagram=(id:string,type:Diagram['type'],elementIds:string[],edges:[number,number][]=[]):Diagram=>{
   const diagram:Diagram={id,type,name:id,description:'',createdAt:'2026-11-12',nodes:elementIds.map((elementId,i)=>({id:`${id}-n${i}`,elementId,x:100*i,y:0})),edges:edges.map(([source,target],i)=>({id:`${id}-e${i}`,source:`${id}-n${source}`,target:`${id}-n${target}`}))}
@@ -1254,10 +1266,10 @@ function qa08AcademyFixture():ProjectDocument{
  return doc
 }
 
-const qa08LabKey='atlas.academy.lab.v1.'+user.id
+const qa08LabKey='novzi.academy.lab.v1.'+user.id
 async function openQA08Academy(){
- fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de ATLAS'}))
- return screen.findByRole('dialog',{name:'Misiones prácticas de ATLAS'})
+ fireEvent.click(screen.getByRole('button',{name:'Abrir misiones prácticas de NOVZI'}))
+ return screen.findByRole('dialog',{name:'Misiones prácticas de NOVZI'})
 }
 function qa08Check(id:string){return within(document.querySelector(`[data-academy-check="${id}"]`) as HTMLElement)}
 async function inQA08Lab(doc:ProjectDocument){
@@ -1463,19 +1475,19 @@ it('QA09 permisos de proyecto rechazados bloquean edición aunque se cargue el d
  vi.mocked(projects.projectAccess).mockRejectedValue(new Error('Permiso proyecto QA09'));await openEditor();expect(await screen.findByText(/Acceso al proyecto: Permiso proyecto QA09/)).toBeTruthy();expect(screen.queryByRole('button',{name:'Agregar caja'})).toBeNull();expect(screen.getByLabelText('Nombre del diagrama')).toHaveProperty('disabled',true);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 catálogo de organizaciones fallido no inventa proyectos',async()=>{
- vi.mocked(workspaces.listWorkspaces).mockRejectedValue(new Error('Catálogo QA09'));render(<AtlasEditor/>);expect(await screen.findByText(/Error al cargar espacios: Catálogo QA09/)).toBeTruthy();expect(await screen.findByRole('heading',{name:'Crea tu primer espacio'})).toBeTruthy();expect(projects.listProjects).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
+ vi.mocked(workspaces.listWorkspaces).mockRejectedValue(new Error('Catálogo QA09'));render(<NovziEditor/>);expect(await screen.findByText(/Error al cargar espacios: Catálogo QA09/)).toBeTruthy();expect(await screen.findByRole('heading',{name:'Crea tu primer espacio'})).toBeTruthy();expect(projects.listProjects).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
 })
 it('QA09 documento ausente inicializa un modelo vacío sin guardar automáticamente',async()=>{
- vi.mocked(projects.loadDocument).mockResolvedValue(null);render(<AtlasEditor/>);expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
+ vi.mocked(projects.loadDocument).mockResolvedValue(null);render(<NovziEditor/>);expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 error de lectura no sustituye el proyecto por un modelo inventado',async()=>{
- vi.mocked(projects.loadDocument).mockRejectedValue(new Error('Documento QA09'));render(<AtlasEditor/>);expect(await screen.findByText(/Error al cargar diagrama: Documento QA09/)).toBeTruthy();expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
+ vi.mocked(projects.loadDocument).mockRejectedValue(new Error('Documento QA09'));render(<NovziEditor/>);expect(await screen.findByText(/Error al cargar diagrama: Documento QA09/)).toBeTruthy();expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 cambiar proyecto guardado carga otro documento y versionado independiente',async()=>{
  const other={id:'p-qa09',name:'Segundo proyecto QA09',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Contexto aislado QA09';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:8}:{document:demoDocument(),version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByRole('heading',{name:'Contexto aislado QA09'})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v8'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 el panel de licencia usa la organización activa y cierra sin mutar el modelo',async()=>{
- await openEditor();fireEvent.click(screen.getByRole('button',{name:'Licencia'}));const modal=await screen.findByRole('dialog',{name:'Licencia y suscripción ATLAS'});expect(await within(modal).findByText('FREE · Sin licencia comercial')).toBeTruthy();expect(within(modal).getByText(workspace.name)).toBeTruthy();expect(projects.workspaceLicense).toHaveBeenCalledWith(workspace.id);fireEvent.click(within(modal).getAllByRole('button',{name:'Cerrar'})[0]);expect(screen.queryByRole('dialog',{name:'Licencia y suscripción ATLAS'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
+ await openEditor();fireEvent.click(screen.getByRole('button',{name:'Licencia'}));const modal=await screen.findByRole('dialog',{name:'Licencia y suscripción NOVZI'});expect(await within(modal).findByText('FREE · Sin licencia comercial')).toBeTruthy();expect(within(modal).getByText(workspace.name)).toBeTruthy();expect(projects.workspaceLicense).toHaveBeenCalledWith(workspace.id);fireEvent.click(within(modal).getAllByRole('button',{name:'Cerrar'})[0]);expect(screen.queryByRole('dialog',{name:'Licencia y suscripción NOVZI'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 cerrar actividad vuelve al lienzo y no registra una escritura',async()=>{
  await openEditor();fireEvent.click(screen.getByRole('button',{name:'Actividad'}));const modal=await screen.findByRole('dialog');fireEvent.click(within(modal).getAllByRole('button',{name:'Cerrar'})[0]);expect(screen.queryByRole('dialog')).toBeNull();expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1483,7 +1495,7 @@ it('QA09 cerrar actividad vuelve al lienzo y no registra una escritura',async()=
 it('QA09 exportación de diccionario bloquea cierre durante generación y no embebe campos',async()=>{
  vi.mocked(projects.workspaceLicense).mockResolvedValue({workspaceId:workspace.id,planCode:'pro',licenseActive:true,status:'active',features:{'diagram.export.png':true,'diagram.export.jpg':true,'diagram.export.clean':true,'diagram.export.advanced':true},expiresAt:null})
  let finish!:(value:{blob:Blob;exportId:string})=>void;vi.mocked(projects.exportDiagramImage).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');let filename='';const revoke=vi.fn();Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa09')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download})
- try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});await within(modal).findByText(/Licencia activa: sin marca de agua/);fireEvent.change(within(modal).getByLabelText('Contenido de exportación'),{target:{value:'dictionary'}});fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:'html'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await waitFor(()=>expect(projects.exportDiagramImage).toHaveBeenCalledOnce());expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(within(modal).getByRole('button',{name:'Cancelar'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.getByRole('dialog',{name:'Exportar desde ATLAS'})).toBeTruthy();expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',expect.objectContaining({mode:'dictionary',documentFormat:'html'}));await act(async()=>finish({blob:new Blob(['QA']),exportId:'qa09'}));expect(await screen.findByText(/Imagen exportada y firmada correctamente/)).toBeTruthy();expect(filename.endsWith('_Fichas.zip')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa09'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}
+ try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Licencia activa: sin marca de agua/);fireEvent.change(within(modal).getByLabelText('Contenido de exportación'),{target:{value:'dictionary'}});fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:'html'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await waitFor(()=>expect(projects.exportDiagramImage).toHaveBeenCalledOnce());expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(within(modal).getByRole('button',{name:'Cancelar'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.getByRole('dialog',{name:'Exportar desde NOVZI'})).toBeTruthy();expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',expect.objectContaining({mode:'dictionary',documentFormat:'html'}));await act(async()=>finish({blob:new Blob(['QA']),exportId:'qa09'}));expect(await screen.findByText(/Imagen exportada y firmada correctamente/)).toBeTruthy();expect(filename.endsWith('_Fichas.zip')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa09'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}
  finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 it('QA09 lee relación con permiso de borrado pero no de edición y permite cancelar',async()=>{
@@ -1561,10 +1573,10 @@ it('QA10 permiso de edición de relación sin eliminación no expone acción des
  vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'relation.edit.mixed','relation.edit.functional','relation.edit.technical']});await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'}));const modal=await screen.findByRole('dialog',{name:'Configurar relación'});expect(within(modal).queryByRole('button',{name:'Eliminar relación'})).toBeNull();expect(within(modal).getByRole('button',{name:'Guardar relación'})).toBeTruthy();fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.queryByRole('dialog')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 lector no puede abrir relación ni importar mediante evento diferido del archivo',async()=>{
- vi.mocked(projects.projectAccess).mockResolvedValue(reader);await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'}));expect(screen.queryByRole('dialog',{name:'Configurar relación'})).toBeNull();const file=new File(['{}'],'qa10.json',{type:'application/json'});Object.defineProperty(file,'text',{value:async()=>JSON.stringify(demoDocument())});fireEvent.change(document.querySelector('input[type=file]')!,{target:{files:[file]}});expect(await screen.findByText('Importación no permitida')).toBeTruthy();expect(projects.importProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
+ vi.mocked(projects.projectAccess).mockResolvedValue(reader);await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'}));expect(screen.queryByRole('dialog',{name:'Configurar relación'})).toBeNull();const file=new File(['{}'],'qa10.json',{type:'application/json'});Object.defineProperty(file,'text',{value:async()=>JSON.stringify(demoDocument())});fireEvent.change(document.querySelector('input[type=file]')!,{target:{files:[file]}});expect(await screen.findByText(/Importación no permitida o guardado pendiente/)).toBeTruthy();expect(projects.importProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 exportación de un proyecto sin diagramas ofrece JSON y deshabilita imágenes',async()=>{
- vi.mocked(projects.loadDocument).mockResolvedValue({document:emptyDoc(),version:1});render(<AtlasEditor/>);await screen.findByRole('heading',{name:'No hay diagramas todavía'});fireEvent.click(await screen.findByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});expect(within(modal).getByLabelText('Formato de exportación')).toHaveProperty('value','json');expect(within(modal).getByRole('option',{name:/PNG/})).toHaveProperty('disabled',true);expect(within(modal).getByRole('option',{name:/JPG/})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(projects.exportProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
+ vi.mocked(projects.loadDocument).mockResolvedValue({document:emptyDoc(),version:1});render(<NovziEditor/>);await screen.findByRole('heading',{name:'No hay diagramas todavía'});fireEvent.click(await screen.findByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});expect(within(modal).getByLabelText('Formato de exportación')).toHaveProperty('value','project-json');expect(within(modal).getByRole('button',{name:'Descargar JSON del proyecto'})).toHaveProperty('disabled',false);expect(within(modal).getByRole('option',{name:/PNG/})).toHaveProperty('disabled',true);expect(within(modal).getByRole('option',{name:/JPG/})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(projects.exportProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 un rechazo textual del guardado mantiene borrador sin exponer copia a quien no puede exportar',async()=>{
  vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.edit.c1']});vi.mocked(projects.saveDocument).mockRejectedValue('Error de transporte QA10');await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador protegido QA10'}});expect(await screen.findByText(/Error de transporte QA10/,{},{timeout:4500})).toBeTruthy();expect(screen.queryByRole('button',{name:'Descargar mis cambios'})).toBeNull();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador protegido QA10');expect(projects.saveDocument).toHaveBeenCalledOnce()
@@ -1606,13 +1618,13 @@ it('QA10 permisos de layout sin permiso de edición de diagrama bloquean modific
  const doc=demoDocument();doc.diagrams[0].filters=[{id:'qa10-filter',label:'Categoría QA10'}];vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.layout.c1']});await openEditor();expect(screen.queryByRole('button',{name:'Filtros'})).toBeNull();const graph=within(screen.getByTestId('graph-renderer'));fireEvent.click(await graph.findByRole('button',{name:'Plataforma Zercano'}));const filters=document.querySelector('.element-filters')!;expect(filters).toBeTruthy();fireEvent.click(within(filters as HTMLElement).getByRole('button',{name:'Configurar'}));const modal=await screen.findByRole('dialog',{name:/Filtros:/});fireEvent.change(within(modal).getByLabelText('Nueva categoría'),{target:{value:'Categoría no autorizada QA10'}});fireEvent.click(within(modal).getByRole('button',{name:'Agregar filtro'}));expect(within(modal).queryByLabelText('Nombre de filtro Categoría no autorizada QA10')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 espacio sin proyecto no concede creación a miembro sin permiso',async()=>{
- vi.mocked(auth.session).mockResolvedValue({...user,platformAdmin:false});vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleName:'Invitado QA10'});vi.mocked(workspaces.listWorkspaces).mockResolvedValue([{...workspace,role:'viewer'}]);vi.mocked(projects.listProjects).mockResolvedValue([]);render(<AtlasEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});await screen.findByText('Invitado QA10',{selector:'.role-pill'});expect(screen.getByRole('button',{name:'Crear proyecto'})).toHaveProperty('disabled',true);expect(screen.queryByRole('button',{name:'Accesos'})).toBeNull();expect(projects.createProject).not.toHaveBeenCalled()
+ vi.mocked(auth.session).mockResolvedValue({...user,platformAdmin:false});vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleName:'Invitado QA10'});vi.mocked(workspaces.listWorkspaces).mockResolvedValue([{...workspace,role:'viewer'}]);vi.mocked(projects.listProjects).mockResolvedValue([]);render(<NovziEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});await screen.findByText('Invitado QA10',{selector:'.role-pill'});expect(screen.getByRole('button',{name:'Crear proyecto'})).toHaveProperty('disabled',true);expect(screen.queryByRole('button',{name:'Accesos'})).toBeNull();expect(projects.createProject).not.toHaveBeenCalled()
 })
 it('QA10 cambio de proyecto bloqueado durante autoguardado conserva el documento activo',async()=>{
  const other={id:'p-qa10',name:'Otro proyecto QA10',workspace_id:workspace.id};vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Cambio sin confirmar QA10'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByText(/Primero espera a que se guarden los cambios/)).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1);await act(async()=>finish(2));expect(await screen.findByRole('button',{name:'Historial · v2'})).toBeTruthy()
 },15000)
 it('QA10 error de sesión abre login privado y no consulta organizaciones',async()=>{
- vi.mocked(auth.session).mockRejectedValue(new Error('Sesión vencida QA10'));render(<AtlasEditor/>);expect(await screen.findByRole('heading',{name:'Iniciar sesión'})).toBeTruthy();expect(workspaces.listWorkspaces).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
+ vi.mocked(auth.session).mockRejectedValue(new Error('Sesión vencida QA10'));render(<NovziEditor/>);expect(await screen.findByRole('heading',{name:'Iniciar sesión'})).toBeTruthy();expect(workspaces.listWorkspaces).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
 })
 it('QA10 foco en caja no registrada termina los reintentos sin bloquear navegación',async()=>{
  const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});const getNode=vi.fn(()=>undefined),fitView=vi.fn();vi.mocked(useReactFlow).mockReturnValue({getNode,fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(getNode).toHaveBeenCalledTimes(23),{timeout:4500});await act(async()=>{await new Promise(resolve=>setTimeout(resolve,180))});expect(getNode).toHaveBeenCalledTimes(23);expect(fitView).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1624,18 +1636,18 @@ it('QA10 la vista técnica de despliegue sin edición presenta icono y metadatos
  const {doc}=qa10View('uml-deployment',[{id:'qa10-device',type:'uml-device',name:'Servidor QA10'},{id:'qa10-runtime',type:'uml-execution',name:'Entorno QA10'}]);vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.view.uml-deployment','element.view.uml-device','element.view.uml-execution','element.technical.view']});const graph=await qa10Open(doc);fireEvent.click(await graph.findByRole('button',{name:'Servidor QA10'}));expect(screen.getByLabelText('Contenedor UML')).toHaveProperty('disabled',true);expect(screen.getByLabelText('Icono del dispositivo UML')).toHaveProperty('disabled',true);expect(screen.getByLabelText('Detalle técnico')).toHaveProperty('disabled',true);fireEvent.click(await graph.findByRole('button',{name:'Entorno QA10'}));expect(screen.getByLabelText('Tipo de entorno UML')).toHaveProperty('disabled',true);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 no ofrece reutilización cuando todas las fichas compatibles están en la vista',async()=>{
- const {doc,diagram}=qa10View('uml-sequence',[{id:'qa10-life',type:'uml-lifeline',name:'Único participante QA10'}]);doc.elements=Object.fromEntries(diagram.nodes.map(n=>[n.elementId,doc.elements[n.elementId]]));doc.diagrams=[diagram];vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});render(<AtlasEditor/>);await screen.findByRole('heading',{name:diagram.name});fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));expect(within(modal).getByText('No hay más elementos disponibles.')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const {doc,diagram}=qa10View('uml-sequence',[{id:'qa10-life',type:'uml-lifeline',name:'Único participante QA10'}]);doc.elements=Object.fromEntries(diagram.nodes.map(n=>[n.elementId,doc.elements[n.elementId]]));doc.diagrams=[diagram];vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});render(<NovziEditor/>);await screen.findByRole('heading',{name:diagram.name});fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));expect(within(modal).getByText('No hay más elementos disponibles.')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 exportación simple FREE usa imagen firmada de la revisión guardada',async()=>{
- vi.mocked(projects.exportDiagramImage).mockResolvedValue({blob:new Blob(['QA imagen']),exportId:'qa10-free'});const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const revoke=vi.fn();let filename='';Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa10-free')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download});try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde ATLAS'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await screen.findByText(/Imagen exportada y firmada correctamente/);expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',undefined);expect(filename.endsWith('.png')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa10-free'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
+ vi.mocked(projects.exportDiagramImage).mockResolvedValue({blob:new Blob(['QA imagen']),exportId:'qa10-free'});const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const revoke=vi.fn();let filename='';Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa10-free')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download});try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await screen.findByText(/Imagen exportada y firmada correctamente/);expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',undefined);expect(filename.endsWith('.png')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa10-free'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 
 // QA11: additional user-visible alternatives, preserving runtime and earlier tests.
 it('QA11 primera organización abre formulario y cancelar no crea datos',async()=>{
- vi.mocked(workspaces.listWorkspaces).mockResolvedValue([]);render(<AtlasEditor/>);await screen.findByRole('heading',{name:'Crea tu primer espacio'});fireEvent.click(screen.getByRole('button',{name:'Crear espacio'}));const modal=await screen.findByRole('dialog',{name:'Crear espacio de trabajo'});expect(within(modal).getByRole('button',{name:'Crear'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(workspaces.createWorkspace).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
+ vi.mocked(workspaces.listWorkspaces).mockResolvedValue([]);render(<NovziEditor/>);await screen.findByRole('heading',{name:'Crea tu primer espacio'});fireEvent.click(screen.getByRole('button',{name:'Crear espacio'}));const modal=await screen.findByRole('dialog',{name:'Crear espacio de trabajo'});expect(within(modal).getByRole('button',{name:'Crear'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(workspaces.createWorkspace).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
 })
 it('QA11 primer proyecto abre formulario desde estado vacío',async()=>{
- vi.mocked(projects.listProjects).mockResolvedValue([]);render(<AtlasEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});const button=screen.getByRole('button',{name:'Crear proyecto'});await waitFor(()=>expect(button).toHaveProperty('disabled',false));fireEvent.click(button);const modal=await screen.findByRole('dialog',{name:'Crear proyecto'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.createProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
+ vi.mocked(projects.listProjects).mockResolvedValue([]);render(<NovziEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});const button=screen.getByRole('button',{name:'Crear proyecto'});await waitFor(()=>expect(button).toHaveProperty('disabled',false));fireEvent.click(button);const modal=await screen.findByRole('dialog',{name:'Crear proyecto'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.createProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 cambia organización y no reutiliza revisión anterior',async()=>{
  const other={id:'w-qa11',name:'Otra organización QA11',role:'owner'},next={id:'p-qa11',name:'Otro proyecto QA11',workspace_id:other.id},doc=demoDocument();doc.diagrams[0].name='Contexto QA11';vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace,other]);vi.mocked(projects.listProjects).mockImplementation(async id=>id===other.id?[next]:[project]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===next.id?{document:doc,version:7}:{document:demoDocument(),version:1});await openEditor();fireEvent.change(screen.getByLabelText('Espacio de trabajo'),{target:{value:other.id}});await screen.findByRole('heading',{name:'Contexto QA11'});expect(await screen.findByRole('button',{name:'Historial · v7'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(next.id);expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1665,7 +1677,7 @@ it('QA11 crear diagramas muestra ayuda por tipo UML y permite cancelar',async()=
  await openEditor();fireEvent.click(screen.getByRole('button',{name:'Crear diagrama'}));const modal=await screen.findByRole('dialog',{name:'Nuevo diagrama'});const type=within(modal).getByLabelText('Tipo de visualización');fireEvent.change(type,{target:{value:'uml-class'}});expect(within(modal).getByText(/El catálogo de cajas y relaciones se adapta/)).toBeTruthy();fireEvent.change(type,{target:{value:'uml-usecase'}});expect(within(modal).getByText(/Para vincular una HU de trazabilidad/)).toBeTruthy();fireEvent.change(type,{target:{value:'custom'}});expect(within(modal).getByText(/Podrás crear filtros propios/)).toBeTruthy();fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 deja intacta navegación al resolver foco de una vista ya abandonada',async()=>{
- const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});let finish!:(ok:boolean)=>void;const fitView=vi.fn(()=>new Promise<boolean>(resolve=>{finish=resolve}));vi.mocked(useReactFlow).mockReturnValue({getNode:()=>({id:target.nodes[0].id}),fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(fitView).toHaveBeenCalledOnce());fireEvent.click(screen.getByRole('button',{name:/C1 · Contexto de Zercano/}));await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});await act(async()=>finish(true));expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});let finish!:(ok:boolean)=>void;const fitView=vi.fn(()=>new Promise<boolean>(resolve=>{finish=resolve}));vi.mocked(useReactFlow).mockReturnValue({getNode:()=>({id:target.nodes[0].id}),fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(fitView).toHaveBeenCalledOnce());ensureDiagramFolderOpen('C1 · Contexto');fireEvent.click(screen.getByRole('button',{name:/C1 · Contexto de Zercano/}));await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});await act(async()=>finish(true));expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 al eliminar un proyecto con otro disponible abre únicamente el siguiente',async()=>{
  const other={id:'p-qa11',name:'Proyecto restante QA11',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Vista restante QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:4}:{document:demoDocument(),version:1});vi.mocked(projects.deleteProject).mockResolvedValue({ok:true});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Administrar proyecto'}));fireEvent.click(within(await screen.findByRole('dialog',{name:'Administrar proyecto: Proyecto QA'})).getByRole('button',{name:'Eliminar proyecto definitivamente'}));const modal=await screen.findByRole('dialog',{name:'Eliminar proyecto: Proyecto QA'});fireEvent.change(within(modal).getByLabelText('Escribe el nombre para confirmar la eliminación'),{target:{value:project.name}});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar definitivamente'}));await screen.findByRole('heading',{name:'Vista restante QA11'});expect(await screen.findByRole('button',{name:'Historial · v4'})).toBeTruthy();expect(projects.deleteProject).toHaveBeenCalledWith(project.id);expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1693,16 +1705,16 @@ it('QA11 lector consulta enlaces históricos sin destino ejecutable ni acción d
 })
 it('QA11 panel de campos abre desde cabecera sin modelo cuando la política lo permite',async()=>{
  // The active project grants field.configure, but its document read is still pending.
- let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));render(<AtlasEditor/>);const button=await screen.findByTitle('Configuración de campos');fireEvent.click(button);const modal=await screen.findByRole('dialog',{name:'Campos personalizados por tipo de elemento'});expect(within(modal).getByRole('button',{name:'Crear campo'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));await act(async()=>finish({document:demoDocument(),version:1}));await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});expect(projects.saveDocument).not.toHaveBeenCalled()
+ let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));render(<NovziEditor/>);const button=await screen.findByTitle('Configuración de campos');fireEvent.click(button);const modal=await screen.findByRole('dialog',{name:'Campos personalizados por tipo de elemento'});expect(within(modal).getByRole('button',{name:'Crear campo'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));await act(async()=>finish({document:demoDocument(),version:1}));await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 permisos de edición funcional no permiten reutilizar ficha no visible',async()=>{
- const doc=demoDocument(),hidden={...createElement('Ficha histórica QA11','system'),id:'qa11-hidden'};doc.elements[hidden.id]=hidden;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:['project.read','diagram.view.c1','diagram.layout.c1','element.view.actor','element.create.actor']});await openEditor();fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));fireEvent.click(within(modal).getByRole('button',{name:/Ficha histórica QA11/}));expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const doc=demoDocument(),hidden={...createElement('Ficha histórica QA11','system'),id:'qa11-hidden'};doc.elements[hidden.id]=hidden;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:['project.read','diagram.view.c1','diagram.layout.c1','element.view.actor','element.create.actor']});await openEditor();fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));expect(within(modal).queryByRole('button',{name:/Ficha histórica QA11/})).toBeNull();expect(within(modal).getByText('No hay más elementos disponibles.')).toBeTruthy();expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 revisión remota sin diagramas deja explorador vacío y retira ficha seleccionada',async()=>{
  const stream=await qa08OpenStream();try{fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const remote=emptyDoc();vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:remote,version:5});await act(async()=>stream.emit('version',{version:5}));expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();expect(screen.queryByLabelText('Nombre')).toBeNull();expect(screen.getByRole('button',{name:'Historial · v5'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
 })
 it('QA11 respuesta tardía del proyecto anterior no reemplaza la vista activa',async()=>{
- const other={id:'p-qa11',name:'Proyecto rápido QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista rápida QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve({document:next,version:6}));render(<AtlasEditor/>);await waitFor(()=>expect(projects.loadDocument).toHaveBeenCalledWith(project.id));fireEvent.click(await screen.findByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista rápida QA11'});await act(async()=>finish({document:demoDocument(),version:99}));expect(screen.getByRole('heading',{name:'Vista rápida QA11'})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v6'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const other={id:'p-qa11',name:'Proyecto rápido QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista rápida QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve({document:next,version:6}));render(<NovziEditor/>);await waitFor(()=>expect(projects.loadDocument).toHaveBeenCalledWith(project.id));fireEvent.click(await screen.findByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista rápida QA11'});await act(async()=>finish({document:demoDocument(),version:99}));expect(screen.getByRole('heading',{name:'Vista rápida QA11'})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v6'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 permiso tardío del proyecto anterior no concede edición al nuevo lector',async()=>{
  const other={id:'p-qa11',name:'Proyecto lector QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista lector QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:next,version:3}:{document:demoDocument(),version:1});let finish!:(value:WorkspaceAccess)=>void;vi.mocked(projects.projectAccess).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve(reader));await openEditor();fireEvent.click(screen.getByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista lector QA11'});await screen.findByText('Lector',{selector:'.role-pill'});await act(async()=>finish(owner));expect(screen.getByLabelText('Nombre del diagrama')).toHaveProperty('disabled',true);expect(screen.queryByRole('button',{name:'Agregar caja'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1721,7 +1733,7 @@ it('QA11 cierra panel de proyecto y conserva política si consulta posterior fal
 })
 
 it('AUD-CL-UX UML clases no presenta perspectivas ni diagnóstico; C1 conserva selector y filtros',async()=>{
- const {doc}=qa10View('uml-class',[{id:'qa10-source',type:'uml-association-class',name:'Asociación borrador QA'}]);const graph=await qa10Open(doc);expect(screen.queryByRole('button',{name:'Funcional'})).toBeNull();expect(screen.queryByRole('button',{name:'Mixta'})).toBeNull();expect(screen.queryByRole('button',{name:'Técnica'})).toBeNull();expect(screen.queryByText(/Diagnóstico UML/)).toBeNull();fireEvent.click(await graph.findByRole('button',{name:'Asociación borrador QA'}));expect(screen.getByText('Borrador · Asociación pendiente de vincular')).toBeTruthy();fireEvent.click(await within(document.querySelector('.diagram-nav') as HTMLElement).findByRole('button',{name:name=>name.includes(doc.diagrams[0].name)}));await screen.findByRole('heading',{name:doc.diagrams[0].name});expect(screen.getByRole('button',{name:'Funcional'})).toBeTruthy();expect(screen.getByRole('button',{name:'Mixta'})).toBeTruthy();expect(screen.getByRole('button',{name:'Técnica'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const {doc}=qa10View('uml-class',[{id:'qa10-source',type:'uml-association-class',name:'Asociación borrador QA'}]);const graph=await qa10Open(doc);expect(screen.queryByRole('button',{name:'Funcional'})).toBeNull();expect(screen.queryByRole('button',{name:'Mixta'})).toBeNull();expect(screen.queryByRole('button',{name:'Técnica'})).toBeNull();expect(screen.queryByText(/Diagnóstico UML/)).toBeNull();fireEvent.click(await graph.findByRole('button',{name:'Asociación borrador QA'}));expect(screen.getByText('Borrador · Asociación pendiente de vincular')).toBeTruthy();ensureDiagramFolderOpen('C1 · Contexto');fireEvent.click(await within(document.querySelector('.diagram-nav') as HTMLElement).findByRole('button',{name:name=>name.includes(doc.diagrams[0].name)}));await screen.findByRole('heading',{name:doc.diagrams[0].name});expect(screen.getByRole('button',{name:'Funcional'})).toBeTruthy();expect(screen.getByRole('button',{name:'Mixta'})).toBeTruthy();expect(screen.getByRole('button',{name:'Técnica'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('AUD-CL-UX UML actividad no muestra perspectivas incluso tras navegar desde C1',async()=>{const {doc}=qa10View('uml-activity',[{id:'qa10-source',type:'uml-action',name:'Acción QA'}]);vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Funcional'}));fireEvent.click(await screen.findByRole('button',{name:/Vista específica QA10/}));await screen.findByRole('heading',{name:'Vista específica QA10'});expect(screen.queryByRole('button',{name:'Funcional'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()})
 

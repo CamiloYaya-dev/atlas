@@ -3,15 +3,15 @@ import assert from 'node:assert/strict'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {ReactFlowProvider} from '@xyflow/react'
 import type {NodeProps} from '@xyflow/react'
-import {createElement,activityDefaults} from '@atlas/contracts'
-import type {DiagramType,ElementType,ModelElement,Perspective} from '@atlas/contracts'
-import {AtlasNode} from './AtlasNode'
+import {createElement,activityDefaults} from '@novzi/contracts'
+import type {DiagramType,ElementType,ModelElement,Perspective} from '@novzi/contracts'
+import {NovziNode} from './NovziNode'
 
 const e=(name:string,type:ElementType):ModelElement=>({...createElement(name,type),id:`qa-${name.replaceAll(' ','-')}`})
 const html=(graphType:DiagramType,element:ModelElement|undefined,extra:Record<string,unknown>={},selected=false)=>{
  const data={element,graphType,mode:'mixed' as Perspective,canResize:false,...extra}
  const props={id:'node-qa',data,selected} as unknown as NodeProps
- return renderToStaticMarkup(<ReactFlowProvider><AtlasNode {...props}/></ReactFlowProvider>)
+ return renderToStaticMarkup(<ReactFlowProvider><NovziNode {...props}/></ReactFlowProvider>)
 }
 
 it('Cajas inexistentes y perspectivas no revelan contenido técnico en la vista funcional',()=>{

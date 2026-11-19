@@ -1,5 +1,5 @@
-import {classCapabilities,isClassType,classTypeReferenceAllowed,validMultiplicity} from '@atlas/contracts'
-import type {ModelElement,UmlAttribute,UmlOperation,UmlParameter,UmlSlot,UmlVisibility} from '@atlas/contracts'
+import {classCapabilities,isClassType,classTypeReferenceAllowed,validMultiplicity} from '@novzi/contracts'
+import type {ModelElement,UmlAttribute,UmlOperation,UmlParameter,UmlSlot,UmlVisibility} from '@novzi/contracts'
 import {Plus,Trash2} from 'lucide-react'
 import {useEffect,useState,useId} from 'react'
 import type {ReactNode} from 'react'

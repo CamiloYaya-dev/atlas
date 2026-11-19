@@ -1,6 +1,6 @@
 import {useState} from 'react'
-import {canonicalSubjectId,newUseCaseIssues,uid,useCaseContext,useCaseRegistry,resolveUseCasePoint,removeUseCaseSemanticRelation,umlRelationLabel} from '@atlas/contracts'
-import type {ModelElement,ProjectDocument,UseCaseDetail} from '@atlas/contracts'
+import {canonicalSubjectId,newUseCaseIssues,uid,useCaseContext,useCaseRegistry,resolveUseCasePoint,removeUseCaseSemanticRelation,umlRelationLabel} from '@novzi/contracts'
+import type {ModelElement,ProjectDocument,UseCaseDetail} from '@novzi/contracts'
 export default function UseCaseDetailsEditor({element,doc,disabled,onChange,onDocumentChange,canResolve}:{element:ModelElement;doc:ProjectDocument;disabled:boolean;onChange:(detail:UseCaseDetail)=>void;onDocumentChange?:(next:ProjectDocument)=>void;canResolve?:(next:ProjectDocument)=>boolean}){
  const [error,setError]=useState(''),[deleteId,setDeleteId]=useState(''),[resolution,setResolution]=useState<{pointId:string;replacement:string}|null>(null),u=element.useCaseDetail||{},points=u.extensionPoints||[],subjects=u.subjectIds||[]
  const set=(patch:Partial<UseCaseDetail>)=>{const detail={...u,...patch},next={...doc,elements:{...doc.elements,[element.id]:{...element,useCaseDetail:detail}}};const issues=newUseCaseIssues(doc,next);if(issues.length){setError(issues[0].message);return}setError('');onChange(detail)}

@@ -1,6 +1,6 @@
-# ATLAS v4.8.1 — Matriz UML componentes · Auditoría 4 — reentrega verificada
+# NOVZI v4.8.1 — Matriz UML componentes · Auditoría 4 — reentrega verificada
 
-Base exacta: `atlas(20261116-235431).zip` (idéntica byte por byte a `atlas(20261116-233953).zip`, SHA-256 `77ab8852ca74047329b1074ee636b5e4498fd0d5665219c1f0fc8e8b48e3d456`). Se integró el parche de auditoría 3 (31 archivos, SHA-256 `4f2b02bfeb00bc4ba2c26f3c9335d8746284ec18780b6c78c44c5f36fd864c13`) en una nueva extracción, sin modificar los demás archivos fuente de la base. Se repitieron las pruebas desde esa raíz. Referencias: `ATLAS_Refactor_Integral_UML_Componentes.pdf` (CMP-01–09/T01–09) y tercera auditoría. Todos los requisitos funcionales originales siguen siendo P0. No se ejecutó QA integral ni cobertura global.
+Base exacta: `novzi(20261116-235431).zip` (idéntica byte por byte a `novzi(20261116-233953).zip`, SHA-256 `77ab8852ca74047329b1074ee636b5e4498fd0d5665219c1f0fc8e8b48e3d456`). Se integró el parche de auditoría 3 (31 archivos, SHA-256 `4f2b02bfeb00bc4ba2c26f3c9335d8746284ec18780b6c78c44c5f36fd864c13`) en una nueva extracción, sin modificar los demás archivos fuente de la base. Se repitieron las pruebas desde esa raíz. Referencias: `NOVZI_Refactor_Integral_UML_Componentes.pdf` (CMP-01–09/T01–09) y tercera auditoría. Todos los requisitos funcionales originales siguen siendo P0. No se ejecutó QA integral ni cobertura global.
 
 ## Hallazgos
 
@@ -15,7 +15,7 @@ Base exacta: `atlas(20261116-235431).zip` (idéntica byte por byte a `atlas(2026
 ## Reproducciones exactas de AUD-CMP-010
 
 - A: negativo `qa/uml-component-negative/24-aud-cmp-010-tipo-de-parte.json`: asociación entre Api y Repo, conector entre puertos IRepo. Antes de tipificar, el documento pasa alta y actualización por política. Con `associationTypeId`, se rechaza con `connector-association` / `Número o tipos de extremos no coinciden con la asociación`, tanto alta, actualización e importación completa por política.
-- B: positivo `qa/ATLAS_QA_UML_COMPONENTES_ASOCIACION.json`: asociación reflexiva IRepo–IRepo en vista de clases. Alta, modificación e importación completa por política aceptadas, forma y semántica válidas.
+- B: positivo `qa/NOVZI_QA_UML_COMPONENTES_ASOCIACION.json`: asociación reflexiva IRepo–IRepo en vista de clases. Alta, modificación e importación completa por política aceptadas, forma y semántica válidas.
 - Controles: asociación directa de partes de tipos Api y Repo válida; invertir sus extremos semánticos incompatibles invalida el conector. Prueba previa de multiplicidad preservada, ahora con memberEnd del tipo del puerto correcto. Caso n-ario con tres memberEnd, multiplicidad de tercer extremo y compatibilidad de campos binarios. Especialización transitiva por ID; cambio indirecto de tipo de puerto y rollback. Tipo no declarado produce advertencia, no una confirmación de conformidad. Importación aislada sin dependencia externa se rechaza (importar proyecto completo), sin inventar ni borrar asociación.
 - UI: aviso en borrador via política compartida, rechazo al guardar sin perder borrador; reutilizar conector n-ario sin aparición y editar tercer extremo conserva todos sus IDs. No se modifican permisos, límites API ni BD.
 
@@ -35,7 +35,7 @@ Base exacta: `atlas(20261116-235431).zip` (idéntica byte por byte a `atlas(2026
 
 ## Evidencia real y comandos
 
-Ruta `qa/uml-component-evidence/auditoria-4/` (ejecución nueva; se conserva también el historial de auditoría 3). Ejecución diagnóstica en Node 22.16.0, mediante `transpileModule` y dependencias JavaScript de la copia auditada; enlaces locales de workspaces reconstruidos para Linux. Variables ficticias de configuración API (`NODE_ENV=test`, `DATABASE_URL=postgresql://qa:qa@127.0.0.1:5432/atlas_test`, `ATLAS_CSRF_SECRET=diagnostic-only-not-production-1234567890`); sin conexión a DB. No incluir configuración ni dependencias en entrega.
+Ruta `qa/uml-component-evidence/auditoria-4/` (ejecución nueva; se conserva también el historial de auditoría 3). Ejecución diagnóstica en Node 22.16.0, mediante `transpileModule` y dependencias JavaScript de la copia auditada; enlaces locales de workspaces reconstruidos para Linux. Variables ficticias de configuración API (`NODE_ENV=test`, `DATABASE_URL=postgresql://qa:qa@127.0.0.1:5432/novzi_test`, `NOVZI_CSRF_SECRET=diagnostic-only-not-production-1234567890`); sin conexión a DB. No incluir configuración ni dependencias en entrega.
 
 | Comando o prueba | Resultado | Evidencia |
 |---|---:|---|
@@ -55,7 +55,7 @@ El JSON manual de una sola vista se mantiene intacto (30 fichas, 32 nodos, 20 ar
 
 ## Instalación y verificación
 
-Descomprimir el ZIP incremental sobre la raíz real de ATLAS (la que contiene `package.json`, `apps/` y `packages/`), sin carpeta contenedora adicional. No contiene dependencias ni migraciones. Ejecutar `node scripts/verify-component-audit4.mjs` para comprobar los hashes de los archivos de la entrega e identificar una instalación antigua antes de comprimirla. El ZIP de fuente completa alternativo contiene la carpeta `atlas/` y está destinado a auditoría o a una instalación limpia; excluye dependencias, configuración privada, respaldos, historial Git y artefactos generados de cobertura/compilación. No sustituir la instalación local completa ni sus datos por este ZIP. Ejecutar `npm run typecheck`, `npm run qa:uml:componentes -- --list`, `npm run qa:uml:componentes`. Importar el JSON manual como diagrama, y el fixture de asociación como proyecto de QA independiente (incluye vista de clases; reemplazar únicamente un proyecto de prueba).
+Descomprimir el ZIP incremental sobre la raíz real de NOVZI (la que contiene `package.json`, `apps/` y `packages/`), sin carpeta contenedora adicional. No contiene dependencias ni migraciones. Ejecutar `node scripts/verify-component-audit4.mjs` para comprobar los hashes de los archivos de la entrega e identificar una instalación antigua antes de comprimirla. El ZIP de fuente completa alternativo contiene la carpeta `novzi/` y está destinado a auditoría o a una instalación limpia; excluye dependencias, configuración privada, respaldos, historial Git y artefactos generados de cobertura/compilación. No sustituir la instalación local completa ni sus datos por este ZIP. Ejecutar `npm run typecheck`, `npm run qa:uml:componentes -- --list`, `npm run qa:uml:componentes`. Importar el JSON manual como diagrama, y el fixture de asociación como proyecto de QA independiente (incluye vista de clases; reemplazar únicamente un proyecto de prueba).
 
 **Dictamen:** AUD-CMP-010 corregido en las capas ejecutadas, AUD-CMP-001–006/008–009 sin regresiones detectadas. AUD-CMP-007: flujo de reutilización estructural y reparación puntual acreditados; permanecen límites de funcionalidad/probatorio descritos en la matriz. No declarar cierre integral ni QA local real verde sin ejecutar. No exigir cobertura 90 % ni QA integral durante esta etapa.
 

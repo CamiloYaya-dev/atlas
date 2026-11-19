@@ -1,6 +1,6 @@
 import {useMemo} from 'react'
-import {availableExportFields} from '@atlas/contracts'
-import type {AdvancedExportMode,Diagram,ExportFieldChoices,ExportPlacement,ProjectDocument} from '@atlas/contracts'
+import {availableExportFields} from '@novzi/contracts'
+import type {AdvancedExportMode,Diagram,ExportFieldChoices,ExportPlacement,ProjectDocument} from '@novzi/contracts'
 
 export function defaultExportChoices(doc:ProjectDocument,diagram:Diagram):ExportFieldChoices{
  const selected:ExportFieldChoices={}
@@ -35,17 +35,17 @@ export default function AdvancedExportFields({doc,diagram,mode,choices,onChange}
   onChange(next)
  }
  const available=['embedded','both'].includes(mode)?true:false
- return <section className="atlas-export-fields" aria-label="Selección avanzada de campos">
+ return <section className="novzi-export-fields" aria-label="Selección avanzada de campos">
   <p className="muted-mini">Elige qué incluir en cada caja. Los datos se obtienen de la versión guardada; los campos vacíos se omiten del resultado.</p>
-  <div className="atlas-export-bulk">
+  <div className="novzi-export-bulk">
    <button type="button" className="ghost" onClick={()=>setAll('omit')}>Omitir todos</button>
    {available&&<button type="button" className="ghost" onClick={()=>setAll('embed')}>Todos en imagen</button>}
    {['dictionary','both'].includes(mode)&&<button type="button" className="ghost" onClick={()=>setAll('dictionary')}>Todos a las fichas</button>}
   </div>
-  <div className="atlas-export-field-scroller">
-   {items.map(item=><div className="atlas-export-element" key={item.id}>
+  <div className="novzi-export-field-scroller">
+   {items.map(item=><div className="novzi-export-element" key={item.id}>
     <strong>{item.element?.name}</strong><small>{item.element?.type} · {item.fields.length} campos posibles</small>
-    {item.fields.map(field=><label key={field.key} className="atlas-export-field-row">
+    {item.fields.map(field=><label key={field.key} className="novzi-export-field-row">
      <span><b>{field.label}</b><small title={field.value}>{field.value||'(sin valor)'}</small></span>
      <select aria-label={`Exportación · ${item.element?.name} · ${field.label}`} value={choices[item.id]?.[field.key]||'omit'} onChange={event=>setField(item.id,field.key,event.target.value as ExportPlacement)}>
       <option value="omit">Omitir</option>

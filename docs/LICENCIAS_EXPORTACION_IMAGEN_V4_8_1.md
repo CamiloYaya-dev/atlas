@@ -1,20 +1,20 @@
-# ATLAS V4.8.1 — Licenciamiento base y exportación de imágenes
+# NOVZI V4.8.1 — Licenciamiento base y exportación de imágenes
 
 ## Entrega
 
 - El botón **Exportar** ofrece JSON del proyecto completo o **PNG/JPG del diagrama actual**. PNG/JPG utiliza el último documento persistido, no el viewport recortado en pantalla; incluye cajas, relaciones, etiquetas y cabecera del diagrama.
-- **Sin licencia comercial activa**: PNG/JPG con marca visible repetida `ATLAS · USO NO COMERCIAL`.
+- **Sin licencia comercial activa**: PNG/JPG con marca visible repetida `NOVZI · USO NO COMERCIAL`.
 - **Licencia activa de pago**: PNG/JPG sin marca visible.
 - **Ambos casos**: la API aplica la política, inserta metadatos de procedencia HMAC-SHA256 en el PNG/JPG y guarda auditoría inmutable; no confía en indicadores de licencia del navegador. JSON mantiene su flujo anterior.
-- La firma se calcula sobre el **hash de la imagen exacta**, su organización, usuario, diagrama, versión y licencia de exportación. Se verifica retirando el bloque de metadatos ATLAS, calculando nuevamente el hash y contrastando la firma con el registro del servidor.
+- La firma se calcula sobre el **hash de la imagen exacta**, su organización, usuario, diagrama, versión y licencia de exportación. Se verifica retirando el bloque de metadatos NOVZI, calculando nuevamente el hash y contrastando la firma con el registro del servidor.
 - El backend genera el gráfico desde la versión guardada y filtrada por las ACL del proyecto. No admite que el cliente envíe su propio bitmap limpio para obtener firma comercial.
 
 ## Instalación (Windows, dentro de la carpeta del proyecto)
 
-1. Respaldar proyecto y BD; extraer el **parche** sobre la raíz de ATLAS conservando `.env`, `node_modules` y volúmenes Docker.
+1. Respaldar proyecto y BD; extraer el **parche** sobre la raíz de NOVZI conservando `.env`, `node_modules` y volúmenes Docker.
 2. `npm install` (nueva dependencia oficial **sharp** para PNG/JPG; el `package-lock.json` viene actualizado, incluidos binarios opcionales para Windows).
 3. `npm run db:migrate` (aplica **006_licensing_export_provenance.sql**; no altera las migraciones anteriores ni el JSON de diagramas).
-4. En `apps/api/.env`, configurar `ATLAS_EXPORT_SIGNING_KEY` con **32 caracteres aleatorios o más**. En entorno `production` es obligatoria; en desarrollo, si se omite, se deriva temporalmente de `ATLAS_CSRF_SECRET`.
+4. En `apps/api/.env`, configurar `NOVZI_EXPORT_SIGNING_KEY` con **32 caracteres aleatorios o más**. En entorno `production` es obligatoria; en desarrollo, si se omite, se deriva temporalmente de `NOVZI_CSRF_SECRET`.
 5. Reiniciar API/web. `npm run typecheck`, `npm run test:export`, `npm run test:ui`, `npm run build`.
 
 **No cambiar secretos de firma sin plan de rotación**: la validación de exportaciones antiguas usa el mismo secreto. Guardar la clave y las copias de seguridad de la base de datos en un almacén seguro.
@@ -33,7 +33,7 @@ Cada funcionalidad futura se añade a `FEATURES`, se resuelve vía `getEntitleme
 
 ## API
 
-Todas las rutas privadas exigen sesión. POST/PUT exigen CSRF `X-CSRF-Token`, igual que el resto de ATLAS.
+Todas las rutas privadas exigen sesión. POST/PUT exigen CSRF `X-CSRF-Token`, igual que el resto de NOVZI.
 
 | Método | Endpoint | Función / autorización |
 |---|---|---|
@@ -51,7 +51,7 @@ Todas las rutas privadas exigen sesión. POST/PUT exigen CSRF `X-CSRF-Token`, ig
 
 Revocar sin borrar la evidencia: `{"planCode":"pro","status":"revoked","features":{}}`.
 
-**Exportación**: `{"format":"png","expectedVersion":12}` (o `jpg`). La versión debe coincidir con la guardada; HTTP 409 si no. El contenido de respuesta es binario `image/png` o `image/jpeg`, con cabecera `X-ATLAS-Export-Id`.
+**Exportación**: `{"format":"png","expectedVersion":12}` (o `jpg`). La versión debe coincidir con la guardada; HTTP 409 si no. El contenido de respuesta es binario `image/png` o `image/jpeg`, con cabecera `X-NOVZI-Export-Id`.
 
 **Verificación**: `{"imageBase64":"..."}` (máximo 4 MB). Responde `verified:true/false`, motivo y `exportId` cuando exista. El registro de servidor está disponible aunque un editor elimine los metadatos de una copia, pero **la verificación automatizada no puede atribuir de manera concluyente una imagen sin firma**.
 

@@ -8,13 +8,13 @@ import {registerProjectController} from '../../projects/presentation/projects.co
 import {ProjectsRepository} from '../../projects/infrastructure/projects.repository'
 import {projectEvents} from '../../projects/realtime/project-events'
 const workspace='11111111-1111-4111-8111-111111111111',actor='22222222-2222-4222-8222-222222222222',role='33333333-3333-4333-8333-333333333333',project='44444444-4444-4444-8444-444444444444'
-const headers={cookie:'atlas_session='+'A'.repeat(48)}
+const headers={cookie:'novzi_session='+'A'.repeat(48)}
 // Exercise real Fastify route handlers + identity/ACL over a strict fake SQL boundary.
 // CSRF/rate limiting are covered by the full application integration suite.
 test('auditoría no propietaria limita proyectos por membresía y elimina atributos internos',async t=>{
  const a=Fastify();t.after(()=>a.close());await registerAccessController(a)
  const query=t.mock.method(pool,'query',async(sql:string,params:unknown[])=>{
-  if(sql.includes('FROM atlas_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
+  if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
   if(sql.includes('FROM workspace_members m JOIN workspace_roles'))return {rows:[{id:role,role_key:'qa_auditor',name:'Auditor'}]}
   if(sql.includes('FROM role_permissions'))return {rows:[{permission:'workspace.audit.view'}]}
   if(sql.includes('FROM audit_events')){assert.match(sql,/pm.user_id=\$2/);assert.deepEqual(params,[workspace,actor,26]);return {rows:[{id:'9',event_type:'project.renamed',actor_name:null,actor_email:null,resource_id:project,resource_name:null,detail:null,created_at:'2026-11-14'}]}}
@@ -28,7 +28,7 @@ test('roles: administrador delegado no puede conceder borrado de workspace ni in
  const a=Fastify();t.after(()=>a.close());await registerAccessController(a)
  let roleKey='qa_admin'
  t.mock.method(pool,'query',async(sql:string)=>{
-  if(sql.includes('FROM atlas_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
+  if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
   if(sql.includes('FROM workspace_members m JOIN workspace_roles'))return {rows:[{id:role,role_key:roleKey,name:'Administrador'}]}
   if(sql.includes('FROM role_permissions'))return {rows:[{permission:'workspace.roles.manage'},{permission:'workspace.members.manage'}]}
   throw Error('SQL inesperado '+sql)
@@ -46,7 +46,7 @@ test('roles: administrador delegado no puede conceder borrado de workspace ni in
 test('alta administrativa rechaza cuerpo inválido, nombre ausente y contraseña vacía, sin insertar cuentas',async t=>{
  const a=Fastify();t.after(()=>a.close());await registerAdminController(a)
  let writes=0;t.mock.method(pool,'query',async(sql:string)=>{
-  if(sql.includes('FROM atlas_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:true,session_id:'s'}]}
+  if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:true,session_id:'s'}]}
   writes++;return {rows:[],rowCount:0}
  })
  for(const payload of [[],{}, {email:'qa@example.test'}, {email:'qa@example.test',name:'QA'}])assert.equal((await a.inject({method:'POST',url:'/api/v1/admin/users',headers,payload})).statusCode,400)
@@ -56,7 +56,7 @@ test('alta administrativa rechaza cuerpo inválido, nombre ausente y contraseña
 test('presencia y restauración rechazan ausencia de documento y edición concurrente antes de persistir',async t=>{
  const a=Fastify();t.after(()=>a.close());await registerProjectController(a)
  t.mock.method(pool,'query',async(sql:string)=>{
-  if(sql.includes('FROM atlas_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
+  if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
   if(sql.includes('AS "workspaceId"'))return {rows:[{workspaceId:workspace}]}
   if(sql.includes('FROM projects p JOIN workspace_members'))return {rows:[{workspace_id:workspace,workspace_role:'owner',id:null,role_key:null,name:null}]}
   if(sql.includes('FROM workspace_members m JOIN workspace_roles'))return {rows:[{id:role,role_key:'owner',name:'Propietario'}]}
@@ -77,10 +77,10 @@ test('presencia y restauración rechazan ausencia de documento y edición concur
 
 test('SSE autorizado entrega cabeceras y revalida permisos y visibilidad antes de conservar conexión',async t=>{
  const app=Fastify();t.after(()=>app.close());await registerProjectController(app)
- const {emptyDoc,createElement}=await import('@atlas/contracts')
+ const {emptyDoc,createElement}=await import('@novzi/contracts')
  const doc=emptyDoc();doc.elements.a={...createElement('Actor QA','actor'),id:'a'};doc.diagrams=[{id:'d',type:'c1',name:'QA',description:'',createdAt:'2026-11-14',nodes:[{id:'n',elementId:'a',x:0,y:0}],edges:[]}]
  t.mock.method(pool,'query',async(sql:string)=>{
-  if(sql.includes('FROM atlas_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
+  if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
   if(sql.includes('AS "workspaceId"'))return {rows:[{workspaceId:workspace}]}
   if(sql.includes('FROM projects p JOIN workspace_members'))return {rows:[{workspace_id:workspace,workspace_role:'owner',id:null,role_key:null,name:null}]}
   if(sql.includes('FROM workspace_members m JOIN workspace_roles'))return {rows:[{id:role,role_key:'owner',name:'Propietario'}]}
@@ -93,6 +93,6 @@ test('SSE autorizado entrega cabeceras y revalida permisos y visibilidad antes d
  const subscribe=t.mock.method(projectEvents,'subscribe',(...args:Parameters<typeof projectEvents.subscribe>)=>{
   assert.deepEqual(args.slice(0,4),[project,'qa-client-valid',actor,'QA']);assert.equal(args[5],3);assert.deepEqual(args[7],{diagrams:new Set(['d']),elements:new Set(['a'])});validate=args[6];args[4].end()
  })
- const response=await app.inject({method:'GET',url:`/api/v1/projects/${project}/events?clientId=qa-client-valid`,headers});assert.equal(response.statusCode,200);assert.match(String(response.headers['content-type']),/text\/event-stream/);assert.match(response.body,/ATLAS live/);assert.equal(subscribe.mock.callCount(),1);assert.ok(validate)
+ const response=await app.inject({method:'GET',url:`/api/v1/projects/${project}/events?clientId=qa-client-valid`,headers});assert.equal(response.statusCode,200);assert.match(String(response.headers['content-type']),/text\/event-stream/);assert.match(response.body,/NOVZI live/);assert.equal(subscribe.mock.callCount(),1);assert.ok(validate)
  await validate();assert.deepEqual(visibility.mock.calls[0].arguments,[project,'qa-client-valid',new Set(['d']),new Set(['a'])]);available=false;await assert.rejects(validate(),{statusCode:404});assert.equal(visibility.mock.callCount(),1)
 })

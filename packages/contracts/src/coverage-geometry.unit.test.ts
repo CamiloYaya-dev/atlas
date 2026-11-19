@@ -1,26 +1,26 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {createElement,atlasNodeSize,atlasNodeMinimum,parallelRoute,parallelOffsets,relationScope,umlContainerAllows} from './index'
+import {createElement,novziNodeSize,novziNodeMinimum,parallelRoute,parallelOffsets,relationScope,umlContainerAllows} from './index'
 import type {DiagramType,ElementType,EdgePathStyle} from './index'
 import type {PortSide} from './parallel-edges'
 
 test('tamaños mínimos protegidos para puertos, parámetros, invariantes y regiones',()=>{
  const cases:[DiagramType,ElementType,number,number][]=[['uml-component','uml-port',16,16],['uml-activity','uml-activity-pin',24,24],['uml-activity','uml-activity-parameter',95,48],['uml-activity','uml-activity-interruptible-region',250,180],['uml-sequence','uml-gate',48,48],['uml-sequence','uml-sequence-invariant',95,65],['uml-sequence','uml-sequence-continuation',95,65]]
- for(const [d,t,w,h] of cases){const e=createElement(t,t);assert.deepEqual(atlasNodeMinimum(d,t),{width:w,height:h},t);assert.deepEqual(atlasNodeSize(d,e,{width:1,height:1}),{width:w,height:h},t)}
+ for(const [d,t,w,h] of cases){const e=createElement(t,t);assert.deepEqual(novziNodeMinimum(d,t),{width:w,height:h},t);assert.deepEqual(novziNodeSize(d,e,{width:1,height:1}),{width:w,height:h},t)}
 })
 test('cajas de casos de uso no recortan títulos multilínea ni puntos de extensión y mantienen ancho explícito',()=>{
  const simple=createElement('Consultar','usecase'),long={...simple,name:'Consultar\nY descargar',useCaseDetail:{extensionPoints:[{id:'p',name:'Punto de extensión',description:'Descripción suficientemente extensa para ocupar varias líneas'}]}}
- const normal=atlasNodeSize('uml-usecase',simple,{width:220,height:100}),extended=atlasNodeSize('uml-usecase',long,{width:220,height:100})
+ const normal=novziNodeSize('uml-usecase',simple,{width:220,height:100}),extended=novziNodeSize('uml-usecase',long,{width:220,height:100})
  assert.equal(normal.width,220);assert.equal(extended.width,220);assert.ok(extended.height>normal.height)
- const actor=createElement('Cliente','actor');assert.ok(atlasNodeSize('uml-usecase',actor).height>=150)
+ const actor=createElement('Cliente','actor');assert.ok(novziNodeSize('uml-usecase',actor).height>=150)
  const rectangle={...actor,useCaseDetail:{presentation:'rectangle' as const,stereotype:'externo',leaf:true},uml:{attributes:[{id:'a',name:'nombre',type:'String',visibility:'private' as const}]}}
- assert.ok(atlasNodeSize('uml-usecase',rectangle,{width:240,height:10}).height>=120)
+ assert.ok(novziNodeSize('uml-usecase',rectangle,{width:240,height:10}).height>=120)
 })
 test('bifurcación vertical, miembros de componentes y despliegue conservan tamaño semántico',()=>{
  const fork={...createElement('Fork','uml-fork'),activityDetail:{orientation:'vertical' as const}}
- assert.deepEqual(atlasNodeSize('uml-activity',fork),{width:48,height:160});assert.deepEqual(atlasNodeSize('uml-activity',fork,{width:40,height:30}),{width:40,height:90})
- for(const t of ['uml-class','uml-interface','uml-datatype','uml-artifact'] as const){const e=createElement(t,t);const members={...e,uml:{attributes:Array.from({length:5},(_,i)=>({id:`a${i}`,name:`n${i}`,type:'String',visibility:'private' as const}))}};assert.ok(atlasNodeSize('uml-component',members).height>atlasNodeSize('uml-component',e).height)}
- const d=createElement('Docker','uml-execution');assert.deepEqual(atlasNodeSize('uml-deployment',d,undefined,0,true),{width:360,height:235})
+ assert.deepEqual(novziNodeSize('uml-activity',fork),{width:48,height:160});assert.deepEqual(novziNodeSize('uml-activity',fork,{width:40,height:30}),{width:40,height:90})
+ for(const t of ['uml-class','uml-interface','uml-datatype','uml-artifact'] as const){const e=createElement(t,t);const members={...e,uml:{attributes:Array.from({length:5},(_,i)=>({id:`a${i}`,name:`n${i}`,type:'String',visibility:'private' as const}))}};assert.ok(novziNodeSize('uml-component',members).height>novziNodeSize('uml-component',e).height)}
+ const d=createElement('Docker','uml-execution');assert.deepEqual(novziNodeSize('uml-deployment',d,undefined,0,true),{width:360,height:235})
 })
 test('las rutas conservan ambos puertos y etiquetas finitas para cuatro estilos, extremos coincidentes y dos ejes',()=>{
  for(const style of ['straight','bezier','step','smoothstep'] as EdgePathStyle[]){

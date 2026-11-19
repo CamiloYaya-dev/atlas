@@ -1,4 +1,4 @@
-import type {ExportField} from '@atlas/contracts'
+import type {ExportField} from '@novzi/contracts'
 
 /** Captura fiel del viewport React Flow. Los metadatos se colocan en una franja
  * exterior; no se superponen a nodos, conectores, puertos ni trazos existentes.
@@ -56,7 +56,7 @@ export async function captureDiagramPng(root:HTMLElement,embedded:Record<string,
   aside.setAttribute('aria-label','Fichas de elementos exportadas')
   aside.style.cssText=`position:absolute;left:${(mainWidth+cardGap)*scale}px;top:${padding*scale}px;width:${cardWidth}px;transform:scale(${scale});transform-origin:0 0;box-sizing:border-box;`
   const header=document.createElement('div')
-  header.textContent='Fichas de elementos · ATLAS'
+  header.textContent='Fichas de elementos · NOVZI'
   header.style.cssText='font:bold 14px Arial;color:#26466e;padding:0 0 12px;margin:0 0 8px;border-bottom:2px solid #cdddf3;'
   aside.appendChild(header)
   cards.forEach((card,i)=>{

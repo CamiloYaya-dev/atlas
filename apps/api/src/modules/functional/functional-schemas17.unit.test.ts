@@ -10,7 +10,7 @@ import type {TransferSelection} from './functional-transfer'
 const id=randomUUID(),projectId=randomUUID(),userId=randomUUID()
 const row={id,name:'Matriz de ejecución',field_type:'table',required:true,options:[],scope:'template'}
 const templateElement={id:randomUUID(),name:'Tabla de verificaciones',kind:'table',page:0,field:'custom:'+id,x:12,y:20,width:160,height:40,rows:2,cols:2,cells:[['Paso','Estado'],['','']],fontSize:10,fontFamily:'Arial'}
-const selections:TransferSelection={finding:'template',rf:'form',rnf:'none',story:'both'}
+const selections:TransferSelection={finding:'template',rf:'form',rnf:'none',story:'both',asis:'none'}
 const fake=()=>{
  const fields:Record<string,unknown>[]=[];const templates:Record<string,unknown>[]=[]
  const query=async(sql:string,args:unknown[]=[]):Promise<{rows:any[];rowCount:number}>=>{
@@ -60,13 +60,13 @@ test('Combinación JSON: por tipo documental se elige formulario, plantilla o am
  assert.throws(()=>validateTransferSelection({finding:'none'}),/Selecciona/)
  assert.throws(()=>validateTransferSelection({finding:'bug'}),/inválida/)
  const layout=validateTemplate({name:'Documento con tabla',kind:'finding',layout:[templateElement]})
- const bundle={format:'ATLAS-FUNCTIONAL-SCHEMAS',version:1,exportedAt:'2026-11-18',selections:{...selections,rf:'none',story:'none'},kinds:{finding:{templates:[layout],fieldDependencies:[{id,...validateField({name:'Matriz de ejecución',fieldType:'table',required:true}),scope:'template'}]}}}
+ const bundle={format:'NOVZI-FUNCTIONAL-SCHEMAS',version:1,exportedAt:'2026-11-18',selections:{...selections,rf:'none',story:'none',asis:'none'},kinds:{finding:{templates:[layout],fieldDependencies:[{id,...validateField({name:'Matriz de ejecución',fieldType:'table',required:true}),scope:'template'}]}}}
  assert.equal(parseFunctionalBundle(bundle).kinds.finding?.templates?.[0].layout[0].field,'custom:'+id)
  assert.throws(()=>parseFunctionalBundle({...bundle,version:2}),/incompatible/)
 })
 test('Plantilla sola exporta dependencias e importa tabla con nuevo ID, sin alterar los campos del proyecto',async()=>{
  const source=fake();source.fields.push({...row});source.templates.push({id:randomUUID(),name:'Ficha de hallazgo',paper:'A4',orientation:'portrait',page_count:1,is_default:true,layout:[templateElement]})
- const bundle=await exportFunctionalBundle(source.c,projectId,{finding:'template',rf:'none',rnf:'none',story:'none'})
+ const bundle=await exportFunctionalBundle(source.c,projectId,{finding:'template',rf:'none',rnf:'none',story:'none',asis:'none'})
  assert.equal(bundle.kinds.finding?.form,undefined)
  assert.deepEqual(bundle.kinds.finding?.fieldDependencies?.map(f=>f.id),[id])
  const target=fake();const result=await importFunctionalBundle(target.c,projectId,userId,parseFunctionalBundle(bundle))
@@ -81,7 +81,7 @@ test('Plantilla sola exporta dependencias e importa tabla con nuevo ID, sin alte
 })
 test('Formulario solo convierte campos ligados a plantillas en campos generales visibles',async()=>{
  const target=fake()
- const bundle={format:'ATLAS-FUNCTIONAL-SCHEMAS' as const,version:1 as const,exportedAt:'2026-11-18',selections:{finding:'form' as const,rf:'none' as const,rnf:'none' as const,story:'none' as const},kinds:{finding:{form:{fields:[{id,...validateField({name:'Lista de pruebas',fieldType:'list'}),scope:'template' as const}]}}}}
+ const bundle={format:'NOVZI-FUNCTIONAL-SCHEMAS' as const,version:1 as const,exportedAt:'2026-11-18',selections:{finding:'form' as const,rf:'none' as const,rnf:'none' as const,story:'none' as const},kinds:{finding:{form:{fields:[{id,...validateField({name:'Lista de pruebas',fieldType:'list'}),scope:'template' as const}]}}}}
  await importFunctionalBundle(target.c,projectId,userId,parseFunctionalBundle(bundle))
  assert.equal(target.fields[0].scope,'global')
 })

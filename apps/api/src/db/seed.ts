@@ -1,9 +1,10 @@
 import {pool} from './pool'
-import {demoDocument} from '@atlas/fixtures'
+import {demoDocument} from '@novzi/fixtures'
 import {DEMO_USER_ID} from '../security/identity'
 import {initializeWorkspaceRoles} from '../security/roles'
 async function seed(){
   if(process.env.NODE_ENV==='production')throw new Error('SEED DEMO PROHIBIDO en producción')
+  if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||!/127\.0\.0\.1:5433\/novzi_test(?:\?|$)/.test(process.env.DATABASE_URL||''))throw new Error('db:seed legado reservado exclusivamente a QA (novzi_test:5433). Usa demo:backfill para demos de usuarios.')
   const client=await pool.connect()
   try {
     await client.query('BEGIN')

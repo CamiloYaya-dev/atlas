@@ -1,7 +1,7 @@
 import {useCaseExtensionNote} from './uml-usecase-policy'
 /** Standalone SVG scene for authorized class snapshots; no editor handles or HTML. */
 import type {Diagram,ProjectDocument} from './index'
-import {atlasNodeSize} from './node-sizing'
+import {novziNodeSize} from './node-sizing'
 import {umlAbsolutePosition,umlNodeDepth} from './uml-containers'
 import {umlTypeIdentifier,classEndProperties} from './uml-class-policy'
 import {umlAttributeText,umlOperationTextResolved} from './uml-structure'
@@ -20,7 +20,7 @@ function terminal(kind:UmlTerminal,p:ReturnType<typeof classPort>):string{
  return symbol?`<g transform="translate(${p.x} ${p.y}) rotate(${angle})" stroke="#506986" stroke-width="1.6">${symbol}</g>`:''
 }
 export function classSvgScene(doc:ProjectDocument,d:Diagram){
- const records=d.nodes.flatMap(node=>{const e=doc.elements[node.elementId];if(!e)return [];const p=umlAbsolutePosition(d,node),size=atlasNodeSize(d.type,e,node,umlNodeDepth(d,node),d.nodes.some(x=>x.parentNodeId===node.id));return [{...p,...size,node,e}]})
+ const records=d.nodes.flatMap(node=>{const e=doc.elements[node.elementId];if(!e)return [];const p=umlAbsolutePosition(d,node),size=novziNodeSize(d.type,e,node,umlNodeDepth(d,node),d.nodes.some(x=>x.parentNodeId===node.id));return [{...p,...size,node,e}]})
  const uc=d.type==='uml-usecase',port=(r:typeof records[number],handle:string|undefined,source:boolean)=>uc?useCasePort(r,r.e,handle,source):classPort(r,handle,source)
  const byId=new Map(records.map(r=>[r.node.id,r])),names=Object.fromEntries(Object.values(doc.elements).map(e=>[e.id,e.name]))
  const edges:string[]=[],offsets=parallelOffsets(d.edges),routes=new Map<string,{a:ReturnType<typeof classPort>;b:ReturnType<typeof classPort>;route:ReturnType<typeof classRelationRoute>}>(),extents:Point[]=[]

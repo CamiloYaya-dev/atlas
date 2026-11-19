@@ -7,7 +7,7 @@ describe('Auditoría: contrato de filtros y cursor',()=>{
  it('codifica parámetros y limita cada solicitud a su espacio',async()=>{
   await listAuditEvents('espacio/qa',10,'125',{eventType:'project.document_restore',actor:'Lady Morales',projectId:'11111111-1111-4111-8111-111111111111',from:'2026-11-01',to:'2026-11-12'})
   const [url]=vi.mocked(request).mock.calls[0]
-  const parsed=new URL('http://atlas.local/api/v1'+url)
+  const parsed=new URL('http://novzi.local/api/v1'+url)
   expect(parsed.pathname).toContain('espacio%2Fqa')
   expect(parsed.searchParams.get('limit')).toBe('10')
   expect(parsed.searchParams.get('beforeId')).toBe('125')

@@ -1,7 +1,7 @@
 import {it,expect,vi} from 'vitest'
 import {render,screen,fireEvent,within} from '@testing-library/react'
-import fixture from '../../../../../../qa/ATLAS_QA_UML_COMPONENTES.json'
-import type {ProjectDocument} from '@atlas/contracts'
+import fixture from '../../../../../../qa/NOVZI_QA_UML_COMPONENTES.json'
+import type {ProjectDocument} from '@novzi/contracts'
 import {ComponentDetails,ComponentRelationDialog,ComponentCatalogRelations} from './ComponentEditors'
 // Vite carga el JSON como módulo: no depende del esquema de import.meta.url ni del cwd.
 // Cada prueba recibe una copia independiente del fixture original.

@@ -4,7 +4,7 @@ import {buildBacklog} from './coverage-backlog.mjs'
 const metric=(total,covered)=>({total,covered,skipped:0,pct:total?100*covered/total:100})
 const row=(total,covered)=>({lines:metric(total,covered),statements:metric(total,covered),functions:metric(total,covered),branches:metric(total,covered)})
 test('backlog detecta 0% y calcula las unidades reales faltantes para 90%',()=>{
- const summary={total:row(100,50),'apps/web/src/features/editor/AtlasEditor.tsx':row(100,0)}
+ const summary={total:row(100,50),'apps/web/src/features/editor/NovziEditor.tsx':row(100,0)}
  const result=buildBacklog(summary)
  assert.equal(result.files.length,1)
  assert.equal(result.files[0].priority,1)

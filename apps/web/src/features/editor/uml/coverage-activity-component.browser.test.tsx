@@ -1,12 +1,12 @@
 import {it,afterEach} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup} from '@testing-library/react'
-import {emptyDoc,createElement,activityDefaults} from '@atlas/contracts'
-import type {ElementType,ActivityDetail,ActivityRoot,DiagramEdge,ProjectDocument,ModelElement} from '@atlas/contracts'
+import {emptyDoc,createElement,activityDefaults} from '@novzi/contracts'
+import type {ElementType,ActivityDetail,ActivityRoot,DiagramEdge,ProjectDocument,ModelElement} from '@novzi/contracts'
 import ActivityDetailsEditor,{ActivityRootEditor} from './ActivityDetailsEditor'
 import ActivityRelationDialog from './ActivityRelationDialog'
 import {ComponentDetails,ComponentCatalogRelations} from './ComponentEditors'
-import fixture from '../../../../../../qa/ATLAS_QA_UML_COMPONENTES.json'
+import fixture from '../../../../../../qa/NOVZI_QA_UML_COMPONENTES.json'
 afterEach(cleanup)
 const click=(name:string)=>fireEvent.click(screen.getByRole('button',{name}))
 const change=(name:string,value:string)=>fireEvent.change(screen.getByLabelText(name,{exact:true}),{target:{value}})

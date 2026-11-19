@@ -4,7 +4,7 @@ import sharp from 'sharp'
 import {sha256,signature,signaturesMatch,embedProvenance,readProvenance} from './provenance'
 import {renderDiagramSVG} from './render-svg'
 import type {Provenance} from './provenance'
-import type {ProjectDocument} from '@atlas/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 const key='local-test-export-signing-key-xxxxxxxxxx-123'
 const base:ProjectDocument={schema:1,fieldDefinitions:[],elements:{
  a:{id:'a',type:'actor',name:'Operador de solicitudes',summary:'Registra y consulta',description:'',owner:'',author:'',status:'Borrador',createdAt:'2026-01-01',updatedAt:'2026-01-01',links:[],fields:{}},
@@ -13,7 +13,7 @@ const base:ProjectDocument={schema:1,fieldDefinitions:[],elements:{
 const proof=(img:Buffer,format:'png'|'jpg'):Provenance=>({version:1,exportId:'01234567-89ab-4cde-8000-000000000001',workspaceId:'w',projectId:'p',diagramId:'d1',actorId:'u',documentVersion:9,format,planCode:'free',licenseActive:false,watermarkApplied:true,exportedAt:'2026-11-12T00:00:00Z',imageSha256:sha256(img)})
 test('renderiza un diagrama completo con etiquetas y marca comercial en plan gratuito',async()=>{
  const {svg,width,height}=renderDiagramSVG(base,base.diagrams[0],true)
- assert.match(svg,/ATLAS · USO NO COMERCIAL/);assert.match(svg,/API de solicitudes/);assert.match(svg,/HTTPS/)
+ assert.match(svg,/NOVZI · USO NO COMERCIAL/);assert.match(svg,/API de solicitudes/);assert.match(svg,/HTTPS/)
  assert.ok(width>500&&height>300)
  const image=await sharp(Buffer.from(svg)).png().toBuffer()
  const meta=await sharp(image).metadata();assert.equal(meta.format,'png')

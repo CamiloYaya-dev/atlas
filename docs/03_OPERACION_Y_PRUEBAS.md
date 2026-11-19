@@ -1,4 +1,4 @@
-# Operación local y resolución de errores — ATLAS V4.2
+# Operación local y resolución de errores — NOVZI V4.2
 
 **Arranque** `npm run dev:all`: npm install → Docker/PostgreSQL → migraciones 001/002/003 → datos ficticios → bootstrap admin, si falta → typecheck → dev API+web.
 

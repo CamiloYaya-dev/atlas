@@ -26,7 +26,7 @@ describe('Espacios editables y protegidos',()=>{
   expect((screen.getByLabelText('Nombre del espacio') as HTMLInputElement).disabled).toBe(true)
   expect(screen.queryByRole('button',{name:'Eliminar espacio…'})).toBeNull()
  })
- it('confirma borrado de espacio vacío con un campo propio de ATLAS, sin usar prompt',async()=>{
+ it('confirma borrado de espacio vacío con un campo propio de NOVZI, sin usar prompt',async()=>{
   const deleted=vi.fn()
   const native=vi.spyOn(window,'prompt')
   render(<WorkspaceSettings workspace={workspace} access={owner} onClose={()=>{}} onRenamed={()=>{}} onDeleted={deleted}/>)

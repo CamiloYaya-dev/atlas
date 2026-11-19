@@ -3,13 +3,13 @@ import assert from 'node:assert/strict'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {Position,ReactFlowProvider} from '@xyflow/react'
 import type {EdgeProps} from '@xyflow/react'
-import {emptyDoc,createElement} from '@atlas/contracts'
-import type {Diagram} from '@atlas/contracts'
-import {AtlasUmlEdge,Terminal,terminalAngle,umlRelationAdornment} from './AtlasUmlEdge'
+import {emptyDoc,createElement} from '@novzi/contracts'
+import type {Diagram} from '@novzi/contracts'
+import {NovziUmlEdge,Terminal,terminalAngle,umlRelationAdornment} from './NovziUmlEdge'
 import VersionDiagramPreview from '../../features/projects/VersionDiagramPreview'
 
 const props=(data:Record<string,unknown>={},override:Record<string,unknown>={})=>({id:'relacion',source:'a',target:'b',sourceX:60,sourceY:80,targetX:360,targetY:180,sourcePosition:Position.Right,targetPosition:Position.Left,data, ...override} as unknown as EdgeProps)
-const edge=(data:Record<string,unknown>,extra:Record<string,unknown>={})=>renderToStaticMarkup(<ReactFlowProvider><svg><AtlasUmlEdge {...props(data,extra)}/></svg></ReactFlowProvider>)
+const edge=(data:Record<string,unknown>,extra:Record<string,unknown>={})=>renderToStaticMarkup(<ReactFlowProvider><svg><NovziUmlEdge {...props(data,extra)}/></svg></ReactFlowProvider>)
 const fixture=(kind:'c4'|'uml-class'|'uml-usecase'|'uml-activity'|'uml-sequence'|'uml-deployment'|'uml-component')=>{
  const doc=emptyDoc(),a=createElement('Servicio de reportes IA','component'),b=createElement('Cliente','actor');a.id='service';b.id='client';doc.elements.service=a;doc.elements.client=b
  const diagram:Diagram={id:'diagram',name:'Revisión QA',type:kind,description:'',createdAt:'2026-11-16',nodes:[{id:'a',elementId:'service',x:0,y:0},{id:'b',elementId:'client',x:400,y:180}],edges:[{id:'r',source:'a',target:'b',relationKind:'dependency',label:'Solicita'}]}
@@ -64,7 +64,7 @@ it('Aristas: n-arias, extensión de asociación, interruptor y puertos de estruc
 it('Aristas: ensamblaje de componentes deriva una bola y socket centrales sin duplicarlos al invertir orientación',()=>{
  const forward=edge({diagramType:'uml-component',relationKind:'assembly',componentAssembly:'forward'})
  const reverse=edge({diagramType:'uml-component',relationKind:'assembly',componentAssembly:'reverse'})
- assert.match(forward,/data-uml-terminal="assembly"/);assert.match(forward,/atlas-assembly-gap-relacion/)
+ assert.match(forward,/data-uml-terminal="assembly"/);assert.match(forward,/novzi-assembly-gap-relacion/)
  assert.match(reverse,/data-uml-terminal="assembly"/);assert.notEqual(forward,reverse)
  const rejected=edge({diagramType:'uml-component',relationKind:'assembly',componentAssembly:undefined})
  assert.doesNotMatch(rejected,/data-uml-terminal="assembly"/)
@@ -75,7 +75,7 @@ it('Aristas: geometría explícita de secuencia mantiene marcas y oculta termina
  assert.doesNotMatch(html,/data-uml-terminal=/)
 })
 it('Aristas: rutas paralelas, autorrelación y tipo vacío preservan geometría sin exponer nodos inexistentes',()=>{
- const defaults=renderToStaticMarkup(<ReactFlowProvider><svg><AtlasUmlEdge {...props({}, {data:undefined})}/></svg></ReactFlowProvider>)
+ const defaults=renderToStaticMarkup(<ReactFlowProvider><svg><NovziUmlEdge {...props({}, {data:undefined})}/></svg></ReactFlowProvider>)
  assert.match(defaults,/class="react-flow__edge-path"/)
  const self=edge({diagramType:'uml-class',relationKind:'association',parallelOffset:15,parallelPath:'bezier'}, {source:'a',target:'a',sourceX:100,sourceY:100,targetX:100,targetY:100})
  assert.match(self,/ C /);assert.doesNotMatch(self,/NaN|Infinity/)

@@ -1,7 +1,7 @@
-Evidencia auditoría 5 — Node 22.16.0 — base atlas(20261116-222443).zip.
+Evidencia auditoría 5 — Node 22.16.0 — base novzi(20261116-222443).zip.
 Runner oficial: npm run qa:uml:secuencia -- --list; npm run qa:uml:secuencia.
 Typecheck: node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit; node node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit.
-Diagnóstico alternativo en Linux: copie los 3 scripts de este directorio a la raíz del repositorio. Establezca variables ficticias de API, sin conexión DB, como las definidas en scripts/qa-uml.mjs (NODE_ENV=test, AUTH_MODE=local, DATABASE_URL de QA, DB_SSL=false, ATLAS_CSRF_SECRET y ATLAS_EXPORT_SIGNING_KEY de QA). Ejecute:
+Diagnóstico alternativo en Linux: copie los 3 scripts de este directorio a la raíz del repositorio. Establezca variables ficticias de API, sin conexión DB, como las definidas en scripts/qa-uml.mjs (NODE_ENV=test, AUTH_MODE=local, DATABASE_URL de QA, DB_SSL=false, NOVZI_CSRF_SECRET y NOVZI_EXPORT_SIGNING_KEY de QA). Ejecute:
 node --loader ./qa-loader.mjs --test packages/contracts/src/uml-sequence-policy.unit.test.ts apps/api/src/domain/sequence-persistence.unit.test.ts
 node --loader ./qa-loader.mjs --test packages/contracts/src/uml-class-audit.unit.test.ts packages/contracts/src/uml-class-policy.unit.test.ts packages/contracts/src/uml-usecase-policy.unit.test.ts packages/contracts/src/uml-activity-policy.unit.test.ts apps/api/src/domain/uml-class-policy.unit.test.ts apps/api/src/domain/uml-usecase-policy.unit.test.ts apps/api/src/domain/uml-activity-policy.unit.test.ts apps/api/src/domain/import-scope.unit.test.ts
 node --loader ./qa-loader.mjs --test --test-name-pattern '\[uml-sequence\]' apps/api/src/domain/uml-scoped.unit.test.ts

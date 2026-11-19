@@ -1,7 +1,7 @@
 import {it,expect,vi} from 'vitest'
 import {render,screen,fireEvent,within} from '@testing-library/react'
-import {emptyDoc,createElement,activityDefaults} from '@atlas/contracts'
-import type {ElementType,ActivityDetail} from '@atlas/contracts'
+import {emptyDoc,createElement,activityDefaults} from '@novzi/contracts'
+import type {ElementType,ActivityDetail} from '@novzi/contracts'
 import ActivityDetailsEditor,{ActivityRootEditor} from './ActivityDetailsEditor'
 import ActivityRelationDialog from './ActivityRelationDialog'
 const model=(types:ElementType[]=['uml-action','uml-action'])=>{const d=emptyDoc();types.forEach((type,i)=>{const id=`e${i}`;d.elements[id]={...createElement(id,type),id,activityDetail:activityDefaults(type)}});d.diagrams=[{id:'d',name:'QA',type:'uml-activity',description:'',createdAt:'2026-11-16',nodes:types.map((_,i)=>({id:`n${i}`,elementId:`e${i}`,x:i*300,y:100})),edges:[]}];return d}

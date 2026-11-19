@@ -2,12 +2,12 @@ import {defineConfig} from 'tsup'
 
 // Generar bundle ESM de servidor, incorporando los contratos internos del monorepo.
 export default defineConfig({
-  entry: ['src/server.ts'],
+  entry: ['src/server.ts', 'src/db/migrate.ts', 'src/db/create-admin.ts'],
   format: ['esm'],
   platform: 'node',
   target: 'node22',
   outDir: 'dist',
   clean: true,
   splitting: false,
-  noExternal: ['@atlas/contracts','@atlas/fixtures']
+  noExternal: ['@novzi/contracts','@novzi/fixtures']
 })

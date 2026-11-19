@@ -1,5 +1,5 @@
 {
-  "name": "@atlas/fixtures",
+  "name": "@novzi/fixtures",
   "version": "0.4.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,6 @@
   },
   "types": "./src/demo.ts",
   "dependencies": {
-    "@atlas/contracts": "*"
+    "@novzi/contracts": "*"
   }
 }

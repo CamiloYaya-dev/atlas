@@ -1,8 +1,8 @@
 import {render,screen,fireEvent,cleanup} from '@testing-library/react'
 import {afterEach,it,expect} from 'vitest'
 import {DeploymentDetails,DeploymentRelationDialog,DeploymentCatalog} from './DeploymentEditors'
-import data from '../../../../../../qa/ATLAS_QA_UML_DESPLIEGUE.json'
-import type {ProjectDocument} from '@atlas/contracts'
+import data from '../../../../../../qa/NOVZI_QA_UML_DESPLIEGUE.json'
+import type {ProjectDocument} from '@novzi/contracts'
 const fixture=()=>structuredClone(data) as ProjectDocument
 afterEach(cleanup)
 it('DEP-05 configuración no corresponde a Device y conserva borrador',()=>{const d=fixture(),v=d.diagrams[0],calls:ProjectDocument[]=[];render(<DeploymentRelationDialog doc={d} diagram={v} initial={v.edges.find(e=>e.id==='d2-api')!} disabled={false} onClose={()=>{}} onSave={x=>(calls.push(x),true)}/>);const cfg=screen.getByLabelText('Especificaciones de configuración') as HTMLSelectElement;Array.from(cfg.options).find(o=>o.value==='spec')!.selected=true;fireEvent.change(cfg);fireEvent.click(screen.getByRole('button',{name:'Guardar relación'}));expect(screen.getByRole('alert').textContent).toMatch(/configuración/i);expect(calls).toHaveLength(0)})

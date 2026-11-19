@@ -5,16 +5,16 @@ import {readFileSync,readdirSync} from 'node:fs'
 import {buildApp} from '../app'
 import {pool} from '../db/pool'
 import {hashPassword} from '../security/password'
-import {emptyDoc,createElement,canonicalUmlEdge,replaceClassRelationAcrossViews} from '@atlas/contracts'
+import {emptyDoc,createElement,canonicalUmlEdge,replaceClassRelationAcrossViews} from '@novzi/contracts'
 import {examples,scopedFixture} from '../../../../qa/uml-scoped-fixtures'
-const expected='postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test'
-if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||process.env.DATABASE_URL!==expected)throw Error('Solo se permite la BD QA local 5433/atlas_test')
+const expected='postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test'
+if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||process.env.DATABASE_URL!==expected)throw Error('Solo se permite la BD QA local 5433/novzi_test')
 after(()=>pool.end())
 for(const [type] of examples)test(`[${type}] API HTTP real: importación, invalidación, guardado, historial y exportación`,async()=>{
- let app=await buildApp();const email=`qa-uml-${randomUUID()}@example.test`,password='AtlasQA!2026-local-only';let userId='',workspaceId=''
+ let app=await buildApp();const email=`qa-uml-${randomUUID()}@example.test`,password='NovziQA!2026-local-only';let userId='',workspaceId=''
  const resetQaRateLimitWindow=async()=>{await app.close();app=await buildApp()}
  try{
-  const result=await pool.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,platform_admin) VALUES($1,$2,$3,true) RETURNING id`,[email,'QA UML',await hashPassword(password)]);userId=result.rows[0].id
+  const result=await pool.query<{id:string}>(`INSERT INTO novzi_users(email,display_name,password_hash,platform_admin) VALUES($1,$2,$3,true) RETURNING id`,[email,'QA UML',await hashPassword(password)]);userId=result.rows[0].id
   const login=await app.inject({method:'POST',url:'/api/v1/auth/login',payload:{email,password}});assert.equal(login.statusCode,200,login.body)
   const headers={cookie:String(login.headers['set-cookie']).split(';')[0],'x-csrf-token':login.json().csrfToken}
   const send=(method:'GET'|'POST'|'PUT',path:string,payload?:object)=>app.inject({method,url:'/api/v1'+path,headers,...(payload===undefined?{}:{payload})})
@@ -109,5 +109,5 @@ for(const [type] of examples)test(`[${type}] API HTTP real: importación, invali
    assert.deepEqual((await send('GET',base+'/versions/'+version)).json().document,initial);
    const complete=await send('POST',base+'/import',{document:doc,expectedVersion:version+1,scope:{mode:'project'}});assert.equal(complete.statusCode,200,complete.body);assert.deepEqual((await send('GET',base+'/document')).json().document,doc);
   }
- }finally{try{if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]);if(userId)await pool.query('DELETE FROM atlas_users WHERE id=$1',[userId])}finally{await app.close()}}
+ }finally{try{if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId]);if(userId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[userId])}finally{await app.close()}}
 })

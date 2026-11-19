@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels,diagramCreationEnabled} from '@atlas/contracts'
-import type {DiagramEdge} from '@atlas/contracts'
+import {emptyDoc,createElement,diagramLabels,elementLabels,fieldLabels,diagramCreationEnabled} from '@novzi/contracts'
+import type {DiagramEdge} from '@novzi/contracts'
 import {createDiagram,editDiagram,deleteDiagram,addElementNode,reuseElementNode,removeElementNode,connectNodes,moveNode,editElement,addFieldDefinition,removeFieldDefinition} from './document-commands'
 function fixture(){
  const a=createElement('Iniciar sesión','activity'),b=createElement('Verificar credenciales','activity')

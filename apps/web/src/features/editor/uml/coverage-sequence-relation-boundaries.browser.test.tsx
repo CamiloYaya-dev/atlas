@@ -1,9 +1,9 @@
 import {it,afterEach} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup} from '@testing-library/react'
-import type {ProjectDocument} from '@atlas/contracts'
+import type {ProjectDocument} from '@novzi/contracts'
 import SequenceRelationDialog from './SequenceRelationDialog'
-import fixture from '../../../../../../qa/ATLAS_QA_UML_SECUENCIA.json'
+import fixture from '../../../../../../qa/NOVZI_QA_UML_SECUENCIA.json'
 
 afterEach(cleanup)
 const source=()=>structuredClone(fixture) as ProjectDocument

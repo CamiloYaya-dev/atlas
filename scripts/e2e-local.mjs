@@ -6,18 +6,18 @@ import {resolve} from 'node:path'
 import {planE2eBatches,assertBatchSelection,assertBatchRun,selectE2eBatches} from './e2e-batches.mjs'
 const root=fileURLToPath(new URL('..',import.meta.url))
 const env={...process.env,
- DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
- MIGRATIONS_DATABASE_URL:'postgresql://atlas:atlas_test_only@127.0.0.1:5433/atlas_test',
- NODE_ENV:'test',AUTH_MODE:'local',ATLAS_ALLOW_DB_TESTS:'true',
- ATLAS_CSRF_SECRET:'atlas-qa-local-csrf-for-automated-tests-only-2026',
- E2E_ADMIN_EMAIL:'qa-admin@atlas.test',E2E_ADMIN_PASSWORD:randomBytes(20).toString('base64url')+'!A',
- E2E_VIEWER_EMAIL:'qa-viewer@atlas.test',E2E_VIEWER_PASSWORD:randomBytes(20).toString('base64url')+'!B',
- E2E_EDITOR_EMAIL:'qa-editor@atlas.test',E2E_EDITOR_PASSWORD:randomBytes(20).toString('base64url')+'!C',
- ATLAS_E2E_AUTOSTART:'true', E2E_BASE_URL:'http://127.0.0.1:5175',
- ATLAS_DEV_API_PORT:'3003',ATLAS_DEV_WEB_PORT:'5175'
+ DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
+ MIGRATIONS_DATABASE_URL:'postgresql://novzi:novzi_test_only@127.0.0.1:5433/novzi_test',
+ NODE_ENV:'test',AUTH_MODE:'local',NOVZI_ALLOW_DB_TESTS:'true',
+ NOVZI_CSRF_SECRET:'novzi-qa-local-csrf-for-automated-tests-only-2026',
+ E2E_ADMIN_EMAIL:'qa-admin@novzi.test',E2E_ADMIN_PASSWORD:randomBytes(20).toString('base64url')+'!A',
+ E2E_VIEWER_EMAIL:'qa-viewer@novzi.test',E2E_VIEWER_PASSWORD:randomBytes(20).toString('base64url')+'!B',
+ E2E_EDITOR_EMAIL:'qa-editor@novzi.test',E2E_EDITOR_PASSWORD:randomBytes(20).toString('base64url')+'!C',
+ NOVZI_E2E_AUTOSTART:'true', E2E_BASE_URL:'http://127.0.0.1:5175',
+ NOVZI_DEV_API_PORT:'3003',NOVZI_DEV_WEB_PORT:'5175'
 }
 function exec(label,cmd,args){
- console.log(`\n[ATLAS QA] ${label}`)
+ console.log(`\n[NOVZI QA] ${label}`)
  // On Windows, never run node.exe through cmd.exe: C:\Program Files would be split by the shell.
  const result=spawnSync(cmd,args,{cwd:root,stdio:'inherit',env,shell:process.platform==='win32' && cmd!==process.execPath})
  if(result.status!==0)process.exit(result.status||1)
@@ -25,7 +25,7 @@ function exec(label,cmd,args){
 const cli=['node_modules/@playwright/test/cli.js','test']
 const flags=process.argv.slice(2)
 function list(selectors=[]){
- const r=spawnSync(process.execPath,[...cli,'--list','--reporter=json',...selectors],{cwd:root,env:{...env,ATLAS_E2E_AUTOSTART:'false'},encoding:'utf8',maxBuffer:16*1024*1024})
+ const r=spawnSync(process.execPath,[...cli,'--list','--reporter=json',...selectors],{cwd:root,env:{...env,NOVZI_E2E_AUTOSTART:'false'},encoding:'utf8',maxBuffer:16*1024*1024})
  if(r.error||r.status!==0)throw Error(r.error?.message||r.stderr||'Error enumerando E2E')
  return JSON.parse(r.stdout)
 }
@@ -39,15 +39,15 @@ if(selection.list)process.exit(0)
 exec('PostgreSQL exclusivo QA (5433)','docker',['compose','--profile','test','up','-d','--wait','db_test'])
 exec('Migraciones en QA','npm',['run','db:migrate'])
 exec('Datos ficticios QA','npm',['run','db:seed'])
-exec('Usuarios temporales QA','npm',['run','e2e:seed','-w','@atlas/api'])
+exec('Usuarios temporales QA','npm',['run','e2e:seed','-w','@novzi/api'])
 // Independent Playwright invocations start/stop their own REAL servers. No
 // production limits, auth, DB, CSRF or ACL configuration is changed.
 const results=[]
 for(const batch of batches){
- console.log(`\n[ATLAS QA] ${batch.name}: ${batch.ids.length} pruebas; servidor real independiente`)
+ console.log(`\n[NOVZI QA] ${batch.name}: ${batch.ids.length} pruebas; servidor real independiente`)
  const reportPath=resolve(root,'test-results','e2e-batches',batch.name,'result.json')
  rmSync(reportPath,{force:true})
- const r=spawnSync(process.execPath,[...cli,...batch.selectors],{cwd:root,stdio:'inherit',env:{...env,ATLAS_E2E_BATCH:batch.name},shell:false})
+ const r=spawnSync(process.execPath,[...cli,...batch.selectors],{cwd:root,stdio:'inherit',env:{...env,NOVZI_E2E_BATCH:batch.name},shell:false})
  let ok=!r.error&&r.status===0
  if(ok)try{assertBatchRun(batch,JSON.parse(readFileSync(reportPath,'utf8')))}catch(error){ok=false;console.error(error.message)}
  results.push({lote:batch.name,pruebas:batch.ids.length,ok})

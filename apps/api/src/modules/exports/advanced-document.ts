@@ -1,6 +1,6 @@
 import {deflateRawSync} from 'node:zlib'
-import type {AdvancedExportRequest,Diagram,ProjectDocument} from '@atlas/contracts'
-import {exportFieldsFor} from '@atlas/contracts'
+import type {AdvancedExportRequest,Diagram,ProjectDocument} from '@novzi/contracts'
+import {exportFieldsFor} from '@novzi/contracts'
 
 const escapeHtml=(value:string)=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]||char))
 
@@ -16,7 +16,7 @@ export function buildDiagramDictionary(doc:ProjectDocument,diagram:Diagram,selec
   :root{font-family:system-ui,'Segoe UI',sans-serif;color:#172a47;background:#f4f7fc}*{box-sizing:border-box}
   body{max-width:980px;margin:0 auto;padding:32px 24px}header{background:#142541;color:white;padding:24px 28px;border-radius:12px}h1{font-size:24px;margin:8px 0}header p{color:#bdd3f4;margin:4px 0}section{background:white;margin:24px 0;padding:22px;border:1px solid #e2eaf4;border-radius:12px;break-inside:avoid}
   h2{font-size:19px;margin:0 0 8px}.type{font-size:12px;color:#536c8e}table{width:100%;border-collapse:collapse}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid #e6ecf4;white-space:pre-wrap;overflow-wrap:anywhere}th{width:26%;color:#415a78}footer{font-size:11px;color:#657a94;margin-top:20px}@media print{body{padding:0;background:white}section{box-shadow:none;border-color:#ccc}}
- </style></head><body><header><p>ATLAS · Documentación del modelo</p><h1>${escapeHtml(diagram.name)}</h1><p>${escapeHtml(diagram.description||'Fichas de elementos, campos y relaciones')}</p></header>${sheets||'<p>No se seleccionaron campos para las fichas.</p>'}<footer>Documento complementario generado por ATLAS · Referencia de exportación ${escapeHtml(exportId)} · Los vínculos se describen, pero no son navegables dentro de una imagen.</footer></body></html>`
+ </style></head><body><header><p>NOVZI · Documentación del modelo</p><h1>${escapeHtml(diagram.name)}</h1><p>${escapeHtml(diagram.description||'Fichas de elementos, campos y relaciones')}</p></header>${sheets||'<p>No se seleccionaron campos para las fichas.</p>'}<footer>Documento complementario generado por NOVZI · Referencia de exportación ${escapeHtml(exportId)} · Los vínculos se describen, pero no son navegables dentro de una imagen.</footer></body></html>`
 }
 
 /** ZIP pequeño sin dependencias extra: PNG/JPG no necesita recomprimirse, HTML sí. */

@@ -1,7 +1,7 @@
 import {test} from 'vitest'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {Diagram} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {Diagram} from '@novzi/contracts'
 import {graphSelection} from './graph-selection'
 const doc=emptyDoc()
 for(const [id,group] of [['a','Autenticación'],['b','Pagos'],['c','Notificaciones']]){const e=createElement(id,'activity');e.id=id;e.group=group;doc.elements[id]=e}

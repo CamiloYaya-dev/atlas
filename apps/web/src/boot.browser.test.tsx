@@ -11,7 +11,7 @@ vi.mock('react-dom/client',()=>({createRoot}))
 describe('Arranque real del frontend',()=>{
  beforeEach(()=>{vi.resetModules();createRoot.mockClear();renderRoot.mockClear();document.body.innerHTML=''})
  it('si falta #root, emite un error identificable en vez de una pantalla vacía',async()=>{
-  await expect(import('./main')).rejects.toThrow('ATLAS: no se encontró el contenedor #root')
+  await expect(import('./main')).rejects.toThrow('NOVZI: no se encontró el contenedor #root')
   expect(createRoot).not.toHaveBeenCalled()
  },20000)
  it('monta la aplicación sobre #root dentro de StrictMode',async()=>{

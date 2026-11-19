@@ -1,8 +1,8 @@
-# ATLAS V4.8.1 — UML secuencia y selección múltiple
+# NOVZI V4.8.1 — UML secuencia y selección múltiple
 
 ## Instalación
 
-Aplica el ZIP de parche sobre la raíz de tu copia de ATLAS, conservando el contenido de tus `.env` y tu base de datos. No son necesarias migraciones ni instalar dependencias nuevas.
+Aplica el ZIP de parche sobre la raíz de tu copia de NOVZI, conservando el contenido de tus `.env` y tu base de datos. No son necesarias migraciones ni instalar dependencias nuevas.
 
 ## Secuencia (UML)
 
@@ -18,13 +18,13 @@ Aplica el ZIP de parche sobre la raíz de tu copia de ATLAS, conservando el cont
 1. Pulsa **Seleccionar área** sobre el lienzo.
 2. Dibuja un rectángulo con el cursor para seleccionar varias cajas (y relaciones).
 3. Arrastra una caja seleccionada para desplazar el grupo o pulsa **Eliminar** (también Supr/Backspace cuando no editas un campo).
-4. ATLAS utiliza su propia confirmación; no hay diálogos nativos.
+4. NOVZI utiliza su propia confirmación; no hay diálogos nativos.
 5. La eliminación afecta a la vista, no borra las fichas compartidas del proyecto. Si el contenedor se borra sin su hijo, ese hijo se desacopla conservando sus coordenadas absolutas.
 6. Mientras el modo de selección está activo, el desplazamiento del lienzo con botón central o derecho sigue habilitado. Para volver al arrastre normal, desactiva el modo.
 
 ## Validación de esta entrega
 
-- `npm run typecheck -w @atlas/web`: aprobado.
+- `npm run typecheck -w @novzi/web`: aprobado.
 - `npm run test:graph`: 76/76 aprobadas (contención y encastre, fragmentos, movimiento y borrado grupal, compatibilidad de actividades).
 - `npm run test:qa-tools`: 4/4 aprobadas.
 - Pruebas de interfaz de Vitest: no ejecutables en este entorno por ausencia de `@rollup/rollup-linux-x64-gnu`.
@@ -32,4 +32,4 @@ Aplica el ZIP de parche sobre la raíz de tu copia de ATLAS, conservando el cont
 
 ## Restricción conocida
 
-ATLAS aún no implementa un editor temporal UML de nivel formal completo (por ejemplo, ordenación automática, validación de ocurrencias de mensajes y fragmentos anidados). Este cambio resuelve lo solicitado y conserva datos históricos; no equivale a conformidad completa OMG UML 2.5.1.
+NOVZI aún no implementa un editor temporal UML de nivel formal completo (por ejemplo, ordenación automática, validación de ocurrencias de mensajes y fragmentos anidados). Este cambio resuelve lo solicitado y conserva datos históricos; no equivale a conformidad completa OMG UML 2.5.1.

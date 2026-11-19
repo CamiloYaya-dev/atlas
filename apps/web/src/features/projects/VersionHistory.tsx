@@ -141,7 +141,7 @@ export default function VersionHistory({projectId,currentVersion,onClose,canRest
   </Overlay>}
   {restoreCandidate!==null&&<Overlay title={`Confirmar restauración v${restoreCandidate}`} onClose={()=>{if(!restoring){setRestoreCandidate(null);setRestoreConfirmation('')}}}>
    <div className="modal-body">
-    <p className="dialog-description">Se creará una <strong>nueva revisión del proyecto completo</strong> a partir de la v{restoreCandidate}. Las versiones anteriores no se eliminarán. Si otra persona ha guardado cambios, ATLAS rechazará la restauración y conservará su trabajo.</p>
+    <p className="dialog-description">Se creará una <strong>nueva revisión del proyecto completo</strong> a partir de la v{restoreCandidate}. Las versiones anteriores no se eliminarán. Si otra persona ha guardado cambios, NOVZI rechazará la restauración y conservará su trabajo.</p>
     <label className="form-field"><span>Para confirmar, escribe <strong>v{restoreCandidate}</strong></span><input autoFocus aria-label="Confirmación de versión" value={restoreConfirmation} onChange={e=>setRestoreConfirmation(e.target.value)} placeholder={`v${restoreCandidate}`} autoComplete="off"/></label>
     {detailError&&<p role="alert">{detailError}</p>}
     <button type="button" className="ghost" disabled={branchBusy} onClick={()=>void createBranch(restoreCandidate)}>Preparar rama para revisar sin restaurar</button>

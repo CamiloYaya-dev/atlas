@@ -44,7 +44,7 @@ function validate(label,data){
   }
  }
 }
-console.log(`ATLAS coverage | objetivo: >=${TARGET}% en líneas, sentencias, funciones y ramas, GLOBAL y POR ARCHIVO`)
+console.log(`NOVZI coverage | objetivo: >=${TARGET}% en líneas, sentencias, funciones y ramas, GLOBAL y POR ARCHIVO`)
 // Check each layer independently, from the original instrumented counts.
 for(const area of ['apps/api/src/','apps/web/src/','packages/contracts/src/','packages/fixtures/src/']){
  const entries=files.filter(([name])=>name.replaceAll('\\','/').includes(area))

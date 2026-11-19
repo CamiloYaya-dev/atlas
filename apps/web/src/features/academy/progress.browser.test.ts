@@ -1,11 +1,11 @@
 import {describe,it,expect} from 'vitest'
-import type {Diagram,ElementType,ProjectDocument} from '@atlas/contracts'
+import type {Diagram,ElementType,ProjectDocument} from '@novzi/contracts'
 import {assessAcademy,academyStorageKey,readAcademyLab,storeAcademyLab} from './progress'
 
 function fixture():ProjectDocument{
  const doc:ProjectDocument={schema:1,elements:{},diagrams:[],fieldDefinitions:[]}
  const addElement=(id:string,type:ElementType,name=id,technical='')=>{
-  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'ATLAS',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
+  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'NOVZI',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
  }
  const addDiagram=(id:string,type:Diagram['type'],elementIds:string[],edges:[number,number][]=[]):Diagram=>{
   const diagram:Diagram={id,type,name:id,description:'',createdAt:'2026-11-12',nodes:elementIds.map((elementId,i)=>({id:`${id}-n${i}`,elementId,x:100*i,y:0})),edges:edges.map(([source,target],i)=>({id:`${id}-e${i}`,source:`${id}-n${source}`,target:`${id}-n${target}`}))}
@@ -93,7 +93,7 @@ describe('Academia de misiones: aprendizaje acreditado por datos reales',()=>{
   expect([result.functionalBadge,result.technicalBadge,result.integrationBadge]).toEqual([false,false,false])
  })
  it('almacena la identidad del laboratorio por cuenta y no confunde espacios',()=>{
-  const user='atlas-academy-unit-user'
+  const user='novzi-academy-unit-user'
   storeAcademyLab(user,{workspaceId:'w-1',projectId:'p-1'})
   expect(readAcademyLab(user)).toEqual({workspaceId:'w-1',projectId:'p-1'})
   expect(readAcademyLab('otra-cuenta')).toBeNull()

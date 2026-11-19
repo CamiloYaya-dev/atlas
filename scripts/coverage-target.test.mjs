@@ -13,7 +13,7 @@ test('90 exacto pasa, 89.999 no pasa por redondeo y 0/0 no contiene código ejec
  for(const bad of [null,{}, {total:0,covered:1},{total:2,covered:-1},{total:1.5,covered:1}])assert.equal(coveragePercent(bad),null)
 })
 test('ambos comandos bloquean archivos omitidos, métricas insuficientes y capas incompletas',()=>{
- const root=mkdtempSync(join(tmpdir(),'atlas-gate-'))
+ const root=mkdtempSync(join(tmpdir(),'novzi-gate-'))
  try{
   mkdirSync(join(root,'scripts'));mkdirSync(join(root,'coverage'))
   for(const file of ['coverage-gate.mjs','coverage-target.mjs','coverage-milestone-90.mjs'])copyFileSync(new URL(file,import.meta.url),join(root,'scripts',file))

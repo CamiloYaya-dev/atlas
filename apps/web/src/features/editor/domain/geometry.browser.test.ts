@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {parallelRoute,parallelOffsets} from './parallel-edges'
 import type {PortSide} from './parallel-edges'
 import {assemblyAnchor} from '../../../components/organisms/uml-assembly'
-import type {EdgePathStyle} from '@atlas/contracts'
+import type {EdgePathStyle} from '@novzi/contracts'
 const styles:EdgePathStyle[]=['straight','step','smoothstep','bezier']
 const sides:PortSide[]=['left','right','top','bottom']
 const near=(a:number,b:number,tolerance=.05)=>assert.ok(Math.abs(a-b)<=tolerance,`${a} != ${b}`)

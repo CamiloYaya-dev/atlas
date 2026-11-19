@@ -1,6 +1,6 @@
 import type {ProjectDocument} from './index'
 
-/** Three-way merge for an ATLAS document. Distinct diagrams, elements, fields,
+/** Three-way merge for an NOVZI document. Distinct diagrams, elements, fields,
  * node positions and relations can be changed concurrently. Conflicting writes
  * to the same property MUST stop, never overwrite another person's work. */
 export class MergeConflict extends Error {

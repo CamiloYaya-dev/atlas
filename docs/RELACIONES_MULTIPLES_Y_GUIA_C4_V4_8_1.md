@@ -1,16 +1,16 @@
-# ATLAS V4.8.1 — Relaciones paralelas y guía de navegación C1–C4
+# NOVZI V4.8.1 — Relaciones paralelas y guía de navegación C1–C4
 
 ## Problema y diagnóstico
 
-ATLAS impedía guardar dos conexiones entre el mismo par de cajas en dos sitios:
-1. `apps/web/src/features/editor/AtlasEditor.tsx` detenía `onConnect` si `source/target` ya aparecían.
+NOVZI impedía guardar dos conexiones entre el mismo par de cajas en dos sitios:
+1. `apps/web/src/features/editor/NovziEditor.tsx` detenía `onConnect` si `source/target` ya aparecían.
 2. `apps/web/src/features/editor/domain/document-commands.ts` impedía crear pares duplicados y `apps/api/src/modules/projects/application/document-policy.ts` los rechazaba al validar el documento.
 3. Al dibujar más de una relación con idénticos extremos/puertos, React Flow solaparía sus trayectorias y etiquetas, complicando el clic y la edición.
 
 ## Cambios
 
 - **Modelo**: las relaciones comparten libremente cajas de origen y destino; cada una mantiene un `id` único, `sourceHandle`, `targetHandle`, nombre, dirección y estilo. Siguen prohibidas las autoconexiones a la misma caja y los IDs duplicados. El backend conserva los controles de permisos de creación, edición y eliminación de cada relación.
-- **Vista**: `parallelOffsets` agrupa cada par de cajas sin importar el sentido y genera carriles independientes y deterministas. `AtlasParallelEdge` respeta curvas, flechas, discontinuidades y estilos; la etiqueta se desplaza con su carril y la zona seleccionable es más cómoda.
+- **Vista**: `parallelOffsets` agrupa cada par de cajas sin importar el sentido y genera carriles independientes y deterministas. `NovziParallelEdge` respeta curvas, flechas, discontinuidades y estilos; la etiqueta se desplaza con su carril y la zona seleccionable es más cómoda.
 - **Puertos**: todos los ocho puertos de cada caja pueden funcionar como origen o destino en `ConnectionMode.Loose` (izquierda, derecha, 3 arriba y 3 abajo). Se agrandaron sus zonas visibles.
 - **Niveles C4**: la lista de diagramas muestra badges `C1`, `C2`, `C3`, `C4` o una abreviatura de la vista. Una caja con vista C4 vinculada muestra el nivel de destino.
 - **Academia**: el ejercicio «Vincula C1 → C2 → C3 → C4» incluye una explicación y un pequeño recorrido guiado:
@@ -34,7 +34,7 @@ ATLAS impedía guardar dos conexiones entre el mismo par de cajas en dos sitios:
 
 - No se altera el esquema JSON (`schema: 1`) ni PostgreSQL. No hay migraciones.
 - Se conservan documentos anteriores que solo tienen una conexión por par de cajas, así como los enlaces a vistas específicas.
-- El parche **no importa ni reemplaza documentos**. Instálalo sobre el código de ATLAS V4.8.1 después de hacer una copia de seguridad y reinicia el servidor frontend/backend.
+- El parche **no importa ni reemplaza documentos**. Instálalo sobre el código de NOVZI V4.8.1 después de hacer una copia de seguridad y reinicia el servidor frontend/backend.
 
 ## QA
 

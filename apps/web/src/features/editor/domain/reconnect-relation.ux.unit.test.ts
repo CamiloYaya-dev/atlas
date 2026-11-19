@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { emptyDoc, createElement } from '@atlas/contracts'
+import { emptyDoc, createElement } from '@novzi/contracts'
 import { reconnectRelation } from './document-commands'
 
 function fixture(){

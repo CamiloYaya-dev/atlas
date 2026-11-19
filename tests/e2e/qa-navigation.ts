@@ -5,7 +5,7 @@ export function observeQaHttp(context:BrowserContext){
  context.on('response',response=>{
   const status=response.status(),path=new URL(response.url()).pathname
   if(path.startsWith('/api/v1/')&&(status===429||status>=500||path==='/api/v1/workspaces'&&status>=400))
-   console.error(`[ATLAS E2E HTTP] ${response.request().method()} ${path} -> ${status}`)
+   console.error(`[NOVZI E2E HTTP] ${response.request().method()} ${path} -> ${status}`)
  })
 }
 /** Select the seeded project through its actual UI and avoid resetting an already selected workspace. */
@@ -21,14 +21,26 @@ export async function openQaDemo(page:Page){
  await expect(project).toBeVisible()
  if(!(await project.getAttribute('class'))?.split(/\s+/).includes('on'))await project.click()
  await expect(project).toHaveClass(/\bon\b/)
- await expect(page.getByRole('button',{name:/C1 · Contexto/}).first()).toBeVisible()
+ await expect(page.locator('[data-tour="diagram-nav"]').getByRole('button',{name:/carpeta C1 · Contexto$/}),
+  'El proyecto QA debe cargar su carpeta C1 antes de navegar').toBeVisible()
 }
 
-/** The diagram button also exposes its semantic badge in the accessible name.
- * Match the visible title within the actual diagram navigation, not the whole button. */
-export async function openQaDiagram(page:Page,name:string){
- const diagram=page.getByRole('button').and(page.locator('[data-tour="diagram-nav"] .diagram-item')).filter({has:page.getByText(name,{exact:true})})
- await expect(diagram,`Debe existir un único diagrama con título ${name} en el proyecto seleccionado`).toHaveCount(1)
+/** Open the real diagram folder before selecting its diagram. Since the sidebar
+ * was grouped by visualization type, a collapsed folder does not render its
+ * .diagram-item buttons. Never fall back to a generic button elsewhere on the
+ * page (e.g. a linked view inside the current diagram).
+ *
+ * The exact diagram title and active state are part of the assertion, not merely
+ * the fact that a button with a matching substring was clicked.
+ */
+export async function openQaDiagram(page:Page,name:string,folderLabel:string){
+ const navigation=page.locator('[data-tour="diagram-nav"]')
+ const expand=navigation.getByRole('button',{name:`Expandir carpeta ${folderLabel}`,exact:true})
+ if(await expand.count())await expand.click()
+ await expect(navigation.getByRole('button',{name:`Contraer carpeta ${folderLabel}`,exact:true}),
+  `La carpeta ${folderLabel} debe quedar abierta`).toBeVisible()
+ const diagram=navigation.locator('button.diagram-item').filter({has:page.getByText(name,{exact:true})})
+ await expect(diagram,`Debe existir un único diagrama llamado ${name} dentro de ${folderLabel}`).toHaveCount(1)
  await expect(diagram).toBeVisible()
  await diagram.click()
  await expect(diagram).toHaveClass(/\bon\b/)

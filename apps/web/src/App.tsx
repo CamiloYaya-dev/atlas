@@ -1,3 +1,3 @@
 // Punto de composición de la aplicación web. Las funcionalidades se implementan por feature.
-import AtlasEditor from './features/editor/AtlasEditor'
-export default AtlasEditor
+import NovziEditor from './features/editor/NovziEditor'
+export default NovziEditor

@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
-import type {DiagramType,ElementType,Project,ProjectDocument,Workspace} from '@atlas/contracts'
+import type {DiagramType,ElementType,Project,ProjectDocument,Workspace} from '@novzi/contracts'
 import {ArrowRight,Award,BookOpen,CheckCircle2,ChevronDown,ChevronUp,Clock3,FolderPlus,GraduationCap,Layers,LockKeyhole,Plus,Sparkles,X} from 'lucide-react'
 import {assessAcademy} from './progress'
 import type {AcademyCheck,AcademyLabIdentity} from './progress'
@@ -24,7 +24,7 @@ const ideas:Partial<Record<DiagramType,{name:string;items:{type:ElementType;name
  c4:{name:'06 · Código de solicitudes',items:[{type:'component',name:'SolicitudController'},{type:'component',name:'SolicitudService'}]}
 }
 /** Browser-only coaching preference; no API writes, telemetry, or extra permissions. */
-export const ACADEMY_HINT_STORAGE_KEY='atlas.academy.idle-hint.minutes.v1'
+export const ACADEMY_HINT_STORAGE_KEY='novzi.academy.idle-hint.minutes.v1'
 export type HintMinutes=0|1|2|3
 export function readHintMinutes():HintMinutes{
  try{const stored=window.localStorage.getItem(ACADEMY_HINT_STORAGE_KEY);const value=Number(stored);return stored!==null&&(value===0||value===1||value===2||value===3)?value:2}
@@ -49,7 +49,7 @@ const sections=[
  {id:'integration' as const,label:'3 · Integración mixta',subtitle:'No es un nuevo diagrama: es una lectura unificada de lo que creaste.',badge:'Arquitectura conectada',icon:Sparkles}
 ]
 export default function AcademyMissions(props:Props){
- const [spaceName,setSpaceName]=useState('ATLAS · Academia personal')
+ const [spaceName,setSpaceName]=useState('NOVZI · Academia personal')
  const [projectName,setProjectName]=useState('Laboratorio · Solicitudes')
  const [expanded,setExpanded]=useState<'functional'|'technical'|'integration'>('functional')
  const [hintMinutes,setHintMinutes]=useState<HintMinutes>(readHintMinutes)
@@ -70,7 +70,7 @@ export default function AcademyMissions(props:Props){
  const sectionLocked=expanded==='technical'&&!assessment.functionalBadge||expanded==='integration'&&!assessment.technicalBadge
  const target=atLab&&!sectionLocked?currentChecks.find(check=>!check.done):undefined
  const targetId=target?.id
- // A real inactivity timer for the entire ATLAS tab. Before the reminder,
+ // A real inactivity timer for the entire NOVZI tab. Before the reminder,
  // any activity delays it. Once active, passive scrolling keeps the guide
  // visible so directional hints reappear when the target leaves the viewport.
  useEffect(()=>{
@@ -125,8 +125,8 @@ export default function AcademyMissions(props:Props){
    {(check.id==='functional-reuse'||check.id==='technical-trace')&&<button type="button" className="academy-task-btn" disabled={blocked||!existingTypes.has(type)} onClick={()=>props.onReuse(type)}>Reutilizar caja</button>}
   </div>
  }
- return <section className="academy-missions" role="dialog" aria-modal="false" aria-label="Misiones prácticas de ATLAS" data-testid="atlas-academy-missions">
-  <header className="academy-missions-header"><span><GraduationCap size={18}/> ATLAS Academy <small>Laboratorio práctico</small></span><button type="button" onClick={props.onClose} aria-label="Cerrar misiones"><X size={18}/></button></header>
+ return <section className="academy-missions" role="dialog" aria-modal="false" aria-label="Misiones prácticas de NOVZI" data-testid="novzi-academy-missions">
+  <header className="academy-missions-header"><span><GraduationCap size={18}/> NOVZI Academy <small>Laboratorio práctico</small></span><button type="button" onClick={props.onClose} aria-label="Cerrar misiones"><X size={18}/></button></header>
   <div className="academy-missions-content" ref={scrollRef}>
    <div className="academy-intro"><h2>Aprende construyendo</h2><p>Tres insignias, un solo modelo. Cada insignia se valida con diagramas y conexiones <strong>guardados de verdad</strong>, no solo con clics.</p><button className="academy-text-link" onClick={props.onStartTour}><BookOpen size={14}/> Primero ver el recorrido explicativo</button></div>
    {props.catalogLoading?<div className="academy-onboarding" role="status"><h3>Recuperando tu laboratorio…</h3><p>Comprobamos los espacios y proyectos de tu cuenta antes de permitir nuevas creaciones.</p></div>:!workspace?<div className="academy-onboarding"><span className="academy-stage">PASO OBLIGATORIO 1 DE 2</span><h3><FolderPlus size={16}/> Crea tu espacio de formación</h3><p>Será una organización independiente para practicar, con sus propios permisos y proyectos. No cambia tus espacios de trabajo.</p><label>Nombre del espacio<input aria-label="Nombre del espacio de formación" value={spaceName} maxLength={80} onChange={event=>setSpaceName(event.target.value)}/></label><button type="button" className="academy-main-action" disabled={props.busy||spaceName.trim().length<2||props.saveStatus!=='saved'} onClick={()=>void props.onCreateWorkspace(spaceName.trim())}>{props.busy?'Creando...':'Crear mi organización de práctica'} <ArrowRight size={15}/></button></div>:
@@ -139,7 +139,7 @@ export default function AcademyMissions(props:Props){
     </div>
     {sections.map(s=>{const checks=assessment[s.id],passed=checks.filter(x=>x.done).length,locked=s.id==='technical'&&!assessment.functionalBadge||s.id==='integration'&&!assessment.technicalBadge
      return <section key={s.id} className="academy-course"><button type="button" className="academy-course-title" onClick={()=>setExpanded(old=>old===s.id?'functional':s.id)} aria-expanded={expanded===s.id}><span className={'academy-course-icon '+(badgeFlags[s.id]?'complete':'')}>{locked?<LockKeyhole size={17}/>:<s.icon size={17}/>}</span><span className="academy-course-copy"><strong>{s.label}</strong><small>{s.subtitle}</small></span><span className="academy-course-count">{passed}/{checks.length}</span>{expanded===s.id?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
-     {expanded===s.id&&<div className="academy-course-body">{locked?<p className="academy-lock-notice">{s.id==='technical'?'Termina los ejercicios funcionales y espera a que ATLAS confirme el guardado.':'La insignia mixta se desbloquea después de completar la arquitectura técnica vinculada.'}</p>:<>
+     {expanded===s.id&&<div className="academy-course-body">{locked?<p className="academy-lock-notice">{s.id==='technical'?'Termina los ejercicios funcionales y espera a que NOVZI confirme el guardado.':'La insignia mixta se desbloquea después de completar la arquitectura técnica vinculada.'}</p>:<>
        {checks.map((check,i)=><div key={check.id} ref={check.id===targetId?targetRef:undefined} data-academy-check={check.id} className={'academy-check '+(check.done?'done':'')+(idle&&targetId===check.id?' academy-attention':'')}><span className="academy-check-mark">{check.done?<CheckCircle2 size={16}/>:i+1}</span><div><strong>{check.title}</strong><p>{check.description}</p>{!check.done&&check.id==='technical-link'&&<div className="academy-c4-wizard" role="group" aria-label="Guía para enlazar los niveles C1 a C4">
  <p className="academy-c4-explanation"><strong>¿Qué significan C1, C2, C3 y C4?</strong> C1 es el mapa general del sistema; C2 muestra sus aplicaciones; C3 descompone una aplicación en componentes y C4 profundiza en la implementación. Cada caja puede abrir otra vista con doble clic.</p>
  <p className="academy-c4-explanation"><strong>Cómo se vinculan:</strong> no arrastres una línea entre diagramas. En la caja indicada abre el <strong>Inspector → Vista vinculada (doble clic)</strong>, selecciona la vista de destino y espera «Guardado». Después haz doble clic en la caja para comprobar la navegación.</p>
@@ -159,7 +159,7 @@ export default function AcademyMissions(props:Props){
    </div>
   </div>
  })}
- </div>}{!check.done&&check.id==='c2'&&<p className="academy-relationship-tip" role="note">Para validar C2: conecta «Aplicación web» con «API de solicitudes» y «API de solicitudes» con «Base de datos de solicitudes». El sentido de las flechas no impide completar la práctica. Las conexiones solo cuentan cuando quedan guardadas.</p>}{!check.done&&check.id.endsWith('-field')&&<p className="academy-relationship-tip">Pulsa «Muéstrame dónde»: ATLAS seleccionará la caja y resaltará «Campos personalizados → Configurar» en el Inspector. Debes crear el campo tú mismo y asignarle un valor.</p>}{idle&&!check.done&&targetId===check.id&&<span className="academy-next-hint"><Sparkles size={12}/> Tu siguiente acción está aquí</span>}{!check.done&&buttonFor(check)}</div></div>)}
+ </div>}{!check.done&&check.id==='c2'&&<p className="academy-relationship-tip" role="note">Para validar C2: conecta «Aplicación web» con «API de solicitudes» y «API de solicitudes» con «Base de datos de solicitudes». El sentido de las flechas no impide completar la práctica. Las conexiones solo cuentan cuando quedan guardadas.</p>}{!check.done&&check.id.endsWith('-field')&&<p className="academy-relationship-tip">Pulsa «Muéstrame dónde»: NOVZI seleccionará la caja y resaltará «Campos personalizados → Configurar» en el Inspector. Debes crear el campo tú mismo y asignarle un valor.</p>}{idle&&!check.done&&targetId===check.id&&<span className="academy-next-hint"><Sparkles size={12}/> Tu siguiente acción está aquí</span>}{!check.done&&buttonFor(check)}</div></div>)}
        {s.id!=='integration'&&<div className="academy-recipes"><strong>Guía para construir las cajas</strong><p>Elige un diagrama y añade estos elementos con los nombres sugeridos. Después conecta los puertos desde el lienzo.</p>{Object.entries(ideas).filter(([key])=>s.id==='functional'?['c1','process','trace'].includes(key):['c2','c3','c4'].includes(key)).map(([key,idea])=><div className="academy-recipe" key={key}><strong>{idea.name}</strong><div>{idea.items.map(item=><button key={item.name} disabled={blocked||!existingTypes.has(key as DiagramType)} type="button" onClick={()=>props.onOpenNode(item.type,item.name,key as DiagramType)} title={`Abrir formulario para crear ${item.type}`}>+ {item.name}</button>)}</div></div>)}</div>}
        {s.id==='integration'&&<button type="button" className="academy-main-action" disabled={blocked||!existingTypes.has('trace')} onClick={props.onMixed}>Abrir trazabilidad en modo mixto <ArrowRight size={15}/></button>}
        {badgeFlags[s.id]&&<p className="academy-earned" role="status"><Award size={15}/> ¡Insignia «{s.badge}» conseguida!</p>}

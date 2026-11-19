@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from 'react'
-import {PERMISSIONS,permissionLabel} from '@atlas/contracts'
+import {PERMISSIONS,permissionLabel} from '@novzi/contracts'
 import {Overlay,Field} from '../../components/molecules/Overlay'
 import {workspaceRoles,workspaceMembers,usersList,createUser,createRole,updateRole,assignMember,removeMember,setUserActive} from './api'
 import type {RoleDetails,UserAccount,Member} from './api'

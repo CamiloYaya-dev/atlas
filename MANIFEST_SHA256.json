@@ -1,0 +1,15 @@
+{
+  "name": "NOVZI QA fixes",
+  "date": "2026-11-18",
+  "files": {
+    "docker-compose.yml": "7912156be349e7c2d9e79f30860e4be4df4842a91bfdb4ac0b1a7c12f490a722",
+    "scripts/e2e-local.mjs": "dff630594f0a5ebb0135cfdad29e4eac2a5411f2a6476739dbb3e4a2c6cf2cc5",
+    "scripts/integration-local.mjs": "d2cb37a59e8ff926fbecf97934444343e11dc7d6d12c2d258d8f1fdde620325b",
+    "scripts/coverage-local.mjs": "2bb28cf02b3b7f0061be156faa1586c8ab566c7158edfa21870048dbe20e5763",
+    "scripts/coverage-operational.mjs": "320c3b55e28cbe2f5fcf81e32d055d6c62b1d10c314d85b82d6b37f48f118a11",
+    "scripts/qa-db-entrypoint-fixture.mjs": "25a190cc41f7862889c79c7e0f4ad0073398dcb999e71f2ecf7b3545d05b34f4",
+    "apps/api/src/db/entrypoints.unit.test.ts": "585203a9bebb016d8621a7d3a7069028f9158750fe2dc2acbc2a5ae5b09c406e",
+    "apps/api/src/modules/projects/application/document-policy.ts": "e9590fc466a55386b71ac2a69fd9442113d4993d3879fdae597bcf2bb01f7570",
+    "packages/contracts/src/uml-usecase-policy.ts": "f91a979ef30cbb707b64abfcc90691ce72b7186a2028ed34fd81fa1037357e20"
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * QA operacional instrumentado: solamente atlas_test (127.0.0.1:5433).
+ * QA operacional instrumentado: solamente novzi_test (127.0.0.1:5433).
  * Recorre los entrypoints reales que no se importan durante unit/integration.
  * Cada comando tiene una expectativa comprobable; no se ejecuta en desarrollo
  * ni contra la base de datos del usuario.
@@ -18,13 +18,13 @@ import {fileURLToPath,pathToFileURL} from 'node:url'
 const root=fileURLToPath(new URL('..',import.meta.url))
 const api=resolve(root,'apps/api')
 const tsx=resolve(root,'node_modules/tsx/dist/cli.mjs')
-const qa=/^postgresql:\/\/[^\s]*@127\.0\.0\.1:5433\/atlas_test(?:\?.*)?$/
-if(process.env.NODE_ENV!=='test'||process.env.ATLAS_ALLOW_DB_TESTS!=='true'||!qa.test(process.env.DATABASE_URL||'')||!qa.test(process.env.MIGRATIONS_DATABASE_URL||'')){
- throw Error('QA OPERACIONAL BLOQUEADO: solo atlas_test en 127.0.0.1:5433 y NODE_ENV=test')
+const qa=/^postgresql:\/\/[^\s]*@127\.0\.0\.1:5433\/novzi_test(?:\?.*)?$/
+if(process.env.NODE_ENV!=='test'||process.env.NOVZI_ALLOW_DB_TESTS!=='true'||!qa.test(process.env.DATABASE_URL||'')||!qa.test(process.env.MIGRATIONS_DATABASE_URL||'')){
+ throw Error('QA OPERACIONAL BLOQUEADO: solo novzi_test en 127.0.0.1:5433 y NODE_ENV=test')
 }
 assert(existsSync(tsx),'Falta tsx: instala dependencias npm antes de medir coverage')
 const env={...process.env,HOST:'127.0.0.1'}
-const coverageTs=env.ATLAS_QA_COVERAGE_TS==='1'
+const coverageTs=env.NOVZI_QA_COVERAGE_TS==='1'
 const registerLoader=pathToFileURL(resolve(root,'scripts/coverage-ts-register.mjs')).href
 const tsArgs=coverageTs?['--enable-source-maps','--import',registerLoader]:[tsx]
 const cmd=(label,source,options={})=>{
@@ -54,41 +54,41 @@ checkEnv('modo demo rechazado',{AUTH_MODE:'demo'},false,/AUTH_MODE=local/)
 checkEnv('puerto cero',{PORT:'0'},false,/PORT inválido/)
 checkEnv('puerto fuera de rango',{PORT:'65536'},false,/PORT inválido/)
 checkEnv('puerto no numérico',{PORT:'NaN'},false,/PORT inválido/)
-checkEnv('secreto CSRF insuficiente',{ATLAS_CSRF_SECRET:'short'},false,/CSRF_SECRET/)
+checkEnv('secreto CSRF insuficiente',{NOVZI_CSRF_SECRET:'short'},false,/CSRF_SECRET/)
 checkEnv('pool cero',{DB_POOL_MAX:'0'},false,/DB_POOL_MAX inválido/)
 checkEnv('pool fuera de rango',{DB_POOL_MAX:'41'},false,/DB_POOL_MAX inválido/)
 checkEnv('pool no numérico',{DB_POOL_MAX:'NaN'},false,/DB_POOL_MAX inválido/)
-checkEnv('CORS producción inseguro',{NODE_ENV:'production',CORS_ORIGINS:'http://bad.example',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',DB_SSL:'true'},false,/CORS_ORIGINS/)
-checkEnv('clave de firma de producción insuficiente',{NODE_ENV:'production',CORS_ORIGINS:'https://atlas.example',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',DB_SSL:'true',ATLAS_EXPORT_SIGNING_KEY:'short'},false,/ATLAS_EXPORT_SIGNING_KEY/)
-checkEnv('TLS producción obligatorio',{NODE_ENV:'production',CORS_ORIGINS:'https://atlas.example',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',DB_SSL:'false'},false,/DB_SSL=true/)
-checkEnv('BD local prohibida en producción',{NODE_ENV:'production',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true'},false,/DATABASE_URL local/)
-checkEnv('configuración de producción válida (sin conexión)',{NODE_ENV:'production',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true',ATLAS_SECURE_COOKIES:'true',TRUST_PROXY:'true',DB_POOL_MAX:'10'},true,/QA-ENV:/)
-checkEnv('orígenes normalizados',{CORS_ORIGINS:' https://a.example, ,https://b.example ',TRUST_PROXY:'true',ATLAS_SECURE_COOKIES:'true'},true,/https:\/\/b\.example/)
-checkEnv('valores alternativos de configuración', {NODE_ENV:'',AUTH_MODE:'',HOST:'',PORT:'',DB_POOL_MAX:'',CORS_ORIGINS:'',ATLAS_EXPORT_SIGNING_KEY:'',DB_SSL:'false',TRUST_PROXY:'false',ATLAS_SECURE_COOKIES:'false'},true,/"host":"127\.0\.0\.1"/)
+checkEnv('CORS producción inseguro',{NODE_ENV:'production',CORS_ORIGINS:'http://bad.example',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',DB_SSL:'true'},false,/CORS_ORIGINS/)
+checkEnv('clave de firma de producción insuficiente',{NODE_ENV:'production',CORS_ORIGINS:'https://novzi.example',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',DB_SSL:'true',NOVZI_EXPORT_SIGNING_KEY:'short'},false,/NOVZI_EXPORT_SIGNING_KEY/)
+checkEnv('TLS producción obligatorio',{NODE_ENV:'production',CORS_ORIGINS:'https://novzi.example',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',DB_SSL:'false'},false,/DB_SSL=true/)
+checkEnv('BD local prohibida en producción',{NODE_ENV:'production',CORS_ORIGINS:'https://novzi.example',DB_SSL:'true'},false,/DATABASE_URL local/)
+checkEnv('configuración de producción válida (sin conexión)',{NODE_ENV:'production',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',CORS_ORIGINS:'https://novzi.example',DB_SSL:'true',NOVZI_SECURE_COOKIES:'true',TRUST_PROXY:'true',DB_POOL_MAX:'10'},true,/QA-ENV:/)
+checkEnv('orígenes normalizados',{CORS_ORIGINS:' https://a.example, ,https://b.example ',TRUST_PROXY:'true',NOVZI_SECURE_COOKIES:'true'},true,/https:\/\/b\.example/)
+checkEnv('valores alternativos de configuración', {NODE_ENV:'',AUTH_MODE:'',HOST:'',PORT:'',DB_POOL_MAX:'',CORS_ORIGINS:'',NOVZI_EXPORT_SIGNING_KEY:'',DB_SSL:'false',TRUST_PROXY:'false',NOVZI_SECURE_COOKIES:'false'},true,/"host":"127\.0\.0\.1"/)
 checkEnv('puerto decimal rechazado',{PORT:'3000.5'},false,/PORT inválido/)
 checkEnv('pool decimal rechazado',{DB_POOL_MAX:'2.5'},false,/DB_POOL_MAX inválido/)
-checkEnv('CORS comodín prohibido en producción',{NODE_ENV:'production',CORS_ORIGINS:'*',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',DB_SSL:'true'},false,/CORS_ORIGINS/)
-checkEnv('producción escucha en interfaces disponibles con configuración válida',{NODE_ENV:'production',HOST:'',DATABASE_URL:'postgresql://qa:qa@remote.example/atlas_qa',CORS_ORIGINS:'https://atlas.example',DB_SSL:'true'},true,/"host":"0\.0\.0\.0"/)
+checkEnv('CORS comodín prohibido en producción',{NODE_ENV:'production',CORS_ORIGINS:'*',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',DB_SSL:'true'},false,/CORS_ORIGINS/)
+checkEnv('producción escucha en interfaces disponibles con configuración válida',{NODE_ENV:'production',HOST:'',DATABASE_URL:'postgresql://qa:qa@remote.example/novzi_qa',CORS_ORIGINS:'https://novzi.example',DB_SSL:'true'},true,/"host":"0\.0\.0\.0"/)
 
 
 // El caso positivo del administrador se valida en integración; este caso ejercita
-// la protección contra ejecutar bootstrap dos veces sobre atlas_test.
+// la protección contra ejecutar bootstrap dos veces sobre novzi_test.
 cmd('migraciones idempotentes','src/db/migrate.ts',{output:/Ya aplicada:|Migración aplicada:/})
 cmd('cuenta semilla exclusiva QA','src/tests/coverage-bootstrap.test.ts',{output:/QA bootstrap:/})
 cmd('seed de proyecto y permisos','src/db/seed.ts',{output:/Demo listo:/})
 cmd('seed idempotente','src/db/seed.ts',{output:/Demo listo:/})
 cmd('cuentas E2E aisladas','src/db/e2e-seed.ts',{env:{
- E2E_ADMIN_EMAIL:'coverage-admin@atlas.test',E2E_ADMIN_PASSWORD:'QA-Operacional-Admin-2026!',
- E2E_VIEWER_EMAIL:'coverage-viewer@atlas.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!',
+ E2E_ADMIN_EMAIL:'coverage-admin@novzi.test',E2E_ADMIN_PASSWORD:'QA-Operacional-Admin-2026!',
+ E2E_VIEWER_EMAIL:'coverage-viewer@novzi.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!',
  // Identidad temporal generada para esta ejecución; nunca reutilizar credenciales productivas.
- E2E_EDITOR_EMAIL:'coverage-editor@atlas.test',E2E_EDITOR_PASSWORD:randomBytes(24).toString('base64url')+'!Qa1'
+ E2E_EDITOR_EMAIL:'coverage-editor@novzi.test',E2E_EDITOR_PASSWORD:randomBytes(24).toString('base64url')+'!Qa1'
 },output:/Usuarios QA preparados/})
 cmd('administrador existente','src/db/admin-status.ts',{output:/Administrador activo: OK/})
-cmd('bootstrap sin credenciales','src/db/create-admin.ts',{expectedStatus:1,env:{ATLAS_ADMIN_EMAIL:'',ATLAS_BOOTSTRAP_PASSWORD:''},output:/Indica ATLAS_ADMIN_EMAIL/})
+cmd('bootstrap sin credenciales','src/db/create-admin.ts',{expectedStatus:1,env:{NOVZI_ADMIN_EMAIL:'',NOVZI_BOOTSTRAP_PASSWORD:''},output:/Indica NOVZI_ADMIN_EMAIL/})
 cmd('E2E sin credenciales','src/db/e2e-seed.ts',{expectedStatus:1,env:{E2E_ADMIN_EMAIL:'',E2E_ADMIN_PASSWORD:'',E2E_VIEWER_EMAIL:'',E2E_VIEWER_PASSWORD:''},output:/Faltan credenciales E2E/})
-cmd('E2E sin editor','src/db/e2e-seed.ts',{expectedStatus:1,env:{E2E_ADMIN_EMAIL:'coverage-admin@atlas.test',E2E_ADMIN_PASSWORD:'QA-Operacional-Admin-2026!',E2E_VIEWER_EMAIL:'coverage-viewer@atlas.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!',E2E_EDITOR_EMAIL:'',E2E_EDITOR_PASSWORD:''},output:/Faltan credenciales editor QA/})
+cmd('E2E sin editor','src/db/e2e-seed.ts',{expectedStatus:1,env:{E2E_ADMIN_EMAIL:'coverage-admin@novzi.test',E2E_ADMIN_PASSWORD:'QA-Operacional-Admin-2026!',E2E_VIEWER_EMAIL:'coverage-viewer@novzi.test',E2E_VIEWER_PASSWORD:'QA-Operacional-Viewer-2026!',E2E_EDITOR_EMAIL:'',E2E_EDITOR_PASSWORD:''},output:/Faltan credenciales editor QA/})
 cmd('no duplicar administrador','src/db/create-admin.ts',{expectedStatus:1,env:{
- ATLAS_ADMIN_EMAIL:'nuevo@atlas.test',ATLAS_BOOTSTRAP_PASSWORD:'QA-Operacional-Admin-2026!'
+ NOVZI_ADMIN_EMAIL:'nuevo@novzi.test',NOVZI_BOOTSTRAP_PASSWORD:'QA-Operacional-Admin-2026!'
 },output:/Ya existe un administrador/})
 
 const port=await new Promise((ok,fail)=>{
@@ -127,4 +127,4 @@ try{
  assert.equal(exited.signal,null,'Servidor QA terminado por señal')
  assert.equal(exited.code,0,`Servidor QA no cerró correctamente: ${output.slice(-2200)}`)
 }
-console.log('[QA operacional] Entrada de servidor y scripts de PostgreSQL verificados con atlas_test.')
+console.log('[QA operacional] Entrada de servidor y scripts de PostgreSQL verificados con novzi_test.')

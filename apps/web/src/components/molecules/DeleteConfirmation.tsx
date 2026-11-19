@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {Overlay,Field} from './Overlay'
 
-/** Confirmación accesible en la interfaz de ATLAS: sin prompt/alert del navegador. */
+/** Confirmación accesible en la interfaz de NOVZI: sin prompt/alert del navegador. */
 export function DeleteConfirmation({title,name,description,consequences,busy,error,onCancel,onConfirm,checkboxLabel}:{
  title:string;name:string;description:string;consequences?:string;busy:boolean;error:string;
  onCancel:()=>void;onConfirm:()=>Promise<void>;checkboxLabel?:string

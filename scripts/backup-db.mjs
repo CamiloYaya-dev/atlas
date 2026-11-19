@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 mkdirSync('backups', { recursive: true });
-const file = join('backups', `atlas-local-${new Date().toISOString().replaceAll(':','-')}.dump`);
+const file = join('backups', `novzi-local-${new Date().toISOString().replaceAll(':','-')}.dump`);
 console.log(`Generando copia local: ${file}`);
 const proc = spawn('docker', ['compose','exec','-T','db','pg_dump','-U','atlas','-d','atlas','-Fc'], { stdio: ['ignore','pipe','inherit'] });
 const dest = createWriteStream(file);

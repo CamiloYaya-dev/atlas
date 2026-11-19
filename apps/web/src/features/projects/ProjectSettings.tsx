@@ -3,7 +3,7 @@ import {Overlay,Field} from '../../components/molecules/Overlay'
 import {DeleteConfirmation} from '../../components/molecules/DeleteConfirmation'
 import {renameProject,deleteProject,projectMembers,projectCandidates,assignProjectMember,removeProjectMember} from './api'
 import type {ProjectMember,ProjectCandidate,ProjectRole} from './api'
-import type {Project} from '@atlas/contracts'
+import type {Project} from '@novzi/contracts'
 import type {WorkspaceAccess} from '../security/types'
 interface Props {project:Project;access:WorkspaceAccess|null;canEditNow:boolean;onClose:()=>void;onRenamed:(project:Project)=>void;onDeleted:(id:string)=>void}
 export default function ProjectSettings({project,access,canEditNow,onClose,onRenamed,onDeleted}:Props){

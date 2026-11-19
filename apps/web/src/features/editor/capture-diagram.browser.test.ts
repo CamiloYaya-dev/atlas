@@ -1,6 +1,6 @@
 import {test,expect,vi,afterEach} from 'vitest'
 import {captureDiagramPng} from './capture-diagram'
-import type {ExportField} from '@atlas/contracts'
+import type {ExportField} from '@novzi/contracts'
 const box=(x:number,y:number,width:number,height:number)=>({x,y,left:x,top:y,right:x+width,bottom:y+height,width,height,toJSON:()=>({})}) as DOMRect
 function scene(){
  const root=document.createElement('div');root.innerHTML='<div class="react-flow__viewport"><div class="react-flow__node" data-id="a"><span class="node-title">Cuenta QA</span></div><div class="react-flow__node" data-id="b">Sin título</div><svg><path class="react-flow__edge-path" d="M 0 0 L 20 20"/><path class="react-flow__edge-path"/><path class="react-flow__edge-path"/></svg></div>'

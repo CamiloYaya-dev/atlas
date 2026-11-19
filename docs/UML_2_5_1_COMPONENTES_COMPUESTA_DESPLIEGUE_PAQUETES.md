@@ -1,10 +1,10 @@
-# ATLAS V4.8.1 · Actualización UML estructural
+# NOVZI V4.8.1 · Actualización UML estructural
 
 ## Alcance
 
 **UML · Componentes:** el ensamblaje (assembly) tiene una única representación bola–encaje en la zona de acople. El símbolo respeta la inclinación general de la conexión y deja libre el texto de la etiqueta. Entre partes/puertos del diagrama compuesto se muestran terminales cuadrados, sin convertirlos en flechas.
 
-**UML · Estructura compuesta:** el `uml-class` representado en esta vista se llama **Clasificador estructurado**. Su contenedor visual es de 780×520 unidades de lienzo. Se pueden crear partes, roles de referencia, puertos (en tarjetas ATLAS acopladas al borde), colaboración y, opcionalmente, interfaces. Los puertos pueden pertenecer al clasificador o a una parte. `connector`, `delegation` y `assembly` son las relaciones nuevas. Los `composition` previamente guardados se siguen leyendo.
+**UML · Estructura compuesta:** el `uml-class` representado en esta vista se llama **Clasificador estructurado**. Su contenedor visual es de 780×520 unidades de lienzo. Se pueden crear partes, roles de referencia, puertos (en tarjetas NOVZI acopladas al borde), colaboración y, opcionalmente, interfaces. Los puertos pueden pertenecer al clasificador o a una parte. `connector`, `delegation` y `assembly` son las relaciones nuevas. Los `composition` previamente guardados se siguen leyendo.
 
 **UML · Despliegue:** el catálogo nuevo muestra solo Nodo, Dispositivo, Entorno de ejecución y Artefacto. Los dispositivos admiten iconos `server`, `desktop`, `android`, `mobile`, `network`, `storage` y `generic`. Los entornos incluyen Docker, JVM, Node.js y motor de datos. Los nodos/dispositivos pueden contener entornos, que a su vez contienen artefactos. Solo se ofrecen las relaciones nuevas `communication-path` y `deployment`: la primera entre nodos físicos/lógicos, la segunda desde un artefacto al destino de despliegue. Las relaciones antiguas `manifestation` y `dependency` se siguen leyendo sin modificar la historia.
 
@@ -33,7 +33,7 @@ npm run coverage:check:90
 npm run build
 ```
 
-**Validado en entorno de empaquetado:** `npm run typecheck -w @atlas/web` y `npm run test:graph` (47/47). Los tests de Vitest globales no pudieron ejecutarse aquí por falta del binario `@rollup/rollup-linux-x64-gnu`, ya que las dependencias de referencia provienen de una instalación Windows. La API no pudo completar TypeScript sin `sharp` instalado. No se declara aprobada la cobertura global ni conformidad UML completa.
+**Validado en entorno de empaquetado:** `npm run typecheck -w @novzi/web` y `npm run test:graph` (47/47). Los tests de Vitest globales no pudieron ejecutarse aquí por falta del binario `@rollup/rollup-linux-x64-gnu`, ya que las dependencias de referencia provienen de una instalación Windows. La API no pudo completar TypeScript sin `sharp` instalado. No se declara aprobada la cobertura global ni conformidad UML completa.
 
 ## Límites intencionales
 

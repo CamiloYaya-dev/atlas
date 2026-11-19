@@ -1,5 +1,5 @@
-import {activitySvgScene,classSvgScene,sequenceSvgScene,umlEdgeLabel,isUmlDiagram} from '@atlas/contracts'
-import type {Diagram,ProjectDocument} from '@atlas/contracts'
+import {activitySvgScene,classSvgScene,sequenceSvgScene,umlEdgeLabel,isUmlDiagram} from '@novzi/contracts'
+import type {Diagram,ProjectDocument} from '@novzi/contracts'
 /** Static SVG, no editing listeners. Coordinates and labels come only from the authorized snapshot. */
 export default function VersionDiagramPreview({diagram,document}:{diagram:Diagram;document:ProjectDocument}){
  if(['uml-class','uml-usecase','uml-activity','uml-sequence'].includes(diagram.type)){const scene=diagram.type==='uml-activity'?activitySvgScene(document,diagram):diagram.type==='uml-sequence'?sequenceSvgScene(document,diagram):classSvgScene(document,diagram);return <div className="revision-canvas"><svg role="img" aria-label={`Vista histórica del diagrama ${diagram.name}`} viewBox={`${scene.minX} ${scene.minY} ${scene.width} ${scene.height}`} dangerouslySetInnerHTML={{__html:scene.markup}}/>{!diagram.nodes.length&&<p>Esta revisión no contiene cajas en el diagrama.</p>}</div>}

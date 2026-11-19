@@ -25,5 +25,5 @@ export async function requestFile(path:string,payload:unknown):Promise<{blob:Blo
  try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(csrfToken?{'X-CSRF-Token':csrfToken}:{})},credentials:'include',cache:'no-store',body:JSON.stringify(payload)})}
  catch{throw new Error('No se pudo conectar con la API de exportaciones')}
  if(!response.ok){const body=await response.json().catch(()=>({})) as {message?:string};throw new Error(body.message||`Error HTTP ${response.status}`)}
- return {blob:await response.blob(),exportId:response.headers.get('X-ATLAS-Export-Id')}
+ return {blob:await response.blob(),exportId:response.headers.get('X-NOVZI-Export-Id')}
 }

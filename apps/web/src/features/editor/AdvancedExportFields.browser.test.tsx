@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest'
 import {fireEvent,render,screen} from '@testing-library/react'
-import {demoDocument} from '@atlas/fixtures'
+import {demoDocument} from '@novzi/fixtures'
 import AdvancedExportFields,{defaultExportChoices,normalizeChoices} from './AdvancedExportFields'
 describe('exportación avanzada del inspector',()=>{
  it('presenta opciones por caja y permite enviar un campo al diccionario',()=>{

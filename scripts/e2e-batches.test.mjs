@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {planE2eBatches,assertBatchSelection,assertBatchRun,selectE2eBatches} from './e2e-batches.mjs'
-const spec=(id,line,title=id,file='atlas.spec.ts')=>({id,line,title,file,tests:[{projectId:'chromium',expectedStatus:'passed'}]})
+const spec=(id,line,title=id,file='novzi.spec.ts')=>({id,line,title,file,tests:[{projectId:'chromium',expectedStatus:'passed'}]})
 const report=(...specs)=>({suites:[{specs}],errors:[]})
 test('conserva pruebas nuevas, agrupa variantes de una línea y aísla recorridos pesados',()=>{
  const all=report(spec('a',1),spec('b',2),spec('c',3,'UML Clases QA'),spec('d',4),spec('e',4),spec('f',5,'nuevo','nested/new.spec.ts'))
  const batches=planE2eBatches(all)
- assert.deepEqual(batches.map(b=>b.selectors),[['atlas.spec.ts:1','atlas.spec.ts:2'],['atlas.spec.ts:3'],['atlas.spec.ts:4'],['nested/new.spec.ts:5']])
+ assert.deepEqual(batches.map(b=>b.selectors),[['novzi.spec.ts:1','novzi.spec.ts:2'],['novzi.spec.ts:3'],['novzi.spec.ts:4'],['nested/new.spec.ts:5']])
  assert.equal(batches.flatMap(b=>b.ids).length,6)
  assertBatchSelection(batches[2],report(all.suites[0].specs[3],all.suites[0].specs[4]))
  assert.throws(()=>assertBatchSelection(batches[2],report(all.suites[0].specs[3])),/incompleta/)

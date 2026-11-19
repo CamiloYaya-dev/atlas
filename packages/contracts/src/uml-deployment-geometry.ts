@@ -3,7 +3,7 @@ import {deploymentNode} from './uml-deployment-catalog'
 import {deploymentEdgePresentation,deploymentRegistry,deploymentSlotText} from './uml-deployment-policy'
 import {componentGlyph} from './uml-component-geometry'
 import {umlAttributeText,umlOperationTextResolved} from './uml-structure'
-import {atlasNodeSize} from './node-sizing'
+import {novziNodeSize} from './node-sizing'
 import {umlAbsolutePosition,umlNodeDepth} from './uml-containers'
 import {classPort,classFacingPort,classPortAngle,classRelationRoute,classEndTerminal,classEndLabel} from './uml-class-geometry'
 import {umlDisplayLabel,umlRelationNotation} from './uml-notation'
@@ -27,7 +27,7 @@ export function deploymentGlyph(doc:ProjectDocument,e:ModelElement,size:{width:n
  return markup
 }
 export function deploymentSvgScene(doc:ProjectDocument,v:Diagram){
- const bounds=new Map(v.nodes.flatMap(n=>{const e=doc.elements[n.elementId];if(!e)return [];const children=v.nodes.some(x=>x.parentNodeId===n.id);return [[n.id,{...umlAbsolutePosition(v,n),...atlasNodeSize(v.type,e,n,umlNodeDepth(v,n),children),e,children,depth:umlNodeDepth(v,n)}] as const]})),offsets=parallelOffsets(v.edges)
+ const bounds=new Map(v.nodes.flatMap(n=>{const e=doc.elements[n.elementId];if(!e)return [];const children=v.nodes.some(x=>x.parentNodeId===n.id);return [[n.id,{...umlAbsolutePosition(v,n),...novziNodeSize(v.type,e,n,umlNodeDepth(v,n),children),e,children,depth:umlNodeDepth(v,n)}] as const]})),offsets=parallelOffsets(v.edges)
  const route=(e:DiagramEdge)=>{const a=bounds.get(e.source),b=bounds.get(e.target);if(!a||!b)return;const p=deploymentPort(a,deploymentCube(doc,a.e),e.associationEnds?.[0]?.handle||e.sourceHandle,true),q=deploymentPort(b,deploymentCube(doc,b.e),e.associationEnds?.[1]?.handle||e.targetHandle,false),r=classRelationRoute({sourceX:p.x,sourceY:p.y,targetX:q.x,targetY:q.y,sourcePosition:p.side,targetPosition:q.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||'smoothstep'},e.source===e.target);return {p,q,r}}
  const terminal=(k:string,p:ReturnType<typeof classPort>)=>{const mark=k==='triangle'?'<path d="M 0 0 L 18 -10 L 18 10 Z" fill="white"/>':k==='open-arrow'?'<path d="M 13 -7 L 0 0 L 13 7"/>':k==='cross'?'<path d="M 3 -5 L 13 5 M 13 -5 L 3 5"/>':k==='diamond-filled'?`<path d="M 0 0 L 11 -6 L 22 0 L 11 6 Z" fill="${ink}"/>`:'';return mark?`<g transform="translate(${p.x} ${p.y}) rotate(${classPortAngle(p.side)})" fill="none" stroke="${ink}" stroke-width="1.5">${mark}</g>`:''}
  const label=(x:number,y:number,s:string)=>s?`<text x="${x}" y="${y}" text-anchor="middle" font-size="11" fill="${ink}" >${esc(s)}</text>`:''

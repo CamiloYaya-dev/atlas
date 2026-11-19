@@ -5,7 +5,7 @@ import {ACTIVITY_TYPES,ACTIVITY_RELATIONS,activityEndpointTypeValid} from './uml
 import {USECASE_CREATION_TYPES,USECASE_TYPES,USECASE_RELATIONS,useCaseEndpointValid} from './uml-usecase-catalog'
 import {CLASS_TYPES,CLASS_RELATIONS} from './uml-class-catalog'
 import {classEndpointValid} from './uml-class-policy'
-/** Catálogo orientado a UML 2.5.1, para el editor visual de ATLAS.
+/** Catálogo orientado a UML 2.5.1, para el editor visual de NOVZI.
  * Tipos y restricciones persistidos; no constituye un motor de validación UML formal.
  */
 import type {DiagramType,ElementType} from './index'
@@ -47,7 +47,7 @@ export const UML_RELATIONS_BY_DIAGRAM:Partial<Record<DiagramType,readonly string
  'uml-interaction-overview':['control-flow','interaction-ref','decision'],
  'uml-timing':['timing-transition','duration','constraint'],
 }
-/** El catálogo visible es estricto; el backend sigue leyendo los modelos previos de ATLAS sin borrarlos. */
+/** El catálogo visible es estricto; el backend sigue leyendo los modelos previos de NOVZI sin borrarlos. */
 export const UML_LEGACY_ELEMENTS:Partial<Record<DiagramType,readonly ElementType[]>>={
  'uml-deployment':['database'],
  'uml-usecase':['system','requirement'],

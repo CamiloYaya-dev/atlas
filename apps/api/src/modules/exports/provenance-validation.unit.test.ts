@@ -21,8 +21,8 @@ test('rechaza JPG inválido, longitud corrupta, token extraño y firmas de longi
  assert.throws(()=>readProvenance(Buffer.from('abcd')),/Solo PNG o JPG/)
  const comment=(token:string)=>{const bytes=Buffer.from(token),len=Buffer.alloc(2);len.writeUInt16BE(bytes.length+2);return Buffer.concat([Buffer.from('ffd8fffe','hex'),len,bytes,Buffer.from('ffd9','hex')])}
  assert.equal(readProvenance(comment('another application')),null)
- assert.equal(readProvenance(comment('ATLAS-PROVENANCE-v1:'+Buffer.from('not JSON').toString('base64url'))),null)
- assert.equal(readProvenance(comment('ATLAS-PROVENANCE-v1:'+Buffer.from(JSON.stringify({proof,signature:'wrong-format'})).toString('base64url'))),null)
+ assert.equal(readProvenance(comment('NOVZI-PROVENANCE-v1:'+Buffer.from('not JSON').toString('base64url'))),null)
+ assert.equal(readProvenance(comment('NOVZI-PROVENANCE-v1:'+Buffer.from(JSON.stringify({proof,signature:'wrong-format'})).toString('base64url'))),null)
  assert.equal(signaturesMatch('ab','cd'),false);assert.equal(signaturesMatch('ab',signature(proof,key)),false)
  assert.throws(()=>embedProvenance(Buffer.from('ffd8ffd9','hex'),'jpg',{...proof,actorId:'u'.repeat(66000)},key),/demasiado larga/)
 })

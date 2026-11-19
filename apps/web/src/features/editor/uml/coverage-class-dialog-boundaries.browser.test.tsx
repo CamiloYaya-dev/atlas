@@ -1,8 +1,8 @@
 import {afterEach,it} from 'vitest'
 import assert from 'node:assert/strict'
 import {render,screen,fireEvent,cleanup,within} from '@testing-library/react'
-import {createElement,emptyDoc} from '@atlas/contracts'
-import type {Diagram,DiagramEdge,ElementType} from '@atlas/contracts'
+import {createElement,emptyDoc} from '@novzi/contracts'
+import type {Diagram,DiagramEdge,ElementType} from '@novzi/contracts'
 import ClassRelationDialog from './ClassRelationDialog'
 
 afterEach(cleanup)

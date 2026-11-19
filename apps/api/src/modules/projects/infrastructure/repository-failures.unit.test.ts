@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {pool} from '../../../db/pool'
 import {ProjectsRepository} from './projects.repository'
 import {WorkspacesRepository} from '../../workspaces/infrastructure/workspaces.repository'
-import {emptyDoc} from '@atlas/contracts'
+import {emptyDoc} from '@novzi/contracts'
 // Mock only the PostgreSQL boundary. No sockets or working database are used.
 test('repositorios: consultas sin filas conservan ausencia y no fabrican resultados',async t=>{
  const query=t.mock.method(pool,'query',async()=>({rows:[],rowCount:0}))

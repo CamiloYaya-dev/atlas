@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {createElement,emptyDoc,DIAGRAM_KINDS,ELEMENT_KINDS,PERMISSIONS} from '@atlas/contracts'
-import type {ProjectDocument,DiagramType,ElementType} from '@atlas/contracts'
+import {createElement,emptyDoc,DIAGRAM_KINDS,ELEMENT_KINDS,PERMISSIONS} from '@novzi/contracts'
+import type {ProjectDocument,DiagramType,ElementType} from '@novzi/contracts'
 import {projectVisible,applyAuthorizedChange} from '../modules/projects/application/document-policy'
 import type {Access} from '../security/roles'
 const permit=(keys:string[]):Access=>({roleId:'custom',roleKey:'custom',roleName:'Personalizado',permissions:new Set(keys)})

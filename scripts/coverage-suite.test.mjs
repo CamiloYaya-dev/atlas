@@ -23,7 +23,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import {pathToFileURL} from 'node:url'
 function mapFixture(run){
- const dir=mkdtempSync(join(tmpdir(),'atlas-source-map-'))
+ const dir=mkdtempSync(join(tmpdir(),'novzi-source-map-'))
  try{
   const src=join(dir,'packages','contracts','src','logic.ts'),raw=join(dir,'raw'),source='export const f = (n: number) => n + 1\n'
   mkdirSync(join(src,'..'),{recursive:true});mkdirSync(raw);writeFileSync(src,source)

@@ -1,0 +1,26 @@
+# Never send credentials, backups, git history, tests or local artifacts into Docker builds.
+.git
+**/.git
+node_modules
+**/node_modules
+**/.env
+**/.env.*
+*.dump
+**/*.dump
+*.dmp
+**/*.dmp
+*.bak
+**/*.bak
+backups
+**/backups
+coverage
+**/coverage
+dist
+**/dist
+*.log
+**/*.log
+*.zip
+**/*.zip
+playwright-report
+**/playwright-report
+.DS_Store

@@ -1,11 +1,11 @@
 import {DomainError} from '../../domain/errors'
 
-export type FunctionalKind='finding'|'rf'|'rnf'|'story'
-export const FUNCTIONAL_KINDS=['finding','rf','rnf','story'] as const
-export const FUNCTIONAL_PREFIX:Record<FunctionalKind,string>={finding:'HAL',rf:'RF',rnf:'RNF',story:'HU'}
+export type FunctionalKind='finding'|'rf'|'rnf'|'story'|'asis'
+export const FUNCTIONAL_KINDS=['finding','rf','rnf','story','asis'] as const
+export const FUNCTIONAL_PREFIX:Record<FunctionalKind,string>={finding:'HAL',rf:'RF',rnf:'RNF',story:'HU',asis:'ASIS'}
 export type FunctionalFieldType='text'|'long'|'number'|'currency'|'date'|'time'|'datetime'|'boolean'|'select'|'multi_select'|'checkbox_group'|'list'|'table'|'image'|'url'|'email'
 export const FIELD_TYPES=['text','long','number','currency','date','time','datetime','boolean','select','multi_select','checkbox_group','list','table','image','url','email'] as const
-export type FunctionalPayload={reviewDate?:string;module?:string;feature?:string;scenario?:string;steps?:string[];expected?:string;obtained?:string;functionalState?:string;findingType?:string;impact?:string;environment?:string;reviewerId?:string;findingStatus?:string;observations?:string;jira?:string;description?:string;priority?:string;acceptanceCriteria?:string[];businessValue?:string;role?:string;goal?:string;benefit?:string;status?:string;custom?:Record<string,unknown>;evidenceLinks?:{id:string;label:string;url:string}[]}
+export type FunctionalPayload={reviewDate?:string;module?:string;feature?:string;scenario?:string;steps?:string[];expected?:string;obtained?:string;functionalState?:string;findingType?:string;impact?:string;environment?:string;reviewerId?:string;findingStatus?:string;observations?:string;jira?:string;description?:string;priority?:string;acceptanceCriteria?:string[];businessValue?:string;role?:string;goal?:string;benefit?:string;status?:string;processName?:string;observedBehavior?:string;scope?:string;assessmentDate?:string;assessmentResult?:string;custom?:Record<string,unknown>;evidenceLinks?:{id:string;label:string;url:string}[]}
 export interface TemplateElement {name?:string;page?:number;rows?:number;cols?:number;cells?:string[][];ordered?:boolean;checked?:boolean;id:string;kind:'field'|'text'|'image'|'line'|'table'|'checkbox'|'list';field?:string;text?:string;image?:string;x:number;y:number;width:number;height:number;fontSize:number;fontFamily:'Arial'|'Helvetica'|'Times New Roman'|'Courier New';bold?:boolean;italic?:boolean;color?:string;align?:'left'|'center'|'right'}
 export type FunctionalFieldDefinition={id:string;name:string;field_type:FunctionalFieldType;required:boolean;options:string[]}
 const isObject=(x:unknown):x is Record<string,unknown>=>!!x&&typeof x==='object'&&!Array.isArray(x)
@@ -17,6 +17,7 @@ const selection=(x:unknown,label:string,values:readonly string[])=>{const s=stri
 const findingStates=['Funciona','Funciona parcialmente','No funciona','No verificado'] as const
 const findingTypes=['Error funcional','Comportamiento por aclarar','Oportunidad de mejora'] as const
 const findingStatuses=['Pendiente de validar','Confirmado','En seguimiento','Resuelto','Validado'] as const
+const asisResults=['Funciona','Funciona parcialmente','No funciona','No verificado'] as const
 const genericStatuses=['Borrador','En análisis','Aprobado','En desarrollo','En QA','Finalizado'] as const
 export const FUNCTIONAL_OPTIONS={findingStates,findingTypes,findingStatuses,genericStatuses}
 export function validateFunctionalPayload(kind:FunctionalKind,input:unknown,fields:FunctionalFieldDefinition[]=[]):FunctionalPayload{
@@ -39,6 +40,14 @@ export function validateFunctionalPayload(kind:FunctionalKind,input:unknown,fiel
   if(['Confirmado','Resuelto','Validado'].includes(p.findingStatus)&&!p.expected)throw new DomainError('Confirma el resultado esperado antes de confirmar el hallazgo',400)
   p.observations=string(input.observations??'','observaciones',8000)
   p.jira=string(input.jira??'','referencia Jira',500)
+ }else if(kind==='asis'){
+  p.processName=string(input.processName,'proceso o funcionalidad',240,true)
+  p.assessmentDate=date(input.assessmentDate,'fecha del diagnóstico')
+  p.scope=string(input.scope??'','alcance',4000)
+  p.observedBehavior=string(input.observedBehavior,'comportamiento actual',12000,true)
+  p.assessmentResult=selection(input.assessmentResult??'No verificado','resultado del diagnóstico',asisResults)
+  p.observations=string(input.observations??'','observaciones',8000)
+  p.environment=string(input.environment??'','entorno y versión',500)
  }else{
   p.description=string(input.description,'descripción',12000,true)
   p.priority=selection(input.priority??'Media','prioridad',['Baja','Media','Alta','Crítica'])
@@ -117,7 +126,7 @@ export function validateTemplate(input:unknown){
  if(elements.some(x=>x.x+x.width>pageW+.2||x.y+x.height>pageH+.2))throw new DomainError('Un componente queda fuera de la página',400)
  return {name,kind,paper,orientation,pageCount:Number(pageCount),layout:elements,isDefault:input.isDefault===true}
 }
-export function defaultFunctionalPayload(kind:FunctionalKind,reviewerId:string):FunctionalPayload{if(kind==='finding')return {reviewDate:new Date().toISOString().slice(0,10),module:'General',feature:'',scenario:'',steps:[''],expected:'',obtained:'',functionalState:'No verificado',findingType:'Comportamiento por aclarar',impact:'',environment:'Web / versión por confirmar',reviewerId,findingStatus:'Pendiente de validar',observations:'',jira:'',custom:{},evidenceLinks:[]};return {description:'',priority:'Media',status:'Borrador',acceptanceCriteria:[],businessValue:'',role:'',goal:'',benefit:'',custom:{},evidenceLinks:[]}}
+export function defaultFunctionalPayload(kind:FunctionalKind,reviewerId:string):FunctionalPayload{if(kind==='finding')return {reviewDate:new Date().toISOString().slice(0,10),module:'General',feature:'',scenario:'',steps:[''],expected:'',obtained:'',functionalState:'No verificado',findingType:'Comportamiento por aclarar',impact:'',environment:'Web / versión por confirmar',reviewerId,findingStatus:'Pendiente de validar',observations:'',jira:'',custom:{},evidenceLinks:[]};if(kind==='asis')return {processName:'',assessmentDate:new Date().toISOString().slice(0,10),scope:'',observedBehavior:'',assessmentResult:'No verificado',environment:'',observations:'',custom:{},evidenceLinks:[]};return {description:'',priority:'Media',status:'Borrador',acceptanceCriteria:[],businessValue:'',role:'',goal:'',benefit:'',custom:{},evidenceLinks:[]}}
 export function defaultTemplateLayout(kind:FunctionalKind='finding'):TemplateElement[]{const base:TemplateElement[]=[
  {id:'logo',kind:'image',x:12,y:12,width:34,height:22,fontSize:10,fontFamily:'Arial'},
  {id:'title',kind:'text',text:'INFORME DE REVISIÓN FUNCIONAL',x:54,y:14,width:145,height:15,fontSize:16,fontFamily:'Arial',bold:true,color:'#17305a'},
@@ -131,6 +140,7 @@ export function defaultTemplateLayout(kind:FunctionalKind='finding'):TemplateEle
  {id:'obtained',kind:'field',field:'obtained',x:12,y:186,width:185,height:40,fontSize:11,fontFamily:'Arial'},
  {id:'impact',kind:'field',field:'impact',x:12,y:233,width:185,height:37,fontSize:11,fontFamily:'Arial'},
  ];if(kind==='finding')return base
+ if(kind==='asis')return [...base.slice(0,5),...([['processName',79,15],['assessmentDate',98,12],['scope',116,35],['observedBehavior',158,73],['assessmentResult',241,15],['observations',260,24]] as const).map(([field,y,height])=>({id:field,kind:'field' as const,field,x:12,y,width:185,height,fontSize:11,fontFamily:'Arial' as const}))]
  const alternate=kind==='story'?[['role',94,12],['goal',114,20],['benefit',143,20],['description',174,40],['acceptanceCriteria',224,48]] as const:[['description',94,72],['priority',176,12],['status',195,12],['acceptanceCriteria',214,44],['businessValue',263,16]] as const
  return [...base.slice(0,5),...alternate.map(([field,y,height])=>({id:field,kind:'field' as const,field,x:12,y,width:185,height,fontSize:11,fontFamily:'Arial' as const}))]
 }

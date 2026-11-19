@@ -9,7 +9,7 @@ async function admin(req:Parameters<typeof identity>[0]){const actor=await ident
 export async function registerAdminController(app:FastifyInstance){
  app.get('/api/v1/admin/users',async req=>{
   await admin(req)
-  const {rows}=await pool.query('SELECT id,email,display_name AS name,active,platform_admin,created_at FROM atlas_users ORDER BY created_at DESC LIMIT 300')
+  const {rows}=await pool.query('SELECT id,email,display_name AS name,active,platform_admin,created_at FROM novzi_users ORDER BY created_at DESC LIMIT 300')
   return rows
  })
  app.post('/api/v1/admin/users',async(req,reply)=>{
@@ -20,7 +20,7 @@ export async function registerAdminController(app:FastifyInstance){
   const client=await pool.connect()
   try{
    await client.query('BEGIN')
-   const {rows}=await client.query<{id:string}>(`INSERT INTO atlas_users(email,display_name,password_hash,created_by)
+   const {rows}=await client.query<{id:string}>(`INSERT INTO novzi_users(email,display_name,password_hash,created_by)
       VALUES ($1,$2,$3,$4) RETURNING id`,[email,name,hash,actor.id])
    const demo=await provisionUserDemo(client,rows[0].id)
    await client.query('COMMIT')
@@ -36,17 +36,17 @@ export async function registerAdminController(app:FastifyInstance){
   const b=obj(req.body)
   if(typeof b.active==='boolean'){
    if(req.params.userId===actor.id&&!b.active)throw new DomainError('No puedes deshabilitar tu propia cuenta',409)
-   const {rowCount}=await pool.query('UPDATE atlas_users SET active=$1,updated_at=now() WHERE id=$2 AND platform_admin=false',[b.active,req.params.userId])
+   const {rowCount}=await pool.query('UPDATE novzi_users SET active=$1,updated_at=now() WHERE id=$2 AND platform_admin=false',[b.active,req.params.userId])
    if(!rowCount)throw new DomainError('Usuario no encontrado o cuenta protegida',404)
-   if(!b.active)await pool.query('UPDATE atlas_sessions SET revoked_at=now() WHERE user_id=$1',[req.params.userId])
+   if(!b.active)await pool.query('UPDATE novzi_sessions SET revoked_at=now() WHERE user_id=$1',[req.params.userId])
    return {ok:true}
   }
   if(typeof b.password==='string'){
    if(req.params.userId===actor.id)throw new DomainError('El cambio de clave propia tendrá un flujo independiente',409)
    const hash=await hashPassword(b.password)
-   const {rowCount}=await pool.query('UPDATE atlas_users SET password_hash=$1,updated_at=now() WHERE id=$2 AND platform_admin=false',[hash,req.params.userId])
+   const {rowCount}=await pool.query('UPDATE novzi_users SET password_hash=$1,updated_at=now() WHERE id=$2 AND platform_admin=false',[hash,req.params.userId])
    if(!rowCount)throw new DomainError('Usuario no encontrado o cuenta protegida',404)
-   await pool.query('UPDATE atlas_sessions SET revoked_at=now() WHERE user_id=$1',[req.params.userId])
+   await pool.query('UPDATE novzi_sessions SET revoked_at=now() WHERE user_id=$1',[req.params.userId])
    return {ok:true}
   }
   throw new DomainError('Se requiere active:boolean o password:string',400)

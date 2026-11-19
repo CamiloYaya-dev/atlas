@@ -2,30 +2,30 @@ import {afterEach,describe,it,expect,vi} from 'vitest'
 import {act,fireEvent,render,screen,within} from '@testing-library/react'
 import AcademyMissions,{ACADEMY_HINT_STORAGE_KEY,guidanceDirection} from './AcademyMissions'
 import type {ComponentProps} from 'react'
-import type {Diagram,ElementType,ProjectDocument} from '@atlas/contracts'
+import type {Diagram,ElementType,ProjectDocument} from '@novzi/contracts'
 
 function props(overrides:Partial<ComponentProps<typeof AcademyMissions>>={}):ComponentProps<typeof AcademyMissions>{
  return {lab:null,workspaces:[],projects:[],catalogLoading:false,activeWorkspaceId:'',activeProjectId:'',doc:null,saveStatus:'saved',mode:'functional',diagramId:'',busy:false,error:'',onClose:vi.fn(),onStartTour:vi.fn(),onCreateWorkspace:vi.fn(async()=>{}),onCreateProject:vi.fn(async()=>{}),onGoToLab:vi.fn(),onOpenDiagram:vi.fn(),onSelectDiagram:vi.fn(),onOpenNode:vi.fn(),onReuse:vi.fn(),onMixed:vi.fn(),onOpenFields:vi.fn(),onInspectElement:vi.fn(),...overrides}
 }
 
 afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();window.localStorage.removeItem(ACADEMY_HINT_STORAGE_KEY)})
-describe('ATLAS Academy · laboratorio en editor real',()=>{
+describe('NOVZI Academy · laboratorio en editor real',()=>{
  it('exige crear la organización antes del proyecto y no ejecuta la API sin clic',()=>{
   const actions=props();render(<AcademyMissions {...actions}/> )
   expect(screen.getByText('Crea tu espacio de formación')).toBeTruthy()
   expect(actions.onCreateWorkspace).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button',{name:/Crear mi organización/}))
-  expect(actions.onCreateWorkspace).toHaveBeenCalledWith('ATLAS · Academia personal')
+  expect(actions.onCreateWorkspace).toHaveBeenCalledWith('NOVZI · Academia personal')
  })
  it('solicita proyecto sólo dentro del espacio real seleccionado',()=>{
-  const actions=props({lab:{workspaceId:'lab-1'},workspaces:[{id:'lab-1',name:'Academia ATLAS',role:'owner'}],activeWorkspaceId:'lab-1'})
+  const actions=props({lab:{workspaceId:'lab-1'},workspaces:[{id:'lab-1',name:'Academia NOVZI',role:'owner'}],activeWorkspaceId:'lab-1'})
   render(<AcademyMissions {...actions}/> )
   expect(screen.getByText('Crea un proyecto de aprendizaje')).toBeTruthy()
   fireEvent.click(screen.getByRole('button',{name:/Crear mi proyecto/}))
   expect(actions.onCreateProject).toHaveBeenCalledWith('Laboratorio · Solicitudes')
  })
  it('rechaza evaluar otro proyecto, ofreciendo volver al laboratorio',()=>{
-  const actions=props({lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia ATLAS',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Prácticas'}],activeWorkspaceId:'w',activeProjectId:'otro'})
+  const actions=props({lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia NOVZI',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Prácticas'}],activeWorkspaceId:'w',activeProjectId:'otro'})
   render(<AcademyMissions {...actions}/>)
   expect(screen.queryByText('Modelado funcional')).toBeNull()
   fireEvent.click(screen.getByRole('button',{name:/Abrir laboratorio/}))
@@ -41,7 +41,7 @@ describe('ATLAS Academy · laboratorio en editor real',()=>{
   window.localStorage.setItem(ACADEMY_HINT_STORAGE_KEY,'1')
   vi.useFakeTimers()
   const doc={schema:1 as const,elements:{},diagrams:[],fieldDefinitions:[]}
-  const a=props({lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia ATLAS',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Laboratorio'}],activeWorkspaceId:'w',activeProjectId:'p',doc})
+  const a=props({lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia NOVZI',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Laboratorio'}],activeWorkspaceId:'w',activeProjectId:'p',doc})
   const spy=vi.spyOn(HTMLElement.prototype,'getBoundingClientRect').mockImplementation(function(this:HTMLElement){
    const rect=this.classList.contains('academy-missions-content')?{top:100,bottom:400}:this.closest?.('[data-academy-check="c1"]')?{top:600,bottom:680}:{top:0,bottom:0}
    return {...rect,left:0,right:350,width:350,height:rect.bottom-rect.top,x:0,y:rect.top,toJSON:()=>({})} as DOMRect
@@ -78,7 +78,7 @@ it('valida nombre de organización y entrega el nombre limpio al editor',()=>{
  fireEvent.change(input,{target:{value:' '}});expect(create.disabled).toBe(true);fireEvent.change(input,{target:{value:'  Organización QA  '}});expect(create.disabled).toBe(false);fireEvent.click(create);expect(a.onCreateWorkspace).toHaveBeenCalledWith('Organización QA')
 })
 it('no crea un proyecto en la organización que no está activa',()=>{
- const a=props({lab:{workspaceId:'lab-1'},workspaces:[{id:'lab-1',name:'Academia ATLAS',role:'owner'}],activeWorkspaceId:'otro'});render(<AcademyMissions {...a}/>);fireEvent.click(screen.getByRole('button',{name:/Ir a la organización de práctica/}));expect(a.onGoToLab).toHaveBeenCalledOnce();expect(a.onCreateProject).not.toHaveBeenCalled()
+ const a=props({lab:{workspaceId:'lab-1'},workspaces:[{id:'lab-1',name:'Academia NOVZI',role:'owner'}],activeWorkspaceId:'otro'});render(<AcademyMissions {...a}/>);fireEvent.click(screen.getByRole('button',{name:/Ir a la organización de práctica/}));expect(a.onGoToLab).toHaveBeenCalledOnce();expect(a.onCreateProject).not.toHaveBeenCalled()
 })
 it('permite iniciar tareas funcionales, mantiene las otras insignias bloqueadas y no cambia el modelo',()=>{
  const doc={schema:1 as const,elements:{},diagrams:[],fieldDefinitions:[]},a=props({lab:{workspaceId:'w',projectId:'p'},workspaces:[{id:'w',name:'Academia',role:'owner'}],projects:[{id:'p',workspace_id:'w',name:'Laboratorio'}],activeWorkspaceId:'w',activeProjectId:'p',doc})
@@ -91,7 +91,7 @@ it('permite iniciar tareas funcionales, mantiene las otras insignias bloqueadas 
 function academyFixture():ProjectDocument{
  const doc:ProjectDocument={schema:1,elements:{},diagrams:[],fieldDefinitions:[]}
  const addElement=(id:string,type:ElementType,name=id,technical='')=>{
-  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'ATLAS',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
+  doc.elements[id]={id,type,name,technical,summary:'',description:'',owner:'',author:'NOVZI',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}}
  }
  const addDiagram=(id:string,type:Diagram['type'],elementIds:string[],edges:[number,number][]=[]):Diagram=>{
   const diagram:Diagram={id,type,name:id,description:'',createdAt:'2026-11-12',nodes:elementIds.map((elementId,i)=>({id:`${id}-n${i}`,elementId,x:100*i,y:0})),edges:edges.map(([source,target],i)=>({id:`${id}-e${i}`,source:`${id}-n${source}`,target:`${id}-n${target}`}))}

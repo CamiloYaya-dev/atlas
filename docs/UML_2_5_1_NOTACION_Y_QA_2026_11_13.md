@@ -1,10 +1,10 @@
-# ATLAS V4.8.1 — Notación UML 2.5.1 y correcciones de QA
+# NOVZI V4.8.1 — Notación UML 2.5.1 y correcciones de QA
 
-Referencia normativa: documento OMG `formal/2017-12-05`, UML 2.5.1, aportado por el propietario de ATLAS. Secciones 7.7, 9, 10.4, 11.5–11.6, 12, 14–19 y anexo B (UML Diagram Interchange).
+Referencia normativa: documento OMG `formal/2017-12-05`, UML 2.5.1, aportado por el propietario de NOVZI. Secciones 7.7, 9, 10.4, 11.5–11.6, 12, 14–19 y anexo B (UML Diagram Interchange).
 
 ## Alcance real de esta entrega
 
-1. Los **14 tipos UML** consultan una misma tabla de estilos semánticos (`packages/contracts/src/uml-notation.ts`). Cada tipo de relación especifica su dirección, trazo y signos de extremo; ya no dependen de los campos visuales genéricos de ATLAS.
+1. Los **14 tipos UML** consultan una misma tabla de estilos semánticos (`packages/contracts/src/uml-notation.ts`). Cada tipo de relación especifica su dirección, trazo y signos de extremo; ya no dependen de los campos visuales genéricos de NOVZI.
 2. El editor UML **oculta dirección y trazo arbitrarios** y conserva el control de recorrido (recto, ortogonal o curvo), que no modifica el significado UML. Se añaden asociaciones navegables explícitas en clases.
 3. En diagramas UML el renderer usa **terminaciones SVG propias**, no flechas genéricas de React Flow: rombos blanco y negro en el extremo del agregado/todo, triángulo hueco para generalización/realización, punta abierta para dependencia, punta llena para mensaje síncrono y bola/encaje orientados según el puerto. El recorrido admite líneas paralelas sin confundir relaciones.
 4. La API rechaza relaciones **nuevas o editadas** con trazo o dirección contrarios al tipo UML; el editor normaliza antes de guardar. Los documentos históricos con opciones obsoletas **no se reescriben al leer** y se dibujan con la notación apropiada.
@@ -26,11 +26,11 @@ Referencia normativa: documento OMG `formal/2017-12-05`, UML 2.5.1, aportado por
 
 El esquema JSON sigue en versión 1. No hay migraciones SQL ni cambios de roles. Se mantiene la fuente única de verdad de los permisos en el backend. **No se declara conformidad UML 2.5.1 completa**: especialmente faltan metamodelos semánticos completos de secuencia, timing, regiones, perfiles, estados y estructura compuesta, trazabilidad XMI/DI, validación de multiplicidades/roles exhaustiva y todas las variantes de notación del anexo B. La tabla y el renderer son una base de notación para extender esos casos sin volver a mezclar el editor libre con UML.
 
-La importación de un JSON anterior puede conservar estilos antiguos para asegurar compatibilidad. Cuando se edite una relación, ATLAS la normaliza. Si los conectores de un diagrama histórico tienen semántica incorrecta, revisar manualmente el **tipo de relación y los extremos origen/destino**, porque intercambiar ambos cambia la semántica de UML.
+La importación de un JSON anterior puede conservar estilos antiguos para asegurar compatibilidad. Cuando se edite una relación, NOVZI la normaliza. Si los conectores de un diagrama histórico tienen semántica incorrecta, revisar manualmente el **tipo de relación y los extremos origen/destino**, porque intercambiar ambos cambia la semántica de UML.
 
 ## Verificación
 
-Ejecutar en PowerShell, dentro de la carpeta `atlas`:
+Ejecutar en PowerShell, dentro de la carpeta `novzi`:
 
 ```powershell
 npm run typecheck
@@ -50,4 +50,4 @@ La prueba del grafo cubre las 14 vistas, la correspondencia de todos los tipos d
 3. Conectar por puertos superior/inferior: la terminación queda vertical. Conectar por puertos laterales: queda horizontal.
 4. En UML Componentes, crear una relación de interfaz proporcionada, requerida y ensamblaje; comprobar la mitad del semicírculo según el lado del puerto (incluido extremo izquierdo).
 5. Importar un JSON anterior y verificar que sus datos no cambian al abrirlo. Al editar una relación histórica, guardar y revisar la notación canónica.
-6. En Academia, abrir Aprender ATLAS, usar Temario para seleccionar «6. Agrega elementos de distintos tipos», abrir «Agregar caja», cancelar y comprobar que el tutorial se reanuda.
+6. En Academia, abrir Aprender NOVZI, usar Temario para seleccionar «6. Agrega elementos de distintos tipos», abrir «Agregar caja», cancelar y comprobar que el tutorial se reanuda.

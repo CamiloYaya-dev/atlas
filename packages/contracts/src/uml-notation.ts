@@ -1,7 +1,7 @@
 import {deploymentEdgePresentation} from './uml-deployment-policy'
 import {componentWiringContractName} from './uml-component-policy'
 import type {ProjectDocument,Diagram} from './index'
-/** Semántica de la notación UML 2.5.1 utilizada por las 14 vistas de ATLAS.
+/** Semántica de la notación UML 2.5.1 utilizada por las 14 vistas de NOVZI.
  * La representación gráfica se deriva del tipo, nunca de ajustes libres del trazo.
  * Esto implementa un subconjunto explícito del metamodelo; no declara conformidad total.
  * Referencia: OMG UML 2.5.1, §§ 7.7, 9.7, 10.4, 11.5–11.6, 12, 14–19 y anexo B.

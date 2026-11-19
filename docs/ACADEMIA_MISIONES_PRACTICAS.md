@@ -1,8 +1,8 @@
-# ATLAS Academy — Misiones reales e insignias (V4.8.1)
+# NOVZI Academy — Misiones reales e insignias (V4.8.1)
 
 ## Objetivo de producto
 
-Conservar el recorrido explicativo de 18 pasos de «Aprender ATLAS» y añadir una ruta de **aprendizaje por ejecución**. El alumno crea una organización propia de formación, un proyecto asociado y un modelo real de un sistema de gestión de solicitudes. El curso evita nombres y datos de clientes. ATLAS no está vinculado comercialmente a Zercano.
+Conservar el recorrido explicativo de 18 pasos de «Aprender NOVZI» y añadir una ruta de **aprendizaje por ejecución**. El alumno crea una organización propia de formación, un proyecto asociado y un modelo real de un sistema de gestión de solicitudes. El curso evita nombres y datos de clientes. NOVZI no está vinculado comercialmente a Zercano.
 
 Las **tres insignias** se derivan del documento real después de que el editor indique «Guardado», no de pulsar «Siguiente», ni de información inventada por el frontend. El usuario puede corregir un error y comprobar de nuevo su avance. No se persiste una certificación irrevocable; el reconocimiento depende del modelo actual.
 
@@ -12,7 +12,7 @@ Las **tres insignias** se derivan del documento real después de que el editor i
 2. Abrir **Misiones** desde la barra superior, o **Misiones e insignias** en el menú lateral.
 3. Elegir el nombre de la organización y pulsar **Crear mi organización de práctica**. Se utiliza la ruta normal `POST /workspaces` y el usuario controla cuándo se crea. No se crean organizaciones de manera silenciosa.
 4. Crear explícitamente un proyecto con **Crear mi proyecto de práctica**. Se usa `POST /workspaces/:id/projects` con un documento vacío válido.
-5. El laboratorio queda vinculado por IDs a la cuenta en `localStorage` (`atlas.academy.lab.v1.<accountId>`). El progreso real es el contenido del proyecto en PostgreSQL. En esta versión la asociación local es por navegador y no se sincroniza con otras instalaciones; los diagramas sí persisten en el servidor.
+5. El laboratorio queda vinculado por IDs a la cuenta en `localStorage` (`novzi.academy.lab.v1.<accountId>`). El progreso real es el contenido del proyecto en PostgreSQL. En esta versión la asociación local es por navegador y no se sincroniza con otras instalaciones; los diagramas sí persisten en el servidor.
 
 **Aislamiento**: es una organización/workspace independiente dentro del mismo despliegue y base de datos, protegida por los controles multitenant y ACL existentes. No es un servidor ni una base PostgreSQL aparte. Se impide evaluar otros proyectos cuando la Academia está abierta. No se ejecuta ninguna importación, reemplazo o borrado automático.
 
@@ -33,7 +33,7 @@ Además de modelar y vincular los diagramas, la insignia **Analista funcional** 
 - Seleccionar la HU-01 en la Matriz de trazabilidad y completar **Resumen**, **Descripción** y **Responsable** desde el **Inspector**. Los valores deben quedar persistidos en la ficha compartida de la HU.
 - Abrir **Configurar campo** y crear una definición **«Canal de solicitud»**, tipo **Lista**, aplicable a **Requerimiento**, con las opciones `Web`, `Móvil`, `API`. Es obligatorio seleccionar una opción en la HU-01 desde el Inspector. Crear solo la definición no acredita el ejercicio.
 
-Las nuevas definiciones son distintas de las que el documento vacío de ATLAS ya trae como valores iniciales. El laboratorio **no las crea automáticamente**.
+Las nuevas definiciones son distintas de las que el documento vacío de NOVZI ya trae como valores iniciales. El laboratorio **no las crea automáticamente**.
 
 ## Curso 2 · Arquitecto técnico — Insignia 2
 
@@ -58,7 +58,7 @@ La insignia técnica exige todas las 7 comprobaciones y guardado completo.
 
 ## Comportamiento de la interfaz
 
-- El panel permanece abierto al usar formularios propios de ATLAS; los modales tienen mayor z-index, y el panel conserva la sección desplegada.
+- El panel permanece abierto al usar formularios propios de NOVZI; los modales tienen mayor z-index, y el panel conserva la sección desplegada.
 - Si el usuario cambia de organización o proyecto, el curso deja de acreditar ese documento y ofrece regresar al laboratorio. No modifica ni reemplaza la información del otro proyecto.
 - En pantalla completa nativa el panel se muestra mediante el portal existente al lienzo; en móviles usa un panel inferior con scroll.
 - Las cajas sugeridas abren el formulario **real** con nombre y tipo precargados. **No las crean sin confirmar**. El alumno construye las relaciones arrastrando puertos y los enlaces desde el inspector.
@@ -69,7 +69,7 @@ La insignia técnica exige todas las 7 comprobaciones y guardado completo.
 ## Recordatorios inteligentes de inactividad
 
 - Control permanente del panel: **«Recordarme el paso tras»** con opciones **1, 2, 3 minutos o Desactivado** (por defecto 2). Preferencia guardada únicamente en el navegador; sin telemetría ni llamadas API.
-- Cuando ATLAS permanece inactivo, el primer criterio incompleto del curso expandido recibe un **borde animado**, con una indicación hacia la acción del paso. Se respeta `prefers-reduced-motion`.
+- Cuando NOVZI permanece inactivo, el primer criterio incompleto del curso expandido recibe un **borde animado**, con una indicación hacia la acción del paso. Se respeta `prefers-reduced-motion`.
 - Solo si el **botón de acción** de ese paso está fuera del área realmente visible del panel, aparece en el pie fijo **«Sube para continuar»** o **«Baja para continuar»**. Si el usuario lo pulsa, la interfaz desplaza suavemente **solo el panel del laboratorio** hacia esa acción. **Nunca se hace scroll automático por inactividad.**
 - Si el alumno desplaza el panel hasta ver la acción, el botón direccional se oculta; si continúa desplazándose y deja la acción fuera de vista, vuelve a aparecer sin exigir otro periodo de espera. La animación no impide usar la aplicación.
 - Mientras hay un modal del editor, confirmación, creación ocupada, error o guardado pendiente, se pausa la asistencia. Un progreso nuevo resuelve el paso destacado y la próxima orientación corresponde al siguiente criterio incompleto.

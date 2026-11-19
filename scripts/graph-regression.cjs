@@ -20,7 +20,7 @@ function load(rel,stubs={}){
  const module={exports:{}};
  const sandbox={module,exports:module.exports,require:(id)=>{
   if(id==='@xyflow/react'&&Object.prototype.hasOwnProperty.call(stubs,id))return {...stubs[id],useUpdateNodeInternals:()=>()=>{}};
-  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@atlas/contracts'?{...actualContracts,...stubs[id]}:stubs[id];
+  if(Object.prototype.hasOwnProperty.call(stubs,id))return id==='@novzi/contracts'?{...actualContracts,...stubs[id]}:stubs[id];
   if(id==='react'||id.startsWith('node:'))return require(id);
   if(id.endsWith('/diagram-beautify'))return diagramBeautifyModule;
   throw Error(`Unexpected require ${id} in ${rel}`);
@@ -28,13 +28,13 @@ function load(rel,stubs={}){
  const execute=vm.runInThisContext('(function(module,exports,require,console,crypto,structuredClone){'+code+'\n})',{filename});
  execute(module,module.exports,sandbox.require,console,global.crypto,global.structuredClone);return module.exports;
 }
-const diagramBeautifyModule=load('apps/web/src/features/editor/domain/diagram-beautify.ts',{'@atlas/contracts':actualContracts});
+const diagramBeautifyModule=load('apps/web/src/features/editor/domain/diagram-beautify.ts',{'@novzi/contracts':actualContracts});
 const classPolicy=load('packages/contracts/src/uml-class-policy.ts');
 const umlContainers=load('packages/contracts/src/uml-containers.ts',{'./uml-class-policy':classPolicy});
 const sizing=load('packages/contracts/src/node-sizing.ts',{'./uml-containers':umlContainers,'./uml-class-policy':classPolicy});
 const sequenceLayout=load('packages/contracts/src/uml-sequence-layout.ts');
 const sequencePorts=load('packages/contracts/src/uml-sequence-ports.ts');
-const commands=load('apps/web/src/features/editor/domain/document-commands.ts',{'@atlas/contracts':{...classPolicy,...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000}});
+const commands=load('apps/web/src/features/editor/domain/document-commands.ts',{'@novzi/contracts':{...classPolicy,...umlContainers,...sizing,...sequenceLayout,...sequencePorts,validNodeDimension:n=>Number.isInteger(n)&&n>=48&&n<=4000}});
 const parallel=loadContract(path.join(root,'packages/contracts/src/parallel-edges.ts'));
 const assembly=load('apps/web/src/components/organisms/uml-assembly.ts');
 const progress=load('apps/web/src/features/academy/progress.ts');
@@ -47,7 +47,7 @@ const umlPolicy={...classPolicy,...umlNotation,...umlContainers,...sizing,...seq
 const contract=load('packages/contracts/src/index.ts',{'./uml-class-policy':classPolicy,'./uml-class-scene':classScene,'./permissions':{},'./collaboration':{},'./export-fields':exportFields,'./uml':uml,'./uml-structure':umlStructure,'./uml-notation':umlNotation,'./uml-containers':umlContainers,'./node-sizing':sizing,'./uml-sequence-layout':sequenceLayout,'./uml-sequence-ports':sequencePorts});
 const roles={allowed:()=>true,requirePermission:()=>{}};
 class DomainError extends Error{constructor(message,status){super(message);this.statusCode=status}}
-const policy=load('apps/api/src/modules/projects/application/document-policy.ts',{'@atlas/contracts':umlPolicy,'../../../security/roles':roles,'../../../domain/errors':{DomainError}});
+const policy=load('apps/api/src/modules/projects/application/document-policy.ts',{'@novzi/contracts':umlPolicy,'../../../security/roles':roles,'../../../domain/errors':{DomainError}});
 const e=(id,type,name=id)=>({id,type,name,summary:'',description:'',owner:'',author:'test',status:'Borrador',createdAt:'2026-11-12',updatedAt:'2026-11-12',links:[],fields:{}});
 const d=(id,type,nodes=[],edges=[])=>({id,type,name:id,description:'',createdAt:'2026-11-12',nodes,edges});
 const node=(id,elementId)=>({id,elementId,x:100,y:150});
@@ -85,13 +85,13 @@ test('las cajas presentan tres puertos arriba y tres abajo además de izquierda/
  const React=require('react');const {renderToStaticMarkup}=require('react-dom/server');
  const Stub=()=>React.createElement('i');
  const icons=new Proxy({}, {get:()=>Stub});
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':icons,
   '@xyflow/react':{Handle:({id,type,position})=>React.createElement('span',{'data-port':id,'data-kind':type,'data-side':position}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{c2:'C2'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{c2:'C2'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  });
- const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}));
+ const html=renderToStaticMarkup(React.createElement(novzi.NovziNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}));
  for(const id of ['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'])assert.match(html,new RegExp(`data-port="${id}"`));
  assert.equal((html.match(/data-port=/g)||[]).length,8)
 });
@@ -100,16 +100,16 @@ test('el render de relaciones muestra ambas flechas y respeta el trazo',()=>{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
-  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
+  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  });
  const v=doc();v.diagrams[0].edges[0]={...v.diagrams[0].edges[0],direction:'both',lineStyle:'dashed',pathStyle:'bezier',sourceHandle:'top-2',targetHandle:'bottom-1'};
  const graph=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true});
- const rel=graph.edges[0];assert.equal(rel.type,'atlas-parallel');assert.equal(rel.data.parallelPath,'bezier');assert.ok(rel.data.routeObstacles.length>0);assert.equal(rel.markerEnd.type,'arrowclosed');assert.equal(rel.markerStart.type,'arrowclosed');assert.equal(rel.style.strokeDasharray,'7 5');assert.equal(rel.sourceHandle,'top-2');assert.equal(rel.targetHandle,'bottom-1');
+ const rel=graph.edges[0];assert.equal(rel.type,'novzi-parallel');assert.equal(rel.data.parallelPath,'bezier');assert.ok(rel.data.routeObstacles.length>0);assert.equal(rel.markerEnd.type,'arrowclosed');assert.equal(rel.markerStart.type,'arrowclosed');assert.equal(rel.style.strokeDasharray,'7 5');assert.equal(rel.sourceHandle,'top-2');assert.equal(rel.targetHandle,'bottom-1');
  const old=graph.edges[1];assert.equal(old.sourceHandle,'right');assert.equal(old.targetHandle,'left');assert.ok(old.markerEnd);assert.equal(old.markerStart,undefined)
 });
 test('el backend exige relation.delete antes de permitir borrar una relación',()=>{
  const guarded=load('apps/api/src/modules/projects/application/document-policy.ts',{
-  '@atlas/contracts':umlPolicy,
+  '@novzi/contracts':umlPolicy,
   '../../../security/roles':{allowed:()=>true,requirePermission:(_access,permission)=>{if(permission==='relation.delete.mixed')throw new DomainError('Permiso insuficiente',403)}},
   '../../../domain/errors':{DomainError}
  });
@@ -122,7 +122,7 @@ test('las relaciones nuevas sobreviven exportación e importación JSON sin modi
 });
 test('el backend no permite vincular un nodo de una vista sin permiso',()=>{
  const protectedPolicy=load('apps/api/src/modules/projects/application/document-policy.ts',{
-  '@atlas/contracts':umlPolicy,
+  '@novzi/contracts':umlPolicy,
   '../../../security/roles':{allowed:()=>true,requirePermission:(_access,permission)=>{if(permission==='diagram.view.c2')throw new DomainError('Vista restringida',403)}},
   '../../../domain/errors':{DomainError}
  });
@@ -160,14 +160,14 @@ test('adaptador ReactFlow da una ruta única a cada relación del mismo par',()=
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
-  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
+  '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc()
  v.diagrams[0].edges.push(edge('r3','na','nb',{sourceHandle:'top-1',targetHandle:'bottom-1'}))
  v.diagrams[0].edges.push(edge('r4','na','nb',{sourceHandle:'right',targetHandle:'left',pathStyle:'bezier'}))
  const view=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true})
  const related=view.edges.filter(e=>['r1','r3','r4'].includes(e.id))
- assert.equal(related.filter(e=>e.type==='atlas-parallel').length,3)
+ assert.equal(related.filter(e=>e.type==='novzi-parallel').length,3)
  assert.equal(new Set(related.map(e=>e.data.parallelOffset)).size,3)
  assert.ok(view.edges.find(e=>e.id==='r2').data.routeObstacles.length>0)
  assert.equal(view.edges.find(e=>e.id==='r3').sourceHandle,'top-1')
@@ -185,16 +185,16 @@ test('identidad de los cuatro niveles C4 y de vistas de procesos',()=>{
 
 test('ReactFlow renderiza rutas paralelas seleccionables y etiquetas independientes',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
- const edgeComponent=load('apps/web/src/components/organisms/AtlasParallelEdge.tsx',{
+ const edgeComponent=load('apps/web/src/components/organisms/NovziParallelEdge.tsx',{
   '@xyflow/react':{
    BaseEdge:({path,interactionWidth})=>React.createElement('path',{'data-path':path,'data-hit':interactionWidth}),
    EdgeLabelRenderer:({children})=>React.createElement('span',{'data-edge-label':true},children)
   },
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
+  '@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const html=renderToStaticMarkup(React.createElement(edgeComponent.AtlasParallelEdge,{
+ const html=renderToStaticMarkup(React.createElement(edgeComponent.NovziParallelEdge,{
   id:'r3',sourceX:0,sourceY:0,targetX:300,targetY:0,
   data:{parallelOffset:30,parallelPath:'smoothstep'},label:'Entrega evento',style:{stroke:'#123'}
  }))
@@ -205,13 +205,13 @@ test('ReactFlow renderiza rutas paralelas seleccionables y etiquetas independien
 test('los ocho puertos pueden iniciar y recibir conexiones en modo loose',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id,type})=>React.createElement('span',{'data-port':id,'data-direction':type}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{c2:'C2 · Contenedores'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{c2:'C2 · Contenedores'},elementLabels:{container:'Contenedor'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}))
+ const html=renderToStaticMarkup(React.createElement(novzi.NovziNode,{data:{element:e('a','container'),mode:'mixed',graphType:'c2'},selected:false}))
  assert.equal((html.match(/data-direction="source"/g)||[]).length,8)
 })
 test('backend conserva todas las relaciones paralelas y permite borrar una sola con ACL',()=>{
@@ -292,7 +292,7 @@ test('UML backend: no deja persistir detalles técnicos sin permisos',()=>{
  const noTechnical={roleKey:'custom',permissions:['diagram.view.c2','element.view.container','element.view.service','element.view.database','element.edit.container','diagram.layout.c2']}
  const r={allowed:(_a,p)=>noTechnical.permissions.includes(p),requirePermission:(_a,p)=>{if(!noTechnical.permissions.includes(p))throw new DomainError('Permiso insuficiente '+p,403)}}
  const secured=load('apps/api/src/modules/projects/application/document-policy.ts',{
-  '@atlas/contracts':umlPolicy,
+  '@novzi/contracts':umlPolicy,
   '../../../security/roles':r,'../../../domain/errors':{DomainError}
  })
  const visible=secured.projectVisible(original,noTechnical)
@@ -304,26 +304,26 @@ test('UML backend: no deja persistir detalles técnicos sin permisos',()=>{
 test('UML grafo: se dibuja dentro del paquete y las conexiones usan notación propia',()=>{
  const hook=load('apps/web/src/features/editor/hooks/useGraphView.ts',{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
-  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
+  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc();v.elements.pkg=e('pkg','uml-package');v.elements.a.type='uml-class';v.elements.b.type='uml-class';v.diagrams[0]=d('uml','uml-class',[
   {id:'parent',elementId:'pkg',x:10,y:10},{id:'na',elementId:'a',x:30,y:90,parentNodeId:'parent'},{id:'nb',elementId:'b',x:670,y:90}
  ],[edge('association1','na','nb',{relationKind:'generalization',targetMultiplicity:'0..*'})])
  const graph=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'technical',selectedId:null,canEdit:true})
  assert.equal(graph.nodes[0].id,'parent');assert.equal(graph.nodes.find(n=>n.id==='na').parentId,'parent');assert.equal(graph.nodes.find(n=>n.id==='na').extent,'parent')
- assert.equal(graph.edges[0].type,'atlas-uml');assert.equal(graph.edges[0].data.relationKind,'generalization');assert.equal(graph.edges[0].data.targetMultiplicity,'0..*')
+ assert.equal(graph.edges[0].type,'novzi-uml');assert.equal(graph.edges[0].data.relationKind,'generalization');assert.equal(graph.edges[0].data.targetMultiplicity,'0..*')
  policy.ensureUniqueIds(v)
 })
 test('UML clases, objetos y componentes usan compartimentos, valores y símbolo propio',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-class':'UML Clases','uml-object':'Objetos','uml-component':'Componentes'},elementLabels:{'uml-class':'Clase','uml-object':'Instancia',component:'Componente'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-class':'UML Clases','uml-object':'Objetos','uml-component':'Componentes'},elementLabels:{'uml-class':'Clase','uml-object':'Instancia',component:'Componente'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const html=(element,graphType)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element,mode:'technical',graphType},selected:false}))
+ const html=(element,graphType)=>renderToStaticMarkup(React.createElement(novzi.NovziNode,{data:{element,mode:'technical',graphType},selected:false}))
  const klass={...e('cls','uml-class','Cliente'),uml:{attributes:[{id:'a',name:'id',type:'UUID',visibility:'private'}],operations:[{id:'o',name:'guardar',returnType:'void',visibility:'public',parameters:[]}]}}
  assert.match(html(klass,'uml-class'),/- id: UUID/);assert.match(html(klass,'uml-class'),/\+ guardar\(\): void/)
  const object={...e('obj','uml-object','c1'),uml:{classifier:'Cliente',slots:[{id:'s',name:'id',value:'abc'}]}}
@@ -331,11 +331,11 @@ test('UML clases, objetos y componentes usan compartimentos, valores y símbolo 
  assert.match(html(e('cmp','component','Motor'),'uml-component'),/Símbolo UML de componente/)
 })
 test('UML líneas: agregación, composición, herencia, realización y ball/socket',()=>{
- const edges=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+ const edges=load('apps/web/src/components/organisms/NovziUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':require('react'),
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
+  '@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
  const rel=edges.umlRelationAdornment
@@ -362,11 +362,11 @@ test('UML atributos, operaciones, slots y paquete se ofrecen en fichas de export
 })
 test('UML componentes: formas de marcador SVG para generalización y composición',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
- const el=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+ const el=load('apps/web/src/components/organisms/NovziUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:({id,path,markerStart,markerEnd,style})=>React.createElement('path',{id,d:path,'data-start':markerStart||'','data-end':markerEnd||'',style}),EdgeLabelRenderer:({children})=>React.createElement('g',null,children)},
-  'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
- const edge=(kind)=>renderToStaticMarkup(React.createElement(el.AtlasUmlEdge,{id:'uml-edge-test',sourceX:10,sourceY:40,targetX:300,targetY:40,sourcePosition:'right',targetPosition:'left',data:{parallelOffset:0,parallelPath:'straight',relationKind:kind},label:''}))
+ const edge=(kind)=>renderToStaticMarkup(React.createElement(el.NovziUmlEdge,{id:'uml-edge-test',sourceX:10,sourceY:40,targetX:300,targetY:40,sourcePosition:'right',targetPosition:'left',data:{parallelOffset:0,parallelPath:'straight',relationKind:kind},label:''}))
  assert.match(edge('composition'),/data-uml-terminal="diamond-filled"/)
  assert.match(edge('composition'),/fill="#506986"/)
  assert.match(edge('aggregation'),/fill="white"/)
@@ -396,9 +396,9 @@ test('los 14 tipos UML ofrecen notación fija para cada relación (trazo, sentid
  assert.equal(umlNotation.umlRelationNotation('provided-interface').end,'ball')
 })
 test('orientación de símbolos UML sigue el lado del puerto, no el vector diagonal',()=>{
- const edges=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+ const edges=load('apps/web/src/components/organisms/NovziUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
-  'react':require('react'),'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
+  'react':require('react'),'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},
   '../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,'react/jsx-runtime':require('react/jsx-runtime')
  })
  assert.equal(edges.terminalAngle('top',100,100,400,400),-90)
@@ -423,12 +423,12 @@ test('API rechaza nuevas relaciones UML semánticamente inválidas y conserva el
 test('grafo UML antiguo se visualiza con notación correcta sin reescribir relaciones persistidas',()=>{
  const hook=load('apps/web/src/features/editor/hooks/useGraphView.ts',{
   '../domain/graph-selection':{graphSelection:d=>({nodeIds:d.nodes.map(n=>n.id),edgeIds:d.edges.map(e=>e.id)})},
-  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
+  '../domain/parallel-edges':parallel,'react':{useMemo:cb=>cb()},'@xyflow/react':{MarkerType:{ArrowClosed:'closed'}},'@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v=doc();v.elements.a.type='uml-class';v.elements.b.type='uml-class'
  v.diagrams[0]=d('old','uml-class',[node('na','a'),node('nb','b')],[edge('r','na','nb',{relationKind:'composition',direction:'both',lineStyle:'dotted'})])
  const graph=hook.useGraphView({diagram:v.diagrams[0],doc:v,groups:[],dependencies:false,mode:'technical',selectedId:null,canEdit:true})
- assert.equal(graph.edges[0].type,'atlas-uml')
+ assert.equal(graph.edges[0].type,'novzi-uml')
  assert.equal(graph.edges[0].markerStart,undefined)
  assert.equal(graph.edges[0].markerEnd,undefined)
  assert.equal(graph.edges[0].style.strokeDasharray,undefined)
@@ -489,12 +489,12 @@ test('UML despliegue: dispositivos y entornos son semánticamente diferentes y t
 
 test('UML conexiones: geometría compartida para ensamblaje y terminales cuadrados entre partes',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
- const component=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+ const component=load('apps/web/src/components/organisms/NovziUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  '@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
- const svg=(kind,additional={})=>renderToStaticMarkup(React.createElement(component.AtlasUmlEdge,{
+ const svg=(kind,additional={})=>renderToStaticMarkup(React.createElement(component.NovziUmlEdge,{
   id:'relation',sourceX:30,sourceY:75,targetX:380,targetY:75,sourcePosition:'right',targetPosition:'left',
   data:{parallelOffset:0,parallelPath:'straight',relationKind:kind,...additional}
  }))
@@ -552,13 +552,13 @@ test('QA CIRCUITO: importar cuatro vistas estructurales y navegar entre cajas co
 test('UML render: clasificador, puerto, dispositivos Docker y subpaquete son figuras distintas',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:()=>React.createElement('i',{'data-port':1}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-composite':'Compuesta','uml-deployment':'Despliegue','uml-package':'Paquetes'},elementLabels:{'uml-class':'Clase UML','uml-port':'Puerto','uml-device':'Dispositivo','uml-execution':'Entorno','uml-package':'Paquete'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-composite':'Compuesta','uml-deployment':'Despliegue','uml-package':'Paquetes'},elementLabels:{'uml-class':'Clase UML','uml-port':'Puerto','uml-device':'Dispositivo','uml-execution':'Entorno','uml-package':'Paquete'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const html=(model,view,extra={})=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{data:{element:model,mode:'technical',graphType:view,...extra},selected:false}))
+ const html=(model,view,extra={})=>renderToStaticMarkup(React.createElement(novzi.NovziNode,{data:{element:model,mode:'technical',graphType:view,...extra},selected:false}))
  assert.match(html(e('s','uml-class','SistemaPago'),'uml-composite'),/uml-composite-classifier/)
  assert.match(html(e('port','uml-port','p:IPagos'),'uml-composite'),/uml-composite-port/)
  assert.match(html({...e('android','uml-device','Android'),uml:{deviceIcon:'android'}},'uml-deployment'),/«device»/)
@@ -666,12 +666,12 @@ test('UML visibilidad admite sólo los cuatro valores estándar',()=>{
 })
 test('ensamblaje UML: la concavidad del socket mira a la bola, sobre tramos horizontales y verticales',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
- const component=load('apps/web/src/components/organisms/AtlasUmlEdge.tsx',{
+ const component=load('apps/web/src/components/organisms/NovziUmlEdge.tsx',{
   '@xyflow/react':{BaseEdge:()=>null,EdgeLabelRenderer:({children})=>children},
   'react':React,'../../features/editor/domain/parallel-edges':parallel,'./uml-assembly':assembly,
-  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
+  '@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing},'react/jsx-runtime':require('react/jsx-runtime')
  })
- const render=(kind,coordinates)=>renderToStaticMarkup(React.createElement(component.AtlasUmlEdge,{id:'edge',
+ const render=(kind,coordinates)=>renderToStaticMarkup(React.createElement(component.NovziUmlEdge,{id:'edge',
   ...coordinates,data:{parallelOffset:0,parallelPath:'straight',relationKind:kind}}))
  for(const coords of [
   {sourceX:20,sourceY:100,targetX:320,targetY:100,sourcePosition:'right',targetPosition:'left'},
@@ -691,7 +691,7 @@ test('al mover cajas con rutas ortogonales el ensamble se mantiene sobre un segm
  }
 })
 test('importación QA 5 vistas: estructuras anidadas y relaciones de perfiles y casos de uso',()=>{
- const fixture=JSON.parse(fs.readFileSync(path.join(root,'docs/qa/ATLAS_QA_UML_Cinco_Vistas_20261114.json'),'utf8')).document
+ const fixture=JSON.parse(fs.readFileSync(path.join(root,'docs/qa/NOVZI_QA_UML_Cinco_Vistas_20261114.json'),'utf8')).document
  assert.equal(contract.isProjectDocument(fixture),true)
  assert.equal(fixture.diagrams.length,5)
  policy.ensureUniqueIds(fixture)
@@ -706,7 +706,7 @@ test('importación QA 5 vistas: estructuras anidadas y relaciones de perfiles y 
  }
 })
 
-// ATLAS QA UML actividades — controles y formas nativas 14/11/2026.
+// NOVZI QA UML actividades — controles y formas nativas 14/11/2026.
 test('UML actividades ofrece catálogo integral, dos flujos y relaciones auxiliares',()=>{
  assert.deepEqual([...uml.UML_ELEMENTS_BY_DIAGRAM['uml-activity']],['uml-start','uml-action','uml-decision','uml-fork','uml-end','uml-flow-final','uml-object-node','uml-partition','uml-activity-pin','uml-activity-parameter','uml-activity-interruptible-region','uml-comment','uml-constraint'])
  assert.deepEqual([...uml.UML_RELATIONS_BY_DIAGRAM['uml-activity']],['control-flow','object-flow','exception-handler','annotation'])
@@ -733,8 +733,8 @@ test('UML actividades: particiones encapsulan nodos, mantienen tamaño e identid
  assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-partition','uml-decision'),true)
  assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-partition','uml-object-node'),true)
  assert.equal(umlContainers.umlContainerAllows('uml-activity','uml-action','uml-partition'),false)
- assert.equal(sizing.atlasNodeSize('uml-activity',e('p','uml-partition')).width>=500,true)
- assert.equal(sizing.atlasNodeSize('uml-activity',e('d','uml-decision')).width,sizing.atlasNodeSize('uml-activity',e('d','uml-decision')).height)
+ assert.equal(sizing.novziNodeSize('uml-activity',e('p','uml-partition')).width>=500,true)
+ assert.equal(sizing.novziNodeSize('uml-activity',e('d','uml-decision')).width,sizing.novziNodeSize('uml-activity',e('d','uml-decision')).height)
 })
 test('UML perfiles no ofrece Modelo UML nuevo, pero continúa leyendo proyectos antiguos',()=>{
  assert.equal(uml.umlElementCreatable('uml-profile','uml-model'),false)
@@ -750,13 +750,13 @@ test('Despliegue muestra nombre del grupo dependencia/despliegue/manifestación 
 test('UML actividades: las figuras son el nodo, sin tarjeta genérica ni rombo decorativo',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const nodeView=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const nodeView=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({}, {get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('i',{'data-port':id}),NodeResizer:Stub,Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'}},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-action':'Acción'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-action':'Acción'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const render=type=>renderToStaticMarkup(React.createElement(nodeView.AtlasNode,{id:'n-'+type,data:{element:e(type,type,'Prueba'),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ const render=type=>renderToStaticMarkup(React.createElement(nodeView.NovziNode,{id:'n-'+type,data:{element:e(type,type,'Prueba'),mode:'mixed',graphType:'uml-activity'},selected:false}))
  const expected=[['uml-decision','uml-decision-shape'],['uml-fork','uml-fork-symbol'],['uml-action','uml-action-label'],['uml-object-node','uml-object-node-label'],['uml-flow-final','uml-control-glyph'],['uml-partition','uml-partition-heading'],['uml-start','uml-control-glyph'],['uml-end','uml-control-glyph']]
  for(const [kind,css] of expected){const out=render(kind);assert.match(out,new RegExp(css),`${kind} debe contener ${css}`);assert.doesNotMatch(out,/class="node-top"/,`${kind} no debe heredar cabecera genérica`)}
  assert.match(render('uml-decision'),/polygon points="42,2 82,42 42,82 2,42"/)
@@ -764,7 +764,7 @@ test('UML actividades: las figuras son el nodo, sin tarjeta genérica ni rombo d
  assert.match(fs.readFileSync(path.join(root,'apps/web/src/styles.css'),'utf8'),/\.uml-diagram-uml-activity\.uml-decision-card/)
 })
 test('JSON QA UML actividades: válido con objetos, carriles y final de flujo',()=>{
- const v=JSON.parse(fs.readFileSync(path.join(root,'ATLAS_QA_UML_Actividades_20261114.json'),'utf8')).document
+ const v=JSON.parse(fs.readFileSync(path.join(root,'NOVZI_QA_UML_Actividades_20261114.json'),'utf8')).document
  assert.equal(contract.isProjectDocument(v),true)
  policy.ensureUniqueIds(v)
  assert.equal(v.diagrams[0].nodes.length,14)
@@ -777,16 +777,16 @@ test('JSON QA UML actividades: válido con objetos, carriles y final de flujo',(
 test('UML actividades: decisiones, inicio y finales muestran exactamente cuatro puntos cardinales',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{
    Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||style?.left||style?.right||''}),
    Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub
   },
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-start':'Inicial','uml-end':'Final','uml-flow-final':'Fin de flujo','uml-decision':'Decisión'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-start':'Inicial','uml-end':'Final','uml-flow-final':'Fin de flujo','uml-decision':'Decisión'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const seen=(type)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'n-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ const seen=(type)=>renderToStaticMarkup(React.createElement(novzi.NovziNode,{id:'n-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
  for(const type of ['uml-start','uml-end','uml-flow-final','uml-decision']){
   const html=seen(type)
   assert.equal((html.match(/data-port=/g)||[]).length,4,type)
@@ -800,17 +800,17 @@ test('UML actividades: decisiones, inicio y finales muestran exactamente cuatro 
 test('UML actividades: control symbols no muestran tarjeta y pintan solamente geometría SVG',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const view=type=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'qa-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ const view=type=>renderToStaticMarkup(React.createElement(novzi.NovziNode,{id:'qa-'+type,data:{element:e('n',type),mode:'mixed',graphType:'uml-activity'},selected:false}))
  for(const type of ['uml-start','uml-end','uml-flow-final','uml-decision','uml-fork']){
   const html=view(type)
-  assert.match(html,/class="atlas-uml-control/,type)
-  assert.doesNotMatch(html,/class="atlas-node/,type)
+  assert.match(html,/class="novzi-uml-control/,type)
+  assert.doesNotMatch(html,/class="novzi-node/,type)
   assert.equal((html.match(/<svg /g)||[]).length,1,type)
   assert.doesNotMatch(html,/class="node-top"|node-title|node-summary/,type)
  }
@@ -821,20 +821,20 @@ test('UML actividades: control symbols no muestran tarjeta y pintan solamente ge
  assert.match(view('uml-flow-final'),/<path d="M18 18L42 42M42 18L18 42"/)
  assert.equal((view('uml-fork').match(/<rect /g)||[]).length,1)
  const css=fs.readFileSync(path.join(root,'apps/web/src/styles.css'),'utf8')
- assert.match(css,/\.react-flow__node-atlas>\.atlas-uml-control/)
+ assert.match(css,/\.react-flow__node-novzi>\.novzi-uml-control/)
  assert.match(css,/background:transparent!important/)
 })
 
 test('UML actividades: barra de bifurcación mantiene tres puntos arriba y abajo, uno por lateral',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id,position,style})=>React.createElement('span',{'data-port':id,'data-side':position,'data-offset':style?.top||style?.bottom||''}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-fork':'Bifurcación'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-activity':'Actividades'},elementLabels:{'uml-fork':'Bifurcación'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const html=renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:'fork',data:{element:e('fork','uml-fork'),mode:'mixed',graphType:'uml-activity'},selected:false}))
+ const html=renderToStaticMarkup(React.createElement(novzi.NovziNode,{id:'fork',data:{element:e('fork','uml-fork'),mode:'mixed',graphType:'uml-activity'},selected:false}))
  assert.equal((html.match(/data-port=/g)||[]).length,8)
  for(const port of ['left','right','top-1','top-2','top-3','bottom-1','bottom-2','bottom-3'])assert.match(html,new RegExp(`data-port="${port}"`))
  assert.equal((html.match(/data-offset="29%"/g)||[]).length,6)
@@ -846,7 +846,7 @@ test('UML actividades: las conexiones históricas se alinean al único puerto si
   '../domain/parallel-edges':parallel,
   'react':{useMemo:cb=>cb()},
   '@xyflow/react':{MarkerType:{ArrowClosed:'arrowclosed'}},
-  '@atlas/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
+  '@novzi/contracts':{...classPolicy,...umlNotation,...umlContainers,...sizing}
  })
  const v={...doc(),elements:{start:e('start','uml-start'),decision:e('decision','uml-decision'),fork:e('fork','uml-fork')},diagrams:[d('act','uml-activity',[node('ns','start'),node('nd','decision'),node('nf','fork')],[
   edge('historica','ns','nd',{sourceHandle:'top-1',targetHandle:'bottom-3',relationKind:'control-flow'}),
@@ -927,13 +927,13 @@ test('Selección por área: borrar parcialmente un grupo limpia aristas y desaco
 test('Render UML de secuencia: fragmento combinado contiene operandos; activación y destrucción son símbolos',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server')
  const Stub=()=>React.createElement('i')
- const atlas=load('apps/web/src/components/organisms/AtlasNode.tsx',{
+ const novzi=load('apps/web/src/components/organisms/NovziNode.tsx',{
   'lucide-react':new Proxy({},{get:()=>Stub}),
   '@xyflow/react':{Handle:({id})=>React.createElement('span',{'data-port':id}),Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},NodeResizer:Stub},
-  '@atlas/contracts':{...classPolicy,diagramLabels:{'uml-sequence':'Secuencia'},elementLabels:{'uml-frame':'Fragmento'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,atlasNodeMinimum:sizing.atlasNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
+  '@novzi/contracts':{...classPolicy,diagramLabels:{'uml-sequence':'Secuencia'},elementLabels:{'uml-frame':'Fragmento'},umlAttributeText:umlStructure.umlAttributeText,umlOperationText:umlStructure.umlOperationText,umlOperationTextResolved:umlStructure.umlOperationTextResolved,umlObjectTitle:umlStructure.umlObjectTitle,novziNodeMinimum:sizing.novziNodeMinimum,sequenceActivationPorts:sequencePorts.sequenceActivationPorts},
   'react/jsx-runtime':require('react/jsx-runtime')
  })
- const make=(type,summary,uml)=>renderToStaticMarkup(React.createElement(atlas.AtlasNode,{id:type,data:{element:{...e('x',type),summary,uml},mode:'technical',graphType:'uml-sequence'},selected:false}))
+ const make=(type,summary,uml)=>renderToStaticMarkup(React.createElement(novzi.NovziNode,{id:type,data:{element:{...e('x',type),summary,uml},mode:'technical',graphType:'uml-sequence'},selected:false}))
  const combined=make('uml-frame','[válido]\n[inválido]',{classifier:'alt'})
  assert.match(combined,/uml-combined-fragment/)
  assert.match(combined,/\[válido\]/)

@@ -22,11 +22,11 @@ async function check(name,fn){cleanup();document.body.innerHTML='';window.localS
 ;(async()=>{
  await check('tutorial empieza y permite avanzar/retroceder',()=>{
   render(React.createElement(Guide,{onClose:()=>{}}))
-  assert(screen.getByText('Bienvenido a ATLAS'))
+  assert(screen.getByText('Bienvenido a NOVZI'))
   fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
   assert(screen.getByText('1. Organización = espacio de trabajo'))
   fireEvent.click(screen.getByRole('button',{name:/Anterior/}))
-  assert(screen.getByText('Bienvenido a ATLAS'))
+  assert(screen.getByText('Bienvenido a NOVZI'))
  })
  await check('ejercicio de jerarquia',()=>{
   render(React.createElement(Guide,{onClose:()=>{}}))

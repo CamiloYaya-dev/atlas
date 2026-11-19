@@ -17,7 +17,7 @@ export function fieldValue(item:Item,name:string):string{
 }
 const dimensions=(t?:Template)=>{const w=t?.paper==='LETTER'?215.9:210,h=t?.paper==='LETTER'?279.4:297;return t?.orientation==='landscape'?{width:h,height:w}:{width:w,height:h}}
 const pageCount=(t?:Template)=>Math.max(1,Math.min(20,Math.round(t?.page_count??t?.pageCount??1)))
-const allElements=(t:Template|undefined,kind:string)=>t?.layout??defaultTemplateLayout(kind as 'finding'|'rf'|'rnf'|'story')
+const allElements=(t:Template|undefined,kind:string)=>t?.layout??defaultTemplateLayout(kind as 'finding'|'rf'|'rnf'|'story'|'asis')
 const elementsForPage=(t:Template|undefined,kind:string,page:number)=>allElements(t,kind).filter(x=>(x.page??0)===page)
 const rows=(e:TemplateElement)=>Math.max(1,Math.min(20,e.rows??3)),cols=(e:TemplateElement)=>Math.max(1,Math.min(12,e.cols??3))
 const rawValue=(item:Item,name:string):unknown=>name==='code'?item.code:name==='title'?item.title:name==='createdAt'?item.created_at:name==='updatedAt'?item.updated_at:name.startsWith('custom:')?(item.payload.custom as Record<string,unknown>|undefined)?.[name.slice(7)]:item.payload[name]
@@ -139,7 +139,7 @@ async function docxFromLayout(item:Item,t?:Template){const page=dimensions(t),me
  return zip([{name:'[Content_Types].xml',data:types},{name:'_rels/.rels',data:relationships},{name:'word/document.xml',data:document},{name:'word/_rels/document.xml.rels',data:imageRels},...media.map(m=>({name:`word/media/${m.name}`,data:m.data}))])
 }
 export async function renderFunctionalFile(item:Item,t:Template|undefined,format:'html'|'pdf'|'docx'){
- const name=`ATLAS_${item.code.replace(/[^\w-]/g,'_')}`
+ const name=`NOVZI_${item.code.replace(/[^\w-]/g,'_')}`
  if(format==='html')return {name:name+'.html',mime:'text/html; charset=utf-8',data:Buffer.from(layoutHTML(item,t))}
  if(format==='docx')return {name:name+'.docx',mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',data:await docxFromLayout(item,t)}
  const pages=[];for(let i=0;i<pageCount(t);i++){const svg=layoutSVG(item,t,i);const jpg=await sharp(Buffer.from(svg.svg)).resize({width:1400}).flatten({background:'#fff'}).jpeg({quality:88}).toBuffer({resolveWithObject:true});pages.push({jpeg:jpg.data,width:jpg.info.width,height:jpg.info.height})}

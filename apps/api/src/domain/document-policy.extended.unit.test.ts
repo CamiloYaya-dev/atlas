@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {emptyDoc,createElement,ROLE_PRESETS} from '@atlas/contracts'
-import type {ModelElement,ProjectDocument} from '@atlas/contracts'
+import {emptyDoc,createElement,ROLE_PRESETS} from '@novzi/contracts'
+import type {ModelElement,ProjectDocument} from '@novzi/contracts'
 import {projectVisible,applyAuthorizedChange} from '../modules/projects/application/document-policy'
 import type {Access} from '../security/roles'
 function role(name='owner'):Access{return {roleId:'test',roleKey:name,roleName:name,permissions:new Set(ROLE_PRESETS.find(r=>r.key===name)!.permissions)}}

@@ -60,8 +60,8 @@
 @media(max-width:620px){.academy-missions{left:0;top:auto;right:0;bottom:0;width:100vw;max-height:min(85dvh,760px);border-radius:18px 18px 0 0}.academy-missions-content{padding:14px}.academy-missions-header{padding:11px 15px}.academy-missions-header small{display:none}}
 @media(max-height:600px){.academy-missions{top:8px;max-height:calc(100dvh - 16px)}.academy-missions-content{padding:10px}}
 
-@media(max-width:1250px){.atlas-academy-launcher{padding:8px;min-width:35px}.atlas-academy-launcher span{display:none}}
-@media(max-width:800px){.atlas-academy-launcher{display:none}}
+@media(max-width:1250px){.novzi-academy-launcher{padding:8px;min-width:35px}.novzi-academy-launcher span{display:none}}
+@media(max-width:800px){.novzi-academy-launcher{display:none}}
 
 /* Contextual, opt-in-by-idle guidance: no automatic scrolling or focus trapping. */
 .academy-coach-footer{flex:none;padding:8px 12px;background:#f8fbff;border-top:1px solid #e4ecf6;display:grid;gap:8px}

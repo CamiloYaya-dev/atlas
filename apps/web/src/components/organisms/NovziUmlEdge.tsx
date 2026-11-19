@@ -1,14 +1,14 @@
 import {needsDetour,obstacleRoute,distinctEdgeRoute} from '../../features/editor/domain/diagram-beautify'
 import type {Rectangle} from '../../features/editor/domain/diagram-beautify'
-import type {sequenceEdgeGeometry} from '@atlas/contracts'
+import type {sequenceEdgeGeometry} from '@novzi/contracts'
 /** UML 2.5.1: símbolos geométricos explícitos en los extremos del conector.
  * No usamos markerStart/markerEnd de React Flow para UML: un rombo o socket
  * no es una flecha genérica y su orientación depende del PUERTO conectado.
  */
 import {BaseEdge,EdgeLabelRenderer} from '@xyflow/react'
 import type {EdgeProps} from '@xyflow/react'
-import type {EdgePathStyle,UmlTerminal,DiagramType,ElementType} from '@atlas/contracts'
-import {umlRelationNotation,classRelationRoute,activityInterruptPath,activityExceptionRoute,classEndTerminal,classEndLabel} from '@atlas/contracts'
+import type {EdgePathStyle,UmlTerminal,DiagramType,ElementType} from '@novzi/contracts'
+import {umlRelationNotation,classRelationRoute,activityInterruptPath,activityExceptionRoute,classEndTerminal,classEndLabel} from '@novzi/contracts'
 import {parallelRoute} from '../../features/editor/domain/parallel-edges'
 import {assemblyAnchor} from './uml-assembly'
 export type UmlEdgeData={routeLane?:number;componentAssembly?:'forward'|'reverse';sequenceGeometry?:ReturnType<typeof sequenceEdgeGeometry>;activityInterrupted?:boolean;parallelOffset:number;parallelPath:EdgePathStyle;relationKind?:string;diagramType?:DiagramType;sourceElementType?:ElementType;targetElementType?:ElementType;sourceMultiplicity?:string;targetMultiplicity?:string;sourceRole?:string;targetRole?:string;wholeEnd?:'source'|'target';sourceNavigability?:'navigable'|'non-navigable'|'unspecified';targetNavigability?:'navigable'|'non-navigable'|'unspecified';extraEnds?:{id:string;x:number;y:number;label:string;side?:'top'|'bottom'|'left'|'right';navigability?:'navigable'|'non-navigable'|'unspecified'}[];semanticDisplayLabel?:string;extensionNote?:string[];associationClassPoint?:{x:number;y:number};annotationPoint?:{x:number;y:number}}
@@ -45,10 +45,10 @@ export function Terminal({kind,x,y,angle}:{kind:UmlTerminal;x:number;y:number;an
   {kind==='cross'&&<path d="M -8,-8 L 8,8 M -8,8 L 8,-8" strokeWidth={2.6}/>}
  </g>
 }
-export function AtlasUmlEdge(props:EdgeProps){
+export function NovziUmlEdge(props:EdgeProps){
  const data=(props.data||{}) as Partial<UmlEdgeData>
  const seq=data.sequenceGeometry
- if(seq)return <><BaseEdge id={props.id} path={seq.path} style={{stroke:INK,strokeWidth:1.5,strokeDasharray:seq.dash,fill:'none'}} interactionWidth={24}/><g pointerEvents="none" dangerouslySetInnerHTML={{__html:seq.marks}}/>{seq.label&&<EdgeLabelRenderer><div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${seq.labelX}px,${seq.labelY}px)`}}>{seq.label}</div></EdgeLabelRenderer>}</>
+ if(seq)return <><BaseEdge id={props.id} path={seq.path} style={{stroke:INK,strokeWidth:1.5,strokeDasharray:seq.dash,fill:'none'}} interactionWidth={24}/><g pointerEvents="none" dangerouslySetInnerHTML={{__html:seq.marks}}/>{seq.label&&<EdgeLabelRenderer><div className="novzi-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${seq.labelX}px,${seq.labelY}px)`}}>{seq.label}</div></EdgeLabelRenderer>}</>
  const n=umlRelationNotation(data.relationKind||'association')
  const displayLabel=n.label?(data.semanticDisplayLabel?.startsWith(n.label)?data.semanticDisplayLabel:n.label):props.label
  const input={sourceX:props.sourceX,sourceY:props.sourceY,targetX:props.targetX,targetY:props.targetY,sourcePosition:props.sourcePosition,targetPosition:props.targetPosition,offset:data.parallelOffset||0,pathStyle:data.parallelPath||'straight' as const}
@@ -75,11 +75,11 @@ export function AtlasUmlEdge(props:EdgeProps){
  const squareStart=hasSquares&&['uml-part','uml-port','uml-reference-role'].includes(data.sourceElementType||'')
  const squareEnd=hasSquares&&['uml-part','uml-port','uml-reference-role'].includes(data.targetElementType||'')
  return <>
-  {assembly&&<defs><mask id={`atlas-assembly-gap-${props.id}`} maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000">
+  {assembly&&<defs><mask id={`novzi-assembly-gap-${props.id}`} maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000">
    <rect x="-100000" y="-100000" width="200000" height="200000" fill="white"/>
    <rect x="-24" y="-15" width="48" height="30" transform={`translate(${assembly.x} ${assembly.y}) rotate(${assembly.angle})`} fill="black"/>
   </mask></defs>}
-  <BaseEdge id={props.id} path={actualPath} style={{...style,...(assembly?{mask:`url(#atlas-assembly-gap-${props.id})`}:{})}} interactionWidth={28}/>
+  <BaseEdge id={props.id} path={actualPath} style={{...style,...(assembly?{mask:`url(#novzi-assembly-gap-${props.id})`}:{})}} interactionWidth={28}/>
   {data.activityInterrupted&&!exception&&<path data-activity-interrupt="true" d={activityInterruptPath(route.labelX,route.labelY)} fill="none" stroke={INK} strokeWidth="2"/>}
   {squareStart&&<rect data-uml-terminal="port-square" x={props.sourceX-5.5} y={props.sourceY-5.5} width="11" height="11" fill="white" stroke={INK} strokeWidth="1.8" pointerEvents="none"/>}
   {nary&&<>{data.diagramType==='uml-component'?<circle cx={hub.x} cy={hub.y} r={4} fill={INK}/>:<polygon points={`${hub.x},${hub.y-10} ${hub.x+14},${hub.y} ${hub.x},${hub.y+10} ${hub.x-14},${hub.y}`} fill="white" stroke={INK}/>}{data.extraEnds?.map(p=><g key={p.id}><path d={`M ${hub.x} ${hub.y} L ${p.x} ${p.y}`} stroke={INK} fill="none"/><Terminal kind={p.navigability==='navigable'?'open-arrow':p.navigability==='non-navigable'?'cross':'none'} x={p.x} y={p.y} angle={terminalAngle(p.side,p.x,p.y,hub.x,hub.y)}/><text x={p.x+8} y={p.y-8} fontSize="10" fill={INK}>{p.label}</text></g>)}</>}
@@ -96,10 +96,10 @@ export function AtlasUmlEdge(props:EdgeProps){
   {!!data.extensionNote?.length&&<path data-uml-note-anchor="true" d={`M ${hub.x} ${hub.y} L ${hub.x} ${hub.y+15}`} stroke={INK} strokeDasharray="4 3" fill="none" pointerEvents="none"/>}
   {(displayLabel||data.sourceMultiplicity||data.targetMultiplicity||data.sourceRole||data.targetRole||data.extensionNote?.length)&&<EdgeLabelRenderer>
    {data.extensionNote?.length? <div className="uc-extension-note" style={{transform:`translate(-50%,0) translate(${route.labelX}px,${route.labelY+15}px)`}}>{data.extensionNote.map((line,i)=><div key={i}>{line}</div>)}</div>:null}
-   {displayLabel&&<div className="atlas-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${assemblyLabel?.x??labelX}px,${assemblyLabel?.y??labelY}px)`}}>{displayLabel}</div>}
-   {(data.sourceMultiplicity||data.sourceRole)&&<div className="atlas-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${sourceLabel.x}px,${sourceLabel.y}px)`}}>{data.sourceRole} {data.sourceMultiplicity}</div>}
-   {(data.targetMultiplicity||data.targetRole)&&<div className="atlas-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${targetLabel.x}px,${targetLabel.y}px)`}}>{data.targetRole} {data.targetMultiplicity}</div>}
+   {displayLabel&&<div className="novzi-parallel-edge-label" style={{transform:`translate(-50%,-50%) translate(${assemblyLabel?.x??labelX}px,${assemblyLabel?.y??labelY}px)`}}>{displayLabel}</div>}
+   {(data.sourceMultiplicity||data.sourceRole)&&<div className="novzi-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${sourceLabel.x}px,${sourceLabel.y}px)`}}>{data.sourceRole} {data.sourceMultiplicity}</div>}
+   {(data.targetMultiplicity||data.targetRole)&&<div className="novzi-uml-end-label" style={{transform:`translate(-50%,-50%) translate(${targetLabel.x}px,${targetLabel.y}px)`}}>{data.targetRole} {data.targetMultiplicity}</div>}
   </EdgeLabelRenderer>}
  </>
 }
-export const umlEdgeTypes={'atlas-uml':AtlasUmlEdge}
+export const umlEdgeTypes={'novzi-uml':NovziUmlEdge}

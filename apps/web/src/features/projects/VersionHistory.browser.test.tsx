@@ -1,6 +1,6 @@
 import {beforeEach,describe,expect,it,vi} from 'vitest'
 import {act,fireEvent,render,screen,waitFor,within} from '@testing-library/react'
-import {emptyDoc,createElement} from '@atlas/contracts'
+import {emptyDoc,createElement} from '@novzi/contracts'
 import {listDocumentVersions,loadDocumentVersion,restoreDocumentVersion,listRestoreBranches,createRestoreBranch,previewRestoreBranch,applyRestoreBranch,discardRestoreBranch} from './api'
 import VersionHistory from './VersionHistory'
 
@@ -20,7 +20,7 @@ beforeEach(()=>{
  vi.mocked(applyRestoreBranch).mockResolvedValue({version:5,restoredFrom:2})
  vi.mocked(discardRestoreBranch).mockResolvedValue({ok:true})
 })
-describe('Historial de documentos de ATLAS',()=>{
+describe('Historial de documentos de NOVZI',()=>{
  it('muestra revisiones, autores y versión cargada sin escribir el documento',async()=>{
   render(<VersionHistory projectId="proyecto-qa" currentVersion={3} onClose={vi.fn()}/>)
   expect(screen.getByRole('dialog',{name:'Historial de versiones'})).toBeTruthy()

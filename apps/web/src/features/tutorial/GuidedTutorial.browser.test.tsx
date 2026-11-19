@@ -5,14 +5,14 @@ import {TUTORIAL_STEPS,TUTORIAL_STORAGE_KEY,TUTORIAL_PROGRESS_KEY} from './tutor
 
 beforeEach(()=>{window.localStorage.removeItem(TUTORIAL_STORAGE_KEY);window.localStorage.removeItem(TUTORIAL_PROGRESS_KEY)})
 afterEach(()=>{document.body.innerHTML='';vi.restoreAllMocks()})
-describe('Academia ATLAS · tutorial contextual no destructivo',()=>{
- it('enseña el objetivo de ATLAS y permite avanzar y retroceder',()=>{
+describe('Academia NOVZI · tutorial contextual no destructivo',()=>{
+ it('enseña el objetivo de NOVZI y permite avanzar y retroceder',()=>{
   render(<GuidedTutorial onClose={vi.fn()}/> )
-  expect(screen.getByText('Bienvenido a ATLAS')).toBeTruthy()
+  expect(screen.getByText('Bienvenido a NOVZI')).toBeTruthy()
   fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
   expect(screen.getByText('1. Organización = espacio de trabajo')).toBeTruthy()
   fireEvent.click(screen.getByRole('button',{name:/Anterior/}))
-  expect(screen.getByText('Bienvenido a ATLAS')).toBeTruthy()
+  expect(screen.getByText('Bienvenido a NOVZI')).toBeTruthy()
  })
  it('permite practicar la jerarquía sin llamar a APIs y registra el resultado',()=>{
   render(<GuidedTutorial onClose={vi.fn()}/> )
@@ -63,8 +63,8 @@ describe('Academia ATLAS · tutorial contextual no destructivo',()=>{
   expect(JSON.stringify(TUTORIAL_STEPS).toLowerCase()).not.toContain('zercano')
   render(<GuidedTutorial onClose={vi.fn()}/> )
   fireEvent.click(screen.getByRole('button',{name:/Siguiente/}))
-  expect(screen.getByText(/Equipo ATLAS/)).toBeTruthy()
-  expect(screen.getByText('Ejemplo ATLAS:')).toBeTruthy()
+  expect(screen.getByText(/Equipo NOVZI/)).toBeTruthy()
+  expect(screen.getByText('Ejemplo NOVZI:')).toBeTruthy()
  })
  it('sitúa todo el panel dentro del viewport cuando el control está abajo',()=>{
   const originalWidth=window.innerWidth,originalHeight=window.innerHeight
@@ -89,7 +89,7 @@ describe('Academia ATLAS · tutorial contextual no destructivo',()=>{
  it('mantiene accesibles los botones de navegación incluso con temario abierto',()=>{
   render(<GuidedTutorial onClose={vi.fn()}/> )
   fireEvent.click(screen.getByRole('button',{name:'Temario'}))
-  const card=screen.getByRole('dialog',{name:'Bienvenido a ATLAS'})
+  const card=screen.getByRole('dialog',{name:'Bienvenido a NOVZI'})
   const index=within(card).getByRole('navigation',{name:'Temario del tutorial'})
   expect(index.compareDocumentPosition(within(card).getByRole('button',{name:/Siguiente/})) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
  })
@@ -101,8 +101,8 @@ describe('Academia ATLAS · tutorial contextual no destructivo',()=>{
 
 it('atajos Alt recorren pasos sin salirse del temario y recuperan el foco al desmontar',()=>{
  const origin=document.createElement('button');document.body.appendChild(origin);origin.focus()
- const view=render(<GuidedTutorial onClose={vi.fn()}/>);fireEvent.keyDown(document,{key:'ArrowLeft',altKey:true});expect(screen.getByText('Bienvenido a ATLAS')).toBeTruthy()
- fireEvent.keyDown(document,{key:'ArrowRight'});expect(screen.getByText('Bienvenido a ATLAS')).toBeTruthy()
+ const view=render(<GuidedTutorial onClose={vi.fn()}/>);fireEvent.keyDown(document,{key:'ArrowLeft',altKey:true});expect(screen.getByText('Bienvenido a NOVZI')).toBeTruthy()
+ fireEvent.keyDown(document,{key:'ArrowRight'});expect(screen.getByText('Bienvenido a NOVZI')).toBeTruthy()
  for(let i=0;i<TUTORIAL_STEPS.length+2;i++)fireEvent.keyDown(document,{key:'ArrowRight',altKey:true})
  expect(screen.getByRole('button',{name:'Finalizar'})).toBeTruthy();view.unmount();expect(document.activeElement).toBe(origin);origin.remove()
 })
@@ -121,31 +121,31 @@ it('posiciona a izquierda, debajo, encima o junto al lienzo sin tapar el ancla c
 })
 it('un almacenamiento inaccesible no impide aprender ni finalizar',()=>{
  vi.spyOn(Storage.prototype,'getItem').mockImplementation(()=>{throw new Error('denied')});vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('denied')})
- const close=vi.fn();render(<GuidedTutorial onClose={close}/>);expect(screen.getByText('Bienvenido a ATLAS')).toBeTruthy();fireEvent.click(screen.getByRole('button',{name:'Temario'}));fireEvent.click(within(screen.getByRole('navigation',{name:'Temario del tutorial'})).getByRole('button',{name:new RegExp(`^${TUTORIAL_STEPS.length}\\.`)}));fireEvent.click(screen.getByRole('button',{name:'Finalizar'}));expect(close).toHaveBeenCalledOnce()
+ const close=vi.fn();render(<GuidedTutorial onClose={close}/>);expect(screen.getByText('Bienvenido a NOVZI')).toBeTruthy();fireEvent.click(screen.getByRole('button',{name:'Temario'}));fireEvent.click(within(screen.getByRole('navigation',{name:'Temario del tutorial'})).getByRole('button',{name:new RegExp(`^${TUTORIAL_STEPS.length}\\.`)}));fireEvent.click(screen.getByRole('button',{name:'Finalizar'}));expect(close).toHaveBeenCalledOnce()
 })
 
 it('resalta un ancla visible, elimina el resaltado si queda fuera y lo recupera al volver',async()=>{
  const anchor=document.createElement('button');anchor.dataset.tour=TUTORIAL_STEPS[0].target;document.body.appendChild(anchor)
  const rect=vi.spyOn(anchor,'getBoundingClientRect');const visible={left:15,top:40,right:95,bottom:80,width:80,height:40} as DOMRect;rect.mockReturnValue(visible)
  const view=render(<GuidedTutorial onClose={vi.fn()}/>);try{
-  await waitFor(()=>expect(anchor.classList.contains('atlas-tour-highlight')).toBe(true));expect(screen.queryByText(/Este control no está visible ahora/)).toBeNull()
-  rect.mockReturnValue({...visible,width:0});fireEvent(window,new Event('resize'));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(false);expect(screen.getByText(/Este control no está visible ahora/)).toBeTruthy()
-  rect.mockReturnValue({...visible,right:-1,left:-81});fireEvent(window,new Event('scroll'));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(false)
-  rect.mockReturnValue(visible);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(true)
- }finally{view.unmount();expect(anchor.classList.contains('atlas-tour-highlight')).toBe(false);anchor.remove()}
+  await waitFor(()=>expect(anchor.classList.contains('novzi-tour-highlight')).toBe(true));expect(screen.queryByText(/Este control no está visible ahora/)).toBeNull()
+  rect.mockReturnValue({...visible,width:0});fireEvent(window,new Event('resize'));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(false);expect(screen.getByText(/Este control no está visible ahora/)).toBeTruthy()
+  rect.mockReturnValue({...visible,right:-1,left:-81});fireEvent(window,new Event('scroll'));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(false)
+  rect.mockReturnValue(visible);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(true)
+ }finally{view.unmount();expect(anchor.classList.contains('novzi-tour-highlight')).toBe(false);anchor.remove()}
 })
 it.each(['-1','1.2','9999','NaN'])('ignora progreso de tutorial inválido %s',value=>{
- window.localStorage.setItem(TUTORIAL_PROGRESS_KEY,value);render(<GuidedTutorial onClose={vi.fn()}/>);expect(screen.getByRole('dialog',{name:'Bienvenido a ATLAS'})).toBeTruthy();expect(window.localStorage.getItem(TUTORIAL_PROGRESS_KEY)).toBe('0')
+ window.localStorage.setItem(TUTORIAL_PROGRESS_KEY,value);render(<GuidedTutorial onClose={vi.fn()}/>);expect(screen.getByRole('dialog',{name:'Bienvenido a NOVZI'})).toBeTruthy();expect(window.localStorage.getItem(TUTORIAL_PROGRESS_KEY)).toBe('0')
 })
 
 it('reposiciona una tarjeta cuando el ancla queda fuera por arriba, derecha o debajo',async()=>{
  const anchor=document.createElement('button');anchor.dataset.tour=TUTORIAL_STEPS[0].target;document.body.appendChild(anchor);const base={left:20,right:100,top:20,bottom:60,width:80,height:40} as DOMRect;const rect=vi.spyOn(anchor,'getBoundingClientRect').mockReturnValue(base);const view=render(<GuidedTutorial onClose={vi.fn()}/>);
- try{await waitFor(()=>expect(anchor.classList.contains('atlas-tour-highlight')).toBe(true));for(const r of [{...base,height:1},{...base,top:-80,bottom:-40},{...base,left:window.innerWidth+1,right:window.innerWidth+81},{...base,top:window.innerHeight+1,bottom:window.innerHeight+41}]){rect.mockReturnValue(r);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(false);rect.mockReturnValue(base);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(true)}}finally{view.unmount();anchor.remove()}
+ try{await waitFor(()=>expect(anchor.classList.contains('novzi-tour-highlight')).toBe(true));for(const r of [{...base,height:1},{...base,top:-80,bottom:-40},{...base,left:window.innerWidth+1,right:window.innerWidth+81},{...base,top:window.innerHeight+1,bottom:window.innerHeight+41}]){rect.mockReturnValue(r);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(false);rect.mockReturnValue(base);fireEvent(window,new Event('resize'));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(true)}}finally{view.unmount();anchor.remove()}
 })
 
 it('el observador de tamaño reposiciona la guía y se desconecta al cerrar',async()=>{
  let refresh:()=>void=()=>{};const observe=vi.fn(),disconnect=vi.fn();class Observer{constructor(callback:()=>void){refresh=callback} observe=observe;disconnect=disconnect}
  vi.stubGlobal('ResizeObserver',Observer)
  const anchor=document.createElement('button');anchor.dataset.tour=TUTORIAL_STEPS[0].target;document.body.appendChild(anchor);const base={left:20,right:100,top:20,bottom:60,width:80,height:40} as DOMRect;const rect=vi.spyOn(anchor,'getBoundingClientRect').mockReturnValue(base)
- const view=render(<GuidedTutorial onClose={vi.fn()}/>);try{await waitFor(()=>expect(anchor.classList.contains('atlas-tour-highlight')).toBe(true));expect(observe).toHaveBeenCalled();rect.mockReturnValue({...base,width:0});await import('@testing-library/react').then(({act})=>act(()=>refresh()));expect(anchor.classList.contains('atlas-tour-highlight')).toBe(false)}finally{view.unmount();anchor.remove();vi.unstubAllGlobals()}expect(disconnect).toHaveBeenCalled()
+ const view=render(<GuidedTutorial onClose={vi.fn()}/>);try{await waitFor(()=>expect(anchor.classList.contains('novzi-tour-highlight')).toBe(true));expect(observe).toHaveBeenCalled();rect.mockReturnValue({...base,width:0});await import('@testing-library/react').then(({act})=>act(()=>refresh()));expect(anchor.classList.contains('novzi-tour-highlight')).toBe(false)}finally{view.unmount();anchor.remove();vi.unstubAllGlobals()}expect(disconnect).toHaveBeenCalled()
 })
