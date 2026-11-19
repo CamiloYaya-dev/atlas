@@ -172,6 +172,10 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
    assert.equal(roles.status,200)
    const ownerRole=roles.data.find((r:{role_key:string})=>r.role_key==='owner')
+   // Preparar membresía real de organización: las cuentas globales no son miembros automáticamente.
+   const org=await pool.query<{organization_id:string}>('SELECT organization_id FROM workspaces WHERE id=$1',[workspaceId])
+   assert.ok(org.rows[0]?.organization_id)
+   await pool.query("INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'member') ON CONFLICT DO NOTHING",[org.rows[0].organization_id,memberId])
    assert.equal((await send('PUT',`/workspaces/${workspaceId}/roles/${ownerRole.id}`,admin,{permissions:[]})).status,403)
    const result=await send('POST',`/workspaces/${workspaceId}/roles`,admin,{roleKey:'qa_view',name:'QA Viewer',permissions:['project.read','diagram.view.c1','element.view.activity']})
    assert.equal(result.status,201)
@@ -199,6 +203,8 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    const signed=await signin(guestEmail,pass);assert.equal(signed.status,200);const guest=signed.user!
    const roleList=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
    const readerRole=roleList.data.find((r:{role_key:string})=>r.role_key==='qa_view')
+   const org=await pool.query<{organization_id:string}>('SELECT organization_id FROM workspaces WHERE id=$1',[workspaceId])
+   await pool.query("INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'member') ON CONFLICT DO NOTHING",[org.rows[0].organization_id,extraId])
    assert.equal((await send('POST',`/workspaces/${workspaceId}/members`,admin,{userId:extraId,roleId:readerRole.id})).status,201)
    const untouched=await send('GET',`/workspaces/${workspaceId}/projects`,guest)
    assert.equal(untouched.status,200);assert.equal(untouched.data.length,0)
@@ -613,28 +619,42 @@ test('API real: autenticación, administración, roles, diagramas y aislamiento'
    assert.equal(empty.status,200);assert.deepEqual(empty.data,{items:[],nextCursor:null})
   })
   await t.test('API real: membresía de proyecto protege al propietario y rechaza cuerpos o candidatos inválidos',async()=>{
-   const base=`/projects/${projectId}`,roles=await send('GET',`/workspaces/${workspaceId}/roles`,admin)
-   assert.equal(roles.status,200)
+   const base=`/projects/${projectId}`
+   const expectStatus=async(method:'GET'|'PUT',path:string,expected:number,payload?:object)=>{
+    const result=await send(method,path,admin,payload)
+    assert.equal(result.status,expected,`${method} ${path}: se esperaba HTTP ${expected}, recibido HTTP ${result.status}; respuesta: ${JSON.stringify(result.data)}`)
+    return result
+   }
+   const roles=await expectStatus('GET',`/workspaces/${workspaceId}/roles`,200)
    const ownerRole=roles.data.find((r:{role_key:string})=>r.role_key==='owner'),viewerRole=roles.data.find((r:{role_key:string})=>r.role_key==='qa_view')
    assert.ok(ownerRole?.id&&viewerRole?.id)
-   const before=await send('GET',`${base}/members`,admin);assert.equal(before.status,200)
-   assert.equal((await send('GET',`${base}/candidates`,admin)).status,200)
-   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{})).status,400)
-   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{roleId:ownerRole.id})).status,403)
-   assert.equal((await send('PUT',`${base}/members/${memberId}`,admin,{roleId:randomUUID()})).status,403)
-   assert.equal((await send('PUT',`${base}/members/${adminId}`,admin,{roleId:viewerRole.id})).status,403)
-   assert.equal((await send('PUT',`${base}/members/${randomUUID()}`,admin,{roleId:viewerRole.id})).status,400)
-   const after=await send('GET',`${base}/members`,admin);assert.equal(after.status,200);assert.deepEqual(after.data,before.data)
+   const before=await expectStatus('GET',`${base}/members`,200)
+   await expectStatus('GET',`${base}/candidates`,200)
+   await expectStatus('PUT',`${base}/members/${memberId}`,400,{})
+   await expectStatus('PUT',`${base}/members/${memberId}`,403,{roleId:ownerRole.id})
+   await expectStatus('PUT',`${base}/members/${memberId}`,403,{roleId:randomUUID()})
+   await expectStatus('PUT',`${base}/members/${adminId}`,403,{roleId:viewerRole.id})
+   // Un UUID bien formado que NO pertenece al directorio privado se rechaza con 403.
+   // No debe revelarse si existe una cuenta global fuera de la organización.
+   await expectStatus('PUT',`${base}/members/${randomUUID()}`,403,{roleId:viewerRole.id})
+   // Un identificador MAL FORMADO sí es una petición inválida (400).
+   await expectStatus('PUT',`${base}/members/id-invalido`,400,{roleId:viewerRole.id})
+   const after=await expectStatus('GET',`${base}/members`,200)
+   assert.deepEqual(after.data,before.data,'Las solicitudes rechazadas no modifican las membresías')
   })
   await t.test('Logout invalida la sesión',async()=>{
    assert.equal((await send('POST','/auth/logout',member)).status,200)
    assert.equal((await send('GET','/auth/me',member)).status,401)
   })
  }finally{
-  if(workspaceId)await pool.query('DELETE FROM workspaces WHERE id=$1',[workspaceId])
-  if(memberId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[memberId])
-  if(extraId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[extraId])
-  if(adminId)await pool.query('DELETE FROM novzi_users WHERE id=$1',[adminId])
+  // Eliminar primero los recursos QA creados durante el caso. Las organizaciones
+  // referencian a novzi_users como creador; eliminarlas ANTES de las cuentas.
+  const qaUsers=[adminId,memberId,extraId].filter(Boolean)
+  if(qaUsers.length){
+   await pool.query('DELETE FROM workspaces WHERE created_by=ANY($1::uuid[])',[qaUsers])
+   await pool.query('DELETE FROM organizations WHERE created_by=ANY($1::uuid[])',[qaUsers])
+   await pool.query('DELETE FROM novzi_users WHERE id=ANY($1::uuid[])',[qaUsers])
+  }
   await app.close();await pool.end()
  }
 })
