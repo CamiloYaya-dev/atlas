@@ -51,3 +51,27 @@ jobs:
         with:
           name: novzi-e2e-artifacts
           path: test-results/
+  deploy-api:
+    name: Deploy API to Coolify (after QA)
+    needs: [unit-and-integration, browser-e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: novzi-api-production
+      cancel-in-progress: false
+    steps:
+      - name: Trigger Coolify through a restricted SSH key
+        env:
+          CD_SSH_KEY: ${{ secrets.NOVZI_CD_SSH_KEY }}
+          CD_KNOWN_HOSTS: ${{ secrets.NOVZI_CD_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$CD_SSH_KEY" || { echo 'Missing NOVZI_CD_SSH_KEY secret'; exit 1; }
+          test -n "$CD_KNOWN_HOSTS" || { echo 'Missing NOVZI_CD_KNOWN_HOSTS secret'; exit 1; }
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$CD_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$CD_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+          ssh -T -o BatchMode=yes -o IdentitiesOnly=yes -i "$HOME/.ssh/id_ed25519" ubuntu@15.204.95.176 deploy
