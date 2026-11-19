@@ -31,6 +31,9 @@ test('roles: administrador delegado no puede conceder borrado de workspace ni in
   if(sql.includes('FROM novzi_sessions'))return {rows:[{id:actor,email:'qa@example.test',display_name:'QA',platform_admin:false,session_id:'s'}]}
   if(sql.includes('FROM workspace_members m JOIN workspace_roles'))return {rows:[{id:role,role_key:roleKey,name:'Administrador'}]}
   if(sql.includes('FROM role_permissions'))return {rows:[{permission:'workspace.roles.manage'},{permission:'workspace.members.manage'}]}
+  // Desde la jerarquía organizacional, únicamente owner/admin puede administrar roles.
+  // Esta prueba representa un administrador de organización con política de espacio delegada.
+  if(sql.includes('FROM workspaces w')&&sql.includes('organization_members m'))return {rows:[{organization_id:'77777777-7777-4777-8777-777777777777',role:'admin'}]}
   throw Error('SQL inesperado '+sql)
  })
  const connect=t.mock.method(pool,'connect',async()=>{throw Error('No debe abrir transacción')})

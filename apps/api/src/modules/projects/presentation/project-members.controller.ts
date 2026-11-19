@@ -10,6 +10,7 @@ export async function registerProjectMembersController(app:FastifyInstance){
  app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/members',async req=>{
   assertUUID(req.params.projectId);const actor=await identity(req)
   const me=await projectAccess(req.params.projectId,actor.id);requirePermission(me,'project.members.manage')
+  await requireOrganizationManagerForProject(req.params.projectId,actor.id)
   const {rows}=await pool.query(`SELECT u.id,u.email,u.display_name AS name,r.id AS role_id,r.role_key,r.name AS role_name
     FROM project_members m JOIN novzi_users u ON u.id=m.user_id JOIN workspace_roles r ON r.id=m.role_id
     WHERE m.project_id=$1 ORDER BY u.email`,[req.params.projectId]);return rows
@@ -17,6 +18,7 @@ export async function registerProjectMembersController(app:FastifyInstance){
  app.get<{Params:{projectId:string}}>('/api/v1/projects/:projectId/candidates',async req=>{
   assertUUID(req.params.projectId);const actor=await identity(req)
   const me=await projectAccess(req.params.projectId,actor.id);requirePermission(me,'project.members.manage')
+  await requireOrganizationManagerForProject(req.params.projectId,actor.id)
   const {rows}=await pool.query<{workspace_id:string;organization_id:string|null}>(`SELECT p.workspace_id,w.organization_id FROM projects p JOIN workspaces w ON w.id=p.workspace_id WHERE p.id=$1`,[req.params.projectId]);if(!rows[0])throw notFound()
   const q=String((req.query as {q?:string})?.q??'').trim();if(q.length>100)throw new DomainError('Búsqueda demasiado larga',400)
   const [users,roles]=await Promise.all([
