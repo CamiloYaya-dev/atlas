@@ -84,13 +84,17 @@ test('crear diagrama y caja, actualizar ficha y comprobar guardado',async({page}
  await openQaDiagram(page,name,'Libres')
  await expect(page.getByText('Actividad QA')).toBeVisible()
 })
-test('administrador abre políticas y encuentra roles y permisos por operación',async({page})=>{
+test('administrador abre políticas centralizadas por organización',async({page})=>{
  await enterAdminWithCachedSession(page)
- await page.getByRole('button',{name:'Accesos'}).click()
- await expect(page.getByRole('heading',{name:'Usuarios y políticas de acceso'})).toBeVisible()
- await expect(page.getByRole('button',{name:/Roles y comportamientos/})).toBeVisible()
+ await page.getByRole('button',{name:'Usuarios y accesos de la organización'}).click()
+ await expect(page.getByRole('heading',{name:'Usuarios y accesos de la organización'})).toBeVisible()
+ await page.getByRole('button',{name:'Roles y permisos'}).click()
+ const space=page.getByRole('combobox',{name:'Espacio de las políticas'})
+ await space.click()
+ await page.getByRole('listbox').getByRole('option').first().click()
  await expect(page.getByText('diagram.view.c1')).toBeVisible()
  await expect(page.getByText('relation.delete.technical')).toBeVisible()
+ await expect(page.getByRole('button',{name:'Crear cuenta'})).toHaveCount(0)
 })
 test('lector tiene solo las vistas y operaciones autorizadas',async({page})=>{
  if(!viewerEmail||!viewerPassword)throw Error('Configura E2E_VIEWER_EMAIL y E2E_VIEWER_PASSWORD para probar denegación UI')

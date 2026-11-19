@@ -20,6 +20,9 @@ test('provisionar es idempotente, privado por usuario y no reescribe demos edita
  let sequence=0,storedDocument:unknown
  const db={query:async(sql:string,args:unknown[]=[])=>{
   sqlLog.push(sql)
+  if(sql.startsWith('SELECT id FROM organizations'))return {rows:[]}
+  if(sql.startsWith('INSERT INTO organizations'))return {rows:[{id:'o'+args[0]}]}
+  if(sql.startsWith('INSERT INTO organization_members'))return {rows:[]}
   if(sql.startsWith('SELECT id FROM workspaces'))return {rows:workspaces.has(String(args[0]))?[{id:workspaces.get(String(args[0]))}]:[]}
   if(sql.startsWith('INSERT INTO workspaces')){const id='w'+(++sequence);workspaces.set(String(args[1]),id);return {rows:[{id}]}}
   if(sql.startsWith('INSERT INTO workspace_roles'))return {rows:[{id:'owner-role'}]}

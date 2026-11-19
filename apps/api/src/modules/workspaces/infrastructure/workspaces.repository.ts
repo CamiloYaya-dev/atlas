@@ -4,7 +4,7 @@ import {initializeWorkspaceRoles,access,requirePermission} from '../../../securi
 import {DomainError,notFound} from '../../../domain/errors'
 export class WorkspacesRepository {
  async listForUser(userId:string):Promise<Workspace[]>{
-  const {rows}=await pool.query<Workspace>(`SELECT w.id,w.name,w.created_by,r.role_key AS role
+  const {rows}=await pool.query<Workspace>(`SELECT w.id,w.name,w.created_by,w.organization_id,r.role_key AS role
    FROM workspaces w JOIN workspace_members m ON m.workspace_id=w.id
    JOIN workspace_roles r ON r.id=m.role_id WHERE m.user_id=$1 ORDER BY w.created_at`,[userId]);return rows
  }
@@ -43,7 +43,16 @@ export class WorkspacesRepository {
   const c=await pool.connect()
   try{
    await c.query('BEGIN')
-   const result=await c.query<{id:string}>('INSERT INTO workspaces(name,created_by) VALUES($1,$2) RETURNING id',[name,userId])
+   // Compatibilidad con los flujos existentes (academia): crear una organización
+   // personal si aún no existe. La UI normal proporciona organizationId explícito.
+   const org=await c.query<{id:string}>(`SELECT id FROM organizations WHERE created_by=$1 AND name='NOVZI · Formación' ORDER BY created_at LIMIT 1`,[userId])
+   let organizationId=org.rows[0]?.id
+   if(!organizationId){
+    const made=await c.query<{id:string}>(`INSERT INTO organizations(name,created_by) VALUES($1,$2) RETURNING id`,['NOVZI · Formación',userId])
+    organizationId=made.rows[0].id
+    await c.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'owner')`,[organizationId,userId])
+   }
+   const result=await c.query<{id:string}>(`INSERT INTO workspaces(name,created_by,organization_id) VALUES($1,$2,$3) RETURNING id`,[name,userId,organizationId])
    const id=result.rows[0].id
    await initializeWorkspaceRoles(c,id)
    const role=await c.query<{id:string}>("SELECT id FROM workspace_roles WHERE workspace_id=$1 AND role_key='owner'",[id])

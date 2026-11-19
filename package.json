@@ -80,7 +80,7 @@
     "qa:uml:vista-interaccion": "node scripts/qa-uml.mjs vista-interaccion",
     "qa:uml:tiempos": "node scripts/qa-uml.mjs tiempos",
     "qa:uml:clases:rapido": "node scripts/qa-uml.mjs clases --fast",
-    "demo:backfill": "node node_modules/tsx/dist/cli.mjs apps/api/src/db/demo-backfill.ts",
+    "demo:backfill": "node --env-file=apps/api/.env node_modules/tsx/dist/cli.mjs apps/api/src/db/demo-backfill.ts",
     "db:migrations:status": "npm run db:migrations:status -w @novzi/api",
     "db:reset:demo": "npm run db:reset:demo -w @novzi/api --",
     "db:demo:status": "npm run db:demo:status -w @novzi/api"

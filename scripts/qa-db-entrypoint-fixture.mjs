@@ -33,6 +33,9 @@ async function query(sql,params=[]){
    if(scenario==='admin-rollback')throw invalid;
    return result([{id:params[0]}])
   }
+  if(sql.includes('SELECT id FROM organizations WHERE created_by='))return result()
+  if(sql.includes('INSERT INTO organizations'))return result([{id:'org-qa'}])
+  if(sql.includes('INSERT INTO organization_members'))return result()
   // Bootstrap provisions an isolated demo workspace, roles and project in the
   // same transaction. Simulate these queries rather than silently allowing SQL.
   if(sql.includes('SELECT id FROM workspaces WHERE created_by=')){

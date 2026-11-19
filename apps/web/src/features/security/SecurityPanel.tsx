@@ -4,27 +4,30 @@ import {Overlay,Field} from '../../components/molecules/Overlay'
 import {workspaceRoles,workspaceMembers,usersList,createUser,createRole,updateRole,assignMember,removeMember,setUserActive} from './api'
 import type {RoleDetails,UserAccount,Member} from './api'
 import type {WorkspaceAccess} from './types'
+import {organizationMembers} from '../organizations/api'
 import {UserPlus,ShieldCheck,Users,Save,Plus,UserX,RefreshCw} from 'lucide-react'
-type Props={workspaceId:string;access:WorkspaceAccess|null;platformAdmin:boolean;onClose:()=>void}
+type Props={workspaceId:string;organizationId?:string;access:WorkspaceAccess|null;platformAdmin:boolean;onClose:()=>void}
 const keyOf=(p:string)=>p.startsWith('diagram.')?'Diagramas':p.startsWith('element.')?'Elementos':p.startsWith('relation.')?'Relaciones':'Operaciones generales'
-export default function SecurityPanel({workspaceId,access,platformAdmin,onClose}:Props){
+export default function SecurityPanel({workspaceId,organizationId,access,platformAdmin,onClose}:Props){
  const canRoles=access?.roleKey==='owner'||access?.permissions.includes('workspace.roles.manage')
  const canMembers=access?.roleKey==='owner'||access?.permissions.includes('workspace.members.manage')
  const [tab,setTab]=useState<'roles'|'members'|'users'>(canRoles?'roles':canMembers?'members':'users')
- const [roles,setRoles]=useState<RoleDetails[]>([]),[members,setMembers]=useState<Member[]>([]),[users,setUsers]=useState<UserAccount[]>([])
+ const [roles,setRoles]=useState<RoleDetails[]>([]),[members,setMembers]=useState<Member[]>([]),[users,setUsers]=useState<UserAccount[]>([]),[directory,setDirectory]=useState<UserAccount[]>([])
  const [picked,setPicked]=useState(''),[selected,setSelected]=useState<string[]>([]),[query,setQuery]=useState('')
  const [newRole,setNewRole]=useState(''),[newRoleKey,setNewRoleKey]=useState('')
  const [newEmail,setNewEmail]=useState(''),[newName,setNewName]=useState(''),[newPass,setNewPass]=useState('')
- const [memberId,setMemberId]=useState(''),[assignRole,setAssignRole]=useState('')
+ const [memberId,setMemberId]=useState(''),[assignRole,setAssignRole]=useState(''),[memberSearch,setMemberSearch]=useState(''),[roleSearch,setRoleSearch]=useState('')
  const [busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[err,setErr]=useState('')
  const activeRole=roles.find(x=>x.id===picked)
  const refresh=async()=>{
   const [r,m,u]=await Promise.all([canRoles||canMembers?workspaceRoles(workspaceId).catch(()=>[]):Promise.resolve([]),canMembers?workspaceMembers(workspaceId):Promise.resolve([]),platformAdmin?usersList():Promise.resolve([])])
   setRoles(r);setMembers(m);setUsers(u)
+  if(organizationId){const candidates=await organizationMembers(organizationId,memberSearch);setDirectory(candidates.map(x=>({...x,active:true,platform_admin:false})))}else setDirectory(u)
   setPicked(old=>r.some(x=>x.id===old)?old:r.find(x=>x.role_key==='functional')?.id||r[0]?.id||'')
  }
  useEffect(()=>{refresh().catch(e=>setErr(String(e.message)))},[workspaceId])
  useEffect(()=>{setSelected(activeRole?.permissions||[])},[activeRole?.id,roles])
+ useEffect(()=>{if(!organizationId)return;let active=true;const task=setTimeout(()=>{void organizationMembers(organizationId,memberSearch).then(items=>{if(active)setDirectory(items.map(x=>({...x,active:true,platform_admin:false})))}).catch(e=>{if(active)setErr((e as Error).message)})},180);return()=>{active=false;clearTimeout(task)}},[organizationId,memberSearch])
  async function act(action:()=>Promise<unknown>,msg:string){setBusy(true);setErr('');setNotice('');try{await action();setNotice(msg);await refresh()}catch(e){setErr(e instanceof Error?e.message:String(e))}finally{setBusy(false)}}
  const filtered=useMemo(()=>PERMISSIONS.filter(x=>permissionLabel(x).toLowerCase().includes(query.toLowerCase())||x.includes(query.toLowerCase())),[query])
  const sections=['Operaciones generales','Diagramas','Elementos','Relaciones']
@@ -49,12 +52,14 @@ export default function SecurityPanel({workspaceId,access,platformAdmin,onClose}
     <h4>Miembros del espacio</h4>
     <div className="sec-rows">{members.map(m=><div className="sec-user-row" key={m.id}><div><strong>{m.name}</strong><small>{m.email} · {m.role_name}</small></div>{m.role_key!=='owner'&&<button className="ghost" disabled={busy} onClick={()=>act(()=>removeMember(workspaceId,m.id),'Acceso retirado')}><UserX size={14}/> Quitar</button>}</div>)}</div>
     <h4>Asignar un usuario existente</h4>
-    <div className="sec-inputs"><select value={memberId} onChange={e=>setMemberId(e.target.value)}><option value="">Seleccionar usuario</option>{users.filter(u=>u.active).map(u=><option key={u.id} value={u.id}>{u.name} · {u.email}</option>)}</select><select value={assignRole} onChange={e=>setAssignRole(e.target.value)}><option value="">Seleccionar rol</option>{roles.filter(x=>x.role_key!=='owner').map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><button className="primary" disabled={!memberId||!assignRole||busy} onClick={()=>act(()=>assignMember(workspaceId,memberId,assignRole),'Miembro asignado')}><Plus size={14}/> Asignar</button></div>
-    {!platformAdmin&&<p className="sec-help">Para crear cuentas nuevas, solicita al administrador principal que las aprovisione.</p>}
+    {organizationId&&<p className="sec-help">Selecciona una persona del directorio de la organización. Para incorporar cuentas de otra organización utiliza «Administrar organización e invitaciones».</p>}
+    <div className="sec-inputs sec-search-inputs"><input aria-label="Buscar usuario por nombre o correo" type="search" placeholder="Nombre o correo" value={memberSearch} onChange={e=>{setMemberSearch(e.target.value);setMemberId('')}}/><input aria-label="Buscar rol" type="search" placeholder="Filtrar rol" value={roleSearch} onChange={e=>{setRoleSearch(e.target.value);setAssignRole('')}}/></div>
+    <div className="sec-inputs"><select value={memberId} onChange={e=>setMemberId(e.target.value)}><option value="">Seleccionar usuario</option>{directory.filter(u=>u.active).map(u=><option key={u.id} value={u.id}>{u.name} · {u.email}</option>)}</select><select value={assignRole} onChange={e=>setAssignRole(e.target.value)}><option value="">Seleccionar rol</option>{roles.filter(x=>x.role_key!=='owner'&&(!roleSearch||x.name.toLowerCase().includes(roleSearch.toLowerCase())||x.role_key.includes(roleSearch.toLowerCase()))).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><button className="primary" disabled={!memberId||!assignRole||busy} onClick={()=>act(()=>assignMember(workspaceId,memberId,assignRole),'Miembro asignado')}><Plus size={14}/> Asignar</button></div>
+    {!platformAdmin&&!organizationId&&<p className="sec-help">Para crear cuentas nuevas, solicita al administrador principal que las aprovisione.</p>}
    </>}
    {tab==='users'&&platformAdmin&&<>
     <h4>Alta de usuarios — acceso cerrado</h4><p className="sec-help">Solo un administrador principal crea cuentas. No existe registro público.</p>
-    <div className="sec-create-user"><Field label="Nombre"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Nombre completo"/></Field><Field label="Email"><input value={newEmail} type="email" onChange={e=>setNewEmail(e.target.value)} placeholder="usuario@empresa.com"/></Field><Field label="Contraseña inicial"><input value={newPass} type="password" minLength={12} autoComplete="new-password" onChange={e=>setNewPass(e.target.value)} placeholder="Mínimo 12 caracteres"/></Field><button className="primary" disabled={busy||newPass.length<12||!newEmail||!newName} onClick={()=>act(async()=>{await createUser({name:newName,email:newEmail,password:newPass});setNewPass('');setNewEmail('');setNewName('')},'Cuenta creada. Asígnale un rol en Miembros.')}><UserPlus size={15}/> Crear cuenta</button></div>
+    <div className="sec-create-user"><Field label="Nombre"><input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Nombre completo"/></Field><Field label="Email"><input value={newEmail} type="email" onChange={e=>setNewEmail(e.target.value)} placeholder="usuario@empresa.com"/></Field><Field label="Contraseña inicial"><input value={newPass} type="password" minLength={12} autoComplete="new-password" onChange={e=>setNewPass(e.target.value)} placeholder="Mínimo 12 caracteres"/></Field><button className="primary" disabled={busy||newPass.length<12||!newEmail||!newName} onClick={()=>act(async()=>{await createUser({name:newName,email:newEmail,password:newPass});setNewPass('');setNewEmail('');setNewName('')},'Cuenta creada sin espacio asignado. Invítala a la organización correspondiente.')}><UserPlus size={15}/> Crear cuenta</button></div>
     <h4>Cuentas existentes</h4><div className="sec-rows">{users.map(u=><div className="sec-user-row" key={u.id}><div><strong>{u.name}</strong><small>{u.email} · {u.platform_admin?'Admin principal':u.active?'Activo':'Suspendido'}</small></div>{!u.platform_admin&&<button className="ghost" disabled={busy} onClick={()=>act(()=>setUserActive(u.id,!u.active),u.active?'Cuenta suspendida':'Cuenta reactivada')}>{u.active?'Suspender':'Activar'}</button>}</div>)}</div>
    </>}
   </div>

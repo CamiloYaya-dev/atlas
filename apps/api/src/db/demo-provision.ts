@@ -1,6 +1,5 @@
-/** Per-account editable demo workspace. Never use the shared QA seed as a user tenant.
- * Run inside the SAME transaction that creates the account: no partial users
- * without a demo, no shared ownership, and no password/authentication changes.
+/** Demo opcional, solo por solicitud explícita (bootstrap o mantenimiento manual).
+ * Crear una cuenta normal NO crea organización, espacio ni proyecto automáticamente.
  */
 import type {PoolClient} from 'pg'
 import {isProjectDocument} from '@novzi/contracts'
@@ -24,8 +23,14 @@ export async function provisionUserDemo(db:PoolClient,userId:string):Promise<{wo
   'SELECT id FROM workspaces WHERE created_by=$1 AND name=$2 LIMIT 1',
   [userId,DEMO_WORKSPACE_NAME])
  if(!ws.rows[0]){
-  ws=await db.query<{id:string}>('INSERT INTO workspaces(name,created_by) VALUES($1,$2) RETURNING id',
-   [DEMO_WORKSPACE_NAME,userId])
+  // Aislar el demo del contenido de empresas reales.
+  let organization=await db.query<{id:string}>(`SELECT id FROM organizations WHERE created_by=$1 AND name=$2 LIMIT 1`,[userId,DEMO_WORKSPACE_NAME])
+  if(!organization.rows[0]){
+   organization=await db.query<{id:string}>(`INSERT INTO organizations(name,created_by) VALUES($1,$2) RETURNING id`,[DEMO_WORKSPACE_NAME,userId])
+   await db.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'owner')`,[organization.rows[0].id,userId])
+  }
+  ws=await db.query<{id:string}>(`INSERT INTO workspaces(name,created_by,organization_id) VALUES($1,$2,$3) RETURNING id`,
+   [DEMO_WORKSPACE_NAME,userId,organization.rows[0].id])
   await initializeWorkspaceRoles(db,ws.rows[0].id)
  }
  const workspaceId=ws.rows[0].id

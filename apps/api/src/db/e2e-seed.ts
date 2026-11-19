@@ -37,6 +37,14 @@ async function main(){
   await c.query('INSERT INTO role_permissions(role_id,permission) SELECT $1,unnest($2::text[])',[editorRole.rows[0].id,grants])
   await c.query(`INSERT INTO workspace_members(workspace_id,user_id,role,role_id) VALUES($1,$2,'editor',$3)
    ON CONFLICT(workspace_id,user_id) DO UPDATE SET role_id=EXCLUDED.role_id,role='editor'`,[w.rows[0].id,editor.rows[0].id,editorRole.rows[0].id])
+  // La base QA también debe respetar la jerarquía organización -> espacio -> proyecto.
+  const linkedOrg=await c.query<{organization_id:string|null}>('SELECT organization_id FROM workspaces WHERE id=$1',[w.rows[0].id])
+  let org=linkedOrg.rows[0]?.organization_id?{rows:[{id:linkedOrg.rows[0].organization_id}]}:
+   await c.query<{id:string}>(`SELECT id FROM organizations WHERE created_by=$1 AND name='NOVZI · Organización QA' LIMIT 1`,[DEMO_USER_ID])
+  if(!org.rows[0])org=await c.query<{id:string}>(`INSERT INTO organizations(name,created_by) VALUES('NOVZI · Organización QA',$1) RETURNING id`,[DEMO_USER_ID])
+  await c.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'owner') ON CONFLICT DO NOTHING`,[org.rows[0].id,DEMO_USER_ID])
+  await c.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,'member'),($1,$3,'member') ON CONFLICT DO NOTHING`,[org.rows[0].id,r.rows[0].id,editor.rows[0].id])
+  await c.query(`UPDATE workspaces SET organization_id=$2 WHERE id=$1 AND (organization_id IS NULL OR organization_id=$2)`,[w.rows[0].id,org.rows[0].id])
   // Explicit access for QA accounts: future projects are NOT inherited from workspace roles.
   const demoProjects=await c.query<{id:string}>('SELECT id FROM projects WHERE workspace_id=$1',[w.rows[0].id])
   for(const pr of demoProjects.rows){
