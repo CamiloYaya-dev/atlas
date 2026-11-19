@@ -677,3 +677,6 @@
 .novzi-access-diagrams label:hover{background:#f3f7fc}
 .novzi-access-diagrams strong,.novzi-access-diagrams small{display:block}
 .novzi-access-diagrams strong{font-size:12px}.novzi-access-diagrams small{font-size:10px;color:#789}
+
+/* Incorporación de cuentas globales a una organización: elegir un único flujo. */
+.novzi-account-mode{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 16px}.novzi-account-mode button{white-space:normal;text-align:center}.novzi-org-create h4{margin-top:0}.novzi-org-create .sec-help{line-height:1.6}
