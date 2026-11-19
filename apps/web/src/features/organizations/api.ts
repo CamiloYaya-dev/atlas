@@ -12,6 +12,9 @@ export const createOrganizationWorkspace=async(organizationId:string,name:string
 }
 export const createOrganizationUser=(id:string,form:{name:string;email:string;password:string;role:'admin'|'member'})=>request(`/organizations/${encodeURIComponent(id)}/users`,{method:'POST',body:JSON.stringify(form)})
 export const inviteToOrganization=(id:string,email:string,role:'admin'|'member')=>request(`/organizations/${encodeURIComponent(id)}/invitations`,{method:'POST',body:JSON.stringify({email,role})})
+export interface OrganizationOutgoingInvitation{id:string;email:string;role:'admin'|'member';created_at:string;expires_at:string}
+export const listOrganizationInvitations=(id:string)=>request<OrganizationOutgoingInvitation[]>(`/organizations/${encodeURIComponent(id)}/invitations`)
+export const cancelOrganizationInvitation=(organizationId:string,invitationId:string)=>request(`/organizations/${encodeURIComponent(organizationId)}/invitations/${encodeURIComponent(invitationId)}`,{method:'DELETE'})
 export const myOrganizationInvitations=()=>request<OrganizationInvitation[]>('/organizations/invitations/mine')
 export const acceptOrganizationInvitation=(id:string)=>request<{ok:boolean;organizationId:string}>(`/organizations/invitations/${encodeURIComponent(id)}/accept`,{method:'POST'})
 export const declineOrganizationInvitation=(id:string)=>request(`/organizations/invitations/${encodeURIComponent(id)}/decline`,{method:'POST'})

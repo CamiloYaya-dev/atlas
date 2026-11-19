@@ -2,13 +2,14 @@ import {beforeEach,describe,expect,it,vi} from 'vitest'
 import {fireEvent,render,screen,waitFor,within} from '@testing-library/react'
 import OrganizationPanel from './OrganizationPanel'
 import * as api from './api'
-vi.mock('./api',()=>({organizationMembers:vi.fn(),myOrganizationInvitations:vi.fn(),organizationAccessTree:vi.fn(),organizationMemberGrants:vi.fn(),createOrganizationUser:vi.fn(),inviteToOrganization:vi.fn(),acceptOrganizationInvitation:vi.fn(),declineOrganizationInvitation:vi.fn(),updateOrganizationMember:vi.fn(),removeOrganizationMember:vi.fn(),assignOrganizationGrants:vi.fn(),removeOrganizationGrant:vi.fn(),organizationRoles:vi.fn(),organizationCreateRole:vi.fn(),organizationUpdateRole:vi.fn()}))
+vi.mock('./api',()=>({organizationMembers:vi.fn(),myOrganizationInvitations:vi.fn(),organizationAccessTree:vi.fn(),organizationMemberGrants:vi.fn(),createOrganizationUser:vi.fn(),inviteToOrganization:vi.fn(),listOrganizationInvitations:vi.fn(),cancelOrganizationInvitation:vi.fn(),acceptOrganizationInvitation:vi.fn(),declineOrganizationInvitation:vi.fn(),updateOrganizationMember:vi.fn(),removeOrganizationMember:vi.fn(),assignOrganizationGrants:vi.fn(),removeOrganizationGrant:vi.fn(),organizationRoles:vi.fn(),organizationCreateRole:vi.fn(),organizationUpdateRole:vi.fn()}))
 const org={id:'o1',name:'Zercano',role:'admin' as const,created_by:'u1',workspace_count:1}
 const members=[{id:'u1',name:'Lady Morales',email:'lady@example.com',role:'admin' as const},{id:'u2',name:'Camilo',email:'camilo@example.com',role:'member' as const}]
 const tree=[{id:'w1',name:'Dirección Tecnología',roles:[{id:'rviewer',workspace_id:'w1',name:'Lector',role_key:'viewer'},{id:'reditor',workspace_id:'w1',name:'Editor',role_key:'editor'}],projects:[{id:'p1',name:'Zercano Plataforma',diagrams:[{id:'d1',name:'C1 Contexto',type:'c1'},{id:'d2',name:'UML Clases',type:'uml-class'}]}]}]
 beforeEach(()=>{
  vi.resetAllMocks();vi.mocked(api.organizationMembers).mockResolvedValue(members)
  vi.mocked(api.myOrganizationInvitations).mockResolvedValue([])
+ vi.mocked(api.listOrganizationInvitations).mockResolvedValue([])
  vi.mocked(api.organizationAccessTree).mockResolvedValue(tree)
  vi.mocked(api.organizationMemberGrants).mockResolvedValue({workspaces:[],projects:[]})
  vi.mocked(api.assignOrganizationGrants).mockResolvedValue({ok:true})
@@ -23,21 +24,66 @@ const choose=async(label:string,name:string)=>{
  fireEvent.click(within(list).getByRole('option',{name:new RegExp(name,'i')}))
 }
 describe('Consola única de organización',()=>{
+ it('el flujo principal invita cuentas globales existentes, sin crear usuarios ni asignar proyectos automáticamente',async()=>{
+  vi.mocked(api.inviteToOrganization).mockResolvedValue({id:'i1'})
+  open()
+  await screen.findByText('Directorio de Zercano')
+  expect(screen.getByRole('button',{name:'Vincular cuenta existente'})).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('Correo de la cuenta existente'),{target:{value:' camilo@otraempresa.co '}})
+  fireEvent.click(screen.getByRole('button',{name:'Invitar cuenta existente'}))
+  await waitFor(()=>expect(api.inviteToOrganization).toHaveBeenCalledWith(org.id,'camilo@otraempresa.co','member'))
+  expect(api.createOrganizationUser).not.toHaveBeenCalled()
+  expect(api.assignOrganizationGrants).not.toHaveBeenCalled()
+  expect(screen.getByRole('status').textContent).toMatch(/debe aceptarla en NOVZI/i)
+ })
+ it('el administrador solo puede invitar miembros, no conceder administración de organización',async()=>{
+  open()
+  await screen.findByText('Directorio de Zercano')
+  expect(screen.getByRole('combobox',{name:'Rol al invitar'}).querySelector('option[value="admin"]')).toBeNull()
+  fireEvent.click(screen.getByRole('button',{name:'Crear usuario nuevo'}))
+  expect(screen.getByRole('combobox',{name:'Rol inicial de organización'}).querySelector('option[value="admin"]')).toBeNull()
+ })
+ it('el propietario puede elegir rol de administrador para la invitación',async()=>{
+  render(<OrganizationPanel organization={{...org,role:'owner'}} onClose={()=>{}} onChanged={()=>{}}/>)
+  expect((await screen.findByRole('combobox',{name:'Rol al invitar'})).querySelector('option[value="admin"]')).toBeTruthy()
+ })
+ it('muestra invitaciones pendientes y permite cancelarlas con confirmación NOVZI',async()=>{
+  vi.mocked(api.listOrganizationInvitations).mockResolvedValue([{id:'i2',email:'camilo@otraempresa.co',role:'member',created_at:'2026-11-19T14:00:00Z',expires_at:'2026-12-02T14:00:00Z'}])
+  vi.mocked(api.cancelOrganizationInvitation).mockResolvedValue({})
+  open()
+  expect(await screen.findByText('camilo@otraempresa.co')).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:'Cancelar invitación'}))
+  expect(await screen.findByRole('dialog',{name:'Cancelar invitación'})).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:'Confirmar cancelación'}))
+  await waitFor(()=>expect(api.cancelOrganizationInvitation).toHaveBeenCalledWith(org.id,'i2'))
+ })
+ it('el destinatario acepta invitación sin perder otra organización ni crear cuenta',async()=>{
+  vi.mocked(api.myOrganizationInvitations).mockResolvedValue([{id:'i1',organization_id:org.id,organization_name:'Zercano',email:'camilo@example.com',role:'member',expires_at:'2026-12-02T14:00:00Z'}])
+  vi.mocked(api.acceptOrganizationInvitation).mockResolvedValue({ok:true,organizationId:org.id})
+  render(<OrganizationPanel organization={null} onClose={()=>{}} onChanged={()=>{}}/>)
+  const tab=await screen.findByRole('button',{name:'Invitaciones recibidas (1)'})
+  fireEvent.click(tab)
+  fireEvent.click(screen.getByRole('button',{name:'Aceptar'}))
+  await waitFor(()=>expect(api.acceptOrganizationInvitation).toHaveBeenCalledWith('i1'))
+  expect(api.createOrganizationUser).not.toHaveBeenCalled()
+ })
  it('un miembro ordinario no recibe botones de alta ni de asignaciones',async()=>{
   render(<OrganizationPanel organization={{...org,role:'member'}} onClose={()=>{}} onChanged={()=>{}}/>)
   expect(await screen.findByText(/Directorio de Zercano/)).toBeTruthy()
   expect(screen.queryByRole('button',{name:'Asignar accesos'})).toBeNull()
   expect(screen.queryByRole('button',{name:'Roles y permisos'})).toBeNull()
-  expect(screen.queryByRole('button',{name:'Crear cuenta'})).toBeNull()
+  expect(screen.queryByRole('button',{name:'Crear usuario nuevo'})).toBeNull()
+  expect(screen.queryByRole('button',{name:'Invitar cuenta existente'})).toBeNull()
   expect(api.organizationAccessTree).not.toHaveBeenCalled()
  })
  it('el administrador crea una cuenta exclusivamente dentro de su organización',async()=>{
   vi.mocked(api.createOrganizationUser).mockResolvedValue({id:'u3'})
   open();await screen.findByText('Directorio de Zercano')
+  fireEvent.click(screen.getByRole('button',{name:'Crear usuario nuevo'}))
   fireEvent.change(screen.getByLabelText('Nombre'),{target:{value:'Usuario nuevo'}})
   fireEvent.change(screen.getByLabelText('Correo'),{target:{value:'nuevo@example.com'}})
   fireEvent.change(screen.getByLabelText('Contraseña inicial'),{target:{value:'Clave-inicial-segura-2026'}})
-  fireEvent.click(screen.getByRole('button',{name:'Crear cuenta'}))
+  fireEvent.click(screen.getByRole('button',{name:'Crear cuenta nueva'}))
   await waitFor(()=>expect(api.createOrganizationUser).toHaveBeenCalledWith(org.id,{name:'Usuario nuevo',email:'nuevo@example.com',password:'Clave-inicial-segura-2026',role:'member'}))
   expect(api.assignOrganizationGrants).not.toHaveBeenCalled()
  })
@@ -56,7 +102,8 @@ describe('Consola única de organización',()=>{
   open();fireEvent.click(screen.getByRole('button',{name:'Roles y permisos'}))
   await choose('Espacio de las políticas','Dirección Tecnología')
   expect(await screen.findByRole('combobox',{name:'Rol editable'})).toBeTruthy()
-  expect(screen.queryByRole('button',{name:'Crear cuenta'})).toBeNull()
+  expect(screen.queryByRole('button',{name:'Crear usuario nuevo'})).toBeNull()
+  expect(screen.queryByRole('button',{name:'Invitar cuenta existente'})).toBeNull()
  })
  it('el retiro de un acceso exige una confirmación del aplicativo, no confirmación nativa',async()=>{
   vi.mocked(api.organizationMemberGrants).mockResolvedValue({workspaces:[{workspace_id:'w1',role_id:'rviewer',role_name:'Lector',role_key:'viewer'}],projects:[]})

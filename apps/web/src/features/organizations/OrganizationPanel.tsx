@@ -2,14 +2,16 @@ import {useCallback,useEffect,useMemo,useState} from 'react'
 import {Overlay,Field} from '../../components/molecules/Overlay'
 import {PERMISSIONS,permissionLabel} from '@novzi/contracts'
 import AccessCombobox from './AccessCombobox'
-import {createOrganizationUser,organizationMembers,inviteToOrganization,myOrganizationInvitations,acceptOrganizationInvitation,declineOrganizationInvitation,updateOrganizationMember,removeOrganizationMember,organizationAccessTree,organizationMemberGrants,assignOrganizationGrants,removeOrganizationGrant,organizationRoles,organizationCreateRole,organizationUpdateRole} from './api'
-import type {Organization,OrganizationInvitation,OrganizationMember,AccessSpace,OrgGrant,OrganizationAccessRole} from './api'
+import {createOrganizationUser,organizationMembers,inviteToOrganization,myOrganizationInvitations,acceptOrganizationInvitation,declineOrganizationInvitation,updateOrganizationMember,removeOrganizationMember,organizationAccessTree,organizationMemberGrants,assignOrganizationGrants,removeOrganizationGrant,organizationRoles,organizationCreateRole,organizationUpdateRole,listOrganizationInvitations,cancelOrganizationInvitation} from './api'
+import type {Organization,OrganizationInvitation,OrganizationMember,AccessSpace,OrgGrant,OrganizationAccessRole,OrganizationOutgoingInvitation} from './api'
 
 type Props={organization:Organization|null;onClose:()=>void;onChanged:()=>void}
 export default function OrganizationPanel({organization,onClose,onChanged}:Props){
  const [tab,setTab]=useState<'accounts'|'access'|'roles'|'invitations'>('accounts')
  const [members,setMembers]=useState<OrganizationMember[]>([])
  const [invites,setInvites]=useState<OrganizationInvitation[]>([])
+ const [sentInvites,setSentInvites]=useState<OrganizationOutgoingInvitation[]>([])
+ const [accountMode,setAccountMode]=useState<'existing'|'new'>('existing')
  const [spaces,setSpaces]=useState<AccessSpace[]>([])
  const [directoryQuery,setDirectoryQuery]=useState('')
  const [email,setEmail]=useState(''),[invitedRole,setInvitedRole]=useState<'member'|'admin'>('member')
@@ -23,18 +25,20 @@ export default function OrganizationPanel({organization,onClose,onChanged}:Props
  const [newRoleName,setNewRoleName]=useState(''),[newRoleKey,setNewRoleKey]=useState(''),[policySearch,setPolicySearch]=useState('')
  const [grants,setGrants]=useState<{workspaces:OrgGrant[];projects:OrgGrant[]}>({workspaces:[],projects:[]})
  const [pendingRemove,setPendingRemove]=useState<{kind:'organization'|'access';userId:string;workspaceId?:string;projectId?:string;label:string}|null>(null)
+ const [pendingInviteCancel,setPendingInviteCancel]=useState<OrganizationOutgoingInvitation|null>(null)
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
  const canManage=organization?.role==='owner'||organization?.role==='admin'
  const selectedSpace=spaces.find(s=>s.id===spaceId)
  const selectedProject=selectedSpace?.projects.find(p=>p.id===projectId)
  const selectedUser=members.find(m=>m.id===userId)
  const reload=useCallback(async()=>{
-  const [m,i,s]=await Promise.all([
+  const [m,i,s,sent]=await Promise.all([
    organization?organizationMembers(organization.id,directoryQuery):Promise.resolve([]),
    myOrganizationInvitations(),
-   organization&&canManage?organizationAccessTree(organization.id):Promise.resolve([])
+   organization&&canManage?organizationAccessTree(organization.id):Promise.resolve([]),
+   organization&&canManage?listOrganizationInvitations(organization.id):Promise.resolve([])
   ])
-  setMembers(m);setInvites(i);setSpaces(s)
+  setMembers(m);setInvites(i);setSpaces(s);setSentInvites(sent)
  },[organization?.id,canManage,directoryQuery])
  useEffect(()=>{void reload().catch(e=>setError((e as Error).message))},[reload])
  useEffect(()=>{if(!organization||!userId){setGrants({workspaces:[],projects:[]});return}let alive=true;void organizationMemberGrants(organization.id,userId).then(v=>{if(alive)setGrants(v)}).catch(e=>{if(alive)setError((e as Error).message)});return()=>{alive=false}},[organization?.id,userId])
@@ -52,27 +56,45 @@ export default function OrganizationPanel({organization,onClose,onChanged}:Props
  const availableRoles=useMemo(()=>selectedSpace?.roles||[],[selectedSpace])
  return <>
  <Overlay title="Usuarios y accesos de la organización" onClose={onClose} wide><div className="modal-body security-console novzi-org-access">
-  <p className="sec-help">Un único lugar para crear cuentas, incorporar miembros y configurar accesos por organización, espacio, proyecto y diagrama. Las cuentas no reciben acceso automático a los proyectos.</p>
+  <p className="sec-help">Administra miembros y permisos en un solo lugar. Puedes vincular una cuenta de NOVZI que ya existe en otra organización: no es necesario crearla de nuevo.</p>
   {error&&<div className="sec-error" role="alert">{error}</div>}{notice&&<div className="sec-notice" role="status">{notice}</div>}
   <div className="sec-tabs" role="group" aria-label="Gestión organizacional">
    <button className={tab==='accounts'?'active':''} onClick={()=>setTab('accounts')}>Cuentas y miembros</button>
    {canManage&&<><button className={tab==='access'?'active':''} onClick={()=>setTab('access')}>Asignar accesos</button><button className={tab==='roles'?'active':''} onClick={()=>setTab('roles')}>Roles y permisos</button></>}
-   <button className={tab==='invitations'?'active':''} onClick={()=>setTab('invitations')}>Invitaciones</button>
+   <button className={tab==='invitations'?'active':''} onClick={()=>setTab('invitations')}>Invitaciones recibidas{invites.length>0?` (${invites.length})`:""}</button>
   </div>
   {!organization&&<p className="sec-help">Crea o selecciona una organización para administrar sus cuentas. Aquí puedes aceptar invitaciones pendientes.</p>}
   {tab==='accounts'&&organization&&<>
+   {canManage&&<section className="novzi-org-create" aria-label="Agregar persona a la organización">
+    <h4>Agregar persona a {organization.name}</h4>
+    <p className="sec-help">Si la persona ya tiene una cuenta NOVZI (aunque sea de otra empresa), vincúlala mediante invitación. No se duplica su cuenta ni se revelan los usuarios de otras organizaciones.</p>
+    <div className="novzi-account-mode" role="group" aria-label="Tipo de incorporación">
+     <button type="button" className={accountMode==='existing'?'primary':'ghost'} aria-pressed={accountMode==='existing'} onClick={()=>setAccountMode('existing')}>Vincular cuenta existente</button>
+     <button type="button" className={accountMode==='new'?'primary':'ghost'} aria-pressed={accountMode==='new'} onClick={()=>setAccountMode('new')}>Crear usuario nuevo</button>
+    </div>
+    {accountMode==='existing'?<>
+     <Field label="Correo de la cuenta existente"><input type="email" autoComplete="off" value={email} onChange={e=>setEmail(e.target.value)} placeholder="persona@empresa.com"/></Field>
+     <Field label="Rol en esta organización"><select value={invitedRole} onChange={e=>setInvitedRole(e.target.value as 'member'|'admin')} aria-label="Rol al invitar"><option value="member">Miembro</option>{organization.role==='owner'&&<option value="admin">Administrador</option>}</select></Field>
+     <p className="sec-help">La invitación aparecerá dentro de NOVZI cuando inicie sesión con ese correo. No enviamos un correo externo. Hasta que la acepte, no verá los espacios ni proyectos de {organization.name}.</p>
+     <button type="button" className="primary" disabled={busy||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())} onClick={()=>void run(async()=>{await inviteToOrganization(organization.id,email.trim(),invitedRole);setEmail('')},'Invitación registrada. La persona debe aceptarla en NOVZI para incorporarse a la organización.')}>Invitar cuenta existente</button>
+    </>:<>
+     <p className="sec-help">Utiliza esta opción únicamente si la persona todavía no tiene cuenta en NOVZI. Si ya existe, vuelve a «Vincular cuenta existente».</p>
+     <Field label="Nombre"><input autoComplete="name" value={newUser.name} onChange={e=>setNewUser(x=>({...x,name:e.target.value}))}/></Field>
+     <Field label="Correo"><input type="email" autoComplete="email" value={newUser.email} onChange={e=>setNewUser(x=>({...x,email:e.target.value}))}/></Field>
+     <Field label="Contraseña inicial"><input type="password" autoComplete="new-password" minLength={12} value={newUser.password} onChange={e=>setNewUser(x=>({...x,password:e.target.value}))}/></Field>
+     <Field label="Rol en la organización"><select aria-label="Rol inicial de organización" value={newUser.role} onChange={e=>setNewUser(x=>({...x,role:e.target.value as 'admin'|'member'}))}><option value="member">Miembro</option>{organization.role==='owner'&&<option value="admin">Administrador</option>}</select></Field>
+     <button className="primary" disabled={busy||newUser.name.trim().length<2||!newUser.email.includes('@')||newUser.password.length<12} onClick={()=>void run(async()=>{await createOrganizationUser(organization.id,newUser);setNewUser({name:'',email:'',password:'',role:'member'})},'Cuenta creada sin accesos a espacios ni proyectos')}>Crear cuenta nueva</button>
+    </>}
+   </section>}
+   {canManage&&<section aria-label="Invitaciones enviadas"><h4>Invitaciones pendientes de {organization.name}</h4>
+    {sentInvites.length===0?<p className="sec-help">Sin invitaciones pendientes.</p>:<div className="sec-rows">{sentInvites.map(i=><div className="sec-user-row" key={i.id}><div><strong>{i.email}</strong><small>Rol: {i.role==='admin'?'Administrador':'Miembro'} · Pendiente de aceptación · Vence: {new Date(i.expires_at).toLocaleDateString('es-CO')}</small></div><button className="ghost" type="button" disabled={busy} onClick={()=>setPendingInviteCancel(i)}>Cancelar invitación</button></div>)}</div>}
+   </section>}
    <h4>Directorio de {organization.name}</h4>
    <Field label="Buscar miembros por nombre o correo"><input type="search" value={directoryQuery} onChange={e=>setDirectoryQuery(e.target.value)} placeholder="Escribe para filtrar el directorio"/></Field>
    <div className="sec-rows">{members.map(m=><div className="sec-user-row" key={m.id}><div><strong>{m.name}</strong><small>{m.email} · {m.role==='owner'?'Propietario':m.role==='admin'?'Administrador':'Miembro'}</small></div>
-    {canManage&&<>{m.role!=='owner'&&<button type="button" onClick={()=>{setUserId(m.id);setTab('access')}}>Accesos</button>}{m.role!=='owner'&&<button className="ghost" disabled={busy} onClick={()=>setPendingRemove({kind:'organization',userId:m.id,label:m.name})}>Retirar</button>}{m.role!=='owner'&&<select aria-label={`Rol de organización de ${m.name}`} value={m.role} disabled={busy} onChange={e=>void run(()=>updateOrganizationMember(organization.id,m.id,e.target.value as 'admin'|'member'),'Rol actualizado')}><option value="member">Miembro</option><option value="admin">Administrador</option></select>}</>}
+    {canManage&&<>{m.role!=='owner'&&<button type="button" onClick={()=>{setUserId(m.id);setTab('access')}}>Accesos</button>}{m.role!=='owner'&&<button className="ghost" disabled={busy} onClick={()=>setPendingRemove({kind:'organization',userId:m.id,label:m.name})}>Retirar</button>}{m.role!=='owner'&&organization.role==='owner'&&<select aria-label={`Rol de organización de ${m.name}`} value={m.role} disabled={busy} onChange={e=>void run(()=>updateOrganizationMember(organization.id,m.id,e.target.value as 'admin'|'member'),'Rol actualizado')}><option value="member">Miembro</option><option value="admin">Administrador</option></select>}</>}
    </div>)}</div>
-   {canManage&&<section className="novzi-org-create"><h4>Crear cuenta en {organization.name}</h4><p className="sec-help">Único formulario para altas. La cuenta pertenecerá a esta organización, pero sin espacios, proyectos ni diagramas asignados.</p>
-    <Field label="Nombre"><input autoComplete="name" value={newUser.name} onChange={e=>setNewUser(x=>({...x,name:e.target.value}))}/></Field>
-    <Field label="Correo"><input type="email" autoComplete="email" value={newUser.email} onChange={e=>setNewUser(x=>({...x,email:e.target.value}))}/></Field>
-    <Field label="Contraseña inicial"><input type="password" autoComplete="new-password" minLength={12} value={newUser.password} onChange={e=>setNewUser(x=>({...x,password:e.target.value}))}/></Field>
-    <Field label="Rol en la organización"><select aria-label="Rol inicial de organización" value={newUser.role} onChange={e=>setNewUser(x=>({...x,role:e.target.value as 'admin'|'member'}))}><option value="member">Miembro</option><option value="admin">Administrador</option></select></Field>
-    <button className="primary" disabled={busy||newUser.name.trim().length<2||!newUser.email.includes('@')||newUser.password.length<12} onClick={()=>void run(async()=>{await createOrganizationUser(organization.id,newUser);setNewUser({name:'',email:'',password:'',role:'member'})},'Cuenta creada sin accesos a espacios ni proyectos')}>Crear cuenta</button>
-   </section>}
+
   </>}
   {tab==='access'&&canManage&&organization&&<>
    <h4>Asignar accesos a un miembro</h4>
@@ -115,14 +137,14 @@ export default function OrganizationPanel({organization,onClose,onChanged}:Props
    </>}
   </>}
   {tab==='invitations'&&<>
-   <h4>Invitaciones pendientes para tu cuenta</h4>
+   <h4>Invitaciones recibidas para tu cuenta</h4>
+   <p className="sec-help">Si te invitan a otra organización, acepta aquí al ingresar con el correo invitado. No perderás acceso a tus organizaciones actuales.</p>
    {invites.length===0?<p className="sec-help">No tienes invitaciones pendientes.</p>:<div className="sec-rows">{invites.map(i=><div className="sec-user-row" key={i.id}><div><strong>{i.organization_name}</strong><small>Rol: {i.role} · Invitación a {i.email}</small></div><button disabled={busy} onClick={()=>void run(()=>acceptOrganizationInvitation(i.id),'Invitación aceptada')}>Aceptar</button><button className="ghost" disabled={busy} onClick={()=>void run(()=>declineOrganizationInvitation(i.id),'Invitación rechazada')}>Rechazar</button></div>)}</div>}
-   {organization&&canManage&&<><h4>Incorporar a alguien existente</h4><p className="sec-help">Invita por correo exacto a una cuenta de otra organización. La persona deberá aceptar antes de recibir acceso; no se expone el directorio global.</p>
-    <Field label="Correo de invitación"><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="persona@empresa.com"/></Field><Field label="Rol al incorporarse"><select value={invitedRole} onChange={e=>setInvitedRole(e.target.value as 'member'|'admin')}><option value="member">Miembro</option><option value="admin">Administrador</option></select></Field><button className="primary" disabled={busy||!email.includes('@')} onClick={()=>void run(async()=>{await inviteToOrganization(organization.id,email,invitedRole);setEmail('')},'Invitación registrada')}>Enviar invitación interna</button>
-   </>}
+
   </>}
   <div className="modal-actions"><button onClick={onClose}>Cerrar</button></div>
  </div></Overlay>
+ {pendingInviteCancel&&organization&&<Overlay title="Cancelar invitación" onClose={()=>{if(!busy)setPendingInviteCancel(null)}}><div className="modal-body"><p>¿Cancelar la invitación pendiente de <strong>{pendingInviteCancel.email}</strong> a <strong>{organization.name}</strong>? Esto no elimina su cuenta global ni afecta sus otras organizaciones.</p><div className="modal-actions"><button className="ghost" type="button" disabled={busy} onClick={()=>setPendingInviteCancel(null)}>Volver</button><button type="button" className="danger outlined" disabled={busy} onClick={()=>{const invite=pendingInviteCancel;void run(()=>cancelOrganizationInvitation(organization.id,invite.id),'Invitación cancelada').then(()=>setPendingInviteCancel(null))}}>Confirmar cancelación</button></div></div></Overlay>}
  {pendingRemove&&<Overlay title="Confirmar retiro de acceso" onClose={()=>{if(!busy)setPendingRemove(null)}}><div className="modal-body"><p>¿Retirar el acceso a <strong>{pendingRemove.label}</strong>? Si retiras un espacio, se retirarán también los accesos a sus proyectos. No se eliminará la cuenta ni los diagramas.</p><div className="modal-actions"><button className="ghost" disabled={busy} onClick={()=>setPendingRemove(null)}>Cancelar</button><button className="danger outlined" disabled={busy} onClick={()=>{const p=pendingRemove;void run(()=>p.kind==='organization'?removeOrganizationMember(organization!.id,p.userId):removeOrganizationGrant(organization!.id,p.userId,p.workspaceId!,p.projectId),'Acceso retirado').then(()=>setPendingRemove(null))}}>Confirmar retiro</button></div></div></Overlay>}
  </>
 }

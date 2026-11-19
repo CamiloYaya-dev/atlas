@@ -99,19 +99,22 @@ export async function registerOrganizationsController(app:FastifyInstance){
   onlyManager(await organizationAccess(req.params.organizationId,actor.id))
   const name=nameOf(b.name),email=emailOf(b.email),hash=await hashPassword(String(b.password??''))
   const role=b.role==='admin'?'admin':'member'
+  if(role==='admin')onlyOwner(await organizationAccess(req.params.organizationId,actor.id))
   const c=await pool.connect()
   try{await c.query('BEGIN')
-   onlyManager(await organizationAccess(req.params.organizationId,actor.id,c))
+   const managerRole=await organizationAccess(req.params.organizationId,actor.id,c)
+   onlyManager(managerRole);if(role==='admin')onlyOwner(managerRole)
    const {rows}=await c.query<{id:string}>(`INSERT INTO novzi_users(email,display_name,password_hash,created_by) VALUES($1,$2,$3,$4) RETURNING id`,[email,name,hash,actor.id])
    await c.query(`INSERT INTO organization_members(organization_id,user_id,role) VALUES($1,$2,$3)`,[req.params.organizationId,rows[0].id,role])
    await c.query('COMMIT');return reply.code(201).send({id:rows[0].id,name,email,role})
-  }catch(e){await c.query('ROLLBACK');if((e as {code?:string}).code==='23505')throw new DomainError('La cuenta ya existe: utiliza Invitar por correo',409);throw e}finally{c.release()}
+  }catch(e){await c.query('ROLLBACK');if((e as {code?:string}).code==='23505')throw new DomainError('La cuenta ya existe: usa Vincular cuenta existente',409);throw e}finally{c.release()}
  })
  app.patch<{Params:{organizationId:string;userId:string}}>('/api/v1/organizations/:organizationId/members/:userId',async req=>{
   assertUUID(req.params.organizationId);assertUUID(req.params.userId)
   const actor=await identity(req),b=input(req.body)
-  onlyManager(await organizationAccess(req.params.organizationId,actor.id))
+  const managerRole=await organizationAccess(req.params.organizationId,actor.id);onlyManager(managerRole)
   if(b.role!=='member'&&b.role!=='admin')throw new DomainError('Rol de organización inválido',400)
+  if(b.role==='admin')onlyOwner(managerRole)
   const current=await pool.query<{role:string}>(`SELECT role FROM organization_members WHERE organization_id=$1 AND user_id=$2`,
    [req.params.organizationId,req.params.userId])
   if(!current.rows[0])throw new DomainError('Miembro no encontrado',404)
@@ -142,6 +145,29 @@ export async function registerOrganizationsController(app:FastifyInstance){
    await c.query('COMMIT')
    for(const item of affected)projectEvents.revokeUser(item.project_id,req.params.userId)
    return {ok:true}
+  }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
+ })
+ app.get<{Params:{organizationId:string}}>('/api/v1/organizations/:organizationId/invitations',async req=>{
+  assertUUID(req.params.organizationId);const actor=await identity(req)
+  onlyManager(await organizationAccess(req.params.organizationId,actor.id))
+  const {rows}=await pool.query(`SELECT id,email,role,created_at,expires_at FROM organization_invitations
+    WHERE organization_id=$1 AND accepted_at IS NULL AND declined_at IS NULL AND expires_at>now()
+    ORDER BY created_at DESC`,[req.params.organizationId])
+  return rows
+ })
+ app.delete<{Params:{organizationId:string;invitationId:string}}>('/api/v1/organizations/:organizationId/invitations/:invitationId',async req=>{
+  assertUUID(req.params.organizationId);assertUUID(req.params.invitationId);const actor=await identity(req)
+  const c=await pool.connect()
+  try{await c.query('BEGIN')
+   const who=await organizationAccess(req.params.organizationId,actor.id,c);onlyManager(who)
+   const {rows}=await c.query<{role:'member'|'admin'}>(`SELECT role FROM organization_invitations
+      WHERE id=$1 AND organization_id=$2 AND accepted_at IS NULL AND declined_at IS NULL FOR UPDATE`,[req.params.invitationId,req.params.organizationId])
+   if(!rows[0])throw new DomainError('Invitación pendiente no encontrada',404)
+   if(rows[0].role==='admin')onlyOwner(who)
+   const result=await c.query(`UPDATE organization_invitations SET declined_at=now()
+      WHERE id=$1 AND organization_id=$2 AND accepted_at IS NULL AND declined_at IS NULL`,[req.params.invitationId,req.params.organizationId])
+   if(result.rowCount!==1)throw new DomainError('La invitación ya no está pendiente',409)
+   await c.query('COMMIT');return {ok:true}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  })
  app.post<{Params:{organizationId:string}}>('/api/v1/organizations/:organizationId/invitations',async(req,reply)=>{

@@ -77,3 +77,94 @@ test('organización: invitación solo se acepta por la cuenta del correo invitad
  assert.ok(seen.some(sql=>sql.includes('INSERT INTO organization_members')))
  assert.ok(!seen.some(sql=>sql.includes('workspace_members')||sql.includes('project_members')))
 })
+
+
+test('invitaciones salientes: solo administradores de la organización consultan solicitudes pendientes',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ const seen:string[]=[]
+ t.mock.method(pool,'query',async(sql:string)=>{
+  seen.push(sql)
+  if(sql.includes('FROM novzi_sessions'))return auth('lady@example.com')
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'admin'}]}
+  if(sql.includes('FROM organization_invitations')&&sql.includes('SELECT id,email,role'))return {rows:[{id:id.invite,email:'externa@example.com',role:'member',created_at:'2026-11-19T12:00:00Z',expires_at:'2026-12-02T12:00:00Z'}]}
+  throw Error('SQL no previsto '+sql)
+ })
+ const ok=await app.inject({method:'GET',url:`/api/v1/organizations/${id.org}/invitations`,headers:{cookie}})
+ assert.equal(ok.statusCode,200,ok.body)
+ assert.equal(ok.json()[0].email,'externa@example.com')
+ assert.ok(seen.every(sql=>!sql.includes('SELECT u.email FROM novzi_users')))
+})
+
+test('invitaciones salientes: un miembro ordinario no puede ver correos externos',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ t.mock.method(pool,'query',async(sql:string)=>{
+  if(sql.includes('FROM novzi_sessions'))return auth('miembro@example.com')
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'member'}]}
+  throw Error('Consulta prohibida '+sql)
+ })
+ const response=await app.inject({method:'GET',url:`/api/v1/organizations/${id.org}/invitations`,headers:{cookie}})
+ assert.equal(response.statusCode,403,response.body)
+})
+
+test('invitaciones salientes: cancelar una pendiente no elimina cuentas ni accesos',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ t.mock.method(pool,'query',async(sql:string)=>{
+  if(sql.includes('FROM novzi_sessions'))return auth('lady@example.com')
+  throw Error('SQL global inesperado '+sql)
+ })
+ const seen:string[]=[]
+ t.mock.method(pool,'connect',async()=>({query:async(sql:string)=>{
+  seen.push(sql)
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'admin'}]}
+  if(sql.includes('SELECT role FROM organization_invitations'))return {rows:[{role:'member'}]}
+  if(sql.includes('UPDATE organization_invitations SET declined_at'))return {rowCount:1,rows:[]}
+  if(['BEGIN','COMMIT','ROLLBACK'].includes(sql))return {rows:[]}
+  throw Error('SQL no previsto '+sql)
+ },release:()=>{}}) as never)
+ const response=await app.inject({method:'DELETE',url:`/api/v1/organizations/${id.org}/invitations/${id.invite}`,headers:{cookie}})
+ assert.equal(response.statusCode,200,response.body)
+ assert.ok(seen.some(sql=>sql.includes('UPDATE organization_invitations SET declined_at')))
+ assert.ok(!seen.some(sql=>sql.includes('DELETE FROM novzi_users')||sql.includes('DELETE FROM organization_members')))
+})
+
+test('invitaciones salientes: solo propietario cancela invitaciones de administradores',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ t.mock.method(pool,'query',async(sql:string)=>{
+  if(sql.includes('FROM novzi_sessions'))return auth('lady@example.com')
+  throw Error('SQL global inesperado '+sql)
+ })
+ const seen:string[]=[]
+ t.mock.method(pool,'connect',async()=>({query:async(sql:string)=>{
+  seen.push(sql)
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'admin'}]}
+  if(sql.includes('SELECT role FROM organization_invitations'))return {rows:[{role:'admin'}]}
+  if(['BEGIN','COMMIT','ROLLBACK'].includes(sql))return {rows:[]}
+  throw Error('SQL no previsto '+sql)
+ },release:()=>{}}) as never)
+ const response=await app.inject({method:'DELETE',url:`/api/v1/organizations/${id.org}/invitations/${id.invite}`,headers:{cookie}})
+ assert.equal(response.statusCode,403,response.body)
+ assert.ok(!seen.some(sql=>sql.startsWith('UPDATE organization_invitations')))
+})
+
+test('administrador delegado no puede crear otra cuenta con rol admin',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ t.mock.method(pool,'query',async(sql:string)=>{
+  if(sql.includes('FROM novzi_sessions'))return auth('lady@example.com')
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'admin'}]}
+  throw Error('SQL global inesperado '+sql)
+ })
+ const response=await app.inject({method:'POST',url:`/api/v1/organizations/${id.org}/users`,headers:{cookie},payload:{name:'Invitado',email:'invitado@example.com',password:'Clave-segura-de-12-caracteres',role:'admin'}})
+ assert.equal(response.statusCode,403,response.body)
+})
+
+
+test('administrador delegado no puede promover miembros existentes a admin',async t=>{
+ const app=Fastify();t.after(()=>app.close());await registerOrganizationsController(app)
+ t.mock.method(pool,'query',async(sql:string)=>{
+  if(sql.includes('FROM novzi_sessions'))return auth('lady@example.com')
+  if(sql.includes('SELECT m.role FROM organization_members'))return {rows:[{role:'admin'}]}
+  throw Error('Consulta prohibida '+sql)
+ })
+ const response=await app.inject({method:'PATCH',url:`/api/v1/organizations/${id.org}/members/${id.owner}`,headers:{cookie},payload:{role:'admin'}})
+ assert.equal(response.statusCode,403,response.body)
+})
