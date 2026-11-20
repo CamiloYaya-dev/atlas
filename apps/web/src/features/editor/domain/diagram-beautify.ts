@@ -1,76 +1,301 @@
 /**
- * Deterministic, non-destructive NOVZI diagram arrangement.
- * Only top-level appearances move. Nested ports, partitions, containment,
- * occurrence timing, element identities and semantic relations stay intact.
+ * Readable deterministic layout for dense architecture/process graphs.
+ * Only changes the current diagram's root occurrences and, when needed,
+ * their presentation handles. NEVER adds/deletes/combines semantic edges.
+ * Contained nodes and time-sensitive sequence coordinates are untouched.
  */
 import {novziNodeSize,newActivityIssues,newClassIssues,newUseCaseIssues,newComponentIssues,newDeploymentIssues,newSequenceIssues} from '@novzi/contracts'
 import type {ProjectDocument,Diagram,DiagramNode} from '@novzi/contracts'
 
-// Space for routing corridors AND readable UML relationship annotations.
-const X_GAP=340
-const Y_GAP=210
-const MARGIN=24
+const HORIZONTAL_GAP=175
+const VERTICAL_GAP=105
+const COMPONENT_GAP=230
+const POSITION_EPSILON=1
+const stableCompare=(a:DiagramNode,b:DiagramNode)=>a.y-b.y||a.x-b.x||a.id.localeCompare(b.id)
+const center=(n:DiagramNode,size:{width:number;height:number})=>({x:n.x+size.width/2,y:n.y+size.height/2})
+type Arc={source:string;target:string}
 
-const center=(n:DiagramNode)=>({x:n.x+(n.width||180)/2,y:n.y+(n.height||95)/2})
-const preferHandle=(dx:number,dy:number,source:boolean)=>{
- if(Math.abs(dx)>=Math.abs(dy)*1.15)return source?(dx>=0?'right':'left'):(dx>=0?'left':'right')
- return source?(dy>=0?'bottom-2':'top-2'):(dy>=0?'top-2':'bottom-2')
+/** A cycle-tolerant feedback-arc heuristic: no node is discarded on cycles. */
+function linearizeCycle(nodes:DiagramNode[],arcs:Arc[]):string[]{
+ const remaining=new Set(nodes.map(n=>n.id)),prefix:string[]=[],suffix:string[]=[]
+ const byId=new Map(nodes.map(n=>[n.id,n]))
+ while(remaining.size){
+  const degree=[...remaining].map(id=>({id,into:arcs.filter(e=>e.target===id&&remaining.has(e.source)).length,out:arcs.filter(e=>e.source===id&&remaining.has(e.target)).length}))
+  const cmp=(a:{id:string},b:{id:string})=>stableCompare(byId.get(a.id)!,byId.get(b.id)!)
+  const sources=degree.filter(n=>n.into===0).sort((a,b)=>b.out-a.out||cmp(a,b))
+  if(sources.length){const id=sources[0].id;prefix.push(id);remaining.delete(id);continue}
+  const sinks=degree.filter(n=>n.out===0).sort((a,b)=>b.into-a.into||cmp(a,b))
+  if(sinks.length){const id=sinks[0].id;suffix.unshift(id);remaining.delete(id);continue}
+  const best=degree.sort((a,b)=>(b.out-b.into)-(a.out-a.into)||cmp(a,b))[0].id
+  prefix.push(best);remaining.delete(best)
+ }
+ return [...prefix,...suffix]
 }
-function optimizeEdgeAnchors(diagram:Diagram):Diagram['edges']{
- const nodes=new Map(diagram.nodes.map(n=>[n.id,n]))
- return diagram.edges.map(edge=>{
-  const source=nodes.get(edge.source),target=nodes.get(edge.target)
-  if(!source||!target||edge.source===edge.target)return edge
-  const a=center(source),b=center(target),dx=b.x-a.x,dy=b.y-a.y
-  const sourceHandle=preferHandle(dx,dy,true),targetHandle=preferHandle(dx,dy,false)
-  if(edge.sourceHandle===sourceHandle&&edge.targetHandle===targetHandle)return edge
-  return {...edge,sourceHandle,targetHandle}
+
+/** Weak components must be laid out separately: unrelated nodes do not share lanes. */
+function weakComponents(nodes:DiagramNode[],arcs:Arc[]):DiagramNode[][]{
+ const byId=new Map(nodes.map(n=>[n.id,n])),neighbors=new Map(nodes.map(n=>[n.id,new Set<string>()]))
+ for(const edge of arcs){neighbors.get(edge.source)?.add(edge.target);neighbors.get(edge.target)?.add(edge.source)}
+ const used=new Set<string>(),result:DiagramNode[][]=[]
+ for(const node of [...nodes].sort(stableCompare)){
+  if(used.has(node.id))continue
+  const stack=[node.id],group:DiagramNode[]=[];used.add(node.id)
+  while(stack.length){const id=stack.pop()!,current=byId.get(id);if(current)group.push(current)
+   for(const adjacent of neighbors.get(id)||[]){if(!used.has(adjacent)){used.add(adjacent);stack.push(adjacent)}}
+  }
+  result.push(group)
+ }
+ return result
+}
+
+function layoutComponent(nodes:DiagramNode[],arcs:Arc[],sizes:Map<string,{width:number;height:number}>){
+ const order=linearizeCycle(nodes,arcs),orderIndex=new Map(order.map((id,i)=>[id,i]))
+ const out=new Map(order.map(id=>[id,[] as string[]])),incoming=new Map(order.map(id=>[id,[] as string[]]))
+ for(const edge of arcs){out.get(edge.source)?.push(edge.target);incoming.get(edge.target)?.push(edge.source)}
+ const depth=new Map(order.map(id=>[id,0]))
+ // An edge pointing backward in the linearized order is a feedback relation,
+ // not a reason to push EVERY node in a cycle onto the same faraway column.
+ for(const id of order){for(const target of out.get(id)||[]){
+  if((orderIndex.get(id)||0)>=(orderIndex.get(target)||0))continue
+  depth.set(target,Math.max(depth.get(target)||0,(depth.get(id)||0)+1))
+ }}
+ const depthMax=Math.max(0,...depth.values())
+ const limit=Math.min(7,Math.max(2,Math.ceil(Math.sqrt(nodes.length)*1.6)))
+ const colOf=new Map(order.map(id=>[id,depthMax>limit?Math.floor((depth.get(id)||0)*limit/depthMax):(depth.get(id)||0)]))
+ const columns=new Map<number,string[]>()
+ for(const id of order){const col=colOf.get(id)!;if(!columns.has(col))columns.set(col,[]);columns.get(col)!.push(id)}
+ const nodeById=new Map(nodes.map(n=>[n.id,n]))
+ for(const values of columns.values())values.sort((a,b)=>stableCompare(nodeById.get(a)!,nodeById.get(b)!))
+ const colKeys=[...columns.keys()].sort((a,b)=>a-b)
+ // Bidirectional barycentric sweeps lower crossing counts without modifying
+ // the underlying edges or depending on browser positioning heuristics.
+ for(let iteration=0;iteration<10;iteration++){
+  const leftToRight=iteration%2===0
+  for(const col of leftToRight?colKeys:[...colKeys].reverse()){
+   const items=columns.get(col)!
+   if(items.length<2)continue
+   const reference=(id:string)=>{
+    const adjacent=[...(out.get(id)||[]),...(incoming.get(id)||[])].filter(n=>colOf.get(n)!==col)
+    let sum=0,weight=0
+    for(const neighbor of adjacent){const neighborCol=colOf.get(neighbor)!,inDirection=leftToRight?neighborCol<col:neighborCol>col
+     if(!inDirection)continue
+     const bucket=columns.get(neighborCol)!,idx=bucket.indexOf(neighbor)
+     if(idx<0)continue
+     const w=1/Math.max(1,Math.abs(col-neighborCol));sum+=((idx+.5)/bucket.length)*w;weight+=w
+    }
+    return weight?sum/weight:NaN
+   }
+   const prev=new Map(items.map((id,index)=>[id,index]))
+   const scores=new Map(items.map(id=>[id,reference(id)]))
+   items.sort((a,b)=>{
+    const aScore=scores.get(a)!,bScore=scores.get(b)!
+    if(Number.isFinite(aScore)&&Number.isFinite(bScore)&&Math.abs(aScore-bScore)>1e-8)return aScore-bScore
+    if(Number.isFinite(aScore)!==Number.isFinite(bScore))return Number.isFinite(aScore)?-1:1
+    return (prev.get(a)||0)-(prev.get(b)||0)
+   })
+  }
+ }
+ // A hub near the center reduces total wire length. Small columns align to the
+ // central mass instead of all starting at the top and creating diagonal spans.
+ const widths=new Map(colKeys.map(col=>[col,Math.max(...columns.get(col)!.map(id=>sizes.get(id)!.width))]))
+ const heights=new Map(colKeys.map(col=>[col,columns.get(col)!.reduce((v,id)=>v+sizes.get(id)!.height,0)+VERTICAL_GAP*(columns.get(col)!.length-1)]))
+ const totalHeight=Math.max(...heights.values())
+ const placed=new Map<string,{x:number;y:number}>()
+ let x=0
+ for(const col of colKeys){
+  const width=widths.get(col)!,items=columns.get(col)!
+  let y=(totalHeight-heights.get(col)!)/2
+  for(const id of items){const size=sizes.get(id)!;placed.set(id,{x:x+(width-size.width)/2,y});y+=size.height+VERTICAL_GAP}
+  x+=width+HORIZONTAL_GAP
+ }
+ return {placed,height:totalHeight,width:Math.max(0,x-HORIZONTAL_GAP)}
+}
+
+/** Architecture-aware layout: explicitly separate entry, business, integration,
+ * repository and storage lanes. It deliberately ALLOWS longer outside corridors
+ * rather than compressing every connection into a shared central bundle.
+ * No element catalog or diagram semantics are modified.
+ */
+export type BeautifyMode='presentation'|'compact'
+type SemanticZone=0|1|2|3|4
+function architectureZone(type:string,name:string):SemanticZone {
+ const n=name.toLocaleLowerCase('es')
+ if(type==='database'||/base de datos|sql server|postgres|mysql|mongodb|redis|db\b/.test(n))return 4
+ if(/repositori|persisten|acceso a datos|data access|data layer/.test(n))return 3
+ if(/entrada|controlador|controller|http|gateway|fachada|api pública|api publica/.test(n))return 0
+ if(type==='external'||/adaptador|integraci[oó]n|tercero|proveedor externo|documentos|im[aá]genes|adjuntos|almacenamiento|cloud/.test(n))return 2
+ return 1
+}
+function layoutArchitecture(nodes:DiagramNode[],sizes:Map<string,{width:number;height:number}>,doc:ProjectDocument,arcs:Arc[],mode:BeautifyMode){
+ const zone=new Map(nodes.map(n=>[n.id,architectureZone(doc.elements[n.elementId]?.type||'',doc.elements[n.elementId]?.name||'')]))
+ const distinct=new Set(zone.values())
+ if(nodes.length<7||distinct.size<3||!distinct.has(1)||!distinct.has(3)&&!distinct.has(4))return null
+ const columns:string[][]=[]
+ const zoneMap=new Map<number,number>()
+ for(let z=0;z<=4;z++){
+  const batch=nodes.filter(n=>zone.get(n.id)===z).sort(stableCompare).map(n=>n.id)
+  if(!batch.length)continue
+  // Domain services are placed in at most 5 rows per lane for traceability.
+  // Other zones stay narrow: each is visually distinguishable as a layer.
+  const rows=mode==='presentation'?(z===1?4:5):(z===1?5:6)
+  const colCount=Math.ceil(batch.length/rows)
+  const groups=Array.from({length:colCount},()=>[] as string[])
+  for(let i=0;i<batch.length;i++)groups[i%colCount].push(batch[i])
+  for(const list of groups){zoneMap.set(columns.length,z);columns.push(list)}
+ }
+ const colOf=new Map(columns.flatMap((items,col)=>items.map(id=>[id,col] as const)))
+ // Order rows by dependency barycenter, not alphabetic / incidental position.
+ // Running both directions captures targets and sources without reversing arrows.
+ for(let sweep=0;sweep<12;sweep++){
+  const forward=sweep%2===0
+  const indices=forward?columns.map((_,i)=>i):columns.map((_,i)=>i).reverse()
+  for(const index of indices){const list=columns[index];if(list.length<2)continue
+   const previous=new Map(list.map((id,i)=>[id,i]))
+   const score=(id:string)=>{
+    const neighbors=arcs.flatMap(a=>a.source===id?[a.target]:a.target===id?[a.source]:[])
+    let total=0,weight=0
+    for(const other of neighbors){const col=colOf.get(other);if(col===undefined||col===index||forward&&col>index||!forward&&col<index)continue
+     const order=columns[col].indexOf(other)
+     if(order<0)continue
+     const w=1/Math.max(1,Math.abs(index-col))
+     total+=(order+.5)/columns[col].length*w;weight+=w
+    }
+    return weight?total/weight:NaN
+   }
+   const scores=new Map(list.map(id=>[id,score(id)]))
+   list.sort((a,b)=>{
+    const x=scores.get(a)!,y=scores.get(b)!
+    if(Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x-y)>1e-8)return x-y
+    if(Number.isFinite(x)!==Number.isFinite(y))return Number.isFinite(x)?-1:1
+    return previous.get(a)!-previous.get(b)!
+   })
+  }
+ }
+ const vGap=mode==='presentation'?145:90,hGap=mode==='presentation'?235:145
+ const colWidths=columns.map(col=>Math.max(...col.map(id=>sizes.get(id)!.width)))
+ const heights=columns.map(col=>col.reduce((h,id)=>h+sizes.get(id)!.height,0)+Math.max(0,col.length-1)*vGap)
+ const maxHeight=Math.max(...heights)
+ const placed=new Map<string,{x:number;y:number}>()
+ let x=0
+ for(let i=0;i<columns.length;i++){
+  let y=(maxHeight-heights[i])/2
+  for(const id of columns[i]){
+   const size=sizes.get(id)!
+   placed.set(id,{x:x+(colWidths[i]-size.width)/2,y})
+   y+=size.height+vGap
+  }
+  const nextZone=zoneMap.get(i+1)
+  x+=colWidths[i]+hGap+(nextZone!==undefined&&nextZone!==zoneMap.get(i)?45:0)
+ }
+ return {placed,height:maxHeight,width:x-hGap}
+}
+
+/** Rebase authored bend coordinates after moving boxes. The weighted endpoint
+ * displacement preserves a local adjustment rather than stranding it where
+ * the OLD boxes were. This is not a semantic graph operation.
+ */
+export function rebaseManualRoutes(before:ProjectDocument,after:ProjectDocument,diagramId:string):ProjectDocument {
+ const previous=before.diagrams.find(d=>d.id===diagramId),current=after.diagrams.find(d=>d.id===diagramId)
+ if(!previous||!current)return after
+ const oldNodes=new Map(previous.nodes.map(n=>[n.id,n])),newNodes=new Map(current.nodes.map(n=>[n.id,n]))
+ const previousEdges=new Map(previous.edges.map(e=>[e.id,e]))
+ let altered=false
+ const edges=current.edges.map(edge=>{
+  const old=previousEdges.get(edge.id),route=old?.manualRoute
+  if(!route?.points?.length||!newNodes.has(edge.source)||!newNodes.has(edge.target))return edge
+  const a=oldNodes.get(edge.source),b=oldNodes.get(edge.target),a1=newNodes.get(edge.source)!,b1=newNodes.get(edge.target)!
+  if(!a||!b)return edge
+  const dxA=a1.x-a.x,dyA=a1.y-a.y,dxB=b1.x-b.x,dyB=b1.y-b.y
+  if(dxA===0&&dyA===0&&dxB===0&&dyB===0)return edge
+  const x0=a.x+(a.width||250)/2,y0=a.y+(a.height||135)/2
+  const dx=b.x+(b.width||250)/2-x0,dy=b.y+(b.height||135)/2-y0
+  const denominator=Math.max(1,dx*dx+dy*dy)
+  const points=route.points.map(p=>{
+   const t=Math.max(0,Math.min(1,((p.x-x0)*dx+(p.y-y0)*dy)/denominator))
+   return {x:Math.round(p.x+dxA*(1-t)+dxB*t),y:Math.round(p.y+dyA*(1-t)+dyB*t)}
+  })
+  altered=true
+  return {...edge,manualRoute:{version:1 as const,points}}
  })
+ return altered?{...after,diagrams:after.diagrams.map(d=>d.id===diagramId?{...d,edges}:d)}:after
 }
 
-export function beautifyDiagram(doc:ProjectDocument,diagramId:string):ProjectDocument {
+/** Reassign only ports of the currently reorganized diagram, not edge semantics. */
+function optimizeEdgeAnchors(diagram:Diagram,sizes:Map<string,{width:number;height:number}>):Diagram['edges']{
+ // Authored UML ports can be part of the notation, not merely of layout.
+ if(diagram.type.startsWith('uml-'))return diagram.edges
+ const nodes=new Map(diagram.nodes.map(n=>[n.id,n]))
+ const point=(id:string)=>{const n=nodes.get(id);return n?center(n,sizes.get(id)??{width:n.width||250,height:n.height||125}):null}
+ const baseline=diagram.edges.map(edge=>{
+  const a=nodes.get(edge.source),b=nodes.get(edge.target)
+  if(!a||!b||edge.source===edge.target||a.parentNodeId||b.parentNodeId||(edge.manualRoute?.points?.length||edge.portsLocked))return edge
+  const ac=point(a.id)!,bc=point(b.id)!,dx=bc.x-ac.x,dy=bc.y-ac.y
+  const sourceHandle=Math.abs(dx)>95?(dx>0?'right':'left'):(dy>=0?'bottom-2':'top-2')
+  const targetHandle=Math.abs(dx)>95?(dx>0?'left':'right'):(dy>=0?'top-2':'bottom-2')
+  return edge.sourceHandle===sourceHandle&&edge.targetHandle===targetHandle?edge:{...edge,sourceHandle,targetHandle}
+ })
+ // Avoid dozens of different relations connecting to exactly the same lateral
+ // pixel on a hub. Vertical ports are already present on NOVZI non-UML cards.
+ const spread=new Map<string,typeof baseline[number]>()
+ for(const end of ['source','target'] as const){
+  const handleKey=end==='source'?'sourceHandle':'targetHandle'
+  const buckets=new Map<string,typeof baseline>()
+  for(const edge of baseline){
+   if(edge.portsLocked||edge.manualRoute?.points?.length)continue
+   const node=nodes.get(edge[end]),side=edge[handleKey]
+   if(!node||node.parentNodeId||!['left','right'].includes(side||''))continue
+   const key=`${node.id}:${side}`
+   const group=buckets.get(key)||[];group.push(edge);buckets.set(key,group)
+  }
+  for(const group of buckets.values()){
+   if(group.length<4)continue
+   group.sort((a,b)=>(point(a[end==='source'?'target':'source'])?.y??0)-(point(b[end==='source'?'target':'source'])?.y??0)||a.id.localeCompare(b.id))
+   const cap=group.length>=7?2:1
+   for(let i=0;i<cap;i++){
+    const first=group[i],last=group[group.length-i-1]
+    const top=i===0?'top-2':'top-1',bottom=i===0?'bottom-2':'bottom-3'
+    const currentFirst=spread.get(first.id)||first,currentLast=spread.get(last.id)||last
+    spread.set(first.id,{...currentFirst,[handleKey]:top})
+    spread.set(last.id,{...currentLast,[handleKey]:bottom})
+   }
+  }
+ }
+ return baseline.map(edge=>spread.get(edge.id)||edge)
+}
+
+export function beautifyDiagram(doc:ProjectDocument,diagramId:string,mode:BeautifyMode='presentation'):ProjectDocument {
  const diagram=doc.diagrams.find(d=>d.id===diagramId)
  if(!diagram)throw new Error('Diagrama no encontrado')
- // Sequence coordinates encode occurrences, activation and fragment membership.
- // Ordinary automatic topological layout would corrupt their UML semantics.
  if(diagram.type==='uml-sequence'&&diagram.interaction)throw new Error('Las coordenadas UML de secuencia representan tiempo; utiliza el ajuste de participantes para mantener sus ocurrencias.')
  const roots=diagram.nodes.filter(n=>!n.parentNodeId)
  if(roots.length<2)return doc
- const byId=new Map(diagram.nodes.map(n=>[n.id,n]))
- const rootOf=(id:string)=>{let n=byId.get(id);const visited=new Set<string>();while(n?.parentNodeId&&byId.has(n.parentNodeId)&&!visited.has(n.id)){visited.add(n.id);n=byId.get(n.parentNodeId)}return n?.id}
- const adj=new Map(roots.map(n=>[n.id,new Set<string>()]))
- const incoming=new Map(roots.map(n=>[n.id,0]))
- for(const e of diagram.edges){const a=rootOf(e.source),b=rootOf(e.target);if(!a||!b||a===b||!adj.has(a)||!adj.has(b)||adj.get(a)!.has(b))continue;adj.get(a)!.add(b);incoming.set(b,(incoming.get(b)||0)+1)}
- const sorted=[...roots].sort((a,b)=>a.x-b.x||a.y-b.y||a.id.localeCompare(b.id))
- const layer=new Map<string,number>()
- const queue=sorted.filter(n=>!incoming.get(n.id)).map(n=>n.id)
- for(const n of queue)layer.set(n,0)
- // Kahn layering; cycles are kept in their original group instead of looping.
- while(queue.length){const id=queue.shift()!;for(const dest of adj.get(id)||[]){layer.set(dest,Math.max(layer.get(dest)||0,(layer.get(id)||0)+1));incoming.set(dest,(incoming.get(dest)||0)-1);if(incoming.get(dest)===0)queue.push(dest)}}
- const unresolved=sorted.filter(n=>!layer.has(n.id))
- if(unresolved.length){const maxLayer=Math.max(0,...layer.values());for(const [i,n] of unresolved.entries())layer.set(n.id,maxLayer+Math.floor(i/5))}
- // Keep very wide graphs readable: limit layers and allow vertical columns.
- const groups=new Map<number,typeof roots>()
- for(const n of sorted){const index=layer.get(n.id)||0;const value=groups.get(index)||[];value.push(n);groups.set(index,value)}
- const sizes=new Map(roots.map(n=>{const e=doc.elements[n.elementId];const actual=e?novziNodeSize(diagram.type,e,n,0,diagram.nodes.some(x=>x.parentNodeId===n.id)):{width:n.width||180,height:n.height||95};return [n.id,{width:Math.max(n.width||0,actual.width),height:Math.max(n.height||0,actual.height)}]}))
- const minX=Math.min(...roots.map(n=>n.x)),minY=Math.min(...roots.map(n=>n.y))
- let x=minX
- const moved=new Map<string,{x:number;y:number}>()
- for(const index of [...groups.keys()].sort((a,b)=>a-b)){
-  const col=groups.get(index)!.sort((a,b)=>a.y-b.y||a.x-b.x||a.id.localeCompare(b.id))
-  const width=Math.max(...col.map(n=>sizes.get(n.id)!.width))
-  let y=minY
-  for(const n of col){const sz=sizes.get(n.id)!;moved.set(n.id,{x:x+(width-sz.width)/2,y});y+=sz.height+Y_GAP}
-  x+=width+X_GAP
+ const nodes=new Map(diagram.nodes.map(n=>[n.id,n]))
+ const rootOf=(id:string)=>{let node=nodes.get(id);const visited=new Set<string>();while(node?.parentNodeId&&nodes.has(node.parentNodeId)&&!visited.has(node.id)){visited.add(node.id);node=nodes.get(node.parentNodeId)}return node?.id}
+ const arcKeys=new Set<string>(),arcs:Arc[]=[]
+ for(const edge of diagram.edges){const source=rootOf(edge.source),target=rootOf(edge.target)
+  if(!source||!target||source===target)continue
+  const key=`${source}\0${target}`
+  if(!arcKeys.has(key)){arcKeys.add(key);arcs.push({source,target})}
  }
- const changed=diagram.nodes.some(n=>moved.has(n.id)&&(Math.abs(n.x-moved.get(n.id)!.x)>MARGIN||Math.abs(n.y-moved.get(n.id)!.y)>MARGIN))
+ const sizes=new Map(roots.map(node=>{
+  const element=doc.elements[node.elementId]
+  const measured=element?novziNodeSize(diagram.type,element,node,0,diagram.nodes.some(n=>n.parentNodeId===node.id)):{width:node.width||250,height:node.height||125}
+  return [node.id,{width:Math.max(node.width||0,measured.width),height:Math.max(node.height||0,measured.height)}]
+ }))
+ const minX=Math.min(...roots.map(n=>n.x)),minY=Math.min(...roots.map(n=>n.y))
+ const moved=new Map<string,{x:number;y:number}>()
+ let offsetY=0
+ for(const group of weakComponents(roots,arcs)){
+  const ids=new Set(group.map(n=>n.id)),groupArcs=arcs.filter(a=>ids.has(a.source)&&ids.has(a.target)),component=!diagram.type.startsWith('uml-')?layoutArchitecture(group,sizes,doc,groupArcs,mode)||layoutComponent(group,groupArcs,sizes):layoutComponent(group,groupArcs,sizes)
+  for(const [id,pos] of component.placed)moved.set(id,{x:minX+pos.x,y:minY+offsetY+pos.y})
+  offsetY+=component.height+COMPONENT_GAP
+ }
+ const arranged={...diagram,nodes:diagram.nodes.map(n=>moved.has(n.id)?{...n,...moved.get(n.id)!}:n)}
+ const arrangedEdges=optimizeEdgeAnchors(arranged,sizes)
+ const movedPositions=diagram.nodes.some(n=>moved.has(n.id)&&(Math.abs(n.x-moved.get(n.id)!.x)>POSITION_EPSILON||Math.abs(n.y-moved.get(n.id)!.y)>POSITION_EPSILON))
+ const changed=movedPositions||arrangedEdges.some((edge,index)=>edge!==diagram.edges[index])
  if(!changed)return doc
- const next:ProjectDocument={...doc,diagrams:doc.diagrams.map(d=>{
-  if(d.id!==diagramId)return d
-  const arranged={...d,nodes:d.nodes.map(n=>moved.has(n.id)?{...n,...moved.get(n.id)!}:n)}
-  return {...arranged,edges:optimizeEdgeAnchors(arranged)}
- })}
- // Fail closed for structured UML, never silently rewrite model semantics.
+ const next=rebaseManualRoutes(doc,{...doc,diagrams:doc.diagrams.map(d=>d.id===diagramId?{...arranged,edges:arrangedEdges}:d)},diagramId)
  const issue=diagram.type==='uml-class'?newClassIssues(doc,next)[0]:diagram.type==='uml-usecase'?newUseCaseIssues(doc,next)[0]:diagram.type==='uml-activity'?newActivityIssues(doc,next)[0]:diagram.type==='uml-component'?newComponentIssues(doc,next)[0]:diagram.type==='uml-deployment'?newDeploymentIssues(doc,next)[0]:diagram.type==='uml-sequence'?newSequenceIssues(doc,next)[0]:undefined
  if(issue)throw new Error('No se puede organizar este diagrama sin alterar su semántica UML: '+issue.message)
  return next

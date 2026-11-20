@@ -74,9 +74,10 @@ it('La tarjeta no UML crece visualmente sin modificar atributos persistidos',()=
  const element=item('Cliente','actor');element.summary='Texto funcional';element.technical='Texto técnico'
  const html=renderNode('c1',element,{adaptiveCard:true,cardMinHeight:135,mode:'mixed'})
  assert.match(html,/novzi-adaptive-card/)
- assert.match(html,/min-height:135px/)
+ assert.match(html,/--novzi-card-min-height:135px/)
  assert.match(html,/Texto funcional/)
  assert.match(html,/Texto técnico/)
+ assert.match(html,/aria-hidden="true"/)
  const uml=renderNode('uml-class',item('Cliente UML','uml-class'),{adaptiveCard:true,cardMinHeight:135})
  assert.doesNotMatch(uml,/novzi-adaptive-card/)
 })

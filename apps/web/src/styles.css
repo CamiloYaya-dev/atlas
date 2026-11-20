@@ -316,7 +316,12 @@
 .uml-diagram-uml-composite.uml-composite-port .node-handle{border-color:#4e81d3!important}
 
 /* Dimensiones por vista: React Flow controla ancho/alto del wrapper. */
-.react-flow__node-novzi .novzi-node{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;box-sizing:border-box;overflow:visible}
+/* UML and fixed-geometry nodes must fill their React Flow wrapper. */
+.react-flow__node-novzi .novzi-node:not(.novzi-adaptive-card){width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;box-sizing:border-box;overflow:visible}
+/* C1-C4/process/data cards measure natural content height. Mixed uses the saved
+   height as the minimum; functional/technical can shrink. Handles live inside
+   this same box, so ResizeObserver keeps their React Flow anchors in sync. */
+.react-flow__node-novzi .novzi-node.novzi-adaptive-card{width:100%!important;height:auto!important;min-width:0!important;min-height:var(--novzi-card-min-height,65px)!important;position:relative!important;box-sizing:border-box;overflow:visible}
 .novzi-node-resize-handle{width:11px!important;height:11px!important;border-radius:3px!important;background:#fff!important;border:2px solid #3472da!important;z-index:100!important;cursor:nwse-resize}
 .novzi-node-resize-line{border-color:#4986ea!important}
 .novzi-size-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.novzi-size-fields input{width:100%;min-width:0}
@@ -682,7 +687,7 @@
 .novzi-account-mode{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 16px}.novzi-account-mode button{white-space:normal;text-align:center}.novzi-org-create h4{margin-top:0}.novzi-org-create .sec-help{line-height:1.6}
 
 /* Non-UML cards adapt to Funcional / Técnica / Mixta without persisting a resize. */
-.novzi-node.novzi-adaptive-card{height:auto;overflow-wrap:anywhere}
+.novzi-node.novzi-adaptive-card{overflow-wrap:anywhere}
 .novzi-node.novzi-adaptive-card .node-summary{max-height:none;overflow:visible;white-space:pre-wrap;overflow-wrap:anywhere}
 .novzi-node.novzi-adaptive-card .node-tech{max-height:none;white-space:pre-wrap;overflow-wrap:anywhere}
 .novzi-node.novzi-adaptive-card .node-tech span{min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}

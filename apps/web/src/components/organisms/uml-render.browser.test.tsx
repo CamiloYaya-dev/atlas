@@ -11,6 +11,7 @@ const {updated}=vi.hoisted(()=>({updated:vi.fn()}))
 // Only the React Flow infrastructure is replaced: real NOVZI renderers, SVG,
 // geometry, contracts and events are exercised. Browser drag tests are separate.
 vi.mock('@xyflow/react',()=>({
+ useReactFlow:()=>({screenToFlowPosition:(point:{x:number;y:number})=>point}),
  Position:{Left:'left',Right:'right',Top:'top',Bottom:'bottom'},
  Handle:({id,position,style}:{id:string;position:string;style?:CSSProperties})=><span data-port={id} data-side={position} style={style}/>,
  NodeResizer:({onResizeEnd}:{onResizeEnd:(event:unknown,size:{width:number;height:number;x:number;y:number})=>void})=><button onClick={()=>onResizeEnd(null,{width:180.2,height:240.7,x:13,y:20})}>QA resize</button>,
