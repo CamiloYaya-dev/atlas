@@ -1,4 +1,6 @@
 import {needsDetour} from '../domain/diagram-beautify'
+import {routeDenseDiagram} from '../domain/density-router'
+import type {RouteInput,RouteBox} from '../domain/density-router'
 import {deploymentGlyph,deploymentEdgePresentation,deploymentCube,deploymentPort,deploymentFacingPort} from '@novzi/contracts'
 import {componentGlyph,componentContract,componentAssemblyDirection,componentHandle} from '@novzi/contracts'
 import {sequenceBox,sequenceGlyphMarkup,sequenceEdgeGeometry,sequenceFrameBounds,sequencePositionLocked} from '@novzi/contracts'
@@ -9,11 +11,12 @@ import {graphSelection} from '../domain/graph-selection'
 import {parallelOffsets} from '../domain/parallel-edges'
 import {useMemo} from 'react'
 import {MarkerType} from '@xyflow/react'
-import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,novziNodeSize,sequenceActivationPorts,sequenceRenderedHandle,sequenceActivationSide} from '@novzi/contracts'
+import {isUmlDiagram,umlRelationNotation,UML_RELATIONS_BY_DIAGRAM,umlAbsolutePosition,umlNodeDepth,novziNodeSize,novziNodeMinimum,sequenceActivationPorts,sequenceRenderedHandle,sequenceActivationSide} from '@novzi/contracts'
 import type {Node,Edge} from '@xyflow/react'
 import type {Diagram,ProjectDocument,Perspective} from '@novzi/contracts'
-export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;includeUntagged?:boolean;mode:Perspective;selectedId:string|null;selectedNodeId?:string;canEdit:boolean;onAdjustExecution?:(id:string,start:number,finish:number,expected:{start:number;finish:number})=>void;onResize?: (nodeId:string,width:number,height:number,x?:number,y?:number)=>void}){
- const {diagram,doc,groups,dependencies,includeUntagged=true,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution}=input
+import type {ManualRoute} from '../domain/manual-edge-routing'
+export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|null;groups:string[];dependencies:boolean;includeUntagged?:boolean;mode:Perspective;selectedId:string|null;selectedNodeId?:string;canEdit:boolean;routeEditorEdgeId?:string|null;onManualRouteCommit?:(edgeId:string,route:ManualRoute|undefined)=>void;focusRelations?:boolean;focusedElementId?:string|null;onAdjustExecution?:(id:string,start:number,finish:number,expected:{start:number;finish:number})=>void;onResize?: (nodeId:string,width:number,height:number,x?:number,y?:number)=>void}){
+ const {diagram,doc,groups,dependencies,includeUntagged=true,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution,routeEditorEdgeId,onManualRouteCommit,focusRelations=false,focusedElementId}=input
  return useMemo(()=>{
   if(!diagram||!doc)return {nodes:[] as Node[],edges:[] as Edge[]}
   const {nodeIds,edgeIds}=graphSelection(diagram,doc,groups,dependencies,includeUntagged)
@@ -42,9 +45,11 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const element=doc.elements[n.elementId]
    const depth=umlNodeDepth(diagram,n)
    const size=seqBox||novziNodeSize(diagram.type,element,n,depth,visibleNodes.some(x=>x.parentNodeId===n.id))
-   // Keep persisted dimensions unchanged: in non-UML views the saved height
-   // is a minimum, and the active perspective may require more space.
+   // Stored dimensions are the editable baseline for MIXED only. Other
+   // perspectives use their actual content height while retaining width/position.
+   // Nothing about this visual measurement changes the persisted document.
    const adaptiveCard=!isUmlDiagram(diagram.type)
+   const cardMinHeight=adaptiveCard?(mode==='mixed'?size.height:novziNodeMinimum(diagram.type,element.type).height):undefined
    // UML: a lifeline terminates where its destruction marker is attached,
    // including when that marker belongs to the end of an activation.
    const sequenceEndY=diagram.type==='uml-sequence'&&['uml-lifeline','actor'].includes(element.type)?(()=>{
@@ -59,8 +64,8 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
     return Math.max(38,top+novziNodeSize(diagram.type,doc.elements[destruction.elementId],destruction).height/2)
    })():undefined
    return {
-    id:n.id,type:'novzi',position,style:adaptiveCard?{width:size.width,minHeight:size.height}:{width:size.width,height:size.height},
-    data:{element:n.childDiagramId===undefined?element:{...element,childDiagramId:n.childDiagramId||undefined,childNodeId:n.childNodeId||undefined},typeNames,elementId:n.elementId,adaptiveCard,cardMinHeight:adaptiveCard?size.height:undefined,...(diagram.type==='uml-deployment'?{componentGlyph:deploymentGlyph(doc,element,size,visibleNodes.some(x=>x.parentNodeId===n.id)),componentSize:size,deploymentCube:deploymentCube(doc,element)}:{}),...(diagram.type==='uml-component'?{componentGlyph:componentGlyph(element,size,typeNames||{},visibleNodes.some(x=>x.parentNodeId===n.id&&doc.elements[x.elementId]?.type!=='uml-port'),element.type==='component'?componentContract(doc,element.id):undefined),componentSize:size}:{}),...(seqBox?{sequenceGlyph:sequenceGlyphMarkup(doc,diagram,n,seqBox),sequenceSize:{width:seqBox.width,height:seqBox.height},sequencePositionLocked:sequencePositionLocked(doc,diagram,n),...(element.type==='uml-activation'&&element.sequenceDetail?.startOccurrenceId&&element.sequenceDetail?.finishOccurrenceId?{executionTimes:{start:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.startOccurrenceId)?.time,finish:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.finishOccurrenceId)?.time},onAdjustExecution}:{})}:{}),...(diagram.type==='uml-activity'?{activityMembership:activityMembershipLabel(doc,element),activityParameterLabel:element.type==='uml-activity-parameter'?activityParameterLabel(doc,diagram,element):undefined,activityParameter:element.type==='uml-activity-parameter'?diagram.activity?.parameters?.find(p=>p.id===element.activityDetail?.parameterId):undefined}:{}),ucAnnotationTarget:diagram.type==='uml-usecase'&&element.type==='uml-subject'&&diagram.edges.some(e=>allowedEdges.has(e.id)&&e.relationKind==='annotation'&&e.target===n.id),mode:isUmlDiagram(diagram.type)?'mixed':mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,sequenceEndY,sequenceActivationHeight:diagram.type==='uml-sequence'&&element.type==='uml-activation'?size.height:undefined,linkedDiagramType:doc.diagrams.find(d=>d.id===(n.childDiagramId===undefined?element.childDiagramId:n.childDiagramId))?.type,canResize:canEdit,onResize,minWidth:80,minHeight:60},
+    id:n.id,type:'novzi',position,style:adaptiveCard?{width:size.width,minHeight:cardMinHeight}:{width:size.width,height:size.height},
+    data:{element:n.childDiagramId===undefined?element:{...element,childDiagramId:n.childDiagramId||undefined,childNodeId:n.childNodeId||undefined},typeNames,elementId:n.elementId,adaptiveCard,cardMinHeight,...(diagram.type==='uml-deployment'?{componentGlyph:deploymentGlyph(doc,element,size,visibleNodes.some(x=>x.parentNodeId===n.id)),componentSize:size,deploymentCube:deploymentCube(doc,element)}:{}),...(diagram.type==='uml-component'?{componentGlyph:componentGlyph(element,size,typeNames||{},visibleNodes.some(x=>x.parentNodeId===n.id&&doc.elements[x.elementId]?.type!=='uml-port'),element.type==='component'?componentContract(doc,element.id):undefined),componentSize:size}:{}),...(seqBox?{sequenceGlyph:sequenceGlyphMarkup(doc,diagram,n,seqBox),sequenceSize:{width:seqBox.width,height:seqBox.height},sequencePositionLocked:sequencePositionLocked(doc,diagram,n),...(element.type==='uml-activation'&&element.sequenceDetail?.startOccurrenceId&&element.sequenceDetail?.finishOccurrenceId?{executionTimes:{start:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.startOccurrenceId)?.time,finish:diagram.interaction?.occurrences.find(o=>o.id===element.sequenceDetail!.finishOccurrenceId)?.time},onAdjustExecution}:{})}:{}),...(diagram.type==='uml-activity'?{activityMembership:activityMembershipLabel(doc,element),activityParameterLabel:element.type==='uml-activity-parameter'?activityParameterLabel(doc,diagram,element):undefined,activityParameter:element.type==='uml-activity-parameter'?diagram.activity?.parameters?.find(p=>p.id===element.activityDetail?.parameterId):undefined}:{}),ucAnnotationTarget:diagram.type==='uml-usecase'&&element.type==='uml-subject'&&diagram.edges.some(e=>allowedEdges.has(e.id)&&e.relationKind==='annotation'&&e.target===n.id),mode:isUmlDiagram(diagram.type)?'mixed':mode,graphType:diagram.type,nestingDepth:depth,childrenCount:visibleNodes.filter(x=>x.parentNodeId===n.id).length,sequenceEndY,sequenceActivationHeight:diagram.type==='uml-sequence'&&element.type==='uml-activation'?size.height:undefined,linkedDiagramType:doc.diagrams.find(d=>d.id===(n.childDiagramId===undefined?element.childDiagramId:n.childDiagramId))?.type,canResize:canEdit&&(!adaptiveCard||mode==='mixed'),onResize,minWidth:80,minHeight:60},
     ...(visibleParent?{parentId:n.parentNodeId,...((diagram.type==='uml-usecase'||diagram.type==='uml-activity'&&element.type==='uml-activity-pin'||['uml-composite','uml-component'].includes(diagram.type)&&element.type==='uml-port'||diagram.type==='uml-sequence'&&element.type==='uml-destruction')?{}:{extent:'parent' as const})}:{}),
     zIndex:sequenceTyped?(['uml-frame','uml-interaction'].includes(element.type)?0:element.type==='uml-lifeline'?1:3):['uml-package','uml-subpackage','uml-model','uml-profile','uml-subject','uml-partition','uml-activity-interruptible-region'].includes(element.type)||diagram.type==='uml-component'&&visibleNodes.some(x=>x.parentNodeId===n.id)||diagram.type==='uml-composite'&&element.type==='uml-class'?depth*10:depth*10+2,
     selected:selectedNodeId?selectedNodeId===n.id:selectedId===n.elementId,draggable:canEdit&&(!sequenceTyped||!sequencePositionLocked(doc,diagram,n))
@@ -105,8 +110,6 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    return ports[pos]?.id||side
   }
   const offsets=parallelOffsets(visibleEdges)
-  const counts=new Map<string,number>()
-  for(const e of visibleEdges){const key=[e.source,e.target].sort().join('\u0000');counts.set(key,(counts.get(key)||0)+1)}
   const bounds=(nodeId:string)=>{if(!visibleIds.has(nodeId))return undefined;const node=diagram.nodes.find(n=>n.id===nodeId);if(!node)return undefined;const el=doc.elements[node.elementId];if(!el)return undefined;const p=diagram.type==='uml-activity'?activityDisplayPosition(doc,diagram,node,activityFrame):umlAbsolutePosition(diagram,node),size=novziNodeSize(diagram.type,el,node,umlNodeDepth(diagram,node),visibleNodes.some(n=>n.parentNodeId===node.id));return {...p,...size,element:el}}
   const hub=(e:Diagram['edges'][number])=>{const a=bounds(e.source),b=bounds(e.target);if(!a||!b)return undefined;const from=diagram.type==='uml-activity'?activityPort(a,a.element,e.sourceHandle,true):diagram.type==='uml-usecase'?useCasePort(a,a.element,classEndProperties(e,'source').handle,true):diagram.type==='uml-deployment'?deploymentPort(a,deploymentCube(doc,a.element),classEndProperties(e,'source').handle,true):classPort(a,classEndProperties(e,'source').handle,true),to=diagram.type==='uml-activity'?activityPort(b,b.element,e.targetHandle,false):diagram.type==='uml-usecase'?useCasePort(b,b.element,classEndProperties(e,'target').handle,false):diagram.type==='uml-deployment'?deploymentPort(b,deploymentCube(doc,b.element),classEndProperties(e,'target').handle,false):classPort(b,classEndProperties(e,'target').handle,false),route=diagram.type==='uml-activity'&&e.relationKind==='exception-handler'?activityExceptionRoute(from,to):classRelationRoute({sourceX:from.x,sourceY:from.y,targetX:to.x,targetY:to.y,sourcePosition:from.side,targetPosition:to.side,offset:offsets.get(e.id)||0,pathStyle:e.pathStyle||(diagram.type==='uml-usecase'?'straight':'smoothstep')},e.source===e.target);return {x:route.labelX,y:route.labelY}}
   // Reserve lanes only when an edge REALLY needs to detour around obstacles.
@@ -123,21 +126,35 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
   }).filter(Boolean) as {id:string;source:string;target:string;x0:number;x1:number;y:number}[]
   const assigned:{id:string;x0:number;x1:number;y:number;source:string;target:string;lane:number}[]=[]
   for(const relation of detourEdges.sort((a,b)=>a.id.localeCompare(b.id))){
-   const neighbors=assigned.filter(q=>relation.source===q.source||relation.source===q.target||relation.target===q.source||relation.target===q.target||
-    (Math.min(relation.x1,q.x1)-Math.max(relation.x0,q.x0)>-40&&Math.abs(relation.y-q.y)<145))
+   const neighbors=assigned.filter(q=>{
+    const samePair=(relation.source===q.source&&relation.target===q.target)||(relation.source===q.target&&relation.target===q.source)
+    const overlappingCorridor=Math.min(relation.x1,q.x1)-Math.max(relation.x0,q.x0)>40&&Math.abs(relation.y-q.y)<55
+    // A shared hub does NOT imply a shared wire. Otherwise thirty unrelated
+    // spokes reserve thirty distant lanes and explode the diagram bounds.
+    return isUmlDiagram(diagram.type)?samePair||overlappingCorridor||relation.source===q.source||relation.target===q.target:samePair||overlappingCorridor
+   })
    const occupied=new Set(neighbors.map(q=>q.lane))
    let lane=0
-   for(let n=0;n<=24;n++){
+   for(let n=0;n<=(isUmlDiagram(diagram.type)?24:8);n++){
     const trial=n===0?0:Math.ceil(n/2)*(n%2?1:-1)
     if(!occupied.has(trial)){lane=trial;break}
    }
    routeLanes.set(relation.id,lane)
    assigned.push({...relation,lane})
   }
+  const denseRoutePlan= !isUmlDiagram(diagram.type)&&visibleEdges.length>=12&&visibleEdges.length<=90&&visibleNodes.length<=60?(()=>{
+   const boxes:RouteBox[]=visibleNodes.flatMap(n=>{const r=bounds(n.id);return r?[{id:n.id,x:r.x,y:r.y,width:r.width,height:r.height}]:[]})
+   const relations:RouteInput[]=visibleEdges.flatMap(edge=>{
+    const a=bounds(edge.source),b=bounds(edge.target)
+    if(!a||!b||edge.manualRoute?.points?.length)return []
+    const from=classPort(a,edge.sourceHandle||'right',true),to=classPort(b,edge.targetHandle||'left',false)
+    const family=`${edge.lineStyle||'solid'}:${edge.direction||'forward'}`
+    return [{id:edge.id,source:edge.source,target:edge.target,from:{x:from.x,y:from.y},to:{x:to.x,y:to.y},sourceSide:from.side,targetSide:to.side,sourceBundleKey:`${edge.source}:${family}`,targetBundleKey:`${edge.target}:${family}`}]
+   })
+   return routeDenseDiagram(relations,boxes)
+  })():null
   const edges:Edge[]=visibleEdges.map(raw=>{
    const e=diagram.type==='uml-deployment'?deploymentEdgePresentation(doc,diagram,raw):raw;
-   const key=[e.source,e.target].sort().join('\u0000')
-   const parallel=(counts.get(key)||0)>1
    const routeLane=routeLanes.get(e.id)||0
    const route=e.pathStyle||defaultPaths[diagram.type]||'smoothstep'
    const semantic=e.relationKind||(isUmlDiagram(diagram.type)?UML_RELATIONS_BY_DIAGRAM[diagram.type]?.[0]||'':'')
@@ -147,7 +164,6 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    // node's border is deliberate UML containment, not an obstacle.
    const isAttached=(id:string,endpoint:string)=>{let n=diagram.nodes.find(x=>x.id===endpoint);const seen=new Set<string>();while(n?.parentNodeId&&!seen.has(n.id)){seen.add(n.id);if(n.parentNodeId===id)return true;n=diagram.nodes.find(x=>x.id===n?.parentNodeId)}return false}
    const routeObstacles=sourceBounds&&targetBounds?visibleNodes.filter(n=>n.id!==e.source&&n.id!==e.target&&!isAttached(n.id,e.source)&&!isAttached(n.id,e.target)).flatMap(n=>{const r=bounds(n.id);return r?[{id:n.id,x:r.x,y:r.y,width:r.width,height:r.height}]:[]}):[]
-   const shouldAvoid=!!sourceBounds&&!!targetBounds&&!e.annotationTargetEdgeId&&e.source!==e.target&&needsDetour({x:sourceBounds.x+sourceBounds.width/2,y:sourceBounds.y+sourceBounds.height/2},{x:targetBounds.x+targetBounds.width/2,y:targetBounds.y+targetBounds.height/2},routeObstacles)
    const notation=umlRelationNotation(semantic)
    const dashed=['include','extend','dependency','realization','import','merge','stereotype-application','manifestation','interaction-ref','required-interface'].includes(semantic)
    const noArrow=['association','link','assembly','connector','communication-path','containment','composition','aggregation'].includes(semantic)
@@ -155,12 +171,12 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
    const classData=['uml-class','uml-usecase','uml-deployment'].includes(diagram.type)?(()=>{const source=classEndProperties(e,'source'),target=classEndProperties(e,'target'),center=hub(e),link=e.annotationTargetEdgeId&&visibleEdges.find(x=>x.id===e.annotationTargetEdgeId),cls=e.associationClassId&&visibleNodes.find(n=>n.elementId===e.associationClassId),box=cls?bounds(cls.id):undefined;return {sourceMultiplicity:source.multiplicity,targetMultiplicity:target.multiplicity,sourceRole:source.role,targetRole:target.role,sourceNavigability:source.navigability,targetNavigability:target.navigability,semanticDisplayLabel:relationLabel,extensionNote:diagram.type==='uml-usecase'?useCaseExtensionNote(doc,diagram,e):undefined,extraEnds:e.associationEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId);if(!r||!center)return [];const p=diagram.type==='uml-deployment'?(end.handle?deploymentPort(r,deploymentCube(doc,r.element),end.handle,false):deploymentFacingPort(r,deploymentCube(doc,r.element),center)):end.handle?classPort(r,end.handle,false):classFacingPort(r,center);return [{...p,id:end.id,navigability:end.navigability,label:[end.role,end.multiplicity].filter(Boolean).join(' ')}]}),associationClassPoint:box&&center?classFacingPort(box,center):undefined,annotationPoint:link?hub(link):undefined}})():{}
    return ({
     id:e.id,source:e.source,target:e.target,sourceHandle:diagram.type==='uml-class'?classEndProperties(e,'source').handle||'right':sequenceHandle(e,'source'),targetHandle:diagram.type==='uml-usecase'&&e.relationKind==='annotation'&&doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type==='uml-subject'?'uc-annotation':diagram.type==='uml-class'?classEndProperties(e,'target').handle||'left':sequenceHandle(e,'target'),label:relationLabel,
-    type:uml?'novzi-uml':parallel||shouldAvoid||routeLane!==0?'novzi-parallel':route,
+    type:uml?'novzi-uml':'novzi-parallel',
     ...(['uml-component','uml-deployment'].includes(diagram.type)?{zIndex:Math.max(1,Math.min(...[e.source,e.target].map(id=>{const n=diagram.nodes.find(x=>x.id===id);return n?umlNodeDepth(diagram,n):0}))*10+1)}:{}),
-    data:uml?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole,wholeEnd:e.wholeEnd,sourceNavigability:e.sourceNavigability,targetNavigability:e.targetNavigability,...classData,...(diagram.type==='uml-component'?{componentAssembly:componentAssemblyDirection(doc,diagram,e),semanticDisplayLabel:relationLabel,extraEnds:e.componentEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId),center=hub(e);if(!r||!center)return [];return [{...(end.handle?classPort(r,end.handle,false):classFacingPort(r,center)),id:end.id,label:''}]}),annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}:{}),...(sequenceTyped?{sequenceGeometry:sequenceEdgeGeometry(doc,diagram,e)}:{}),...(diagram.type==='uml-activity'?{activityInterrupted:!!e.activityEdge?.interruptingRegionId&&e.relationKind!=='exception-handler',annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}: {})}:parallel||shouldAvoid||routeLane!==0?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route}:undefined,
+    data:uml?{routeObstacles:routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route,relationKind:semantic,diagramType:diagram.type,sourceElementType:doc.elements[diagram.nodes.find(n=>n.id===e.source)?.elementId||'']?.type,targetElementType:doc.elements[diagram.nodes.find(n=>n.id===e.target)?.elementId||'']?.type,sourceMultiplicity:e.sourceMultiplicity,targetMultiplicity:e.targetMultiplicity,sourceRole:e.sourceRole,targetRole:e.targetRole,wholeEnd:e.wholeEnd,sourceNavigability:e.sourceNavigability,targetNavigability:e.targetNavigability,...classData,...(diagram.type==='uml-component'?{componentAssembly:componentAssemblyDirection(doc,diagram,e),semanticDisplayLabel:relationLabel,extraEnds:e.componentEnds?.slice(2).flatMap(end=>{const r=bounds(end.nodeId),center=hub(e);if(!r||!center)return [];return [{...(end.handle?classPort(r,end.handle,false):classFacingPort(r,center)),id:end.id,label:''}]}),annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}:{}),...(sequenceTyped?{sequenceGeometry:sequenceEdgeGeometry(doc,diagram,e)}:{}),...(diagram.type==='uml-activity'?{activityInterrupted:!!e.activityEdge?.interruptingRegionId&&e.relationKind!=='exception-handler',annotationPoint:e.annotationTargetEdgeId?(()=>{const target=visibleEdges.find(x=>x.id===e.annotationTargetEdgeId);return target?hub(target):undefined})():undefined}: {})}: {routeObstacles,routeLane,parallelOffset:offsets.get(e.id)||0,parallelPath:route,autoWaypoints:denseRoutePlan?.get(e.id)?.points.slice(1,-1),autoLabel:denseRoutePlan?.get(e.id)?{x:denseRoutePlan.get(e.id)!.labelX,y:denseRoutePlan.get(e.id)!.labelY}:undefined,manualRoute:e.manualRoute,routeEditing:routeEditorEdgeId===e.id,routeCanEdit:canEdit,onRouteCommit:onManualRouteCommit},
     animated:diagram.type==='sequence',
     labelStyle:{fontSize:11,fill:'#70809c',fontWeight:600},labelBgStyle:{fill:'#fff',fillOpacity:.95},
-    style:{stroke:'#8e9cb0',strokeWidth:1.7,strokeDasharray:uml?notation.stroke==='dashed'?'7 5':notation.stroke==='dotted'?'2 5':undefined:e.lineStyle==='dashed'||!e.lineStyle&&dashed?'7 5':e.lineStyle==='dotted'?'2 5':undefined},
+    style:{stroke:routeEditorEdgeId===e.id?'#2864e7':'#8e9cb0',strokeWidth:routeEditorEdgeId===e.id?3:1.7,opacity:focusRelations&&focusedElementId&&!visibleNodes.some(n=>n.elementId===focusedElementId&&(n.id===e.source||n.id===e.target))?.13:1,strokeDasharray:uml?notation.stroke==='dashed'?'7 5':notation.stroke==='dotted'?'2 5':undefined:e.lineStyle==='dashed'||!e.lineStyle&&dashed?'7 5':e.lineStyle==='dotted'?'2 5':undefined},
     markerEnd:uml?undefined:!noArrow&&(!e.direction||['forward','both'].includes(e.direction))?{type:['include','extend','dependency'].includes(semantic)?MarkerType.Arrow:MarkerType.ArrowClosed,color:'#8e9cb0',width:16,height:16}:undefined,
     markerStart:uml?undefined:!noArrow&&['reverse','both'].includes(e.direction||'forward')?{type:['include','extend','dependency'].includes(semantic)?MarkerType.Arrow:MarkerType.ArrowClosed,color:'#8e9cb0',width:16,height:16}:undefined
    })
@@ -168,5 +184,5 @@ export function useGraphView(input:{diagram:Diagram|null;doc:ProjectDocument|nul
   if(sequenceFrame){let id=`novzi-sequence-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:sequenceFrame.x,y:sequenceFrame.y},data:{label:`sd ${diagram.name}`},style:{width:sequenceFrame.width,height:sequenceFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
   if(activityFrame){let id=`novzi-activity-frame:${diagram.id}`;while(diagram.nodes.some(n=>n.id===id))id+=':';nodes.unshift({id,type:'activity-frame',position:{x:activityFrame.x,y:activityFrame.y},data:{label:diagram.name},style:{width:activityFrame.width,height:activityFrame.height,pointerEvents:'none'},zIndex:-1,draggable:false,selectable:false,connectable:false,deletable:false})}
   return {nodes,edges}
- },[diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution])
+ },[diagram,doc,groups,dependencies,includeUntagged,mode,selectedId,selectedNodeId,canEdit,onResize,onAdjustExecution,routeEditorEdgeId,onManualRouteCommit,focusRelations,focusedElementId])
 }

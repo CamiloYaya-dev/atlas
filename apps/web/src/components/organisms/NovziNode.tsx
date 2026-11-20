@@ -3,7 +3,7 @@ import {activityNodeLabel,activitySymbol,activityPorts} from '@novzi/contracts'
 import {umlTypeIdentifier,classTemplateFormalText,UC_ACTOR_GLYPH} from '@novzi/contracts'
 import {UserRound,Boxes,Database,Code2,BookOpen,FileText,Workflow,Cloud,Layers,Maximize2,Server,Monitor,Smartphone,HardDrive,Network,Box,Container} from 'lucide-react'
 import {Handle,Position,NodeResizer,useUpdateNodeInternals} from '@xyflow/react'
-import {useEffect,useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import type {NodeProps} from '@xyflow/react'
 import {diagramLabels,elementLabels,umlAttributeText,umlOperationText,umlOperationTextResolved,umlObjectTitle,novziNodeMinimum,sequenceActivationPorts} from '@novzi/contracts'
 import type {DiagramType,ModelElement,Perspective} from '@novzi/contracts'
@@ -28,6 +28,31 @@ function ActivationHandles({id,height}:{id:string;height:number}){
   <Handle id="right" type="source" position={Position.Right} className="node-handle novzi-sequence-symbol-port" style={{right:'35.42%',top:'50%'}} title="Mensaje UML lateral derecho"/>
   {ports.map(p=><Handle key={p.id} id={p.id} type="source" position={p.side==='left'?Position.Left:Position.Right} className="node-handle novzi-sequence-symbol-port" style={{[p.side]:'35.42%',top:`${p.topPercent}%`}} title={`Mensaje ${p.side==='left'?'izquierdo':'derecho'} · ${p.topPercent}%`}/>) }
  </>
+}
+/**
+ * React Flow caches node/handle geometry. Re-measure once the active perspective
+ * finishes laying out, and when content or fonts change its actual card height.
+ * This updates only connection anchors; it NEVER persists a resize/version.
+ */
+function AdaptiveCardPortSync({nodeId,perspective}:{nodeId:string;perspective:Perspective}){
+ const marker=useRef<HTMLSpanElement>(null)
+ const updateNodeInternals=useUpdateNodeInternals()
+ useEffect(()=>{
+  const card=marker.current?.parentElement
+  if(!card)return
+  let frame:number|undefined
+  const schedule=()=>{
+   if(typeof requestAnimationFrame==='function'){
+    if(frame!==undefined)cancelAnimationFrame(frame)
+    frame=requestAnimationFrame(()=>updateNodeInternals(nodeId))
+   }else{updateNodeInternals(nodeId)}
+  }
+  schedule()
+  const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(schedule):undefined
+  observer?.observe(card)
+  return ()=>{observer?.disconnect();if(frame!==undefined)cancelAnimationFrame(frame)}
+ },[nodeId,perspective,updateNodeInternals])
+ return <span ref={marker} aria-hidden="true" style={{display:'none'}}/>
 }
 function UmlControlSymbol({id,graphType,kind,selected,canResize,onResize,activationHeight,activityElement}:{
  id:string;graphType:DiagramType;kind:string;selected:boolean;canResize:boolean;activationHeight?:number;activityElement?:ModelElement;
@@ -183,7 +208,8 @@ export function NovziNode({id,data,selected}:NodeProps){
  const canResize=!!data.canResize
  const resizeCallback=data.onResize as ((nodeId:string,width:number,height:number,x?:number,y?:number)=>void)|undefined
  const {width:minWidth,height:minHeight}=novziNodeMinimum(graphType,element.type)
- return <div className={`novzi-node kind-${element.type} ${graphType.startsWith('uml-')?'uml-diagram uml-diagram-'+graphType:''} ${umlClass?'uml-structural-class':''} ${umlDecision?'uml-decision-card':''} ${umlFork?'uml-fork-card':''} ${umlLifeline?'uml-lifeline-card':''} ${umlPseudostate?'uml-pseudostate-card':''} ${umlObject?'uml-instance-card':''} ${umlPackage?'uml-package-container':''} ${umlSubject?'uml-usecase-subject':''} ${umlMetaclass?'uml-metaclass-card':''} ${umlStereotype?'uml-stereotype-card':''} ${umlComponent?'uml-component-card':''} ${compositeClassifier?'uml-composite-classifier':''} ${compositePart?'uml-composite-part':''} ${compositeRole?'uml-composite-reference':''} ${compositePort?'uml-composite-port':''} ${compositeCollaboration?'uml-composite-collaboration':''} ${umlSequenceFrame?'uml-interaction-frame':''} ${umlInteractionRef?'uml-interaction-ref':''} ${umlStateNode?'uml-state-card':''} ${umlStateRegion?'uml-state-region':''} ${umlCommunicationParticipant?'uml-communication-participant':''} ${umlSequenceParticipant?'uml-sequence-participant':''} ${umlSequenceActivation?'uml-sequence-activation':''} ${umlSequenceDestruction?'uml-sequence-destruction':''} ${umlPackage&&data.nestingDepth?`uml-nested-level-${Math.min(2,Number(data.nestingDepth))}`:''} ${deployment?'uml-deployment-node':''} ${deployment&&Number(data.childrenCount||0)>0?'uml-deployment-container':''} ${ucRectangle?'uc-rectangle':''} ${selected?'selected':''} ${adaptiveCard?'novzi-adaptive-card':''}`} style={adaptiveCard?{minHeight:cardMinHeight}:undefined}>
+ return <div className={`novzi-node kind-${element.type} ${graphType.startsWith('uml-')?'uml-diagram uml-diagram-'+graphType:''} ${umlClass?'uml-structural-class':''} ${umlDecision?'uml-decision-card':''} ${umlFork?'uml-fork-card':''} ${umlLifeline?'uml-lifeline-card':''} ${umlPseudostate?'uml-pseudostate-card':''} ${umlObject?'uml-instance-card':''} ${umlPackage?'uml-package-container':''} ${umlSubject?'uml-usecase-subject':''} ${umlMetaclass?'uml-metaclass-card':''} ${umlStereotype?'uml-stereotype-card':''} ${umlComponent?'uml-component-card':''} ${compositeClassifier?'uml-composite-classifier':''} ${compositePart?'uml-composite-part':''} ${compositeRole?'uml-composite-reference':''} ${compositePort?'uml-composite-port':''} ${compositeCollaboration?'uml-composite-collaboration':''} ${umlSequenceFrame?'uml-interaction-frame':''} ${umlInteractionRef?'uml-interaction-ref':''} ${umlStateNode?'uml-state-card':''} ${umlStateRegion?'uml-state-region':''} ${umlCommunicationParticipant?'uml-communication-participant':''} ${umlSequenceParticipant?'uml-sequence-participant':''} ${umlSequenceActivation?'uml-sequence-activation':''} ${umlSequenceDestruction?'uml-sequence-destruction':''} ${umlPackage&&data.nestingDepth?`uml-nested-level-${Math.min(2,Number(data.nestingDepth))}`:''} ${deployment?'uml-deployment-node':''} ${deployment&&Number(data.childrenCount||0)>0?'uml-deployment-container':''} ${ucRectangle?'uc-rectangle':''} ${selected?'selected':''} ${adaptiveCard?'novzi-adaptive-card':''}`} style={adaptiveCard?{'--novzi-card-min-height':`${cardMinHeight??65}px`} as React.CSSProperties:undefined}>
+  {adaptiveCard&&<AdaptiveCardPortSync nodeId={id} perspective={mode}/>}
   {graphType.startsWith('uml-')&&!umlClass&&!umlMetaclass&&!umlStereotype&&!deployment&&!umlComponent&&!(umlPackage&&graphType==='uml-class'&&!data.childrenCount)&&!(umlPackage&&['uml-model','uml-profile'].includes(element.type))&&<span className="novzi-uml-type-identifier novzi-uml-type-corner">{uc?element.type==='actor'?(ucRectangle?'«actor»':'«Actor»'):'«Use Case»':umlTypeIdentifier(element)}</span>}
   {selected&&canResize&&<NodeResizer isVisible={true} minWidth={minWidth} minHeight={minHeight} maxWidth={4000} maxHeight={4000} keepAspectRatio={(activityDiagram||stateDiagram)&&['uml-decision','uml-start','uml-end','uml-flow-final'].includes(element.type)}
     color="#326ee7" handleClassName="novzi-node-resize-handle" lineClassName={(activityDiagram||stateDiagram)&&['uml-start','uml-end','uml-flow-final','uml-decision','uml-fork'].includes(element.type)?'novzi-uml-symbol-resize-line':'novzi-node-resize-line'}

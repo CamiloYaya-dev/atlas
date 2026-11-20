@@ -45,7 +45,7 @@ describe('Relaciones configurables',()=>{
   const edge=result.current.edges.find(x=>x.id===first.id)!
   expect(edge.markerStart).toBeDefined();expect(edge.markerEnd).toBeDefined()
   expect(edge.sourceHandle).toBe('top-2');expect(edge.targetHandle).toBe('bottom-3')
-  expect(edge.style?.strokeDasharray).toBe('7 5');expect(edge.type).toBe('bezier')
+  expect(edge.style?.strokeDasharray).toBe('7 5');expect(edge.type).toBe('novzi-parallel');expect(edge.data?.parallelPath).toBe('bezier')
  })
 })
 
@@ -159,20 +159,21 @@ it('destrucción y activación de borrador con Interaction se distinguen de sím
 
 
 describe('Tarjetas responsive por perspectiva',()=>{
- it('C1 conserva ancho y alto guardado como mínimo visual sin modificar JSON',()=>{
+ it('C1 usa alto guardado solo en Mixta y alto natural en Funcional/Técnica, sin modificar JSON',()=>{
   const model=emptyDoc()
   const e={...createElement('Cliente','actor'),id:'cliente',summary:'Persona que consulta los servicios de Zercano.',technical:'Interactúa desde la aplicación web y móvil con la autenticación.'}
   model.elements[e.id]=e
-  const diagram:Diagram={id:'c1-card',name:'Contexto',description:'',type:'c1',createdAt:'2026-11-19',nodes:[{id:'caja',elementId:e.id,x:100,y:80,width:280,height:135}],edges:[]}
+  const diagram:Diagram={id:'c1-card',name:'Contexto',description:'',type:'c1',createdAt:'2026-11-19',nodes:[{id:'caja',elementId:e.id,x:100,y:80,width:280,height:210}],edges:[]}
   model.diagrams=[diagram]
   const before=JSON.stringify(model)
-  const render=(mode:Perspective)=>renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode,selectedId:null,canEdit:true}))
   for(const mode of ['functional','technical','mixed'] as const){
-   const {result,unmount}=render(mode)
+   const {result,unmount}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode,selectedId:null,canEdit:true}))
    const card=result.current.nodes[0]
-   expect(card.style).toMatchObject({width:280,minHeight:135})
+   const expectedMin=mode==='mixed'?210:65
+   expect(card.style).toMatchObject({width:280,minHeight:expectedMin})
    expect(card.style?.height).toBeUndefined()
-   expect(card.data).toMatchObject({adaptiveCard:true,cardMinHeight:135,mode})
+   expect(card.data).toMatchObject({adaptiveCard:true,cardMinHeight:expectedMin,mode,canResize:mode==='mixed'})
+   expect(card.position).toEqual({x:100,y:80})
    unmount()
   }
   expect(JSON.stringify(model)).toBe(before)
