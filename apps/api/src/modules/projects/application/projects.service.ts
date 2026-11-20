@@ -44,6 +44,12 @@ export class ProjectsService {
   const data=await this.repo.loadDocument(projectId)
   return data?{version:data.version,document:projectVisible(data.document,a)}:null
  }
+ async currentVersion(projectId:string,userId:string){
+  await this.assertReadable(projectId,userId)
+  const version=await this.repo.currentVersion(projectId)
+  if(version===null)throw notFound()
+  return version
+ }
  async listVersions(projectId:string,userId:string){
   const scope=await this.repo.scope(projectId,userId);if(!scope)throw notFound()
   const a=await projectAccess(projectId,userId);requirePermission(a,'project.read')

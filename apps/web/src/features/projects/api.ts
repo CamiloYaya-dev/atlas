@@ -3,6 +3,8 @@ import type {ProjectDocument,Project,AdvancedExportRequest} from '@novzi/contrac
 export const listProjects=(workspaceId:string)=>request<Project[]>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`)
 export const createProject=(workspaceId:string,name:string,document:ProjectDocument)=>request<Project>(`/workspaces/${encodeURIComponent(workspaceId)}/projects`,{method:'POST',body:JSON.stringify({name,document})})
 export const loadDocument=(projectId:string)=>request<{document:ProjectDocument,version:number}|null>(`/projects/${encodeURIComponent(projectId)}/document`)
+/** Minimal version probe; ACL is revalidated by the API on each request. */
+export const loadProjectVersion=(projectId:string)=>request<{version:number}>(`/projects/${encodeURIComponent(projectId)}/current-version`)
 /** Collaborative saves use the immutable baseline in PostgreSQL to merge independent edits.
  * The optional callback receives the permission-filtered, canonical document after commit. */
 export async function saveDocument(projectId:string,document:ProjectDocument,expectedVersion:number,onCommitted?:(saved:ProjectDocument,version:number)=>void){

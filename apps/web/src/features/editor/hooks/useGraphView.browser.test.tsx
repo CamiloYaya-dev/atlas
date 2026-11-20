@@ -156,3 +156,36 @@ it('destrucción y activación de borrador con Interaction se distinguen de sím
  rerender({doc:model,canEdit:false});for(const id of ['a','x'])expect(get(id).draggable).toBe(false);
  expect(model.diagrams[0].interaction?.occurrences).toEqual([]);
 });
+
+
+describe('Tarjetas responsive por perspectiva',()=>{
+ it('C1 conserva ancho y alto guardado como mínimo visual sin modificar JSON',()=>{
+  const model=emptyDoc()
+  const e={...createElement('Cliente','actor'),id:'cliente',summary:'Persona que consulta los servicios de Zercano.',technical:'Interactúa desde la aplicación web y móvil con la autenticación.'}
+  model.elements[e.id]=e
+  const diagram:Diagram={id:'c1-card',name:'Contexto',description:'',type:'c1',createdAt:'2026-11-19',nodes:[{id:'caja',elementId:e.id,x:100,y:80,width:280,height:135}],edges:[]}
+  model.diagrams=[diagram]
+  const before=JSON.stringify(model)
+  const render=(mode:Perspective)=>renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode,selectedId:null,canEdit:true}))
+  for(const mode of ['functional','technical','mixed'] as const){
+   const {result,unmount}=render(mode)
+   const card=result.current.nodes[0]
+   expect(card.style).toMatchObject({width:280,minHeight:135})
+   expect(card.style?.height).toBeUndefined()
+   expect(card.data).toMatchObject({adaptiveCard:true,cardMinHeight:135,mode})
+   unmount()
+  }
+  expect(JSON.stringify(model)).toBe(before)
+ })
+ it('las geometrías UML conservan una altura fija y no reciben adaptación automática',()=>{
+  const model=emptyDoc()
+  const e={...createElement('Cliente','uml-class'),id:'clase'}
+  model.elements[e.id]=e
+  const diagram:Diagram={id:'uml-card',name:'Clases',description:'',type:'uml-class',createdAt:'2026-11-19',nodes:[{id:'caja',elementId:e.id,x:50,y:50,width:280,height:180}],edges:[]}
+  model.diagrams=[diagram]
+  const {result}=renderHook(()=>useGraphView({doc:model,diagram,groups:[],dependencies:false,mode:'mixed',selectedId:null,canEdit:true}))
+  const card=result.current.nodes[0]
+  expect(card.style).toMatchObject({width:280,height:180})
+  expect(card.data.adaptiveCard).toBe(false)
+ })
+})

@@ -680,3 +680,10 @@
 
 /* Incorporación de cuentas globales a una organización: elegir un único flujo. */
 .novzi-account-mode{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 16px}.novzi-account-mode button{white-space:normal;text-align:center}.novzi-org-create h4{margin-top:0}.novzi-org-create .sec-help{line-height:1.6}
+
+/* Non-UML cards adapt to Funcional / Técnica / Mixta without persisting a resize. */
+.novzi-node.novzi-adaptive-card{height:auto;overflow-wrap:anywhere}
+.novzi-node.novzi-adaptive-card .node-summary{max-height:none;overflow:visible;white-space:pre-wrap;overflow-wrap:anywhere}
+.novzi-node.novzi-adaptive-card .node-tech{max-height:none;white-space:pre-wrap;overflow-wrap:anywhere}
+.novzi-node.novzi-adaptive-card .node-tech span{min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.novzi-node.novzi-adaptive-card .node-title{overflow-wrap:anywhere}
