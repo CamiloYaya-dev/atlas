@@ -22,6 +22,7 @@ import GuidedTutorial from '../tutorial/GuidedTutorial'
 import AcademyMissions from '../academy/AcademyMissions'
 import LicensePanel from '../licensing/LicensePanel'
 import {captureDiagramPng} from './capture-diagram'
+import {createStandaloneDiagramDocument} from './standalone-diagram-export'
 import AdvancedExportFields,{defaultExportChoices,normalizeChoices} from './AdvancedExportFields'
 import {exportFieldsFor,UML_DIAGRAM_GROUPS,UML_RELATIONS_BY_DIAGRAM,umlElementReusable,umlElementCreatable,umlRelationLabel,umlRelationEndpointValid,umlContainerAllows,umlAbsolutePosition,umlNodeDepth,novziNodeSize,validNodeDimension,sequenceIsAttachment,sequenceActivationPorts,sequenceActivationSide,sequenceNearestPort,canonicalUmlEdge,isUmlDiagram,umlRelationNotation} from '@novzi/contracts'
 import type {AdvancedExportMode,ExportFieldChoices,ExportField} from '@novzi/contracts'
@@ -679,7 +680,7 @@ function AppInner(){
  const exportProjectJSON=async()=>{if(!projectId||!can('artifact.export'))return;try{const exported=await exportProject(projectId);downloadJSONFile(`NOVZI_${(project?.name||'proyecto').replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`,exported)}catch(e){announce('Exportación: '+(e as Error).message)}}
  const exportDiagramJSON=()=>{
   if(!doc||!diagram||!projectId||!can('artifact.export'))return
-  const payload={format:'NOVZI-DIAGRAM-JSON',workspaceId:wsId||null,projectId,projectName:project?.name||'',diagramId:diagram.id,diagramName:diagram.name,diagramType:diagram.type,version:versionMap.current[projectId]||currentVersion,exportedAt:new Date().toISOString(),document:{...doc,diagrams:[diagram]}}
+  const payload={format:'NOVZI-DIAGRAM-JSON',workspaceId:wsId||null,projectId,projectName:project?.name||'',diagramId:diagram.id,diagramName:diagram.name,diagramType:diagram.type,version:versionMap.current[projectId]||currentVersion,exportedAt:new Date().toISOString(),document:createStandaloneDiagramDocument(doc,diagram.id)}
   downloadJSONFile(`NOVZI_${diagram.name.replace(/[^a-zA-Z0-9_-]+/g,'_')}.diagram.json`,payload)
  }
  const openExport=async()=>{

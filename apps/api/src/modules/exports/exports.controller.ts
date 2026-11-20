@@ -49,7 +49,12 @@ export async function registerExportsController(app:FastifyInstance){
   // Captura del navegador: la firma certifica emisión e integridad de píxeles, no equivalencia semántica con el modelo.
   // Solo el servidor decide y aplica la marca, la firma y la auditoría.
   if(typeof body.imageBase64!=='string')throw new DomainError('Captura visual requerida; actualiza NOVZI para exportar fielmente',400)
-  const raw=await encodeCapturedDiagram(body.imageBase64,fmt,watermarkApplied)
+  const start=Date.now()
+  req.log.info({diagramId:d.id,projectId:req.params.projectId,format:fmt,imageBase64Bytes:body.imageBase64.length},'Inicio de rasterización de exportación')
+  let raw:Buffer
+  try{raw=await encodeCapturedDiagram(body.imageBase64,fmt,watermarkApplied)}
+  catch(error){req.log.error({err:error,diagramId:d.id,elapsedMs:Date.now()-start},'Fallo de rasterización de exportación');throw error}
+  req.log.info({diagramId:d.id,elapsedMs:Date.now()-start,outputBytes:raw.length},'Rasterización de exportación completada')
   const createdAt=new Date().toISOString(),exportId=randomUUID()
   const proof:Provenance={version:1,exportId,workspaceId,projectId:req.params.projectId,diagramId:d.id,actorId:user.id,documentVersion:saved.version,format:fmt,planCode:rights.planCode,licenseActive:rights.licenseActive,watermarkApplied,exportedAt:createdAt,imageSha256:sha256(raw)}
   const sig=signature(proof,env.exportSigningKey),finalImage=embedProvenance(raw,fmt,proof,env.exportSigningKey)

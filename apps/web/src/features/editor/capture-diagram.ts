@@ -33,7 +33,7 @@ export async function captureDiagramPng(root:HTMLElement,embedded:Record<string,
  const sidebarHeight=cards.reduce((total,card)=>total+cardHeight(card)+18,0)
  const rawWidth=mainWidth+(cards.length?cardWidth+cardGap+padding:0)
  const rawHeight=Math.max(maxY-minY+padding*2,sidebarHeight+padding*2)
- const scale=Math.min(1,4000/rawWidth,4000/rawHeight,Math.sqrt(22_000_000/(rawWidth*rawHeight)))
+ const scale=Math.min(1,4000/rawWidth,4000/rawHeight,Math.sqrt(8_000_000/(rawWidth*rawHeight)))
  const width=Math.max(1,Math.ceil(rawWidth*scale)),height=Math.max(1,Math.ceil(rawHeight*scale))
  const clone=viewport.cloneNode(true) as HTMLElement
  const source=[viewport,...viewport.querySelectorAll('*')],target=[clone,...clone.querySelectorAll('*')]
@@ -84,7 +84,25 @@ export async function captureDiagramPng(root:HTMLElement,embedded:Record<string,
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height
  const context=canvas.getContext('2d');if(!context)throw new Error('Canvas no disponible')
  context.fillStyle='#f7faff';context.fillRect(0,0,width,height);context.drawImage(image,0,0)
- const data=canvas.toDataURL('image/png')
+ // Keep the JSON POST below proxy limits and reduce expensive image processing
+ // on small production instances. Most diagrams fit without any reduction.
+ let data=canvas.toDataURL('image/png')
  if(!data.startsWith('data:image/png;base64,'))throw new Error('Formato de captura inválido')
+ for(let attempt=0;data.length>5_500_000&&attempt<4;attempt++){
+  const ratio=Math.min(.83,Math.max(.5,Math.sqrt(5_500_000/data.length)*.85))
+  const reduced=document.createElement('canvas')
+  reduced.width=Math.max(1,Math.floor(canvas.width*ratio))
+  reduced.height=Math.max(1,Math.floor(canvas.height*ratio))
+  const ctx=reduced.getContext('2d')
+  if(!ctx)throw new Error('Canvas no disponible para adaptar la exportación')
+  ctx.drawImage(canvas,0,0,reduced.width,reduced.height)
+  canvas.width=reduced.width;canvas.height=reduced.height
+  const resized=canvas.getContext('2d')
+  if(!resized)throw new Error('Canvas no disponible para adaptar la exportación')
+  resized.drawImage(reduced,0,0)
+  data=canvas.toDataURL('image/png')
+  if(!data.startsWith('data:image/png;base64,'))throw new Error('Formato de captura inválido')
+ }
+ if(data.length>5_500_000)throw new Error('El PNG supera el límite seguro de subida; divide el diagrama o reduce sus dimensiones')
  return data.slice('data:image/png;base64,'.length)
 }
