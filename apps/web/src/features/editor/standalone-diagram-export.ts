@@ -57,7 +57,11 @@ export function createStandaloneDiagramDocument(source:ProjectDocument,diagramId
  const useCaseRelations=source.useCaseRelations===undefined?undefined:Object.fromEntries(Object.entries(source.useCaseRelations).filter(([,r])=>required.has(r.sourceElementId)&&required.has(r.targetElementId)))
  const componentRelations=source.componentRelations===undefined?undefined:Object.fromEntries(Object.entries(source.componentRelations).filter(([id])=>componentIds.has(id)))
  const deploymentRelations=source.deploymentRelations===undefined?undefined:Object.fromEntries(Object.entries(source.deploymentRelations).filter(([id])=>deploymentIds.has(id)))
- return {schema:1,elements,diagrams:[structuredClone(diagram)],fieldDefinitions,
+ return {schema:1,elements,diagrams:[{...structuredClone(diagram),nodes:diagram.nodes.map(node=>{
+   const copy=structuredClone(node)
+   if(copy.childDiagramId&&copy.childDiagramId!==diagram.id){delete copy.childDiagramId;delete copy.childNodeId}
+   return copy
+  })}],fieldDefinitions,
   ...(useCaseRelations===undefined?{}:{useCaseRelations}),
   ...(componentRelations===undefined?{}:{componentRelations}),
   ...(deploymentRelations===undefined?{}:{deploymentRelations})}

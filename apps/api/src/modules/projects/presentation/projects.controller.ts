@@ -23,6 +23,36 @@ export async function registerProjectController(app:FastifyInstance){
   if(!Number.isSafeInteger(version))throw new DomainError('Versión inválida',400)
   return service.loadVersion(req.params.projectId,version,(await identity(req)).id)
  })
+ // Historial / CAS individuales; el cursor del proyecto nunca se muestra como versión de C1/C2/UML.
+ const diagramParams=(projectId:string,diagramId:string)=>{
+  assertUUID(projectId)
+  if(!/^[a-zA-Z0-9_-]{1,150}$/.test(diagramId))throw new DomainError('ID de diagrama inválido',400)
+ }
+ app.get<{Params:{projectId:string;diagramId:string}}>('/api/v1/projects/:projectId/diagrams/:diagramId/state',async req=>{
+  diagramParams(req.params.projectId,req.params.diagramId)
+  return service.diagramState(req.params.projectId,req.params.diagramId,(await identity(req)).id)
+ })
+ app.get<{Params:{projectId:string;diagramId:string}}>('/api/v1/projects/:projectId/diagrams/:diagramId/checkpoints',async req=>{
+  diagramParams(req.params.projectId,req.params.diagramId)
+  return service.listDiagramCheckpoints(req.params.projectId,req.params.diagramId,(await identity(req)).id)
+ })
+ app.get<{Params:{projectId:string;diagramId:string;version:string}}>('/api/v1/projects/:projectId/diagrams/:diagramId/checkpoints/:version',async req=>{
+  diagramParams(req.params.projectId,req.params.diagramId)
+  if(!/^[1-9]\d*$/.test(req.params.version)||!Number.isSafeInteger(Number(req.params.version)))throw new DomainError('Versión inválida',400)
+  return service.loadDiagramCheckpoint(req.params.projectId,req.params.diagramId,Number(req.params.version),(await identity(req)).id)
+ })
+ app.post<{Params:{projectId:string;diagramId:string}}>('/api/v1/projects/:projectId/diagrams/:diagramId/checkpoints',async req=>{
+  diagramParams(req.params.projectId,req.params.diagramId)
+  return service.createDiagramCheckpoint(req.params.projectId,req.params.diagramId,(await identity(req)).id)
+ })
+ app.post<{Params:{projectId:string;diagramId:string}}>('/api/v1/projects/:projectId/diagrams/:diagramId/checkpoints/restore',async req=>{
+  diagramParams(req.params.projectId,req.params.diagramId)
+  const actor=await identity(req),body=object(req.body)
+  const saved=await service.restoreDiagramCheckpoint(req.params.projectId,req.params.diagramId,body.version,body.expectedDiagramRevision,actor.id)
+  projectEvents.publishVersion(req.params.projectId,saved.version)
+  return saved
+ })
+
  // Live collaboration: SSE uses the same session cookie and project authorization.
  app.get<{Params:{projectId:string},Querystring:{clientId?:string}}>('/api/v1/projects/:projectId/events',async(req,reply)=>{
   assertUUID(req.params.projectId)

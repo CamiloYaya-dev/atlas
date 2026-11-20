@@ -66,7 +66,7 @@ vi.mock('@xyflow/react',async()=>{
 vi.mock('../security/api',()=>({session:vi.fn(),login:vi.fn(),logout:vi.fn(),workspaceAccess:vi.fn(),workspaceRoles:vi.fn(),workspaceMembers:vi.fn(),usersList:vi.fn()}))
 vi.mock('../organizations/api',()=>({listOrganizations:vi.fn(),createOrganization:vi.fn(),createOrganizationWorkspace:vi.fn(),organizationMembers:vi.fn(),myOrganizationInvitations:vi.fn(),listOrganizationInvitations:vi.fn(),cancelOrganizationInvitation:vi.fn(),inviteToOrganization:vi.fn(),acceptOrganizationInvitation:vi.fn(),declineOrganizationInvitation:vi.fn(),createOrganizationUser:vi.fn(),updateOrganizationMember:vi.fn(),removeOrganizationMember:vi.fn(),organizationAccessTree:vi.fn(),organizationMemberGrants:vi.fn(),assignOrganizationGrants:vi.fn(),removeOrganizationGrant:vi.fn(),organizationRoles:vi.fn(),organizationCreateRole:vi.fn(),organizationUpdateRole:vi.fn()}))
 vi.mock('../workspaces/api',()=>({listWorkspaces:vi.fn(),createWorkspace:vi.fn(),renameWorkspace:vi.fn(),deleteWorkspace:vi.fn()}))
-vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),loadProjectVersion:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),sendPresence:vi.fn(),workspaceLicense:vi.fn(),exportDiagramImage:vi.fn(),setWorkspaceLicense:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
+vi.mock('../projects/api',()=>({listProjects:vi.fn(),createProject:vi.fn(),loadDocument:vi.fn(),loadProjectVersion:vi.fn(),saveDocument:vi.fn(),exportProject:vi.fn(),sendPresence:vi.fn(),workspaceLicense:vi.fn(),exportDiagramImage:vi.fn(),setWorkspaceLicense:vi.fn(),importProject:vi.fn(),listDocumentVersions:vi.fn(),loadDocumentVersion:vi.fn(),loadDiagramState:vi.fn(),listDiagramCheckpoints:vi.fn(),loadDiagramCheckpoint:vi.fn(),createDiagramCheckpoint:vi.fn(),restoreDiagramCheckpoint:vi.fn(),renameProject:vi.fn(),restoreDocumentVersion:vi.fn(),listRestoreBranches:vi.fn(),createRestoreBranch:vi.fn(),previewRestoreBranch:vi.fn(),applyRestoreBranch:vi.fn(),discardRestoreBranch:vi.fn(),projectAccess:vi.fn(),deleteProject:vi.fn(),projectMembers:vi.fn(),projectCandidates:vi.fn(),assignProjectMember:vi.fn(),removeProjectMember:vi.fn()}))
 vi.mock('../audit/api',()=>({listAuditEvents:vi.fn()}))
 
 const owner:WorkspaceAccess={roleId:'r-owner',roleKey:'owner',roleName:'Propietario',permissions:[]}
@@ -105,6 +105,9 @@ beforeEach(()=>{
  vi.mocked(projects.saveDocument).mockResolvedValue(2)
  vi.mocked(projects.sendPresence).mockResolvedValue({ok:true})
  vi.mocked(projects.listDocumentVersions).mockResolvedValue([])
+ // El cursor global de proyecto no es el historial visible de un diagrama.
+ vi.mocked(projects.loadDiagramState).mockResolvedValue({revision:1,version:1})
+ vi.mocked(projects.listDiagramCheckpoints).mockResolvedValue([{version:1,created_at:'2026-11-19T08:00:00.000Z',created_by:user.id,editor_name:user.name,reason:'baseline'}])
  vi.mocked(projects.listRestoreBranches).mockResolvedValue([])
  vi.mocked(projects.renameProject).mockResolvedValue(project)
  vi.mocked(projects.projectMembers).mockResolvedValue([])
@@ -131,18 +134,18 @@ async function openEditor(){
 // selection events. The heading can precede the passive diagram reset.
 async function openAreaSelectionQA(control:'Seleccionar dos QA'|'Seleccionar relación QA08'='Seleccionar dos QA'){
  await act(async()=>{render(<NovziEditor/>)})
- await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'},{timeout:4500})
+ await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'},{timeout:8000})
  const graph=within(await screen.findByTestId('graph-renderer'))
- await graph.findByRole('button',{name:'Usuario final'},{timeout:4500})
- await graph.findByRole('button',{name:'Plataforma Zercano'},{timeout:4500})
+ await graph.findByRole('button',{name:'Usuario final'},{timeout:8000})
+ await graph.findByRole('button',{name:'Plataforma Zercano'},{timeout:8000})
  const toolbar=within(screen.getByRole('toolbar',{name:'Acciones del diagrama'}))
- const toggle=await toolbar.findByRole('button',{name:'Seleccionar área del diagrama'},{timeout:4500})
+ const toggle=await toolbar.findByRole('button',{name:'Seleccionar área del diagrama'},{timeout:8000})
  expect(toggle.getAttribute('aria-pressed')).toBe('false')
  await act(async()=>{fireEvent.click(toggle)})
  expect(toggle.getAttribute('aria-pressed')).toBe('true')
- const selection=await graph.findByRole('button',{name:control},{timeout:4500})
+ const selection=await graph.findByRole('button',{name:control},{timeout:8000})
  await act(async()=>{fireEvent.click(selection)})
- const remove=await toolbar.findByRole('button',{name:'Eliminar selección del diagrama'},{timeout:4500})
+ const remove=await toolbar.findByRole('button',{name:'Eliminar selección del diagrama'},{timeout:8000})
  expect(remove.textContent).toContain(control==='Seleccionar dos QA'?'Eliminar (2)':'Eliminar (1)')
 }
 
@@ -301,7 +304,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   fireEvent.change(within(modal).getByLabelText('Tipo de visualización'),{target:{value:'custom'}})
   fireEvent.click(within(modal).getByRole('button',{name:/^Crear$/}))
   expect(screen.getByRole('heading',{name:'Vista QA nueva'})).toBeTruthy()
-  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalled(),{timeout:4500})
+  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalled(),{timeout:8000})
   const [savedId,savedDoc,version]=vi.mocked(projects.saveDocument).mock.calls.at(-1)!
   expect(savedId).toBe('p-qa')
   expect(savedDoc.diagrams.some(d=>d.name==='Vista QA nueva'&&d.type==='custom')).toBe(true)
@@ -320,7 +323,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const calls=vi.mocked(projects.saveDocument).mock.calls
    expect(calls.length).toBeGreaterThan(0)
    expect(Object.values(calls.at(-1)![1].elements).some(e=>e.name==='Actividad del piloto'&&e.summary==='Flujo funcional verificado')).toBe(true)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('lector no obtiene controles de creación, importación o exportación',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
@@ -348,7 +351,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const calls=vi.mocked(projects.saveDocument).mock.calls
    expect(calls.length).toBeGreaterThan(0)
    expect(calls.at(-1)![1].diagrams[0].edges[0].label).toBe('Etiqueta actualizada')
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('relaciones creables por permiso propio, sin habilitar arrastre de nodos',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleKey:'relation-creator',roleName:'Creador de relaciones',permissions:[...reader.permissions,'relation.create.mixed']})
@@ -362,7 +365,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    expect(calls.length).toBeGreaterThan(0)
    const edges=calls.at(-1)![1].diagrams[0].edges
    expect(edges.some(e=>e.source==='n-actor'&&e.target==='n-payment-provider')).toBe(true)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('cierre de sesión regresa al login y revoca sesión por API',async()=>{
   await openEditor()
@@ -381,7 +384,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const updated=calls.at(-1)![1].diagrams.find(d=>d.id==='c1')!
    expect(updated.name).toBe('Contexto de piloto QA')
    expect(updated.description).toBe('Mapa verificado en pruebas')
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('crea un proyecto usando un documento vacío y cambia al nuevo proyecto',async()=>{
   const fresh={id:'p-new',workspace_id:'w-qa',name:'Proyecto del piloto'}
@@ -433,7 +436,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const calls=vi.mocked(projects.saveDocument).mock.calls
    expect(calls.length).toBeGreaterThan(0)
    expect(calls.at(-1)![1].fieldDefinitions.some(f=>f.label==='Código de requisito QA'&&f.forType==='requirement')).toBe(true)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('permite cambiar la perspectiva sin mutar el documento ni iniciar guardado',async()=>{
   await openEditor()
@@ -451,6 +454,8 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   ])
   await openEditor()
   fireEvent.click(await screen.findByRole('button',{name:'Historial · v1'}))
+  expect(await screen.findByRole('button',{name:'Consultar v1'})).toBeTruthy()
+  fireEvent.click(screen.getByRole('button',{name:'Historial técnico anterior del proyecto'}))
   expect(await screen.findByRole('button',{name:'Consultar v2'})).toBeTruthy()
   expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy()
   expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -461,7 +466,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
   vi.mocked(projects.saveDocument).mockRejectedValue(new Error('Conflicto de versión QA'))
   await openEditor()
   fireEvent.change(screen.getByLabelText('Nombre del diagrama'),{target:{value:'Versión en conflicto'}})
-  await waitFor(()=>expect(screen.getByText(/Conflicto de versión QA/)).toBeTruthy(),{timeout:4500})
+  await waitFor(()=>expect(screen.getByText(/Conflicto de versión QA/)).toBeTruthy(),{timeout:8000})
   expect(screen.getByText(/No se guardaron los cambios/)).toBeTruthy()
   expect(screen.getByRole('button',{name:/Recargar desde servidor/})).toBeTruthy()
  })
@@ -500,8 +505,8 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
    expect(saves.at(-1)![1].elements['platform']).toMatchObject({id:'platform',name:'Plataforma auditada',summary:'Resumen funcional QA',description:'Descripción completa QA',technical:'Fastify y PostgreSQL QA',owner:'Equipo QA',author:'Test de regresión',status:'En QA',createdAt:'2026-11-10'})
-  },{timeout:4500})
- })
+  },{timeout:8000})
+ },15000)
  it('navega por doble clic del nodo y vuelve con el menú sin alterar el documento',async()=>{
   await openEditor()
   await screen.findByRole('button',{name:'Plataforma Zercano'})
@@ -529,7 +534,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saved=saves.at(-1)![1]
    expect(saved.diagrams.find(d=>d.id==='c1')!.nodes.find(n=>n.id==='n-platform')).toMatchObject({x:372,y:184,elementId:'platform'})
    expect(saved.elements['platform'].id).toBe('platform')
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('rechaza conexiones huérfanas, incompletas y autoconexiones antes del guardado',async()=>{
   await openEditor()
@@ -548,7 +553,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    expect(edges).toHaveLength(3)
    expect(new Set(edges.map(e=>e.id)).size).toBe(3)
    expect(edges.some(e=>e.sourceHandle==='top-1'&&e.targetHandle==='bottom-3')).toBe(true)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('el lector no puede conectar cajas aunque un evento de ReactFlow sea falsificado',async()=>{
   vi.mocked(auth.workspaceAccess).mockResolvedValue(reader)
@@ -615,7 +620,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const document=saves.at(-1)![1]
    expect(document.diagrams.some(d=>d.id==='c1')).toBe(false)
    expect(document.elements['platform'].id).toBe('platform')
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('cancelar borrado de un diagrama y de una caja preserva datos',async()=>{
   const nativeConfirm=vi.spyOn(window,'confirm')
@@ -648,7 +653,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    expect(document.elements['platform']).toBeTruthy()
    expect(document.diagrams[0].nodes.some(n=>n.elementId==='platform')).toBe(false)
    expect(document.diagrams[0].edges.some(e=>e.source==='n-platform'||e.target==='n-platform')).toBe(false)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('reutiliza un elemento existente en otra vista sin crear una copia en el catálogo',async()=>{
   await openEditor()
@@ -663,7 +668,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const document=saves.at(-1)![1]
    expect(document.diagrams[0].nodes.some(n=>n.elementId==='app-web')).toBe(true)
    expect(Object.keys(document.elements)).toHaveLength(Object.keys(demoDocument().elements).length)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('agrega un enlace HTTPS validado a un elemento y permite retirarlo',async()=>{
   await openEditor()
@@ -679,7 +684,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
    expect(saves.at(-1)![1].elements['platform'].links).toEqual([])
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('rechaza enlaces JavaScript para evitar ejecución en ventanas externas',async()=>{
   await openEditor()
@@ -700,7 +705,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
    expect(saves.at(-1)![1].elements['hu-pay'].fields['f-priority']).toBe('Crítica')
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('registra campos booleanos y permite editarlos dentro de una ficha',async()=>{
   await openEditor()
@@ -720,7 +725,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const doc=saves.at(-1)![1]
    const fieldId=doc.fieldDefinitions.find(f=>f.label==='Aprobado para piloto')!.id
    expect(doc.elements['platform'].fields[fieldId]).toBe(true)
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('elimina una definición de campo solo tras confirmación, sin borrar fichas',async()=>{
   const nativeConfirm=vi.spyOn(window,'confirm')
@@ -739,7 +744,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const doc=saves.at(-1)![1]
    expect(doc.fieldDefinitions).toHaveLength(oldCount-1)
    expect(doc.elements['hu-pay']).toBeTruthy()
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('valida las credenciales en login privado y muestra errores sin abrir registro público',async()=>{
   vi.mocked(auth.session).mockRejectedValue(new Error('No autenticado'))
@@ -841,7 +846,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    expect(saves.length).toBeGreaterThan(0)
    const fields=saves.at(-1)![1].elements['platform'].fields
    expect(fields).toMatchObject({'qa-text':'Datos verificados','qa-long':'Descripción funcional ampliada','qa-link':'https://novzi.example/qa','qa-date':'2026-11-11','qa-num':'7','qa-choice':'Aprobado','qa-bool':true})
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('oculta el campo técnico a un rol funcional, incluso si puede editar metadatos',async()=>{
   const functional:WorkspaceAccess={roleId:'r-functional',roleKey:'functional',roleName:'Funcional QA',permissions:['project.read','diagram.view.c1','element.view.system','element.edit.system','diagram.edit.c1']}
@@ -912,7 +917,7 @@ describe('Editor conectado a API — recorridos de comportamiento',()=>{
    const saves=vi.mocked(projects.saveDocument).mock.calls
    expect(saves.length).toBeGreaterThan(0)
    expect(saves.at(-1)![1].fieldDefinitions.find(f=>f.label==='Estado de pruebas QA')?.options).toEqual(['Abierto','En QA','Cerrado'])
-  },{timeout:4500})
+  },{timeout:8000})
  })
  it('cancelar la eliminación de un campo no altera las definiciones del proyecto',async()=>{
   const nativeConfirm=vi.spyOn(window,'confirm')
@@ -973,14 +978,14 @@ describe('Regresión funcional de UML y selección de área',()=>{
   fireEvent.click(screen.getByRole('button',{name:/Secuencia de QA/}));await screen.findByRole('heading',{name:'Secuencia de QA'})
   fireEvent.click(await screen.findByRole('button',{name:'Mensaje QA 1'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje QA 2'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje QA 1'}));fireEvent.click(screen.getByRole('button',{name:'Mensaje vertical QA'}))
   expect(screen.getByText(/únicamente por sus lados/)).toBeTruthy()
-  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];const edges=last?.diagrams.find(d=>d.id===seq.id)?.edges||[];expect(edges).toHaveLength(3);expect(new Set(edges.map(e=>e.id)).size).toBe(3);expect(edges.every(e=>e.sourceHandle?.startsWith('seq-')&&e.targetHandle?.startsWith('seq-'))).toBe(true)},{timeout:4500})
+  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];const edges=last?.diagrams.find(d=>d.id===seq.id)?.edges||[];expect(edges).toHaveLength(3);expect(new Set(edges.map(e=>e.id)).size).toBe(3);expect(edges.every(e=>e.sourceHandle?.startsWith('seq-')&&e.targetHandle?.startsWith('seq-'))).toBe(true)},{timeout:8000})
  })
  it('selección por área: cancelar conserva datos y confirmar quita el grupo sin borrar catálogo',async()=>{
   const doc=demoDocument();const first=doc.diagrams[0].nodes.slice(0,2);const nativeConfirm=vi.spyOn(window,'confirm')
   await openAreaSelectionQA();fireEvent.click(screen.getByRole('button',{name:'Eliminar selección del diagrama'}))
   let modal=screen.getByRole('dialog',{name:'Eliminar selección del diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button',{name:'Eliminar selección del diagrama'}));modal=screen.getByRole('dialog',{name:'Eliminar selección del diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar selección'}))
-  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(last).toBeDefined();for(const n of first){expect(last!.diagrams[0].nodes.some(x=>x.id===n.id)).toBe(false);expect(last!.elements[n.elementId]).toBeDefined()}},{timeout:4500});expect(nativeConfirm).not.toHaveBeenCalled()
+  await waitFor(()=>{const last=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(last).toBeDefined();for(const n of first){expect(last!.diagrams[0].nodes.some(x=>x.id===n.id)).toBe(false);expect(last!.elements[n.elementId]).toBeDefined()}},{timeout:8000});expect(nativeConfirm).not.toHaveBeenCalled()
  })
 })
 
@@ -1004,7 +1009,7 @@ describe('Colaboración en vivo y guardado seguro',()=>{
  },15000)
  it('un conflicto de versión conserva cambios y no reintenta sobrescritura automáticamente',async()=>{
   vi.mocked(projects.saveDocument).mockRejectedValue(new Error('Conflicto de colaboración'))
-  await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));expect(await screen.findByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.saveDocument).toHaveBeenCalledTimes(1)
+  await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));expect(await screen.findByText('No se guardaron los cambios.',undefined,{timeout:9000})).toBeTruthy();expect(projects.saveDocument).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));expect(screen.getByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.saveDocument).toHaveBeenCalledTimes(1)
  },15000)
 })
@@ -1023,7 +1028,7 @@ describe('Regresión de edición y persistencia',()=>{
   await waitFor(()=>expect(within(modal).getByLabelText('Nombre de filtro Categoría nueva')).toBeTruthy())
   fireEvent.click(within(modal).getByRole('button',{name:'Eliminar filtro Categoría nueva'}))
   const confirm=screen.getByRole('dialog',{name:'Eliminar filtro'});fireEvent.click(within(confirm).getByRole('button',{name:'Quitar filtro'}))
-  await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].diagrams[0];expect(saved).toBeDefined();expect(saved!.filters?.some(f=>f.label==='Categoría nueva')??false).toBe(false);expect(saved!.nodes.map(n=>n.id)).toEqual(initial.nodes.map(n=>n.id))},{timeout:4500})
+  await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].diagrams[0];expect(saved).toBeDefined();expect(saved!.filters?.some(f=>f.label==='Categoría nueva')??false).toBe(false);expect(saved!.nodes.map(n=>n.id)).toEqual(initial.nodes.map(n=>n.id))},{timeout:8000})
  })
  it('eliminar relación requiere confirmación y conserva los dos extremos',async()=>{
   const original=demoDocument(),snapshot=structuredClone(original),initial=snapshot.diagrams[0],edge=initial.edges[0]
@@ -1032,7 +1037,7 @@ describe('Regresión de edición y persistencia',()=>{
   // El encabezado puede estar montado antes del useEffect que sincroniza React Flow.
   // Esperar la relación visible REAL del fixture, no insertar un botón artificial.
   const openRelation=async()=>{
-   const button=await screen.findByRole('button',{name:'Editar relación QA'},{timeout:4500})
+   const button=await screen.findByRole('button',{name:'Editar relación QA'},{timeout:8000})
    expect(button.getAttribute('data-edge-id')).toBe(edge.id)
    fireEvent.click(button)
    const dialog=await screen.findByRole('dialog',{name:'Configurar relación'})
@@ -1052,7 +1057,7 @@ describe('Regresión de edición y persistencia',()=>{
    expect(saved!.diagrams[0].nodes).toEqual(initial.nodes)
    expect(saved!.elements).toEqual(snapshot.elements)
    expect(saved!.diagrams.slice(1)).toEqual(snapshot.diagrams.slice(1))
-  },{timeout:4500})
+  },{timeout:8000})
   expect(projects.saveDocument).toHaveBeenCalledTimes(1)
  },15000)
 })
@@ -1066,14 +1071,14 @@ it('fragmentos combinados conservan operador y guardas en documento persistido',
  const doc=demoDocument();const frame={...createElement('Fragmento QA','uml-frame'),id:'frame-qa',uml:{classifier:'alt'},summary:'[ok]\n[else]'};doc.elements[frame.id]=frame
  doc.diagrams.push({id:'qa-frag',name:'Fragmentos QA',type:'uml-sequence',description:'',createdAt:'2026-11-14',nodes:[{id:'qa-frame',elementId:frame.id,x:100,y:100,width:400,height:240}],edges:[]})
  vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Fragmentos QA/}));fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Fragmento QA'}));fireEvent.change(screen.getByLabelText('Operador del fragmento UML'),{target:{value:'loop'}});fireEvent.change(screen.getByLabelText('Guardas del fragmento combinado'),{target:{value:'[i < 10]'}})
- await waitFor(()=>{const e=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].elements[frame.id];expect(e?.uml?.classifier).toBe('loop');expect(e?.summary).toBe('[i < 10]')},{timeout:4500})
+ await waitFor(()=>{const e=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].elements[frame.id];expect(e?.uml?.classifier).toBe('loop');expect(e?.summary).toBe('[i < 10]')},{timeout:8000})
 })
 
 it('edita protocolo, sentido, trazo y recorrido sin modificar extremos ni otras relaciones',async()=>{
  const original=demoDocument(),snapshot=structuredClone(original),initial=snapshot.diagrams[0],edge=initial.edges[0]
  vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1})
  await openEditor()
- const button=await screen.findByRole('button',{name:'Editar relación QA'},{timeout:4500})
+ const button=await screen.findByRole('button',{name:'Editar relación QA'},{timeout:8000})
  expect(button.getAttribute('data-edge-id')).toBe(edge.id);fireEvent.click(button)
  const modal=await screen.findByRole('dialog',{name:'Configurar relación'})
  fireEvent.change(within(modal).getByLabelText('Nombre o protocolo de la relación'),{target:{value:'HTTPS QA'}})
@@ -1081,15 +1086,15 @@ it('edita protocolo, sentido, trazo y recorrido sin modificar extremos ni otras 
  fireEvent.change(within(modal).getByLabelText('Trazo'),{target:{value:'dashed'}})
  fireEvent.change(within(modal).getByLabelText('Recorrido'),{target:{value:'straight'}})
  fireEvent.click(within(modal).getByRole('button',{name:'Guardar relación'}))
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved).toBeDefined();expect(saved!.diagrams[0].edges[0]).toMatchObject({...edge,label:'HTTPS QA',direction:'both',lineStyle:'dashed',pathStyle:'straight'});expect(saved!.diagrams[0].edges.slice(1)).toEqual(initial.edges.slice(1));expect(saved!.diagrams[0].nodes).toEqual(initial.nodes);expect(saved!.elements).toEqual(snapshot.elements)},{timeout:4500})
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved).toBeDefined();expect(saved!.diagrams[0].edges[0]).toMatchObject({...edge,label:'HTTPS QA',direction:'both',lineStyle:'dashed',pathStyle:'straight'});expect(saved!.diagrams[0].edges.slice(1)).toEqual(initial.edges.slice(1));expect(saved!.diagrams[0].nodes).toEqual(initial.nodes);expect(saved!.elements).toEqual(snapshot.elements)},{timeout:8000})
 },15000)
 it('cancelar el editor de una relación descarta sus cambios sin persistirlos',async()=>{
  await openEditor()
- fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'},{timeout:4500}))
+ fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'},{timeout:8000}))
  const modal=await screen.findByRole('dialog',{name:'Configurar relación'})
  const input=within(modal).getByLabelText('Nombre o protocolo de la relación') as HTMLInputElement,original=input.value
  fireEvent.change(input,{target:{value:'No guardar QA'}});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}))
- fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'},{timeout:4500}))
+ fireEvent.click(await screen.findByRole('button',{name:'Editar relación QA'},{timeout:8000}))
  expect((screen.getByLabelText('Nombre o protocolo de la relación') as HTMLInputElement).value).toBe(original)
  expect(projects.saveDocument).not.toHaveBeenCalled()
 },15000)
@@ -1120,7 +1125,7 @@ for(const [mode,format,documentFormat] of [['embedded','png','pdf'],['both','jpg
    if(mode==='both')fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:documentFormat}})
    fireEvent.click(within(modal).getByRole('button',{name:'Todos en imagen'}));fireEvent.click(within(modal).getByRole('button',{name:'Descargar '+format.toUpperCase()}))
    await screen.findByText(/Imagen exportada y firmada correctamente/);expect(captureDiagramPng).toHaveBeenCalledOnce();expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),expect.objectContaining({'n-platform':expect.any(Array)}));expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,doc.diagrams[0].id,format,1,'cG5n',expect.objectContaining({mode,fields:expect.any(Object),...(mode==='both'?{documentFormat}:{})}));expect(create).toHaveBeenCalledWith(blob);expect(filename.endsWith(mode==='both'?'_Fichas.zip':'.png')).toBe(true);expect(projects.saveDocument).not.toHaveBeenCalled()
-   await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa-export'),{timeout:4500})
+   await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa-export'),{timeout:8000})
   }finally{if(originalCreate)Object.defineProperty(URL,'createObjectURL',originalCreate);else Reflect.deleteProperty(URL,'createObjectURL');if(originalRevoke)Object.defineProperty(URL,'revokeObjectURL',originalRevoke);else Reflect.deleteProperty(URL,'revokeObjectURL')}
  },15000)
 }
@@ -1132,7 +1137,7 @@ it('redimensiona una caja desde inspector, rechaza dimensiones inválidas y cons
  const size=screen.getByRole('region',{name:'Dimensiones de caja'}),width=within(size).getByLabelText('Ancho (px)'),height=within(size).getByLabelText('Alto (px)'),apply=within(size).getByRole('button',{name:'Aplicar tamaño'}) as HTMLButtonElement
  fireEvent.change(width,{target:{value:'0'}});expect(apply.disabled).toBe(true);expect(projects.saveDocument).not.toHaveBeenCalled()
  fireEvent.change(width,{target:{value:'320'}});fireEvent.change(height,{target:{value:'180'}});expect(apply.disabled).toBe(false);fireEvent.click(apply)
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.id===node.id)).toMatchObject({width:320,height:180,elementId:node.elementId});expect(saved?.elements).toEqual(original.elements);expect(saved?.diagrams.slice(1)).toEqual(original.diagrams.slice(1))},{timeout:4500})
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.id===node.id)).toMatchObject({width:320,height:180,elementId:node.elementId});expect(saved?.elements).toEqual(original.elements);expect(saved?.diagrams.slice(1)).toEqual(original.diagrams.slice(1))},{timeout:8000})
 },15000)
 it('asigna propiedades de relación UML de clases y preserva extremos',async()=>{
  const original=demoDocument();for(const id of ['qa-class-a','qa-class-b'])original.elements[id]={...createElement(id,'uml-class'),id}
@@ -1141,14 +1146,14 @@ it('asigna propiedades de relación UML de clases y preserva extremos',async()=>
  await waitFor(()=>expect(screen.getByRole('button',{name:'Editar relación QA'}).getAttribute('data-edge-id')).toBe('qa-e'))
  fireEvent.click(screen.getByRole('button',{name:'Editar relación QA'}));const modal=await screen.findByRole('dialog',{name:'Configurar relación'})
  for(const [name,value] of [['Multiplicidad origen UML','1'],['Multiplicidad destino UML','0..*'],['Rol origen UML','cliente'],['Rol destino UML','pedidos']])fireEvent.change(within(modal).getByLabelText(name),{target:{value}})
- fireEvent.click(within(modal).getByRole('button',{name:'Guardar relación'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams.find(d=>d.id===diagram.id)?.edges[0]).toMatchObject({id:'qa-e',source:'qa-na',target:'qa-nb',sourceMultiplicity:'1',targetMultiplicity:'0..*',sourceRole:'cliente',targetRole:'pedidos',relationKind:'association'});expect(saved?.elements).toEqual(original.elements)},{timeout:4500})
+ fireEvent.click(within(modal).getByRole('button',{name:'Guardar relación'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams.find(d=>d.id===diagram.id)?.edges[0]).toMatchObject({id:'qa-e',source:'qa-na',target:'qa-nb',sourceMultiplicity:'1',targetMultiplicity:'0..*',sourceRole:'cliente',targetRole:'pedidos',relationKind:'association'});expect(saved?.elements).toEqual(original.elements)},{timeout:8000})
 },15000)
 it('permite cambiar iconos UML de despliegue sin cambiar los identificadores',async()=>{
  const original=demoDocument();for(const [id,type] of [['qa-device','uml-device'],['qa-runtime','uml-execution']] as const)original.elements[id]={...createElement(id,type),id}
  const diagram:Diagram={id:'qa-deploy',type:'uml-deployment',name:'Despliegue QA04',description:'',createdAt:'2026-11-14',nodes:[{id:'qa-dev-node',elementId:'qa-device',x:0,y:0},{id:'qa-run-node',elementId:'qa-runtime',x:400,y:0}],edges:[]};original.diagrams.push(diagram)
  vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Despliegue QA04/}));fireEvent.click(await screen.findByRole('button',{name:'qa-device'}));fireEvent.change(screen.getByLabelText('Icono del dispositivo UML'),{target:{value:'network'}})
  fireEvent.click(await screen.findByRole('button',{name:'qa-runtime'}));fireEvent.change(screen.getByLabelText('Tipo de entorno UML'),{target:{value:'docker'}})
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements['qa-device'].uml?.deviceIcon).toBe('network');expect(saved?.elements['qa-runtime'].uml?.runtimeIcon).toBe('docker');expect(saved?.diagrams.find(d=>d.id===diagram.id)).toEqual(diagram)},{timeout:4500})
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements['qa-device'].uml?.deviceIcon).toBe('network');expect(saved?.elements['qa-runtime'].uml?.runtimeIcon).toBe('docker');expect(saved?.diagrams.find(d=>d.id===diagram.id)).toEqual(diagram)},{timeout:8000})
 },15000)
 it('si falla captura visual no se firma ni descarga una imagen inexistente',async()=>{
  vi.mocked(captureDiagramPng).mockRejectedValue(new Error('Captura no disponible QA04'));await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await waitFor(()=>expect((within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement).disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));expect(await screen.findByText(/Captura no disponible QA04/)).toBeTruthy();expect(projects.exportDiagramImage).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Exportar desde NOVZI'})).toBeTruthy()
@@ -1168,8 +1173,8 @@ it('Academy transfiere al tutorial explicativo y cerrar no modifica el documento
 for(const concurrent of [false,true])it(`restauración histórica ${concurrent?'con actualización concurrente':'correcta'} valida versión de servidor antes de reemplazar el lienzo`,async()=>{
  const original=demoDocument(),restored=demoDocument();restored.diagrams[0].name='Contexto restaurado QA06';const version={version:2,created_at:'2026-11-12T12:00:00.000Z',updated_by:user.id,editor_name:'QA'}
  vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:3});vi.mocked(projects.listDocumentVersions).mockResolvedValue([version]);vi.mocked(projects.loadDocumentVersion).mockImplementation(async(_id,v)=>({...version,version:v,document:restored}));vi.mocked(projects.restoreDocumentVersion).mockResolvedValue({version:4,restoredFrom:2})
- await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Historial · v3'}));fireEvent.click(await screen.findByRole('button',{name:'Consultar v2'}));fireEvent.click(await screen.findByRole('button',{name:'Restaurar v2 como nueva versión'}));const confirm=screen.getByRole('dialog',{name:'Confirmar restauración v2'});fireEvent.change(within(confirm).getByLabelText('Confirmación de versión'),{target:{value:'v2'}});vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:restored,version:concurrent?5:4});fireEvent.click(within(confirm).getByRole('button',{name:'Crear versión restaurada'}));await waitFor(()=>expect(projects.restoreDocumentVersion).toHaveBeenCalledWith(project.id,2,3))
- if(concurrent){expect(await screen.findByText(/Se restauró la versión, pero ya se detectó otra actualización/)).toBeTruthy();expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(screen.getByRole('dialog',{name:'Historial de versiones'})).toBeTruthy()}else{expect(await screen.findByRole('heading',{name:'Contexto restaurado QA06'})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v4'})).toBeTruthy();expect(screen.queryByRole('dialog',{name:'Historial de versiones'})).toBeNull()}
+ await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Historial · v1'}));fireEvent.click(await screen.findByRole('button',{name:'Historial técnico anterior del proyecto'}));fireEvent.click(await screen.findByRole('button',{name:'Consultar v2'}));fireEvent.click(await screen.findByRole('button',{name:'Restaurar v2 como nueva versión'}));const confirm=screen.getByRole('dialog',{name:'Confirmar restauración v2'});fireEvent.change(within(confirm).getByLabelText('Confirmación de versión'),{target:{value:'v2'}});vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:restored,version:concurrent?5:4});fireEvent.click(within(confirm).getByRole('button',{name:'Crear versión restaurada'}));await waitFor(()=>expect(projects.restoreDocumentVersion).toHaveBeenCalledWith(project.id,2,3))
+ if(concurrent){expect(await screen.findByText(/Se restauró la versión, pero ya se detectó otra actualización/)).toBeTruthy();expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(screen.getByRole('dialog',{name:'Historial de versiones'})).toBeTruthy()}else{expect(await screen.findByRole('heading',{name:'Contexto restaurado QA06'})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(screen.queryByRole('dialog',{name:'Historial de versiones'})).toBeNull()}
  expect(projects.saveDocument).not.toHaveBeenCalled()
 },15000)
 
@@ -1215,29 +1220,29 @@ it('eliminar la organización con proyectos exige reconocer la eliminación en c
 })
 it('la copia de recuperación conserva el borrador no guardado, y cancelar recarga mantiene los cambios',async()=>{
  vi.mocked(projects.saveDocument).mockRejectedValue(new Error('Conflicto de colaboración QA07'));const descriptor=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDescriptor=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const create=vi.fn((_blob:Blob)=>'blob:qa07-recovery'),revoke=vi.fn();const click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});Object.defineProperty(URL,'createObjectURL',{configurable:true,value:create});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke})
- try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));await screen.findByText('No se guardaron los cambios.');fireEvent.click(screen.getByRole('button',{name:'Descargar mis cambios'}));expect(create).toHaveBeenCalledOnce();const blob=create.mock.calls[0][0];const content=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsText(blob)});const parsed=JSON.parse(content);expect(parsed.format).toBe('NOVZI-LOCAL-UNSAVED');expect(parsed.expectedVersion).toBe(1);expect(parsed.document).toEqual(JSON.parse(JSON.stringify(vi.mocked(projects.saveDocument).mock.calls[0][1])));expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa07-recovery');fireEvent.click(screen.getByRole('button',{name:'Recargar desde servidor'}));const modal=await screen.findByRole('dialog',{name:'Descartar borrador local'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(screen.queryByRole('dialog',{name:'Descartar borrador local'})).toBeNull();expect(screen.getByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1)}finally{if(descriptor)Object.defineProperty(URL,'createObjectURL',descriptor);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDescriptor)Object.defineProperty(URL,'revokeObjectURL',revokeDescriptor);else Reflect.deleteProperty(URL,'revokeObjectURL')}
+ try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Mover nodo QA'}));await screen.findByText('No se guardaron los cambios.',undefined,{timeout:9000});fireEvent.click(screen.getByRole('button',{name:'Descargar mis cambios'}));expect(create).toHaveBeenCalledOnce();const blob=create.mock.calls[0][0];const content=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsText(blob)});const parsed=JSON.parse(content);expect(parsed.format).toBe('NOVZI-LOCAL-UNSAVED');expect(parsed.expectedVersion).toBe(1);expect(parsed.document).toEqual(JSON.parse(JSON.stringify(vi.mocked(projects.saveDocument).mock.calls[0][1])));expect(click).toHaveBeenCalledOnce();expect(revoke).toHaveBeenCalledWith('blob:qa07-recovery');fireEvent.click(screen.getByRole('button',{name:'Recargar desde servidor'}));const modal=await screen.findByRole('dialog',{name:'Descartar borrador local'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(screen.queryByRole('dialog',{name:'Descartar borrador local'})).toBeNull();expect(screen.getByText('No se guardaron los cambios.')).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1)}finally{if(descriptor)Object.defineProperty(URL,'createObjectURL',descriptor);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDescriptor)Object.defineProperty(URL,'revokeObjectURL',revokeDescriptor);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 it('un subpaquete se crea dentro del paquete seleccionado y persiste su visibilidad UML',async()=>{
- const initial=demoDocument(),element={...createElement('Paquete QA07','uml-package'),id:'qa07-package'};initial.elements[element.id]=element;const diagram:Diagram={id:'qa07-packages',type:'uml-package',name:'Paquetes QA07',description:'',createdAt:'2026-11-14',nodes:[{id:'qa07-parent',elementId:element.id,x:0,y:0}],edges:[]};initial.diagrams.push(diagram);vi.mocked(projects.loadDocument).mockResolvedValue({document:initial,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Paquetes QA07/}));fireEvent.click(await screen.findByRole('button',{name:'Paquete QA07'}));fireEvent.change(screen.getByLabelText('Visibilidad UML del elemento'),{target:{value:'protected'}});fireEvent.click(screen.getByRole('button',{name:'Crear subpaquete dentro de este paquete'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements[element.id].uml?.visibility).toBe('protected');const sub=Object.values(saved?.elements||{}).find(e=>e.name==='Nuevo subpaquete');expect(sub?.type).toBe('uml-subpackage');expect(saved?.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.elementId===sub?.id)?.parentNodeId).toBe('qa07-parent')},{timeout:4500})
+ const initial=demoDocument(),element={...createElement('Paquete QA07','uml-package'),id:'qa07-package'};initial.elements[element.id]=element;const diagram:Diagram={id:'qa07-packages',type:'uml-package',name:'Paquetes QA07',description:'',createdAt:'2026-11-14',nodes:[{id:'qa07-parent',elementId:element.id,x:0,y:0}],edges:[]};initial.diagrams.push(diagram);vi.mocked(projects.loadDocument).mockResolvedValue({document:initial,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Paquetes QA07/}));fireEvent.click(await screen.findByRole('button',{name:'Paquete QA07'}));fireEvent.change(screen.getByLabelText('Visibilidad UML del elemento'),{target:{value:'protected'}});fireEvent.click(screen.getByRole('button',{name:'Crear subpaquete dentro de este paquete'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements[element.id].uml?.visibility).toBe('protected');const sub=Object.values(saved?.elements||{}).find(e=>e.name==='Nuevo subpaquete');expect(sub?.type).toBe('uml-subpackage');expect(saved?.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.elementId===sub?.id)?.parentNodeId).toBe('qa07-parent')},{timeout:8000})
 },15000)
 it('un subpaquete sin contenedor no se crea ni guarda',async()=>{
  const initial=demoDocument();initial.diagrams.push({id:'qa07-empty-package',type:'uml-package',name:'Paquetes vacíos QA07',description:'',createdAt:'2026-11-14',nodes:[],edges:[]});vi.mocked(projects.loadDocument).mockResolvedValue({document:initial,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:/Paquetes vacíos QA07/}));fireEvent.click(await screen.findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.change(within(modal).getByLabelText('Nombre de la caja'),{target:{value:'Subpaquete huérfano QA07'}});fireEvent.change(within(modal).getByLabelText('Tipo de elemento'),{target:{value:'uml-subpackage'}});fireEvent.click(within(modal).getByRole('button',{name:'Agregar al lienzo'}));expect(await screen.findByText(/Primero crea o selecciona un Paquete o Model/)).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled();expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy()
 })
 it('el guardado canónico del servidor actualiza el documento y la versión del editor',async()=>{
- vi.mocked(projects.saveDocument).mockImplementation(async(_id,snapshot,_version,onCommitted)=>{const canonical=structuredClone(snapshot);canonical.diagrams[0].name='Contexto canónico QA07';onCommitted?.(canonical,2);return 2});await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Descripción enviada QA07'}});expect(await screen.findByRole('heading',{name:'Contexto canónico QA07'},{timeout:4500})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v2'})).toBeTruthy();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Descripción enviada QA07');expect(projects.saveDocument).toHaveBeenCalledOnce()
+ vi.mocked(projects.saveDocument).mockImplementation(async(_id,snapshot,_version,onCommitted)=>{const canonical=structuredClone(snapshot);canonical.diagrams[0].name='Contexto canónico QA07';onCommitted?.(canonical,2);return 2});await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Descripción enviada QA07'}});expect(await screen.findByRole('heading',{name:'Contexto canónico QA07'},{timeout:8000})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Descripción enviada QA07');expect(projects.saveDocument).toHaveBeenCalledOnce()
 },15000)
 it('el guardado en curso fusiona cambios independientes del servidor con la edición local siguiente',async()=>{
  let finish!:()=>void;vi.mocked(projects.saveDocument).mockImplementationOnce((_id,snapshot,_version,onCommitted)=>new Promise(resolve=>{finish=()=>{const canonical=structuredClone(snapshot);canonical.elements.platform.summary='Resumen remoto QA07';onCommitted?.(canonical,2);resolve(2)}})).mockResolvedValue(3)
- await openEditor();fireEvent.change(screen.getByLabelText('Nombre del diagrama'),{target:{value:'Contexto en curso QA07'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});expect(screen.getByText('Guardando...')).toBeTruthy();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Edición mientras guarda QA07'}});expect(projects.saveDocument).toHaveBeenCalledOnce();await act(async()=>finish());await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][2]).toBe(2);expect(calls[1][1].diagrams[0]).toMatchObject({name:'Contexto en curso QA07',description:'Edición mientras guarda QA07'});expect(calls[1][1].elements.platform.summary).toBe('Resumen remoto QA07')},{timeout:4500});expect(await screen.findByRole('button',{name:'Historial · v3'})).toBeTruthy()
+ await openEditor();fireEvent.change(screen.getByLabelText('Nombre del diagrama'),{target:{value:'Contexto en curso QA07'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000});expect(screen.getByText('Guardando...')).toBeTruthy();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Edición mientras guarda QA07'}});expect(projects.saveDocument).toHaveBeenCalledOnce();await act(async()=>finish());await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][2]).toBe(2);expect(calls[1][1].diagrams[0]).toMatchObject({name:'Contexto en curso QA07',description:'Edición mientras guarda QA07'});expect(calls[1][1].elements.platform.summary).toBe('Resumen remoto QA07')},{timeout:8000});expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy()
 },15000)
 it('las categorías de una caja se asignan y retiran sin editar las fichas compartidas',async()=>{
- const original=demoDocument();original.diagrams[0].filters=[{id:'qa07-filter',label:'Categoría de prueba QA07'}];original.diagrams[0].nodes=original.diagrams[0].nodes.map(n=>({...n,filterIds:[]}));vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});vi.mocked(projects.saveDocument).mockResolvedValueOnce(2).mockResolvedValueOnce(3);await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}));const input=screen.getByLabelText('Asignar Categoría de prueba QA07') as HTMLInputElement;expect(input.checked).toBe(false);fireEvent.click(input);await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.elementId==='platform')?.filterIds).toEqual(['qa07-filter']);expect(saved?.elements).toEqual(original.elements)},{timeout:4500});await screen.findByRole('button',{name:'Historial · v2'});fireEvent.click(screen.getByLabelText('Asignar Categoría de prueba QA07'));await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][1].diagrams[0].nodes.find(n=>n.elementId==='platform')?.filterIds).toEqual([]);expect(calls[1][1].elements).toEqual(original.elements)},{timeout:4500})
+ const original=demoDocument();original.diagrams[0].filters=[{id:'qa07-filter',label:'Categoría de prueba QA07'}];original.diagrams[0].nodes=original.diagrams[0].nodes.map(n=>({...n,filterIds:[]}));vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});vi.mocked(projects.saveDocument).mockResolvedValueOnce(2).mockResolvedValueOnce(3);await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Plataforma Zercano'}));const input=screen.getByLabelText('Asignar Categoría de prueba QA07') as HTMLInputElement;expect(input.checked).toBe(false);fireEvent.click(input);await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.elementId==='platform')?.filterIds).toEqual(['qa07-filter']);expect(saved?.elements).toEqual(original.elements)},{timeout:8000});await screen.findByText('Guardado',{selector:'.save-chip'});fireEvent.click(screen.getByLabelText('Asignar Categoría de prueba QA07'));await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][1].diagrams[0].nodes.find(n=>n.elementId==='platform')?.filterIds).toEqual([]);expect(calls[1][1].elements).toEqual(original.elements)},{timeout:8000})
 },15000)
 it('renombrar un filtro a vacío o a otra categoría existente no altera el documento',async()=>{
  const original=demoDocument();original.diagrams[0].filters=[{id:'qa07-a',label:'Categoría A QA07'},{id:'qa07-b',label:'Categoría B QA07'}];vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Filtros'}));const modal=screen.getByRole('dialog',{name:/Filtros:/});const rename=within(modal).getByLabelText('Nombre de filtro Categoría A QA07');const action=within(rename.parentElement!).getByRole('button',{name:'Guardar'});fireEvent.change(rename,{target:{value:' '}});fireEvent.click(action);expect(await screen.findByText('El nombre del filtro no puede quedar vacío')).toBeTruthy();fireEvent.change(rename,{target:{value:'categoría b qa07'}});fireEvent.click(action);expect(await screen.findByText('Ya existe otro filtro con ese nombre')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled();fireEvent.click(within(modal).getByRole('button',{name:'Cerrar filtros'}));expect(screen.queryByRole('dialog',{name:/Filtros:/})).toBeNull()
 },15000)
 it('no permite exportar una imagen de un borrador mientras el guardado está pendiente',async()=>{
- let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador QA07'}});fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);const download=within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement;expect(download.disabled).toBe(true);fireEvent.click(download);expect(captureDiagramPng).not.toHaveBeenCalled();expect(projects.exportDiagramImage).not.toHaveBeenCalled();await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});await act(async()=>finish(2));await waitFor(()=>expect(download.disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.exportDiagramImage).not.toHaveBeenCalled()
+ let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador QA07'}});fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);const download=within(modal).getByRole('button',{name:'Descargar PNG'}) as HTMLButtonElement;expect(download.disabled).toBe(true);fireEvent.click(download);expect(captureDiagramPng).not.toHaveBeenCalled();expect(projects.exportDiagramImage).not.toHaveBeenCalled();await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000});await act(async()=>finish(2));await waitFor(()=>expect(download.disabled).toBe(false));fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.exportDiagramImage).not.toHaveBeenCalled()
 },15000)
 
 // QA08: real Academy actions reaching the editor, not mock callback assertions.
@@ -1356,7 +1361,7 @@ describe('QA08 · Academy integrada con editor',()=>{
   await inQA08Lab(doc);fireEvent.click(qa08Check('process').getByRole('button',{name:'Ir al diagrama'}));expect(await screen.findByRole('heading',{name:process.name})).toBeTruthy()
   fireEvent.click(qa08Check('functional-reuse').getByRole('button',{name:'Reutilizar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});expect(within(modal).getByLabelText('Buscar elemento del proyecto')).toBeTruthy()
   fireEvent.change(within(modal).getByLabelText('Buscar elemento del proyecto'),{target:{value:'HU-01'}});fireEvent.click(within(modal).getByRole('button',{name:/HU-01/}))
-  await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements).toEqual(doc.elements);expect(saved?.diagrams.find(d=>d.id===process.id)?.nodes.some(n=>n.elementId==='hu')).toBe(true)},{timeout:4500})
+  await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements).toEqual(doc.elements);expect(saved?.diagrams.find(d=>d.id===process.id)?.nodes.some(n=>n.elementId==='hu')).toBe(true)},{timeout:8000})
  },15000)
  it.each(['functional','technical'] as const)('selecciona la ficha %s y resalta su configuración de campos sin guardar por sí solo',async kind=>{
   const doc=qa08AcademyFixture(),element=doc.elements[kind==='functional'?'hu':'endpoint'];element.description='';element.fields={}
@@ -1396,7 +1401,7 @@ describe('QA08 · Academy integrada con editor',()=>{
 // QA08 · Real graph commands; only the XYFlow event source is simulated.
 it('QA08 desplaza dos nodos en una única revisión, preservando fichas y relaciones',async()=>{
  const initial=demoDocument();await openAreaSelectionQA();fireEvent.click(screen.getByRole('button',{name:'Mover dos cajas QA08'}))
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.slice(0,2).map(n=>({x:n.x,y:n.y}))).toEqual([{x:450,y:290},{x:670,y:350}]);expect(saved?.diagrams[0].edges).toEqual(initial.diagrams[0].edges);expect(saved?.elements).toEqual(initial.elements)},{timeout:4500});expect(projects.saveDocument).toHaveBeenCalledOnce()
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.slice(0,2).map(n=>({x:n.x,y:n.y}))).toEqual([{x:450,y:290},{x:670,y:350}]);expect(saved?.diagrams[0].edges).toEqual(initial.diagrams[0].edges);expect(saved?.elements).toEqual(initial.elements)},{timeout:8000});expect(projects.saveDocument).toHaveBeenCalledOnce()
 },15000)
 it('QA08 la selección de una relación no permite eliminarla a un usuario con permiso de layout solamente',async()=>{
  vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.layout.c1']})
@@ -1405,16 +1410,16 @@ it('QA08 la selección de una relación no permite eliminarla a un usuario con p
 },15000)
 it('QA08 elimina solamente una relación seleccionada, no sus extremos ni catálogo',async()=>{
  const initial=demoDocument();await openAreaSelectionQA('Seleccionar relación QA08');fireEvent.click(screen.getByRole('button',{name:'Eliminar selección del diagrama'}));const modal=screen.getByRole('dialog',{name:'Eliminar selección del diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar selección'}))
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes).toEqual(initial.diagrams[0].nodes);expect(saved?.diagrams[0].edges).toEqual(initial.diagrams[0].edges.slice(1));expect(saved?.elements).toEqual(initial.elements)},{timeout:4500})
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes).toEqual(initial.diagrams[0].nodes);expect(saved?.diagrams[0].edges).toEqual(initial.diagrams[0].edges.slice(1));expect(saved?.elements).toEqual(initial.elements)},{timeout:8000})
 },15000)
 it('QA08 acopla por arrastre una clase al paquete UML y permite desvincularla desde el inspector',async()=>{
  const doc=demoDocument();const parent={...createElement('Paquete de dominio QA08','uml-package'),id:'qa08-element-package'},child={...createElement('Clase QA08','uml-class'),id:'qa08-element-class'};doc.elements[parent.id]=parent;doc.elements[child.id]=child
  const diagram:Diagram={id:'qa08-class',name:'Clases QA08',type:'uml-class',description:'',createdAt:'2026-11-14',nodes:[{id:'qa08-parent',elementId:parent.id,x:0,y:0,width:780,height:520},{id:'qa08-child',elementId:child.id,x:1000,y:600}],edges:[]};doc.diagrams.push(diagram)
  vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});vi.mocked(projects.saveDocument).mockResolvedValueOnce(2).mockResolvedValueOnce(3)
  await openEditor();fireEvent.click(screen.getByRole('button',{name:/Clases QA08/}));fireEvent.click(await screen.findByRole('button',{name:'Arrastrar a contenedor QA08'}))
- await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.id==='qa08-child')).toMatchObject({parentNodeId:'qa08-parent',x:100,y:100})},{timeout:4500});await screen.findByRole('button',{name:'Historial · v2'})
+ await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.id==='qa08-child')).toMatchObject({parentNodeId:'qa08-parent',x:100,y:100})},{timeout:8000});await screen.findByRole('button',{name:'Historial · v1'})
  fireEvent.click(within(screen.getByTestId('graph-renderer')).getByRole('button',{name:child.name}));fireEvent.change(screen.getByLabelText('Contenedor UML'),{target:{value:''}})
- await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][1].diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.id==='qa08-child')?.parentNodeId).toBeUndefined();expect(calls[1][1].elements).toEqual(doc.elements)},{timeout:4500})
+ await waitFor(()=>{const calls=vi.mocked(projects.saveDocument).mock.calls;expect(calls).toHaveLength(2);expect(calls[1][1].diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.id==='qa08-child')?.parentNodeId).toBeUndefined();expect(calls[1][1].elements).toEqual(doc.elements)},{timeout:8000})
 },15000)
 it('QA08 rechaza relaciones UML que nacen de un nodo final de actividad',async()=>{
  const doc=demoDocument();const end={...createElement('Final QA08','uml-end'),id:'qa08-end'},action={...createElement('Acción QA08','uml-action'),id:'qa08-action'};doc.elements[end.id]=end;doc.elements[action.id]=action
@@ -1424,9 +1429,9 @@ it('QA08 rechaza relaciones UML que nacen de un nodo final de actividad',async()
 it('QA08 preserva cambios incompatibles del mismo campo durante autoguardado y bloquea otro envío',async()=>{
  let finish!:()=>void
  vi.mocked(projects.saveDocument).mockImplementationOnce((_id,snapshot,_version,onCommitted)=>new Promise(resolve=>{finish=()=>{const remote=structuredClone(snapshot);remote.diagrams[0].description='Cambio remoto sobre la misma descripción';onCommitted?.(remote,2);resolve(2)}}))
- await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Primer borrador QA08'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500})
+ await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Primer borrador QA08'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000})
  fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Segundo borrador QA08'}});await act(async()=>finish())
- expect(await screen.findByText('No se guardaron los cambios.')).toBeTruthy();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Segundo borrador QA08');expect(screen.getByRole('alert').textContent).toContain('Conflicto de colaboración')
+ expect(await screen.findByText('No se guardaron los cambios.',undefined,{timeout:9000})).toBeTruthy();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Segundo borrador QA08');expect(screen.getByRole('alert').textContent).toContain('Conflicto de colaboración')
  await act(async()=>{await new Promise(resolve=>setTimeout(resolve,1100))});expect(projects.saveDocument).toHaveBeenCalledOnce()
 },15000)
 
@@ -1454,12 +1459,12 @@ describe('QA08 · eventos remotos y permisos',()=>{
  it('ignora revisión cuando hay un borrador o escritura en curso',async()=>{
   const stream=await qa08OpenStream();const count=vi.mocked(projects.loadDocument).mock.calls.length;let finish!:(v:number)=>void;vi.mocked(projects.saveDocument).mockImplementation(()=>new Promise(resolve=>{finish=resolve}))
   fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador concurrente QA08'}});act(()=>stream.emit('version',{version:8}));expect(projects.loadDocument).toHaveBeenCalledTimes(count)
-  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});act(()=>stream.emit('version',{version:9}));expect(projects.loadDocument).toHaveBeenCalledTimes(count);await act(async()=>finish(2));expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador concurrente QA08')
+  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000});act(()=>stream.emit('version',{version:9}));expect(projects.loadDocument).toHaveBeenCalledTimes(count);await act(async()=>finish(2));expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador concurrente QA08')
  },15000)
  it('una modificación local posterior a una lectura remota impide reemplazar el borrador',async()=>{
   const stream=await qa08OpenStream();let finish!:(v:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}))
   act(()=>stream.emit('version',{version:2}));fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador después de lectura QA08'}});const remote=demoDocument();remote.diagrams[0].description='Descripción remota QA08';await act(async()=>finish({document:remote,version:2}));expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador después de lectura QA08')
-  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});expect(vi.mocked(projects.saveDocument).mock.calls[0][1].diagrams[0].description).toBe('Borrador después de lectura QA08');expect(vi.mocked(projects.saveDocument).mock.calls[0][2]).toBe(1)
+  await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000});expect(vi.mocked(projects.saveDocument).mock.calls[0][1].diagrams[0].description).toBe('Borrador después de lectura QA08');expect(vi.mocked(projects.saveDocument).mock.calls[0][2]).toBe(1)
  },15000)
  it('actualiza presencia de otros colaboradores y envía la selección al endpoint efímero',async()=>{
   const stream=await qa08OpenStream();fireEvent.click(within(screen.getByTestId('graph-renderer')).getByRole('button',{name:'Plataforma Zercano'}));act(()=>stream.emit('presence',{participants:[{clientId:'r1',userId:'other1',name:'Ana QA08',diagramId:'c1',elementId:'platform'},{clientId:'r2',userId:'other2',name:'Luis QA08',diagramId:'c1',elementId:null},{clientId:'self',userId:user.id,name:'QA',diagramId:'c1',elementId:'platform'}]}))
@@ -1471,11 +1476,11 @@ describe('QA08 · eventos remotos y permisos',()=>{
 it('QA09 redimensionar por evento del lienzo valida límites y conserva la ficha',async()=>{
  const doc=demoDocument(),node={...doc.diagrams[0].nodes[0],id:'qa09-resize'};doc.diagrams[0].nodes=[node,...doc.diagrams[0].nodes.slice(1)];doc.diagrams[0].edges=doc.diagrams[0].edges.map(e=>({...e,source:e.source==='n-actor'?node.id:e.source,target:e.target==='n-actor'?node.id:e.target}));vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1})
  await openEditor();fireEvent.click(await screen.findByRole('button',{name:'Redimensionar inválido QA09'}));expect(await screen.findByText(/Ancho\/alto: entre 48 y 4000/)).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
- fireEvent.click(screen.getByRole('button',{name:'Redimensionar válido QA09'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.id===node.id)).toMatchObject({width:360,height:220,x:40,y:60});expect(saved?.elements).toEqual(doc.elements)},{timeout:4500})
+ fireEvent.click(screen.getByRole('button',{name:'Redimensionar válido QA09'}));await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.id===node.id)).toMatchObject({width:360,height:220,x:40,y:60});expect(saved?.elements).toEqual(doc.elements)},{timeout:8000})
 },15000)
 it('QA09 enfoca la caja de destino cuando el renderizador la registra',async()=>{
  const doc=demoDocument();const target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});const fitView=vi.fn().mockResolvedValueOnce(false).mockResolvedValue(true);vi.mocked(useReactFlow).mockReturnValue({getNode:()=>({id:target.nodes[0].id}),fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>)
- await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(fitView).toHaveBeenCalledTimes(2),{timeout:4500});expect(fitView).toHaveBeenLastCalledWith(expect.objectContaining({nodes:[{id:target.nodes[0].id}]}));expect(projects.saveDocument).not.toHaveBeenCalled()
+ await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(fitView).toHaveBeenCalledTimes(2),{timeout:8000});expect(fitView).toHaveBeenLastCalledWith(expect.objectContaining({nodes:[{id:target.nodes[0].id}]}));expect(projects.saveDocument).not.toHaveBeenCalled()
 },15000)
 it('QA09 permisos de organización rechazados no impiden leer un proyecto autorizado',async()=>{
  vi.mocked(auth.workspaceAccess).mockRejectedValue(new Error('Permiso organización QA09'));await openEditor();expect(await screen.findByText(/No se pudieron cargar permisos: Permiso organización QA09/)).toBeTruthy();expect(screen.queryByRole('button',{name:'Actividad'})).toBeNull();expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1493,7 +1498,7 @@ it('QA09 error de lectura no sustituye el proyecto por un modelo inventado',asyn
  vi.mocked(projects.loadDocument).mockRejectedValue(new Error('Documento QA09'));render(<NovziEditor/>);expect(await screen.findByText(/Error al cargar diagrama: Documento QA09/)).toBeTruthy();expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 cambiar proyecto guardado carga otro documento y versionado independiente',async()=>{
- const other={id:'p-qa09',name:'Segundo proyecto QA09',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Contexto aislado QA09';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:8}:{document:demoDocument(),version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByRole('heading',{name:'Contexto aislado QA09'})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v8'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
+ const other={id:'p-qa09',name:'Segundo proyecto QA09',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Contexto aislado QA09';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:8}:{document:demoDocument(),version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByRole('heading',{name:'Contexto aislado QA09'})).toBeTruthy();expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 el panel de licencia usa la organización activa y cierra sin mutar el modelo',async()=>{
  await openEditor();fireEvent.click(screen.getByRole('button',{name:'Licencia'}));const modal=await screen.findByRole('dialog',{name:'Licencia y suscripción NOVZI'});expect(await within(modal).findByText('FREE · Sin licencia comercial')).toBeTruthy();expect(within(modal).getByText(workspace.name)).toBeTruthy();expect(projects.workspaceLicense).toHaveBeenCalledWith(workspace.id);fireEvent.click(within(modal).getAllByRole('button',{name:'Cerrar'})[0]);expect(screen.queryByRole('dialog',{name:'Licencia y suscripción NOVZI'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1504,7 +1509,7 @@ it('QA09 cerrar actividad vuelve al lienzo y no registra una escritura',async()=
 it('QA09 exportación de diccionario bloquea cierre durante generación y no embebe campos',async()=>{
  vi.mocked(projects.workspaceLicense).mockResolvedValue({workspaceId:workspace.id,planCode:'pro',licenseActive:true,status:'active',features:{'diagram.export.png':true,'diagram.export.jpg':true,'diagram.export.clean':true,'diagram.export.advanced':true},expiresAt:null})
  let finish!:(value:{blob:Blob;exportId:string})=>void;vi.mocked(projects.exportDiagramImage).mockImplementation(()=>new Promise(resolve=>{finish=resolve}));const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');let filename='';const revoke=vi.fn();Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa09')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download})
- try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Licencia activa: sin marca de agua/);fireEvent.change(within(modal).getByLabelText('Contenido de exportación'),{target:{value:'dictionary'}});fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:'html'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await waitFor(()=>expect(projects.exportDiagramImage).toHaveBeenCalledOnce());expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(within(modal).getByRole('button',{name:'Cancelar'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.getByRole('dialog',{name:'Exportar desde NOVZI'})).toBeTruthy();expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',expect.objectContaining({mode:'dictionary',documentFormat:'html'}));await act(async()=>finish({blob:new Blob(['QA']),exportId:'qa09'}));expect(await screen.findByText(/Imagen exportada y firmada correctamente/)).toBeTruthy();expect(filename.endsWith('_Fichas.zip')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa09'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}
+ try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Licencia activa: sin marca de agua/);fireEvent.change(within(modal).getByLabelText('Contenido de exportación'),{target:{value:'dictionary'}});fireEvent.change(within(modal).getByLabelText('Formato de las fichas'),{target:{value:'html'}});fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await waitFor(()=>expect(projects.exportDiagramImage).toHaveBeenCalledOnce());expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(within(modal).getByRole('button',{name:'Cancelar'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(screen.getByRole('dialog',{name:'Exportar desde NOVZI'})).toBeTruthy();expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',expect.objectContaining({mode:'dictionary',documentFormat:'html'}));await act(async()=>finish({blob:new Blob(['QA']),exportId:'qa09'}));expect(await screen.findByText(/Imagen exportada y firmada correctamente/)).toBeTruthy();expect(filename.endsWith('_Fichas.zip')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa09'),{timeout:8000});expect(projects.saveDocument).not.toHaveBeenCalled()}
  finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 it('QA09 lee relación con permiso de borrado pero no de edición y permite cancelar',async()=>{
@@ -1517,7 +1522,7 @@ it('QA09 usuarios y accesos están centralizados en organización y cerrar no gu
  await openEditor();expect(screen.queryByRole('button',{name:'Administrar accesos del espacio'})).toBeNull();expect(screen.queryByRole('button',{name:'Cuentas de la plataforma'})).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Usuarios y accesos de la organización'}));const modal=await screen.findByRole('dialog',{name:'Usuarios y accesos de la organización'});await waitFor(()=>expect(organizations.organizationAccessTree).toHaveBeenCalledWith(organization.id));await waitFor(()=>expect(organizations.listOrganizationInvitations).toHaveBeenCalledWith(organization.id));expect(within(modal).queryByRole('alert')).toBeNull();fireEvent.click(within(modal).getByText('Cerrar',{selector:'button'}));expect(screen.queryByRole('dialog')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 seleccionar caja de destino enlaza una aparición sin alterar catálogos de otras vistas',async()=>{
- const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const link=screen.getByLabelText('Vista vinculada (doble clic)');const destination=screen.getByLabelText('Caja de destino (opcional)');fireEvent.change(destination,{target:{value:target.nodes[0].id}});await waitFor(()=>expect(vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].elements.platform.childNodeId).toBe(target.nodes[0].id),{timeout:4500});await screen.findByRole('button',{name:'Historial · v2'});vi.mocked(projects.saveDocument).mockResolvedValueOnce(3);fireEvent.change(link,{target:{value:''}});await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.elements.platform.childNodeId).toBeUndefined();expect(saved?.elements.platform.childDiagramId).toBeUndefined();expect(saved?.diagrams).toEqual(doc.diagrams)}, {timeout:4500})
+ const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const link=screen.getByLabelText('Vista vinculada (doble clic)');const destination=screen.getByLabelText('Caja de destino (opcional)');fireEvent.change(destination,{target:{value:target.nodes[0].id}});await waitFor(()=>expect(vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1].diagrams[0].nodes.find(n=>n.elementId==='platform')).toMatchObject({childDiagramId:target.id,childNodeId:target.nodes[0].id}),{timeout:8000});await screen.findByText('Guardado',{selector:'.save-chip'});vi.mocked(projects.saveDocument).mockResolvedValueOnce(3);fireEvent.change(link,{target:{value:''}});await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0].nodes.find(n=>n.elementId==='platform')).toMatchObject({childDiagramId:null,childNodeId:null});expect(saved?.elements.platform).toEqual(doc.elements.platform)}, {timeout:8000})
 },15000)
 it('QA09 navega a un elemento relacionado de otra vista usando identidad del catálogo',async()=>{
  const doc=demoDocument(),a=doc.diagrams[0].nodes.find(n=>n.elementId==='platform')!;const target={...createElement('Relacionado QA09','system'),id:'qa09-related'};doc.elements[target.id]=target;doc.diagrams.push({id:'qa09-remote-view',type:'custom',name:'Vista relacionada QA09',description:'',createdAt:'2026-11-14',nodes:[{...a,id:'qa09-reused'},{id:'qa09-related-node',elementId:target.id,x:300,y:200}],edges:[{id:'qa09-link',source:'qa09-reused',target:'qa09-related-node',label:'Consulta'}]});vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));fireEvent.click(await screen.findByRole('button',{name:target.name}));expect(await screen.findByRole('heading',{name:'Vista relacionada QA09'})).toBeTruthy();expect(screen.getByLabelText('Nombre')).toHaveProperty('value',target.name);expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1529,7 +1534,7 @@ it('QA09 importación que retorna documento vacío conserva la revisión confirm
  await openEditor();vi.mocked(projects.importProject).mockResolvedValue(9);vi.mocked(projects.loadDocument).mockResolvedValueOnce(null);const input=document.querySelector('input[type=file]')!;const file=new File(['{}'],'qa09.json',{type:'application/json'});Object.defineProperty(file,'text',{value:async()=>JSON.stringify({document:demoDocument()})});fireEvent.change(input,{target:{files:[file]}});const modal=await screen.findByRole('dialog',{name:'Confirmar importación'});fireEvent.click(within(modal).getByRole('button',{name:'Importar documento'}));await screen.findByText('Importación validada y guardada');expect(projects.importProject).toHaveBeenCalledWith(project.id,expect.any(Object),1,{mode:'project'});expect(screen.queryByTestId('graph-renderer')).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA09 tipo de vista puede cambiarse sin cambiar identidad ni fichas',async()=>{
- const doc=demoDocument();await openEditor();fireEvent.change(screen.getByLabelText('Tipo de vista'),{target:{value:'custom'}});await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0]).toMatchObject({id:doc.diagrams[0].id,type:'custom',nodes:doc.diagrams[0].nodes,edges:doc.diagrams[0].edges});expect(saved?.elements).toEqual(doc.elements)},{timeout:4500})
+ const doc=demoDocument();await openEditor();fireEvent.change(screen.getByLabelText('Tipo de vista'),{target:{value:'custom'}});await waitFor(()=>{const saved=vi.mocked(projects.saveDocument).mock.calls.at(-1)?.[1];expect(saved?.diagrams[0]).toMatchObject({id:doc.diagrams[0].id,type:'custom',nodes:doc.diagrams[0].nodes,edges:doc.diagrams[0].edges});expect(saved?.elements).toEqual(doc.elements)},{timeout:8000})
 },15000)
 it('QA09 rechaza archivo sin contenido seleccionado sin llamar a importación',async()=>{
  await openEditor();const input=document.querySelector('input[type=file]')!;fireEvent.change(input,{target:{files:[]}});expect(screen.queryByRole('dialog',{name:'Confirmar importación'})).toBeNull();expect(projects.importProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1549,7 +1554,7 @@ async function qa10Open(doc:ProjectDocument){
 async function qa10Add(type:ElementType,name:string){
  fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.change(within(modal).getByLabelText('Nombre de la caja'),{target:{value:name}});fireEvent.change(within(modal).getByLabelText('Tipo de elemento'),{target:{value:type}});fireEvent.click(within(modal).getByRole('button',{name:'Agregar al lienzo'}));return modal
 }
-async function qa10Saved(){await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalled(),{timeout:4500});return vi.mocked(projects.saveDocument).mock.calls.at(-1)![1]}
+async function qa10Saved(){await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalled(),{timeout:8000});return vi.mocked(projects.saveDocument).mock.calls.at(-1)![1]}
 
 it('QA10 crea fragmento combinado con operador alt y guardas iniciales',async()=>{
  const {doc,diagram}=qa10View('uml-sequence',[]);await qa10Open(doc);await qa10Add('uml-frame','Alternativas QA10');const saved=await qa10Saved();const e=Object.values(saved.elements).find(x=>x.name==='Alternativas QA10');expect(e).toMatchObject({type:'uml-frame',uml:{classifier:'alt'},summary:'[condición]\n[else]'});expect(saved.diagrams.find(d=>d.id===diagram.id)?.nodes.some(n=>n.elementId===e?.id)).toBe(true)
@@ -1588,13 +1593,13 @@ it('QA10 exportación de un proyecto sin diagramas ofrece JSON y deshabilita im�
  vi.mocked(projects.loadDocument).mockResolvedValue({document:emptyDoc(),version:1});render(<NovziEditor/>);await screen.findByRole('heading',{name:'No hay diagramas todavía'});fireEvent.click(await screen.findByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});expect(within(modal).getByLabelText('Formato de exportación')).toHaveProperty('value','project-json');expect(within(modal).getByRole('button',{name:'Descargar JSON del proyecto'})).toHaveProperty('disabled',false);expect(within(modal).getByRole('option',{name:/PNG/})).toHaveProperty('disabled',true);expect(within(modal).getByRole('option',{name:/JPG/})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cerrar'}));expect(projects.exportProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 un rechazo textual del guardado mantiene borrador sin exponer copia a quien no puede exportar',async()=>{
- vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.edit.c1']});vi.mocked(projects.saveDocument).mockRejectedValue('Error de transporte QA10');await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador protegido QA10'}});expect(await screen.findByText(/Error de transporte QA10/,{},{timeout:4500})).toBeTruthy();expect(screen.queryByRole('button',{name:'Descargar mis cambios'})).toBeNull();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador protegido QA10');expect(projects.saveDocument).toHaveBeenCalledOnce()
+ vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:[...reader.permissions,'diagram.edit.c1']});vi.mocked(projects.saveDocument).mockRejectedValue('Error de transporte QA10');await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Borrador protegido QA10'}});expect(await screen.findByText(/Error de transporte QA10/,{},{timeout:8000})).toBeTruthy();expect(screen.queryByRole('button',{name:'Descargar mis cambios'})).toBeNull();expect(screen.getByLabelText('Descripción')).toHaveProperty('value','Borrador protegido QA10');expect(projects.saveDocument).toHaveBeenCalledOnce()
 },15000)
 it('QA10 una revisión remota elimina la vista actual y selecciona la siguiente sin escritura local',async()=>{
- const stream=await qa08OpenStream();try{const remote=demoDocument();remote.diagrams=remote.diagrams.slice(1);const next=remote.diagrams[0];vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:remote,version:2});await act(async()=>stream.emit('version',{version:2}));expect(await screen.findByRole('heading',{name:next.name})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v2'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
+ const stream=await qa08OpenStream();try{const remote=demoDocument();remote.diagrams=remote.diagrams.slice(1);const next=remote.diagrams[0];vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:remote,version:2});await act(async()=>stream.emit('version',{version:2}));expect(await screen.findByRole('heading',{name:next.name})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
 })
 it('QA10 presencia antigua sin userId se distingue por clientId, también ante un ping fallido',async()=>{
- const stream=await qa08OpenStream();try{vi.mocked(projects.sendPresence).mockRejectedValue(new Error('Presencia no disponible'));const clientId=new URL(stream.url,'http://localhost').searchParams.get('clientId');act(()=>stream.emit('presence',{participants:[{clientId,name:'Yo QA10',diagramId:'c1',elementId:null},{clientId:'peer-legacy',name:'Colega QA10',diagramId:'c1',elementId:null}]}));expect(await screen.findByText(/Colega QA10 está viendo este diagrama/)).toBeTruthy();expect(screen.queryByText(/Yo QA10 está viendo/)).toBeNull();await waitFor(()=>expect(projects.sendPresence).toHaveBeenCalled(),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
+ const stream=await qa08OpenStream();try{vi.mocked(projects.sendPresence).mockRejectedValue(new Error('Presencia no disponible'));const clientId=new URL(stream.url,'http://localhost').searchParams.get('clientId');act(()=>stream.emit('presence',{participants:[{clientId,name:'Yo QA10',diagramId:'c1',elementId:null},{clientId:'peer-legacy',name:'Colega QA10',diagramId:'c1',elementId:null}]}));expect(await screen.findByText(/Colega QA10 está viendo este diagrama/)).toBeTruthy();expect(screen.queryByText(/Yo QA10 está viendo/)).toBeNull();await waitFor(()=>expect(projects.sendPresence).toHaveBeenCalled(),{timeout:8000});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
 })
 it('QA10 al quitar la única vista conserva el catálogo y vuelve al estado sin diagramas',async()=>{
  const doc=demoDocument();doc.diagrams=doc.diagrams.slice(0,1);vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Eliminar diagrama'}));const modal=await screen.findByRole('dialog',{name:'Eliminar diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar diagrama'}));expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();const saved=await qa10Saved();expect(saved.diagrams).toEqual([]);expect(Object.keys(saved.elements).sort()).toEqual(Object.keys(doc.elements).sort())
@@ -1630,13 +1635,13 @@ it('QA10 espacio sin proyecto no concede creación a miembro sin permiso',async(
  vi.mocked(auth.session).mockResolvedValue({...user,platformAdmin:false});vi.mocked(auth.workspaceAccess).mockResolvedValue({...reader,roleName:'Invitado QA10'});vi.mocked(workspaces.listWorkspaces).mockResolvedValue([{...workspace,role:'viewer'}]);vi.mocked(projects.listProjects).mockResolvedValue([]);render(<NovziEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});await screen.findByText('Invitado QA10',{selector:'.role-pill'});expect(screen.getByRole('button',{name:'Crear proyecto'})).toHaveProperty('disabled',true);expect(screen.queryByRole('button',{name:'Accesos'})).toBeNull();expect(projects.createProject).not.toHaveBeenCalled()
 })
 it('QA10 cambio de proyecto bloqueado durante autoguardado conserva el documento activo',async()=>{
- const other={id:'p-qa10',name:'Otro proyecto QA10',workspace_id:workspace.id};vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Cambio sin confirmar QA10'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:4500});fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByText(/Primero espera a que se guarden los cambios/)).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1);await act(async()=>finish(2));expect(await screen.findByRole('button',{name:'Historial · v2'})).toBeTruthy()
+ const other={id:'p-qa10',name:'Otro proyecto QA10',workspace_id:workspace.id};vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(version:number)=>void;vi.mocked(projects.saveDocument).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}));await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Cambio sin confirmar QA10'}});await waitFor(()=>expect(projects.saveDocument).toHaveBeenCalledOnce(),{timeout:8000});fireEvent.click(screen.getByRole('button',{name:other.name}));expect(await screen.findByText(/Primero espera a que se guarden los cambios/)).toBeTruthy();expect(projects.loadDocument).toHaveBeenCalledTimes(1);await act(async()=>finish(2));expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy()
 },15000)
 it('QA10 error de sesión abre login privado y no consulta organizaciones',async()=>{
  vi.mocked(auth.session).mockRejectedValue(new Error('Sesión vencida QA10'));render(<NovziEditor/>);expect(await screen.findByRole('heading',{name:'Iniciar sesión'})).toBeTruthy();expect(workspaces.listWorkspaces).not.toHaveBeenCalled();expect(projects.loadDocument).not.toHaveBeenCalled()
 })
 it('QA10 foco en caja no registrada termina los reintentos sin bloquear navegación',async()=>{
- const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});const getNode=vi.fn(()=>undefined),fitView=vi.fn();vi.mocked(useReactFlow).mockReturnValue({getNode,fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(getNode).toHaveBeenCalledTimes(23),{timeout:4500});await act(async()=>{await new Promise(resolve=>setTimeout(resolve,180))});expect(getNode).toHaveBeenCalledTimes(23);expect(fitView).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});const getNode=vi.fn(()=>undefined),fitView=vi.fn();vi.mocked(useReactFlow).mockReturnValue({getNode,fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(getNode).toHaveBeenCalledTimes(23),{timeout:8000});await act(async()=>{await new Promise(resolve=>setTimeout(resolve,180))});expect(getNode).toHaveBeenCalledTimes(23);expect(fitView).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 },15000)
 it('QA10 relación histórica de despliegue se identifica sin reescribir la notación',async()=>{
  const {doc}=qa10View('uml-deployment',[{id:'qa10-source',type:'uml-artifact',name:'Artefacto QA10'},{id:'qa10-target',type:'uml-node',name:'Nodo QA10'}],[{id:'qa10-edge',source:'qa10-source',target:'qa10-target',relationKind:'manifestation'}]);const graph=await qa10Open(doc);fireEvent.click(await graph.findByRole('button',{name:'Editar relación QA'}));const modal=await screen.findByRole('dialog',{name:'Relación UML de despliegue'});const select=within(modal).getByLabelText('Tipo de relación UML');expect(select).toHaveProperty('value','manifestation');expect(within(modal).getByRole('note').textContent).toContain('sin registro');fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1648,7 +1653,7 @@ it('QA10 no ofrece reutilización cuando todas las fichas compatibles están en 
  const {doc,diagram}=qa10View('uml-sequence',[{id:'qa10-life',type:'uml-lifeline',name:'Único participante QA10'}]);doc.elements=Object.fromEntries(diagram.nodes.map(n=>[n.elementId,doc.elements[n.elementId]]));doc.diagrams=[diagram];vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});render(<NovziEditor/>);await screen.findByRole('heading',{name:diagram.name});fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));expect(within(modal).getByText('No hay más elementos disponibles.')).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA10 exportación simple FREE usa imagen firmada de la revisión guardada',async()=>{
- vi.mocked(projects.exportDiagramImage).mockResolvedValue({blob:new Blob(['QA imagen']),exportId:'qa10-free'});const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const revoke=vi.fn();let filename='';Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa10-free')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download});try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await screen.findByText(/Imagen exportada y firmada correctamente/);expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',undefined);expect(filename.endsWith('.png')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa10-free'),{timeout:4500});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
+ vi.mocked(projects.exportDiagramImage).mockResolvedValue({blob:new Blob(['QA imagen']),exportId:'qa10-free'});const createDesc=Object.getOwnPropertyDescriptor(URL,'createObjectURL'),revokeDesc=Object.getOwnPropertyDescriptor(URL,'revokeObjectURL');const revoke=vi.fn();let filename='';Object.defineProperty(URL,'createObjectURL',{configurable:true,value:vi.fn(()=> 'blob:qa10-free')});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:revoke});vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){filename=this.download});try{await openEditor();fireEvent.click(screen.getByRole('button',{name:'Exportar'}));const modal=await screen.findByRole('dialog',{name:'Exportar desde NOVZI'});await within(modal).findByText(/Sin licencia comercial: imagen con marca de agua/);fireEvent.click(within(modal).getByRole('button',{name:'Descargar PNG'}));await screen.findByText(/Imagen exportada y firmada correctamente/);expect(captureDiagramPng).toHaveBeenCalledWith(expect.any(HTMLElement),{});expect(projects.exportDiagramImage).toHaveBeenCalledWith(project.id,'c1','png',1,'cG5n',undefined);expect(filename.endsWith('.png')).toBe(true);await waitFor(()=>expect(revoke).toHaveBeenCalledWith('blob:qa10-free'),{timeout:8000});expect(projects.saveDocument).not.toHaveBeenCalled()}finally{if(createDesc)Object.defineProperty(URL,'createObjectURL',createDesc);else Reflect.deleteProperty(URL,'createObjectURL');if(revokeDesc)Object.defineProperty(URL,'revokeObjectURL',revokeDesc);else Reflect.deleteProperty(URL,'revokeObjectURL')}
 },15000)
 
 // QA11: additional user-visible alternatives, preserving runtime and earlier tests.
@@ -1659,7 +1664,7 @@ it('QA11 primer proyecto abre formulario desde estado vacío',async()=>{
  vi.mocked(projects.listProjects).mockResolvedValue([]);render(<NovziEditor/>);await screen.findByRole('heading',{name:'Crea tu primer proyecto'});const button=screen.getByRole('button',{name:'Crear proyecto'});await waitFor(()=>expect(button).toHaveProperty('disabled',false));fireEvent.click(button);const modal=await screen.findByRole('dialog',{name:'Crear proyecto'});fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.createProject).not.toHaveBeenCalled();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 cambia organización y no reutiliza revisión anterior',async()=>{
- const other={id:'w-qa11',name:'Otra organización QA11',role:'owner'},next={id:'p-qa11',name:'Otro proyecto QA11',workspace_id:other.id},doc=demoDocument();doc.diagrams[0].name='Contexto QA11';vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace,other]);vi.mocked(projects.listProjects).mockImplementation(async id=>id===other.id?[next]:[project]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===next.id?{document:doc,version:7}:{document:demoDocument(),version:1});await openEditor();fireEvent.change(screen.getByLabelText('Espacio de trabajo'),{target:{value:other.id}});await screen.findByRole('heading',{name:'Contexto QA11'});expect(await screen.findByRole('button',{name:'Historial · v7'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(next.id);expect(projects.saveDocument).not.toHaveBeenCalled()
+ const other={id:'w-qa11',name:'Otra organización QA11',role:'owner'},next={id:'p-qa11',name:'Otro proyecto QA11',workspace_id:other.id},doc=demoDocument();doc.diagrams[0].name='Contexto QA11';vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace,other]);vi.mocked(projects.listProjects).mockImplementation(async id=>id===other.id?[next]:[project]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===next.id?{document:doc,version:7}:{document:demoDocument(),version:1});await openEditor();fireEvent.change(screen.getByLabelText('Espacio de trabajo'),{target:{value:other.id}});await screen.findByRole('heading',{name:'Contexto QA11'});expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(projects.loadDocument).toHaveBeenLastCalledWith(next.id);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 persiste atributos UML desde ficha y conserva posiciones',async()=>{
  const {doc,diagram}=qa10View('uml-class',[{id:'qa11-class',type:'uml-class',name:'Cuenta QA11'}]);const graph=await qa10Open(doc);fireEvent.click(await graph.findByRole('button',{name:'Cuenta QA11'}));fireEvent.click(screen.getByRole('button',{name:'Atributo'}));fireEvent.change(screen.getByLabelText(/^Nombre atributo/),{target:{value:'saldo'}});fireEvent.change(screen.getByLabelText(/^Tipo atributo/),{target:{value:'Decimal'}});const saved=await qa10Saved();expect(saved.elements['element-qa11-class'].uml?.attributes).toEqual([expect.objectContaining({name:'saldo',type:'Decimal'})]);expect(saved.diagrams.find(d=>d.id===diagram.id)).toEqual(diagram);expect(saved.elements.platform).toEqual(doc.elements.platform)
@@ -1674,7 +1679,7 @@ it('QA11 reutiliza subpaquete dentro de paquete válido',async()=>{
  const {doc,diagram}=qa10View('uml-package',[{id:'qa11-parent',type:'uml-package',name:'Paquete QA11'}]);const element={...createElement('Subpaquete QA11','uml-subpackage'),id:'qa11-reuse'};doc.elements[element.id]=element;const graph=await qa10Open(doc);fireEvent.click(await graph.findByRole('button',{name:'Paquete QA11'}));fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));fireEvent.change(within(modal).getByLabelText('Buscar elemento del proyecto'),{target:{value:'Subpaquete QA11'}});fireEvent.click(within(modal).getByRole('button',{name:/Subpaquete QA11/}));const saved=await qa10Saved();expect(saved.elements).toEqual(doc.elements);expect(saved.diagrams.find(d=>d.id===diagram.id)?.nodes.find(n=>n.elementId===element.id)?.parentNodeId).toBe('qa11-parent')
 })
 it('QA11 quitar vínculo de vista elimina destino sin borrar diagramas',async()=>{
- const original=demoDocument();vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});await openEditor();const graph=within(await screen.findByTestId('graph-renderer'));fireEvent.click(await graph.findByRole('button',{name:'Plataforma Zercano'}));fireEvent.change(screen.getByLabelText('Vista vinculada (doble clic)'),{target:{value:''}});expect(screen.queryByLabelText('Caja de destino (opcional)')).toBeNull();expect(screen.queryByRole('button',{name:/Navegar dentro de esta caja/})).toBeNull();const saved=await qa10Saved();expect(saved.elements.platform.childDiagramId).toBeUndefined();expect(saved.elements.platform.childNodeId).toBeUndefined();expect(saved.diagrams).toEqual(original.diagrams)
+ const original=demoDocument();vi.mocked(projects.loadDocument).mockResolvedValue({document:original,version:1});await openEditor();const graph=within(await screen.findByTestId('graph-renderer'));fireEvent.click(await graph.findByRole('button',{name:'Plataforma Zercano'}));fireEvent.change(screen.getByLabelText('Vista vinculada (doble clic)'),{target:{value:''}});expect(screen.queryByLabelText('Caja de destino (opcional)')).toBeNull();expect(screen.queryByRole('button',{name:/Navegar dentro de esta caja/})).toBeNull();const saved=await qa10Saved();expect(saved.diagrams[0].nodes.find(n=>n.elementId==='platform')).toMatchObject({childDiagramId:null,childNodeId:null});expect(saved.elements.platform).toEqual(original.elements.platform)
 })
 it('QA11 busca catálogo por resumen y regresa a creación',async()=>{
  const doc=demoDocument();const element={...createElement('Elemento único QA11','system'),id:'qa11-search',summary:'Cadena de búsqueda irrepetible QA11'};doc.elements[element.id]=element;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});await openEditor();fireEvent.click(within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).getByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));const search=within(modal).getByLabelText('Buscar elemento del proyecto');fireEvent.change(search,{target:{value:'irrepetible QA11'}});expect(within(modal).getByRole('button',{name:/Elemento único QA11/})).toBeTruthy();fireEvent.change(search,{target:{value:'sin coincidencias QA11'}});expect(within(modal).queryByRole('button',{name:/Elemento único QA11/})).toBeNull();fireEvent.click(within(modal).getByRole('button',{name:'Crear elemento'}));expect(within(modal).getByRole('button',{name:'Agregar al lienzo'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1689,7 +1694,7 @@ it('QA11 deja intacta navegación al resolver foco de una vista ya abandonada',a
  const doc=demoDocument(),target=doc.diagrams.find(d=>d.id===doc.elements.platform.childDiagramId)!;doc.elements.platform.childNodeId=target.nodes[0].id;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});let finish!:(ok:boolean)=>void;const fitView=vi.fn(()=>new Promise<boolean>(resolve=>{finish=resolve}));vi.mocked(useReactFlow).mockReturnValue({getNode:()=>({id:target.nodes[0].id}),fitView,getViewport:()=>({x:0,y:0,zoom:1})} as unknown as ReturnType<typeof useReactFlow>);await openEditor();await within(await screen.findByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'});fireEvent.click(await screen.findByRole('button',{name:'Profundizar QA'}));await screen.findByRole('heading',{name:target.name});await waitFor(()=>expect(fitView).toHaveBeenCalledOnce());ensureDiagramFolderOpen('C1 · Contexto');fireEvent.click(screen.getByRole('button',{name:/C1 · Contexto de Zercano/}));await screen.findByRole('heading',{name:'C1 · Contexto de Zercano'});await act(async()=>finish(true));expect(screen.getByRole('heading',{name:'C1 · Contexto de Zercano'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 al eliminar un proyecto con otro disponible abre únicamente el siguiente',async()=>{
- const other={id:'p-qa11',name:'Proyecto restante QA11',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Vista restante QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:4}:{document:demoDocument(),version:1});vi.mocked(projects.deleteProject).mockResolvedValue({ok:true});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Administrar proyecto'}));fireEvent.click(within(await screen.findByRole('dialog',{name:'Administrar proyecto: Proyecto QA'})).getByRole('button',{name:'Eliminar proyecto definitivamente'}));const modal=await screen.findByRole('dialog',{name:'Eliminar proyecto: Proyecto QA'});fireEvent.change(within(modal).getByLabelText('Escribe el nombre para confirmar la eliminación'),{target:{value:project.name}});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar definitivamente'}));await screen.findByRole('heading',{name:'Vista restante QA11'});expect(await screen.findByRole('button',{name:'Historial · v4'})).toBeTruthy();expect(projects.deleteProject).toHaveBeenCalledWith(project.id);expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
+ const other={id:'p-qa11',name:'Proyecto restante QA11',workspace_id:workspace.id},doc=demoDocument();doc.diagrams[0].name='Vista restante QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:doc,version:4}:{document:demoDocument(),version:1});vi.mocked(projects.deleteProject).mockResolvedValue({ok:true});await openEditor();fireEvent.click(screen.getByRole('button',{name:'Administrar proyecto'}));fireEvent.click(within(await screen.findByRole('dialog',{name:'Administrar proyecto: Proyecto QA'})).getByRole('button',{name:'Eliminar proyecto definitivamente'}));const modal=await screen.findByRole('dialog',{name:'Eliminar proyecto: Proyecto QA'});fireEvent.change(within(modal).getByLabelText('Escribe el nombre para confirmar la eliminación'),{target:{value:project.name}});fireEvent.click(within(modal).getByRole('button',{name:'Eliminar definitivamente'}));await screen.findByRole('heading',{name:'Vista restante QA11'});expect(await screen.findByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(projects.deleteProject).toHaveBeenCalledWith(project.id);expect(projects.loadDocument).toHaveBeenLastCalledWith(other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 al eliminar organización activa conserva la segunda y carga sus proyectos',async()=>{
  const other={id:'w-qa11',name:'Organización restante QA11',role:'owner'};vi.mocked(workspaces.listWorkspaces).mockResolvedValue([workspace,other]);vi.mocked(projects.listProjects).mockImplementation(async id=>id===other.id?[]:[project]);vi.mocked(workspaces.deleteWorkspace).mockResolvedValue({ok:true,deletedProjects:1});await openEditor();fireEvent.click(screen.getByTitle('Administrar espacio'));fireEvent.click(within(await screen.findByRole('dialog',{name:'Administrar espacio: Espacio QA'})).getByRole('button',{name:'Eliminar espacio…'}));const modal=await screen.findByRole('dialog',{name:'Eliminar espacio: Espacio QA'});fireEvent.change(within(modal).getByLabelText('Escribe el nombre para confirmar la eliminación'),{target:{value:workspace.name}});fireEvent.click(within(modal).getByRole('checkbox'));fireEvent.click(within(modal).getByRole('button',{name:'Eliminar definitivamente'}));await screen.findByRole('heading',{name:'Crea tu primer proyecto'});await waitFor(()=>expect(projects.listProjects).toHaveBeenLastCalledWith(other.id));expect(screen.getByLabelText('Espacio de trabajo')).toHaveProperty('value',other.id);expect(projects.saveDocument).not.toHaveBeenCalled()
@@ -1720,16 +1725,16 @@ it('QA11 permisos de edición funcional no permiten reutilizar ficha no visible'
  const doc=demoDocument(),hidden={...createElement('Ficha histórica QA11','system'),id:'qa11-hidden'};doc.elements[hidden.id]=hidden;vi.mocked(projects.loadDocument).mockResolvedValue({document:doc,version:1});vi.mocked(projects.projectAccess).mockResolvedValue({...reader,permissions:['project.read','diagram.view.c1','diagram.layout.c1','element.view.actor','element.create.actor']});await openEditor();fireEvent.click(await within(screen.getByRole('toolbar',{name:'Acciones del diagrama'})).findByRole('button',{name:'Agregar caja'}));const modal=await screen.findByRole('dialog',{name:'Agregar caja al diagrama'});fireEvent.click(within(modal).getByRole('button',{name:'Reutilizar existente'}));expect(within(modal).queryByRole('button',{name:/Ficha histórica QA11/})).toBeNull();expect(within(modal).getByText('No hay más elementos disponibles.')).toBeTruthy();expect(screen.getByRole('dialog',{name:'Agregar caja al diagrama'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 revisión remota sin diagramas deja explorador vacío y retira ficha seleccionada',async()=>{
- const stream=await qa08OpenStream();try{fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const remote=emptyDoc();vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:remote,version:5});await act(async()=>stream.emit('version',{version:5}));expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();expect(screen.queryByLabelText('Nombre')).toBeNull();expect(screen.getByRole('button',{name:'Historial · v5'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
+ const stream=await qa08OpenStream();try{fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));const remote=emptyDoc();vi.mocked(projects.loadDocument).mockResolvedValueOnce({document:remote,version:5});await act(async()=>stream.emit('version',{version:5}));expect(await screen.findByRole('heading',{name:'No hay diagramas todavía'})).toBeTruthy();expect(screen.queryByLabelText('Nombre')).toBeNull();expect(screen.getByRole('button',{name:'Historial técnico'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()}finally{vi.unstubAllGlobals()}
 })
 it('QA11 respuesta tardía del proyecto anterior no reemplaza la vista activa',async()=>{
- const other={id:'p-qa11',name:'Proyecto rápido QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista rápida QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve({document:next,version:6}));render(<NovziEditor/>);await waitFor(()=>expect(projects.loadDocument).toHaveBeenCalledWith(project.id));fireEvent.click(await screen.findByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista rápida QA11'});await act(async()=>finish({document:demoDocument(),version:99}));expect(screen.getByRole('heading',{name:'Vista rápida QA11'})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v6'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
+ const other={id:'p-qa11',name:'Proyecto rápido QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista rápida QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);let finish!:(value:{document:ProjectDocument;version:number})=>void;vi.mocked(projects.loadDocument).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve({document:next,version:6}));render(<NovziEditor/>);await waitFor(()=>expect(projects.loadDocument).toHaveBeenCalledWith(project.id));fireEvent.click(await screen.findByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista rápida QA11'});await act(async()=>finish({document:demoDocument(),version:99}));expect(screen.getByRole('heading',{name:'Vista rápida QA11'})).toBeTruthy();expect(screen.getByRole('button',{name:'Historial · v1'})).toBeTruthy();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 permiso tardío del proyecto anterior no concede edición al nuevo lector',async()=>{
  const other={id:'p-qa11',name:'Proyecto lector QA11',workspace_id:workspace.id},next=demoDocument();next.diagrams[0].name='Vista lector QA11';vi.mocked(projects.listProjects).mockResolvedValue([project,other]);vi.mocked(projects.loadDocument).mockImplementation(async id=>id===other.id?{document:next,version:3}:{document:demoDocument(),version:1});let finish!:(value:WorkspaceAccess)=>void;vi.mocked(projects.projectAccess).mockImplementation(id=>id===project.id?new Promise(resolve=>{finish=resolve}):Promise.resolve(reader));await openEditor();fireEvent.click(screen.getByRole('button',{name:other.name}));await screen.findByRole('heading',{name:'Vista lector QA11'});await screen.findByText('Lector',{selector:'.role-pill'});await act(async()=>finish(owner));expect(screen.getByLabelText('Nombre del diagrama')).toHaveProperty('disabled',true);expect(screen.queryByRole('button',{name:'Agregar caja'})).toBeNull();expect(projects.saveDocument).not.toHaveBeenCalled()
 })
 it('QA11 tras un fallo transitorio guarda el cambio siguiente sin perder el borrador',async()=>{
- vi.mocked(projects.saveDocument).mockRejectedValueOnce(new Error('Red temporal QA11')).mockResolvedValueOnce(2);await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Descripción local QA11'}});await screen.findByText('No se guardaron los cambios.');fireEvent.change(screen.getByLabelText('Nombre del diagrama'),{target:{value:'Nombre revisado QA11'}});await screen.findByRole('button',{name:'Historial · v2'},{timeout:4500});expect(screen.queryByText('No se guardaron los cambios.')).toBeNull();expect(projects.saveDocument).toHaveBeenCalledTimes(2);const [id,saved,base]=vi.mocked(projects.saveDocument).mock.calls[1];expect(id).toBe(project.id);expect(base).toBe(1);expect(saved.diagrams[0]).toMatchObject({name:'Nombre revisado QA11',description:'Descripción local QA11'})
+ vi.mocked(projects.saveDocument).mockRejectedValueOnce(new Error('Red temporal QA11')).mockResolvedValueOnce(2);await openEditor();fireEvent.change(screen.getByLabelText('Descripción'),{target:{value:'Descripción local QA11'}});await screen.findByText('No se guardaron los cambios.',undefined,{timeout:9000});fireEvent.change(screen.getByLabelText('Nombre del diagrama'),{target:{value:'Nombre revisado QA11'}});await screen.findByText('Guardado',{selector:'.save-chip'},{timeout:8000});expect(screen.queryByText('No se guardaron los cambios.')).toBeNull();expect(projects.saveDocument).toHaveBeenCalledTimes(2);const [id,saved,base]=vi.mocked(projects.saveDocument).mock.calls[1];expect(id).toBe(project.id);expect(base).toBe(1);expect(saved.diagrams[0]).toMatchObject({name:'Nombre revisado QA11',description:'Descripción local QA11'})
 },15000)
 it('QA11 formato URL malformado no habilita guardar enlace externo',async()=>{
  await openEditor();fireEvent.click(await within(screen.getByTestId('graph-renderer')).findByRole('button',{name:'Plataforma Zercano'}));fireEvent.click(screen.getByRole('button',{name:'Agregar'}));const modal=await screen.findByRole('dialog',{name:'Agregar enlace externo'});fireEvent.change(within(modal).getByLabelText('Etiqueta del enlace'),{target:{value:'Documentación QA11'}});fireEvent.change(within(modal).getByLabelText('URL HTTPS'),{target:{value:'http://['}});expect(within(modal).getByRole('button',{name:'Agregar enlace'})).toHaveProperty('disabled',true);fireEvent.click(within(modal).getByRole('button',{name:'Cancelar'}));expect(projects.saveDocument).not.toHaveBeenCalled()

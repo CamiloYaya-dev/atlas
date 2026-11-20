@@ -1,4 +1,6 @@
 import {newDeploymentIssues} from '@novzi/contracts'
+import {isDeepStrictEqual} from 'node:util'
+import {diagramSnapshot,recordDiagramChanges} from './diagram-checkpoints'
 import {applyScopedImport} from '../application/import-scope'
 import type {ImportScope} from '../application/import-scope'
 import {pool} from '../../../db/pool'
@@ -21,6 +23,7 @@ export class ProjectsRepository {
    await c.query('INSERT INTO project_members(project_id,workspace_id,user_id,role_id) VALUES($1,$2,$3,$4)',[rows[0].id,workspaceId,userId,ownerRole.rows[0].id])
    await c.query('INSERT INTO project_documents(project_id,document,updated_by) VALUES ($1,$2::jsonb,$3)',[rows[0].id,JSON.stringify(document),userId]);
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES($1,1,$2::jsonb,$3)',[rows[0].id,JSON.stringify(document),userId]);
+   await recordDiagramChanges(c,rows[0].id,{...document,diagrams:[]},document,1,userId)
    await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id) VALUES ($1,$2,$3,$4)',[workspaceId,userId,'project.created',rows[0].id]);
    await c.query('COMMIT');return rows[0]
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
@@ -118,15 +121,116 @@ export class ProjectsRepository {
    // wrongly raises 'Intento de modificar un elemento oculto'.
    const merged=operation==='restore' ? repairStoredUseCaseAnnotations(adaptUseCaseDocument(structuredClone(submitted))) : operation==='import'&&importScope ? applyScopedImport(document,submitted,importScope,ac) : applyAuthorizedChange(document,submitted,ac)
    if(operation==='restore'){if(!isProjectDocument(merged))throw new DomainError('Instantánea histórica inválida',400);ensureUniqueIds(merged)}
+   // Un guardado idéntico no consume cursor, snapshot, auditoría ni evento nuevo.
+   if(isDeepStrictEqual(document,merged)){await c.query('COMMIT');return {version,document:projectVisible(document,ac)}}
    if(importScope&&Buffer.byteLength(JSON.stringify(merged),'utf8')>4*1024*1024)throw new DomainError('Documento demasiado grande (máximo 4 MB)',413)
    const updated=await c.query<{version:number}>(`UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version`,[JSON.stringify(merged),userId,projectId])
    const next=updated.rows[0].version
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES ($1,$2,$3::jsonb,$4)',[projectId,next,JSON.stringify(merged),userId])
+   await recordDiagramChanges(c,projectId,document,merged,next,userId)
    await c.query('INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES ($1,$2,$3,$4,$5::jsonb)',[workspaceId,userId,`project.document_${operation}`,projectId,JSON.stringify({version:next,role:ac.roleKey,collaborative,...(importScope?{importScope}:{}),...(sourceVersion?{sourceVersion}:{})})])
    await c.query('COMMIT')
    return {version:next,document:projectVisible(merged,ac)}
   }catch(e){await c.query('ROLLBACK');throw e}finally{c.release()}
  }
+
+ /** Último cursor de edición y último checkpoint de UN diagrama; independientes del proyecto. */
+ async diagramState(projectId:string,diagramId:string){
+  const {rows}=await pool.query<{revision:string|number;version:number}>(`
+   SELECT s.state_revision AS revision,COALESCE((SELECT MAX(v.version)
+    FROM project_diagram_checkpoints v WHERE v.project_id=s.project_id AND v.diagram_id=s.diagram_id),1) AS version
+   FROM project_diagram_states s WHERE s.project_id=$1 AND s.diagram_id=$2`,[projectId,diagramId])
+  return rows[0]?{revision:Number(rows[0].revision),version:Number(rows[0].version)}:null
+ }
+ async diagramCheckpoints(projectId:string,diagramId:string){
+  const {rows}=await pool.query<{version:number;created_at:string;created_by:string;editor_name:string|null;reason:string}>(`
+   SELECT v.version,v.created_at,v.created_by,u.display_name AS editor_name,v.reason
+   FROM project_diagram_checkpoints v LEFT JOIN novzi_users u ON u.id=v.created_by
+   WHERE v.project_id=$1 AND v.diagram_id=$2 ORDER BY v.version DESC LIMIT 50`,[projectId,diagramId])
+  return rows
+ }
+ async diagramCheckpoint(projectId:string,diagramId:string,version:number){
+  const {rows}=await pool.query<{version:number;snapshot:{diagram:ProjectDocument['diagrams'][number];elements:ProjectDocument['elements']};created_at:string;created_by:string;reason:string}>(`
+   SELECT version,snapshot,created_at,created_by,reason FROM project_diagram_checkpoints
+   WHERE project_id=$1 AND diagram_id=$2 AND version=$3`,[projectId,diagramId,version])
+  return rows[0]||null
+ }
+ async createDiagramCheckpoint(projectId:string,diagramId:string,userId:string){
+  const c=await pool.connect()
+  try{
+   await c.query('BEGIN')
+   const {rows}=await c.query<{document:ProjectDocument;version:number}>(`
+    SELECT document,version FROM project_documents WHERE project_id=$1 FOR UPDATE`,[projectId])
+   if(!rows[0])throw notFound()
+   const ac=await projectAccess(projectId,userId,c)
+   const visible=projectVisible(rows[0].document,ac)
+   const diagram=visible.diagrams.find(d=>d.id===diagramId)
+   if(!diagram)throw notFound()
+   requirePermission(ac,`diagram.view.${diagram.type}`)
+   if(ac.roleKey!=='owner'&&!ac.permissions.has(`diagram.edit.${diagram.type}`)&&!ac.permissions.has(`diagram.layout.${diagram.type}`))throw new DomainError('No tienes permisos para crear puntos de control',403)
+   const snapshot=diagramSnapshot(rows[0].document,diagramId)!
+   const last=await c.query<{version:number;snapshot:typeof snapshot}>(`
+    SELECT version,snapshot FROM project_diagram_checkpoints WHERE project_id=$1 AND diagram_id=$2
+    ORDER BY version DESC LIMIT 1`,[projectId,diagramId])
+   const current=last.rows[0]
+   if(current&&isDeepStrictEqual(current.snapshot,snapshot)){
+    await c.query('COMMIT');return {version:current.version,created:false}
+   }
+   const next=(current?.version??0)+1
+   await c.query(`INSERT INTO project_diagram_checkpoints(project_id,diagram_id,version,snapshot,project_cursor,created_by,reason)
+    VALUES($1,$2,$3,$4::jsonb,$5,$6,'manual')`,[projectId,diagramId,next,JSON.stringify(snapshot),rows[0].version,userId])
+   await c.query('COMMIT')
+   return {version:next,created:true}
+  }catch(error){await c.query('ROLLBACK');throw error}finally{c.release()}
+ }
+ /** Restauración puntual por CAS del diagrama: los cambios ajenos NO provocan conflicto. */
+ async restoreDiagramCheckpoint(projectId:string,diagramId:string,sourceVersion:number,expectedDiagramRevision:number,userId:string){
+  const c=await pool.connect()
+  try{
+   await c.query('BEGIN')
+   const {rows}=await c.query<{document:ProjectDocument;version:number;workspace_id:string}>(`
+    SELECT d.document,d.version,p.workspace_id FROM project_documents d JOIN projects p ON p.id=d.project_id
+    WHERE d.project_id=$1 FOR UPDATE OF d`,[projectId])
+   if(!rows[0])throw notFound()
+   const ac=await projectAccess(projectId,userId,c)
+   if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede restaurar una versión del diagrama',403)
+   const before=rows[0].document,diagram=projectVisible(before,ac).diagrams.find(d=>d.id===diagramId)
+   if(!diagram)throw notFound()
+   const {rows:state}=await c.query<{state_revision:string|number}>(`
+    SELECT state_revision FROM project_diagram_states WHERE project_id=$1 AND diagram_id=$2`,[projectId,diagramId])
+   if(!state[0]||Number(state[0].state_revision)!==expectedDiagramRevision)throw new DomainError('El diagrama cambió durante la restauración. Actualiza y revisa los cambios.',409)
+   const {rows:history}=await c.query<{snapshot:{diagram:ProjectDocument['diagrams'][number];elements:ProjectDocument['elements']}}>(`
+    SELECT snapshot FROM project_diagram_checkpoints WHERE project_id=$1 AND diagram_id=$2 AND version=$3`,[projectId,diagramId,sourceVersion])
+   const snapshot=history[0]?.snapshot
+   if(!snapshot||snapshot.diagram.id!==diagramId)throw notFound()
+   const incoming:ProjectDocument=structuredClone(before)
+   incoming.diagrams=incoming.diagrams.map(d=>d.id===diagramId?structuredClone(snapshot.diagram):d)
+   for(const [id,element] of Object.entries(snapshot.elements)){
+    const shared=before.diagrams.some(d=>d.id!==diagramId&&d.nodes.some(n=>n.elementId===id))
+    if(shared&&!isDeepStrictEqual(before.elements[id],element))throw new DomainError(`La ficha ${element.name} es compartida con otra vista y cambió. No se sobrescribirá.`,409)
+    incoming.elements[id]=structuredClone(element)
+   }
+   const restored=applyAuthorizedChange(before,incoming,ac)
+   if(isDeepStrictEqual(restored,before)){await c.query('COMMIT');return {version:rows[0].version,restoredFrom:sourceVersion,unchanged:true}}
+   const updated=await c.query<{version:number}>(`
+    UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now()
+    WHERE project_id=$3 RETURNING version`,[JSON.stringify(restored),userId,projectId])
+   const cursor=updated.rows[0].version
+   await c.query(`INSERT INTO project_document_versions(project_id,version,document,updated_by)
+    VALUES($1,$2,$3::jsonb,$4)`,[projectId,cursor,JSON.stringify(restored),userId])
+   await recordDiagramChanges(c,projectId,before,restored,cursor,userId,false)
+   const {rows:latest}=await c.query<{version:number}>(`
+    SELECT version FROM project_diagram_checkpoints WHERE project_id=$1 AND diagram_id=$2
+    ORDER BY version DESC LIMIT 1`,[projectId,diagramId])
+   await c.query(`INSERT INTO project_diagram_checkpoints(project_id,diagram_id,version,snapshot,project_cursor,created_by,reason)
+    VALUES($1,$2,$3,$4::jsonb,$5,$6,'restore')`,[projectId,diagramId,(latest[0]?.version??0)+1,JSON.stringify(diagramSnapshot(restored,diagramId)),cursor,userId])
+   await c.query(`INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail)
+    VALUES($1,$2,'diagram.restored',$3,$4::jsonb)`,[rows[0].workspace_id,userId,projectId,JSON.stringify({diagramId,sourceVersion,cursor})])
+   await c.query('COMMIT')
+   return {version:cursor,restoredFrom:sourceVersion,unchanged:false}
+  }catch(error){await c.query('ROLLBACK');throw error}finally{c.release()}
+ }
+
  /** Branches reference IMMUTABLE historical revisions; they never replace the working document on creation. */
  async listRestoreBranches(projectId:string,userId:string){
   const ac=await projectAccess(projectId,userId);if(ac.roleKey!=='owner')throw new DomainError('Solo el propietario puede revisar ramas de restauración',403)
@@ -181,6 +285,7 @@ export class ProjectsRepository {
    const updated=await c.query<{version:number}>('UPDATE project_documents SET document=$1::jsonb,version=version+1,updated_by=$2,updated_at=now() WHERE project_id=$3 RETURNING version',[JSON.stringify(resolved),userId,projectId])
    const version=updated.rows[0].version
    await c.query('INSERT INTO project_document_versions(project_id,version,document,updated_by) VALUES($1,$2,$3::jsonb,$4)',[projectId,version,JSON.stringify(resolved),userId])
+   await recordDiagramChanges(c,projectId,row.document,resolved,version,userId)
    await c.query("UPDATE project_restore_branches SET status='applied',resolved_at=now() WHERE project_id=$1 AND id=$2",[projectId,branchId])
    await c.query(`INSERT INTO audit_events(workspace_id,actor_id,event_type,resource_id,detail) VALUES($1,$2,'project.restore_branch_applied',$3,$4::jsonb)`,[row.workspace_id,userId,projectId,JSON.stringify({branchId,sourceVersion:branch.source_version,mode,version})])
    await c.query('COMMIT');return {version,restoredFrom:branch.source_version,mode}
