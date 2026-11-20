@@ -202,7 +202,7 @@ export function rebaseManualRoutes(before:ProjectDocument,after:ProjectDocument,
  let altered=false
  const edges=current.edges.map(edge=>{
   const old=previousEdges.get(edge.id),route=old?.manualRoute
-  if(!route?.points?.length||!newNodes.has(edge.source)||!newNodes.has(edge.target))return edge
+  if(!route?.points?.length&&old?.labelPosition?.mode!=='manual'||!newNodes.has(edge.source)||!newNodes.has(edge.target))return edge
   const a=oldNodes.get(edge.source),b=oldNodes.get(edge.target),a1=newNodes.get(edge.source)!,b1=newNodes.get(edge.target)!
   if(!a||!b)return edge
   const dxA=a1.x-a.x,dyA=a1.y-a.y,dxB=b1.x-b.x,dyB=b1.y-b.y
@@ -210,12 +210,12 @@ export function rebaseManualRoutes(before:ProjectDocument,after:ProjectDocument,
   const x0=a.x+(a.width||250)/2,y0=a.y+(a.height||135)/2
   const dx=b.x+(b.width||250)/2-x0,dy=b.y+(b.height||135)/2-y0
   const denominator=Math.max(1,dx*dx+dy*dy)
-  const points=route.points.map(p=>{
+  const points=route?.points.map(p=>{
    const t=Math.max(0,Math.min(1,((p.x-x0)*dx+(p.y-y0)*dy)/denominator))
    return {x:Math.round(p.x+dxA*(1-t)+dxB*t),y:Math.round(p.y+dyA*(1-t)+dyB*t)}
   })
   altered=true
-  return {...edge,manualRoute:{version:1 as const,points}}
+  return {...edge,...(points?{manualRoute:{version:1 as const,points}}:{}),...(old?.labelPosition?.mode==='manual'?{labelPosition:{mode:'manual' as const,x:Math.round(old.labelPosition.x+(dxA+dxB)/2),y:Math.round(old.labelPosition.y+(dyA+dyB)/2)}}:{})}
  })
  return altered?{...after,diagrams:after.diagrams.map(d=>d.id===diagramId?{...d,edges}:d)}:after
 }
