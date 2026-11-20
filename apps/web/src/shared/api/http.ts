@@ -23,7 +23,7 @@ export async function requestFile(path:string,payload:unknown):Promise<{blob:Blo
  const endpoint=`${apiRoot}/api/v1${path}`
  let response:Response
  try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',...(csrfToken?{'X-CSRF-Token':csrfToken}:{})},credentials:'include',cache:'no-store',body:JSON.stringify(payload)})}
- catch{throw new Error('No se pudo conectar con la API de exportaciones')}
- if(!response.ok){const body=await response.json().catch(()=>({})) as {message?:string};throw new Error(body.message||`Error HTTP ${response.status}`)}
+ catch{throw new Error('No se recibió respuesta de exportación. Comprueba los logs de la API y del proxy Coolify (posible 502/CORS secundario).')}
+ if(!response.ok){const body=await response.json().catch(()=>({})) as {message?:string};throw new Error(body.message||(response.status===502||response.status===504?`Error ${response.status} del proxy al exportar. Revisa los logs de la API/Coolify.`:`Error HTTP ${response.status}`))}
  return {blob:await response.blob(),exportId:response.headers.get('X-NOVZI-Export-Id')}
 }

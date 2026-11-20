@@ -69,6 +69,10 @@ export class ProjectsRepository {
    FROM project_document_versions v LEFT JOIN novzi_users u ON u.id=v.updated_by
    WHERE v.project_id=$1 AND v.version=$2`,[projectId,version]);return rows[0]||null
  }
+ async currentVersion(projectId:string):Promise<number|null>{
+  const {rows}=await pool.query<{version:number}>('SELECT version FROM project_documents WHERE project_id=$1',[projectId])
+  return rows[0]?.version??null
+ }
  async loadDocument(projectId:string):Promise<{document:ProjectDocument,version:number}|null>{const {rows}=await pool.query<{document:ProjectDocument,version:number}>('SELECT document,version FROM project_documents WHERE project_id=$1',[projectId]);return rows[0]||null}
  async saveAuthorized(projectId:string,incoming:ProjectDocument,expectedVersion:number,userId:string,operation:'save'|'import'|'restore',sourceVersion?:number,importScope?:ImportScope){
   const saved=await this.saveInternal(projectId,incoming,expectedVersion,userId,operation,false,sourceVersion,importScope)

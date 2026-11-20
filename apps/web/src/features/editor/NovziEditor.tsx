@@ -22,6 +22,7 @@ import GuidedTutorial from '../tutorial/GuidedTutorial'
 import AcademyMissions from '../academy/AcademyMissions'
 import LicensePanel from '../licensing/LicensePanel'
 import {captureDiagramPng} from './capture-diagram'
+import {createStandaloneDiagramDocument} from './standalone-diagram-export'
 import AdvancedExportFields,{defaultExportChoices,normalizeChoices} from './AdvancedExportFields'
 import {exportFieldsFor,UML_DIAGRAM_GROUPS,UML_RELATIONS_BY_DIAGRAM,umlElementReusable,umlElementCreatable,umlRelationLabel,umlRelationEndpointValid,umlContainerAllows,umlAbsolutePosition,umlNodeDepth,novziNodeSize,validNodeDimension,sequenceIsAttachment,sequenceActivationPorts,sequenceActivationSide,sequenceNearestPort,canonicalUmlEdge,isUmlDiagram,umlRelationNotation} from '@novzi/contracts'
 import type {AdvancedExportMode,ExportFieldChoices,ExportField} from '@novzi/contracts'
@@ -53,7 +54,7 @@ import AuditPanel from '../audit/AuditPanel'
 import type {WorkspaceAccess} from '../security/types'
 import {relationScope,mergeProjectDocuments,MergeConflict} from '@novzi/contracts'
 import {createWorkspace as apiCreateWorkspace,listWorkspaces} from '../workspaces/api'
-import {listProjects,createProject as apiCreateProject,projectAccess as apiProjectAccess,loadDocument,saveDocument,exportProject,importProject,sendPresence,workspaceLicense,exportDiagramImage} from '../projects/api'
+import {listProjects,createProject as apiCreateProject,projectAccess as apiProjectAccess,loadDocument,loadProjectVersion,saveDocument,exportProject,importProject,sendPresence,workspaceLicense,exportDiagramImage} from '../projects/api'
 import type {LiveParticipant,LicenseEntitlements} from '../projects/api'
 import {projectEventsUrl} from '../../shared/api/http'
 import {createElement,diagramLabels,elementLabels,fieldLabels,emptyDoc,isProjectDocument,today,uid} from '../../types'
@@ -269,7 +270,28 @@ function AppInner(){
   },950)
   return()=>window.clearTimeout(tid)
  },[projectId,doc,editSerial,canEdit,saveTick])
- // Live event stream: only versions/presence are pushed; documents are re-read with ACL filtering.
+ // Both SSE and the periodic version probe use this ACL-filtered reload path.
+ // Never overwrite a local draft, a pending save, or a conflict-resolution session.
+ const remoteReloadRef=useRef<string|null>(null)
+ const refreshRemoteVersion=useCallback(async(pid:string,announcedVersion:number)=>{
+  if(!Number.isSafeInteger(announcedVersion)||announcedVersion<=versionMap.current[pid]||activeProjectRef.current!==pid)return
+  if(editSerialRef.current>ackSerialRef.current||saveBusyRef.current||importBusyRef.current||conflictLockedProject.current===pid||remoteReloadRef.current===pid)return
+  const initialSerial=editSerialRef.current
+  remoteReloadRef.current=pid
+  try{
+   const saved=await loadDocument(pid)
+   if(!saved||activeProjectRef.current!==pid||saveBusyRef.current||importBusyRef.current||editSerialRef.current!==initialSerial||conflictLockedProject.current===pid)return
+   if(saved.version<=versionMap.current[pid])return
+   versionMap.current[pid]=saved.version;setCurrentVersion(saved.version)
+   savedClassBaseline.current={projectId:pid,document:saved.document};setDoc(saved.document)
+   setDiagramId(prev=>saved.document.diagrams.some(d=>d.id===prev)?prev:saved.document.diagrams[0]?.id||'')
+   setSelectedId(prev=>prev&&saved.document.elements[prev]?prev:null)
+  }catch{
+   // A transient REST failure should not misrepresent SSE status.
+   // The next version probe/stream event will retry without discarding local edits.
+  }finally{if(remoteReloadRef.current===pid)remoteReloadRef.current=null}
+ },[])
+ // Live event stream: pushes versions/presence; the document is re-read with ACL filtering.
  useEffect(()=>{
   setParticipants([]);setLiveStatus('offline');liveClientRef.current=null
   if(!projectId||!account||!doc||typeof EventSource==='undefined')return
@@ -278,30 +300,33 @@ function AppInner(){
   const stream=new EventSource(projectEventsUrl(pid,clientId),{withCredentials:true})
   setLiveStatus('connecting')
   stream.onopen=()=>{if(activeProjectRef.current===pid)setLiveStatus('online')}
-  stream.onerror=()=>{if(activeProjectRef.current===pid)setLiveStatus('offline')}
+  stream.onerror=()=>{if(activeProjectRef.current===pid){setLiveStatus('offline');setParticipants([])}}
   const onPresence=(evt:Event)=>{
-   try{const payload=JSON.parse((evt as MessageEvent).data) as {participants:LiveParticipant[]};if(activeProjectRef.current===pid&&Array.isArray(payload.participants))setParticipants(payload.participants)}catch{/* corrupted stream event ignored */}
+   try{const payload=JSON.parse((evt as MessageEvent).data) as {participants:LiveParticipant[]};if(activeProjectRef.current===pid&&Array.isArray(payload.participants))setParticipants(payload.participants)}catch{/* malformed event ignored */}
   }
   const onVersion=(evt:Event)=>{
-   let version:number
-   try{version=Number((JSON.parse((evt as MessageEvent).data) as {version:number}).version)}catch{return}
-   if(!Number.isSafeInteger(version)||version<=versionMap.current[pid]||activeProjectRef.current!==pid)return
-   // Never replace a local unsaved draft or a save in flight.
-   if(editSerialRef.current>ackSerialRef.current||saveBusyRef.current||importBusyRef.current||conflictLockedProject.current===pid)return
-   const initialSerial=editSerialRef.current
-   void loadDocument(pid).then(saved=>{
-    if(!saved||activeProjectRef.current!==pid||saveBusyRef.current||importBusyRef.current||editSerialRef.current!==initialSerial||conflictLockedProject.current===pid)return
-    if(saved.version<=versionMap.current[pid])return
-    versionMap.current[pid]=saved.version;setCurrentVersion(saved.version)
-    savedClassBaseline.current={projectId:pid,document:saved.document};setDoc(saved.document)
-    setDiagramId(prev=>saved.document.diagrams.some(d=>d.id===prev)?prev:saved.document.diagrams[0]?.id||'')
-    setSelectedId(prev=>prev&&saved.document.elements[prev]?prev:null)
-   }).catch(()=>setLiveStatus('offline'))
+   try{const version=Number((JSON.parse((evt as MessageEvent).data) as {version:number}).version);void refreshRemoteVersion(pid,version)}catch{/* malformed event ignored */}
   }
   stream.addEventListener('presence',onPresence)
   stream.addEventListener('version',onVersion)
   return()=>{stream.removeEventListener('presence',onPresence);stream.removeEventListener('version',onVersion);stream.close();if(liveClientRef.current===clientId)liveClientRef.current=null}
- },[projectId,account?.id,Boolean(doc)])
+ },[projectId,account?.id,Boolean(doc),refreshRemoteVersion])
+ // Fail-safe for interrupted SSE and multi-replica API deployments: check a tiny
+ // authenticated version cursor, fetching the document only when the version advanced.
+ useEffect(()=>{
+  if(!projectId||!account||!doc)return
+  const pid=projectId
+  let stopped=false,checking=false
+  const check=async()=>{
+   if(stopped||checking||document.visibilityState==='hidden'||activeProjectRef.current!==pid)return
+   if(editSerialRef.current>ackSerialRef.current||saveBusyRef.current||importBusyRef.current||conflictLockedProject.current===pid)return
+   checking=true
+   try{const {version}=await loadProjectVersion(pid);if(!stopped)await refreshRemoteVersion(pid,version)}catch{/* next interval retries without touching the draft */}
+   finally{checking=false}
+  }
+  const timer=window.setInterval(()=>{void check()},12000)
+  return()=>{stopped=true;window.clearInterval(timer)}
+ },[projectId,account?.id,Boolean(doc),refreshRemoteVersion])
  // Diagram/element awareness is ephemeral; selections are never stored in PostgreSQL.
  useEffect(()=>{
   if(!projectId||!doc||!liveClientRef.current||liveStatus!=='online')return
@@ -655,7 +680,7 @@ function AppInner(){
  const exportProjectJSON=async()=>{if(!projectId||!can('artifact.export'))return;try{const exported=await exportProject(projectId);downloadJSONFile(`NOVZI_${(project?.name||'proyecto').replace(/[^a-zA-Z0-9_-]+/g,'_')}.json`,exported)}catch(e){announce('Exportación: '+(e as Error).message)}}
  const exportDiagramJSON=()=>{
   if(!doc||!diagram||!projectId||!can('artifact.export'))return
-  const payload={format:'NOVZI-DIAGRAM-JSON',workspaceId:wsId||null,projectId,projectName:project?.name||'',diagramId:diagram.id,diagramName:diagram.name,diagramType:diagram.type,version:versionMap.current[projectId]||currentVersion,exportedAt:new Date().toISOString(),document:{...doc,diagrams:[diagram]}}
+  const payload={format:'NOVZI-DIAGRAM-JSON',workspaceId:wsId||null,projectId,projectName:project?.name||'',diagramId:diagram.id,diagramName:diagram.name,diagramType:diagram.type,version:versionMap.current[projectId]||currentVersion,exportedAt:new Date().toISOString(),document:createStandaloneDiagramDocument(doc,diagram.id)}
   downloadJSONFile(`NOVZI_${diagram.name.replace(/[^a-zA-Z0-9_-]+/g,'_')}.diagram.json`,payload)
  }
  const openExport=async()=>{
@@ -828,7 +853,7 @@ function AppInner(){
      <div className="side-bottom"><button type="button" className="sidebar-tutorial" data-tour="tutorial-launcher" aria-label="Abrir tutorial desde el menú lateral" onClick={()=>{setSidebarOpen(false);setTutorialOpen(true)}}><BookOpen size={16}/> Aprender NOVZI {!tutorialCompleted&&<span>Nuevo</span>}</button><button type="button" className="sidebar-tutorial" aria-label="Abrir misiones prácticas de NOVZI" onClick={()=>{setSidebarOpen(false);setTutorialOpen(false);setAcademyOpen(true)}}><Award size={16}/> Misiones e insignias</button><div className="demo-label"><span className="live-dot cloud"/>API · PostgreSQL · Acceso cerrado</div><button className="profile-pill" onClick={signOut}><span className="avatar"><UserRound size={15}/></span><span className="email">{account.email}</span><LogOut size={15}/></button></div>
    </aside>
    <main className="main">
-     <header className="topbar"><div className="top-left">{navigationTrail.length>0&&<button type="button" className="ghost novzi-back-link" onClick={navigateBack} title="Volver al diagrama anterior"><ArrowRight size={14}/> Volver</button>}<button className="icon-btn nav-collapse-toggle" title={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-label={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-expanded={!sidebarHidden} onClick={()=>{setNavigationCollapsed(sidebarHidden?false:true);setExpanded(false)}}>{sidebarHidden?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'NOVZI'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right">{projectId&&accessPolicy&&<button className="ghost" data-tour="history" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}{wsId&&<button className="ghost" title="Ver licencia y suscripción de la organización" onClick={()=>setDialog('license')}><ShieldCheck size={15}/> Licencia</button>}{wsId&&can('workspace.audit.view')&&<button className="ghost" onClick={()=>setDialog('audit')}>Actividad</button>}{projectId&&<span className={'collab-status '+(liveStatus==='online'?'connected':'disconnected')} role='status' title={others.map(p=>`${p.name}: ${p.diagramId?'en un diagrama':'en el proyecto'}`).join(' · ')||'Sin colaboradores en este proyecto'}><span className='collab-dot'/> {liveStatus==='online'?`${participants.length} persona${participants.length===1?'':'s'} en línea`:liveStatus==='connecting'?'Conectando...':'Sin conexión en vivo'}</span>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Sin guardar'}</span><span className="role-pill"><ShieldCheck size={14}/>{projectPolicy?.roleName||accessPolicy?.roleName||(ws?roleLabel[ws.role||'viewer']:'Sin espacio')||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}</div></header>
+     <header className="topbar"><div className="top-left">{navigationTrail.length>0&&<button type="button" className="ghost novzi-back-link" onClick={navigateBack} title="Volver al diagrama anterior"><ArrowRight size={14}/> Volver</button>}<button className="icon-btn nav-collapse-toggle" title={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-label={sidebarHidden?'Mostrar menú lateral':'Ocultar menú lateral'} aria-expanded={!sidebarHidden} onClick={()=>{setNavigationCollapsed(sidebarHidden?false:true);setExpanded(false)}}>{sidebarHidden?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={19}/></button><span className="bread"><Home size={14}/> <ChevronRight size={12}/> {ws?.name||'NOVZI'} <ChevronRight size={12}/> <strong>{project?.name||'Proyecto'}</strong></span></div><div className="top-right">{projectId&&accessPolicy&&<button className="ghost" data-tour="history" onClick={()=>setDialog('history')}>Historial · v{currentVersion}</button>}{wsId&&<button className="ghost" title="Ver licencia y suscripción de la organización" onClick={()=>setDialog('license')}><ShieldCheck size={15}/> Licencia</button>}{wsId&&can('workspace.audit.view')&&<button className="ghost" onClick={()=>setDialog('audit')}>Actividad</button>}{projectId&&<span className={'collab-status '+(liveStatus==='online'?'connected':'disconnected')} role='status' title={others.map(p=>`${p.name}: ${p.diagramId?'en un diagrama':'en el proyecto'}`).join(' · ')||'Sin colaboradores en este proyecto'}><span className='collab-dot'/> {liveStatus==='online'?`${participants.length} persona${participants.length===1?'':'s'} en línea`:liveStatus==='connecting'?'Conectando...':'Sin conexión en vivo · respaldo cada 12 s'}</span>}<span className={'save-chip '+saveStatus}>{saveStatus==='saved'?<CheckCircle2 size={13}/>:saveStatus==='saving'?<Save size={13}/>:saveStatus==='error'?<X size={13}/>:<RefreshCcw size={13}/>} {saveStatus==='saved'?'Guardado':saveStatus==='saving'?'Guardando...':saveStatus==='pending'?'Cambios pendientes':'Sin guardar'}</span><span className="role-pill"><ShieldCheck size={14}/>{projectPolicy?.roleName||accessPolicy?.roleName||(ws?roleLabel[ws.role||'viewer']:'Sin espacio')||'Sin rol'}</span>{can('field.configure')&&<button className="icon-btn" title="Configuración de campos" onClick={()=>setDialog('fields')}><Settings2 size={17}/></button>}</div></header>
      {editingHere.length>0&&<div className='collab-presence' role='status'><span className='collab-dot'/> {editingHere.map(p=>p.name).join(', ')} {editingHere.length===1?'está':'están'} viendo este diagrama{focusingElement.length>0&&selected?` · ${focusingElement.map(p=>p.name).join(', ')} en la caja ${selected.name}`:''}</div>}
      {activeModule==='functional'&&project&&doc?<FunctionalModule key={projectId} projectId={projectId} projectName={project.name} doc={doc} userId={account.id} can={can} onDirtyChange={setFunctionalDirty} onCreateDiagram={(name)=>{setActiveModule('diagrams');setNewName(name.startsWith('AS-IS')?name:'AS-IS · '+name);setNewType('process');setDialog('new-diagram')}} onDiagram={(id,nodeId)=>{const target=doc.diagrams.find(d=>d.id===id);if(!target||!can(`diagram.view.${target.type}`)){announce('No tienes acceso al diagrama solicitado');return}setActiveModule('diagrams');if(nodeId)navigateToNode(target,nodeId,false);else visitDiagram(id)}}/>:!project||!doc?<section className="blank-state"><div className="blank-image"><FolderPlus size={40}/></div><span className="eyebrow">NOVZI / PRIMEROS PASOS</span><h1>{!org?'Crea tu primera organización':!ws?'Crea tu primer espacio':'Crea tu primer proyecto'}</h1><p>{!org?'Una organización agrupa sus espacios y miembros. Ejemplo: Zercano.':!ws?'Crea espacios por área, como Dirección de Tecnología o Dirección de Producto.':'Dentro del proyecto podrás crear diagramas, componentes, procesos y requerimientos vinculados.'}</p><button className="primary" disabled={!(!ws?!!account:can('project.create'))} onClick={()=>{setNewName('');setDialog(!org?'new-organization':ws?'new-project':'new-workspace')}}><Plus size={17}/>{!org?'Crear organización':ws?'Crear proyecto':'Crear espacio'}</button></section>:
      <>
@@ -866,7 +891,7 @@ function AppInner(){
         {diagram?.interaction&&doc&&<SequenceDetailsEditor key={'sequence:'+selected.id} diagram={diagram} doc={doc} element={selected} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')||!can(`diagram.edit.${diagram.type}`)} onSave={next=>applyActivityCommand(()=>next)}/>}
         {diagram?.type==='uml-deployment'&&can('element.technical.view')&&<DeploymentDetails key={`dep:${selected.id}`} doc={doc} element={selected} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} onSave={partial=>applyActivityCommand(old=>commandEditElement(old,selected.id,partial,dateOf()))}/>}
         {diagram?.type==='uml-component'&&doc&&can('element.technical.view')&&<ComponentDetails key={`cmp:${selected.id}`} doc={doc} element={selected} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} onSave={partial=>applyActivityCommand(old=>commandEditElement(old,selected.id,partial,dateOf()))}/>}{diagram?.type==='uml-component'&&doc&&can('element.technical.view')&&<ComponentCatalogRelations key={`cmp-rel:${selected.id}`} doc={doc} element={selected} disabled={!can('element.technical.edit')||!can('relation.edit.technical')} canDelete={can('relation.delete.technical')} onSave={next=>applyActivityCommand(()=>next)}/>}
-        {diagram?.type!=='uml-activity'&&!diagram?.interaction&&can('element.technical.view')&&<UmlDetailsEditor key={`uml-structure:${selected.id}`} componentContext={diagram?.type==='uml-component'} element={selected} catalog={doc?.elements} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} onChange={uml=>updateElement(selected.id,{uml})}/>}
+        {diagram&&isUmlDiagram(diagram.type)&&diagram.type!=='uml-activity'&&!diagram.interaction&&can('element.technical.view')&&<UmlDetailsEditor key={`uml-structure:${selected.id}`} componentContext={diagram?.type==='uml-component'} element={selected} catalog={doc?.elements} disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} onChange={uml=>updateElement(selected.id,{uml})}/>}
         {diagram?.type==='uml-sequence'&&!diagram.interaction&&selected.type==='uml-frame'&&<>
          <Field label="Operador del fragmento combinado"><select aria-label="Operador del fragmento UML" disabled={!can(`element.edit.${selected.type}`)||!can('element.technical.edit')} value={['alt','opt','loop','par'].includes(selected.uml?.classifier||'alt')?selected.uml?.classifier||'alt':'alt'} onChange={e=>updateElement(selected.id,{uml:{...(selected.uml||{}),classifier:e.target.value}})}>
           {['alt','opt','loop','par'].map(operator=><option value={operator} key={operator}>{operator}</option>)}

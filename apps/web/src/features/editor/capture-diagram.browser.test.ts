@@ -39,3 +39,12 @@ test('captura con transform none y caja sin identificador conserva una imagen vÃ
  expect(await captureDiagramPng(root)).toBe('QUJD');expect(r.svg()).toContain('Cuenta QA');expect(r.drawImage).toHaveBeenCalledOnce()
 })
 
+
+test('captura reduce PNG demasiado grande antes de enviar imagen al backend',async()=>{
+ const root=scene(),r=raster()
+ const data=vi.spyOn(HTMLCanvasElement.prototype,'toDataURL')
+ data.mockReset().mockReturnValueOnce('data:image/png;base64,'+'A'.repeat(5_500_100)).mockReturnValue('data:image/png;base64,QUJD')
+ expect(await captureDiagramPng(root)).toBe('QUJD')
+ expect(data).toHaveBeenCalledTimes(2)
+ expect(r.drawImage.mock.calls.length).toBeGreaterThan(1)
+})

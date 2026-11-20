@@ -69,3 +69,14 @@ it('Catálogo gráfico: íconos funcionales y vista de actividad conservan contr
  assert.match(renderNode('uml-activity',item('Crear reporte','uml-action')),/Crear reporte/)
  assert.match(renderNode('uml-activity',item('Paquete','uml-object-node')),/Paquete/)
 })
+
+it('La tarjeta no UML crece visualmente sin modificar atributos persistidos',()=>{
+ const element=item('Cliente','actor');element.summary='Texto funcional';element.technical='Texto técnico'
+ const html=renderNode('c1',element,{adaptiveCard:true,cardMinHeight:135,mode:'mixed'})
+ assert.match(html,/novzi-adaptive-card/)
+ assert.match(html,/min-height:135px/)
+ assert.match(html,/Texto funcional/)
+ assert.match(html,/Texto técnico/)
+ const uml=renderNode('uml-class',item('Cliente UML','uml-class'),{adaptiveCard:true,cardMinHeight:135})
+ assert.doesNotMatch(uml,/novzi-adaptive-card/)
+})
