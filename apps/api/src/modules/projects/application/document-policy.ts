@@ -80,7 +80,13 @@ export function projectVisible(document:ProjectDocument,a:Access):ProjectDocumen
  let cmChanged=true;while(cmChanged){cmChanged=false;for(const [id,r] of Object.entries(cmpRegistry))if(componentRelationDependencies(r).some(ref=>!Object.hasOwn(cmpRegistry,ref))){delete cmpRegistry[id];cmChanged=true}}
  const depRegistry=allowed(a,'diagram.view.uml-deployment')&&allowed(a,'element.technical.view')?Object.fromEntries(Object.entries(deploymentRegistry(document)).filter(([,r])=>deploymentRefs(r).every(id=>!!elements[id]))):{}
  const redacted=diagrams.map(d=>{
-  const nodes=d.nodes.filter(n=>!!elements[n.elementId]), ids=new Set(nodes.map(n=>n.id))
+  const nodes=d.nodes.filter(n=>!!elements[n.elementId]).map(n=>{
+   if(n.childDiagramId===undefined)return n // vínculo heredado desde la ficha
+   const dest=diagrams.find(item=>item.id===n.childDiagramId)
+   if(!dest)return {...n,childDiagramId:null,childNodeId:null}
+   if(n.childNodeId&&!dest.nodes.some(target=>target.id===n.childNodeId&&!!elements[target.elementId]))return {...n,childNodeId:null}
+   return n
+  }), ids=new Set(nodes.map(n=>n.id))
   const edges=d.edges.filter(e=>(!e.deploymentRelationId||Object.hasOwn(depRegistry,e.deploymentRelationId))&&(!e.componentRelationId||Object.hasOwn(cmpRegistry,e.componentRelationId))&&(!e.componentEnds||e.componentEnds.every(end=>ids.has(end.nodeId)))&&(!e.activityEdge?.selectionBehaviorId||diagrams.some(v=>v.id===e.activityEdge?.selectionBehaviorId))&&(!e.activityEdge?.transformationBehaviorId||diagrams.some(v=>v.id===e.activityEdge?.transformationBehaviorId))&&(!e.activityEdge?.interruptingRegionId||!!elements[e.activityEdge.interruptingRegionId])&&(!e.activityEdge?.exceptionTypeIds||e.activityEdge.exceptionTypeIds.every(id=>!!elements[id]))&&ids.has(e.source)&&ids.has(e.target)&&(!e.associationClassId||!!elements[e.associationClassId])&&(!e.associationEnds||e.associationEnds.every(end=>ids.has(end.nodeId)))&&(!e.templateBindings||e.templateBindings.every(b=>!!elements[b.elementId])))
   if(incompleteSequence.has(d.id)){const {interaction:_,...safe}=d;return {...safe,nodes,edges:edges.filter(e=>!e.sequenceEdge&&!e.annotationTargetEdgeId)}}
   return {...d,...(d.activity?{activity:{...d.activity,parameters:d.activity.parameters?.map(p=>p.typeId&&!elements[p.typeId]?{...p,typeId:undefined}:p)}}:{}),nodes,edges:edges.filter(e=>!e.annotationTargetEdgeId||edges.some(x=>x.id===e.annotationTargetEdgeId))}
@@ -126,6 +132,9 @@ export function ensureUniqueIds(doc:ProjectDocument){
     const anchored=!!anchor&&n.x===anchor.x&&n.y===anchor.y
     if(!anchored&&(n.x<(port?-100:0)||n.y<(port?-45:0)||n.x>size.width+(port?0:-20)||n.y>size.height+(port?0:-20)))throw new DomainError('Caja fuera de contenedor UML',400)
    }
+   // Los enlaces por ocurrencia deben apuntar a una vista y caja existentes.
+   if(n.childDiagramId!==undefined&&n.childDiagramId!==null&&(!doc.diagrams.some(target=>target.id===n.childDiagramId)||n.childDiagramId.length>150))throw new DomainError('Vista vinculada del nodo inexistente',400)
+   if(n.childNodeId&&(!n.childDiagramId||!doc.diagrams.find(target=>target.id===n.childDiagramId)?.nodes.some(target=>target.id===n.childNodeId)))throw new DomainError('Caja vinculada del nodo inexistente',400)
    const element=doc.elements[n.elementId]
    if((n.width!==undefined||n.height!==undefined)&&d.nodes.some(child=>child.parentNodeId===n.id)&&element){
     const size=novziNodeSize(d.type,element,n,umlNodeDepth(d,n),true)
@@ -286,6 +295,10 @@ export function applyAuthorizedChange(original:ProjectDocument,incoming:ProjectD
     if(['uml-usecase','uml-activity','uml-sequence','uml-deployment'].includes(d.type)&&original.elements[n.elementId]&&!visible.elements[n.elementId])fail('Referencia UML oculta')
     requirePermission(a,`element.view.${el.type}`)
     const oldNode=previousNodes.get(n.id)
+    if(oldNode&&(oldNode.childDiagramId!==n.childDiagramId||oldNode.childNodeId!==n.childNodeId)){
+     requirePermission(a,`element.edit.${el.type}`)
+     if(n.childDiagramId){const target=incoming.diagrams.find(v=>v.id===n.childDiagramId)||original.diagrams.find(v=>v.id===n.childDiagramId);if(target){requirePermission(a,`diagram.view.${target.type}`);if(n.childNodeId){const child=target.nodes.find(x=>x.id===n.childNodeId);if(child){const referenced=full.elements[child.elementId];if(referenced)requirePermission(a,`element.view.${referenced.type}`)}}}}
+    }
     if(oldNode&&!equal(oldNode.elementId,n.elementId)){const historicalActor=stored.type==='uml-sequence'&&!stored.interaction&&!!d.interaction&&original.elements[oldNode.elementId]?.type==='actor'&&el.type==='uml-lifeline'&&!original.elements[n.elementId]&&el.sequenceDetail?.classifierId===oldNode.elementId&&equal(original.elements[oldNode.elementId],full.elements[oldNode.elementId]);if(!historicalActor)fail('No se permite reemplazar la identidad de un nodo');requirePermission(a,'element.view.actor')}
    }
    // Removing a node implicitly removes edges, check all removed relations below.

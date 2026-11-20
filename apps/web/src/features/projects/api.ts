@@ -58,3 +58,13 @@ export const workspaceLicense=(workspaceId:string)=>request<LicenseEntitlements>
 export const setWorkspaceLicense=(workspaceId:string,payload:{planCode:'pro'|'free';status:'active'|'revoked';features:Record<string,boolean>})=>request<LicenseEntitlements>(`/admin/workspaces/${encodeURIComponent(workspaceId)}/license`,{method:'PUT',body:JSON.stringify(payload)})
 
 export const exportDiagramImage=(projectId:string,diagramId:string,format:'png'|'jpg',expectedVersion:number,imageBase64:string,advanced?:AdvancedExportRequest)=>requestFile(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/export-image`,{format,expectedVersion,imageBase64,advanced})
+
+/** Historial visible por diagrama; el version global es sólo cursor de concurrencia. */
+export type DiagramState={revision:number;version:number}
+export type DiagramCheckpoint={version:number;created_at:string;created_by:string;editor_name:string|null;reason:'baseline'|'automatic'|'manual'|'restore'}
+export type DiagramCheckpointSnapshot={diagram:ProjectDocument['diagrams'][number];elements:ProjectDocument['elements']}
+export const loadDiagramState=(projectId:string,diagramId:string)=>request<DiagramState>(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/state`)
+export const listDiagramCheckpoints=(projectId:string,diagramId:string)=>request<DiagramCheckpoint[]>(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/checkpoints`)
+export const loadDiagramCheckpoint=(projectId:string,diagramId:string,version:number)=>request<DiagramCheckpoint&{snapshot:DiagramCheckpointSnapshot}>(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/checkpoints/${version}`)
+export const createDiagramCheckpoint=(projectId:string,diagramId:string)=>request<{version:number;created:boolean}>(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/checkpoints`,{method:'POST'})
+export const restoreDiagramCheckpoint=(projectId:string,diagramId:string,version:number,expectedDiagramRevision:number)=>request<{version:number;restoredFrom:number;unchanged:boolean}>(`/projects/${encodeURIComponent(projectId)}/diagrams/${encodeURIComponent(diagramId)}/checkpoints/restore`,{method:'POST',body:JSON.stringify({version,expectedDiagramRevision})})

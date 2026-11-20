@@ -26,6 +26,13 @@ describe('Exportar solo diagrama actual',()=>{
   expect(isProjectDocument(exported)).toBe(true)
   expect(original).toEqual(snapshot)
  })
+ it('no exporta vínculos de navegación por ocurrencia hacia vistas omitidas',()=>{
+  const original=fixture();original.diagrams[0].nodes[0].childDiagramId='other';original.diagrams[0].nodes[0].childNodeId='n-other'
+  const exported=createStandaloneDiagramDocument(original,'c1')
+  expect(exported.diagrams[0].nodes[0].childDiagramId).toBeUndefined()
+  expect(exported.diagrams[0].nodes[0].childNodeId).toBeUndefined()
+  expect(original.diagrams[0].nodes[0].childDiagramId).toBe('other')
+ })
  it('conserva campos compatibles y excluye definiciones ajenas',()=>{
   const original=fixture()
   original.fieldDefinitions.push({id:'actor-field',label:'Tipo',forType:'actor',kind:'text'})

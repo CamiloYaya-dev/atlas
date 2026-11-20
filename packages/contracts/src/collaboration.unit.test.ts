@@ -103,3 +103,22 @@ test('ramas: las modificaciones independientes se combinan sin elecciones manual
  assert.equal(preview.document.diagrams[0].name,'Contexto histórico')
  assert.equal(preview.document.diagrams[1].name,'Nuevo contenedor')
 })
+
+test('NOVZI dos ocurrencias de ficha compartida vinculan otros diagramas sin conflicto childNodeId',()=>{
+ const base=emptyDoc(),el=createElement('Componente común','component');el.id='shared';base.elements.shared=el
+ base.diagrams=[
+  {id:'c2',name:'C2',type:'c2',description:'',createdAt:'2026-11-20',nodes:[{id:'c2-n',elementId:'shared',x:0,y:0}],edges:[]},
+  {id:'process',name:'Proceso',type:'process',description:'',createdAt:'2026-11-20',nodes:[{id:'p-n',elementId:'shared',x:50,y:0}],edges:[]}
+ ]
+ const local=structuredClone(base),remote=structuredClone(base)
+ local.diagrams[0].nodes[0].childDiagramId='process';local.diagrams[0].nodes[0].childNodeId='p-n'
+ remote.diagrams[1].nodes[0].childDiagramId='c2';remote.diagrams[1].nodes[0].childNodeId='c2-n'
+ const merged=mergeProjectDocuments(base,local,remote)
+ assert.equal(merged.diagrams[0].nodes[0].childNodeId,'p-n')
+ assert.equal(merged.diagrams[1].nodes[0].childNodeId,'c2-n')
+ assert.equal(merged.elements.shared.childNodeId,undefined)
+ // Mismo nodo + mismo campo con destinos incompatibles: se DEBE rechazar.
+ const competing=structuredClone(base)
+ competing.diagrams[0].nodes[0].childDiagramId='process';competing.diagrams[0].nodes[0].childNodeId='otro'
+ assert.throws(()=>mergeProjectDocuments(base,local,competing),MergeConflict)
+})

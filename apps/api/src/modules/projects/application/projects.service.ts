@@ -84,6 +84,43 @@ export class ProjectsService {
   if(!result)throw new DomainError('Versión base no disponible. Conserva tu copia local y recarga el proyecto.',409)
   return result
  }
+
+ /** Historial específico del diagrama: el contador global sólo es un cursor interno. */
+ private async ensureDiagramReadable(projectId:string,diagramId:string,userId:string){
+  const current=await this.loadDocument(projectId,userId)
+  if(!current||!current.document.diagrams.some(d=>d.id===diagramId))throw notFound()
+  return current
+ }
+ async diagramState(projectId:string,diagramId:string,userId:string){
+  await this.ensureDiagramReadable(projectId,diagramId,userId)
+  const state=await this.repo.diagramState(projectId,diagramId)
+  if(!state)throw notFound()
+  return state
+ }
+ async listDiagramCheckpoints(projectId:string,diagramId:string,userId:string){
+  await this.ensureDiagramReadable(projectId,diagramId,userId)
+  return this.repo.diagramCheckpoints(projectId,diagramId)
+ }
+ async loadDiagramCheckpoint(projectId:string,diagramId:string,version:number,userId:string){
+  await this.ensureDiagramReadable(projectId,diagramId,userId)
+  const item=await this.repo.diagramCheckpoint(projectId,diagramId,version)
+  if(!item)throw notFound()
+  const ac=await projectAccess(projectId,userId)
+  // No filtrar por simple tipo: el snapshot también debe atravesar ACL de fichas.
+  const filtered=projectVisible({schema:1,diagrams:[item.snapshot.diagram],elements:item.snapshot.elements,fieldDefinitions:[]},ac)
+  if(!filtered.diagrams.some(d=>d.id===diagramId))throw notFound()
+  return {...item,snapshot:{diagram:filtered.diagrams[0],elements:filtered.elements}}
+ }
+ async createDiagramCheckpoint(projectId:string,diagramId:string,userId:string){
+  await this.ensureDiagramReadable(projectId,diagramId,userId)
+  return this.repo.createDiagramCheckpoint(projectId,diagramId,userId)
+ }
+ async restoreDiagramCheckpoint(projectId:string,diagramId:string,version:unknown,revision:unknown,userId:string){
+  await this.ensureDiagramReadable(projectId,diagramId,userId)
+  if(typeof version!=='number'||!Number.isSafeInteger(version)||version<1)throw new DomainError('Versión del diagrama inválida',400)
+  if(typeof revision!=='number'||!Number.isSafeInteger(revision)||revision<1)throw new DomainError('Revisión actual del diagrama inválida',400)
+  return this.repo.restoreDiagramCheckpoint(projectId,diagramId,version,revision,userId)
+ }
  async listRestoreBranches(projectId:string,userId:string){await this.assertReadable(projectId,userId);return this.repo.listRestoreBranches(projectId,userId)}
  async createRestoreBranch(projectId:string,sourceVersion:unknown,userId:string){await this.assertReadable(projectId,userId);if(typeof sourceVersion!=='number'||!Number.isSafeInteger(sourceVersion)||sourceVersion<1)throw new DomainError('Versión histórica inválida',400);return this.repo.createRestoreBranch(projectId,sourceVersion,userId)}
  async previewRestoreBranch(projectId:string,branchId:string,userId:string){await this.assertReadable(projectId,userId);return this.repo.previewRestoreBranch(projectId,branchId,userId)}

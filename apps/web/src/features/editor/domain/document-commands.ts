@@ -31,7 +31,7 @@ export function editDiagram(doc:ProjectDocument,id:string,changes:Partial<Diagra
 export function deleteDiagram(doc:ProjectDocument,id:string):ProjectDocument{
  doc=repairStoredUseCaseAnnotations(adaptUseCaseDocument(doc))
  if(!doc.diagrams.some(d=>d.id===id))throw new Error('Diagrama no encontrado')
- return validatedActivityRemoval(doc,retainUseCaseCatalog(doc,{...doc,diagrams:doc.diagrams.filter(d=>d.id!==id),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined,childNodeId:undefined}:e]))}),id)
+ return validatedActivityRemoval(doc,retainUseCaseCatalog(doc,{...doc,diagrams:doc.diagrams.filter(d=>d.id!==id).map(d=>({...d,nodes:d.nodes.map(n=>n.childDiagramId===id?{...n,childDiagramId:null,childNodeId:null}:n)})),elements:Object.fromEntries(Object.entries(doc.elements).map(([key,e])=>[key,e.childDiagramId===id?{...e,childDiagramId:undefined,childNodeId:undefined}:e]))}),id)
 }
 export function addElementNode(doc:ProjectDocument,diagramId:string,element:ModelElement,node:{id:string;x:number;y:number}):ProjectDocument{
  if(doc.diagrams.find(d=>d.id===diagramId)?.interaction){if(!umlElementCreatable('uml-sequence',element.type))throw Error('Tipo no permitido en secuencia');element={...element,sequenceDetail:element.sequenceDetail??sequenceDefaults(element.type,element.id)}}
@@ -71,7 +71,7 @@ export function removeElementNode(doc:ProjectDocument,diagramId:string,elementId
  const removed=new Set(target?.nodes.filter(n=>n.elementId===elementId&&(!nodeId||n.id===nodeId)).map(n=>n.id)||[])
  if(target?.type==='uml-component'){for(let count=-1;count!==removed.size;){count=removed.size;for(const n of target.nodes)if(n.parentNodeId&&removed.has(n.parentNodeId)&&doc.elements[n.elementId]?.type==='uml-port')removed.add(n.id)}}
  const updated=withDiagram(doc,diagramId,d=>({...d,nodes:d.nodes.filter(n=>!removed.has(n.id)).map(n=>n.parentNodeId&&removed.has(n.parentNodeId)?{...n,parentNodeId:undefined,...umlAbsolutePosition(d,n)}:n),edges:pruneRelations(d,removed,new Set())}))
- return validatedActivityRemoval(doc,retainUseCaseCatalog(doc,{...updated,elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}),diagramId)
+ return validatedActivityRemoval(doc,retainUseCaseCatalog(doc,{...updated,diagrams:updated.diagrams.map(d=>({...d,nodes:d.nodes.map(n=>n.childDiagramId===diagramId&&n.childNodeId&&removed.has(n.childNodeId)?{...n,childNodeId:null}:n)})),elements:Object.fromEntries(Object.entries(updated.elements).map(([id,e])=>[id,e.childDiagramId===diagramId&&e.childNodeId&&removed.has(e.childNodeId)?{...e,childNodeId:undefined}:e]))}),diagramId)
 }
 export function connectNodes(doc:ProjectDocument,diagramId:string,edge:DiagramEdge):ProjectDocument{
  if(doc.diagrams.find(d=>d.id===diagramId)?.type==='uml-deployment'){if(doc.diagrams.find(d=>d.id===diagramId)?.edges.some(e=>e.id===edge.id))throw Error('ID de relación duplicado');return setDeploymentRelation(doc,diagramId,edge)}
