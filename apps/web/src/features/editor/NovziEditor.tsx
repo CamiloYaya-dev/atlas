@@ -16,6 +16,7 @@ import ClassRelationDialog from './uml/ClassRelationDialog'
 import {newClassIssues,umlRelationNameLocked,replaceClassRelationAcrossViews} from '@novzi/contracts'
 import {createDiagram as commandCreateDiagram,editDiagram as commandEditDiagram,deleteDiagram as commandDeleteDiagram,addElementNode as commandAddElementNode,reuseElementNode as commandReuseElementNode,removeElementNode as commandRemoveElementNode,deleteDetachedUseCaseElement as commandDeleteDetachedUseCaseElement,deleteDetachedActivityElement as commandDeleteDetachedActivityElement,convertLegacyActivitySignal as commandConvertLegacyActivitySignal,connectNodes as commandConnectNodes,editRelation as commandEditRelation,removeRelation as commandRemoveRelation,reconnectRelation as commandReconnectRelation,moveNode as commandMoveNode,moveDiagramSelection as commandMoveDiagramSelection,removeDiagramSelection as commandRemoveDiagramSelection,resizeNode as commandResizeNode,setNodePackage as commandSetNodePackage,editElement as commandEditElement,addFieldDefinition as commandAddFieldDefinition,removeFieldDefinition as commandRemoveFieldDefinition} from './domain/document-commands'
 import {useGraphView} from './hooks/useGraphView'
+import {preserveReactFlowMeasurements} from './domain/preserve-reactflow-measurements'
 import {beautifyDiagram,rebaseManualRoutes} from './domain/diagram-beautify'
 import type {BeautifyMode} from './domain/diagram-beautify'
 import type {ManualRoute} from './domain/manual-edge-routing'
@@ -402,7 +403,7 @@ function AppInner(){
   const currentId=diagram.id
   patch(old=>({...old,diagrams:old.diagrams.map(d=>d.id!==currentId?d:{...d,edges:d.edges.map(e=>e.id!==edgeId?e:(route?{...e,manualRoute:route}:(()=>{const {manualRoute:_unused,...rest}=e;return rest})()))})}))
  },[diagram,doc,patch,projectPolicy])
- const filtered=useGraphView({diagram,doc,groups,dependencies,includeUntagged,mode:diagram&&isUmlDiagram(diagram.type)?'mixed':mode,selectedId,routeEditorEdgeId,focusRelations:focusRelations&&!!diagram&&diagram.edges.length>=10,focusedElementId:hoveredElementId||selectedId,onManualRouteCommit:updateManualRoute,selectedNodeId:diagram?.type==='uml-usecase'?selectedNode?.id:undefined,canEdit,onResize:onResizeView,onAdjustExecution:can('diagram.edit.uml-sequence')&&can('element.technical.edit')&&can('element.edit.uml-activation')?onAdjustExecution:undefined})
+ const filtered=useGraphView({diagram,doc,groups,dependencies,includeUntagged,mode:diagram&&isUmlDiagram(diagram.type)?'mixed':mode,selectedId,routeEditorEdgeId,focusRelations:focusRelations&&!!diagram&&diagram.edges.length>=10,focusedElementId:focusRelations&&!!diagram&&diagram.edges.length>=10?hoveredElementId||selectedId:null,onManualRouteCommit:updateManualRoute,selectedNodeId:diagram?.type==='uml-usecase'?selectedNode?.id:undefined,canEdit,onResize:onResizeView,onAdjustExecution:can('diagram.edit.uml-sequence')&&can('element.technical.edit')&&can('element.edit.uml-activation')?onAdjustExecution:undefined})
  const [displayNodes,setDisplayNodes,onDisplayNodesChange]=useNodesState<Node>([])
  const [displayEdges,setDisplayEdges,onDisplayEdgesChange]=useEdgesState<Edge>([])
  const [areaSelectionMode,setAreaSelectionMode]=useState(false)
@@ -411,7 +412,13 @@ function AppInner(){
   const nodeIds=nodes.map(n=>n.id),edgeIds=edges.map(e=>e.id)
   setBatchSelection(prev=>prev.nodeIds.join('|')===nodeIds.join('|')&&prev.edgeIds.join('|')===edgeIds.join('|')?prev:{nodeIds,edgeIds})
  },[])
- useEffect(()=>{setDisplayNodes(filtered.nodes);setDisplayEdges(filtered.edges)},[filtered.nodes,filtered.edges,setDisplayNodes,setDisplayEdges])
+ const measuredDiagramId=useRef<string|null>(null)
+ useEffect(()=>{
+  const sameDiagram=!!diagram&&measuredDiagramId.current===diagram.id
+  measuredDiagramId.current=diagram?.id??null
+  setDisplayNodes(previous=>preserveReactFlowMeasurements(filtered.nodes,previous,sameDiagram))
+  setDisplayEdges(filtered.edges)
+ },[diagram?.id,filtered.nodes,filtered.edges,setDisplayNodes,setDisplayEdges])
  useEffect(()=>{setBatchSelection({nodeIds:[],edgeIds:[]});setAreaSelectionMode(false);setRouteEditorEdgeId(null);setHoveredElementId(null)},[diagramId,projectId])
 
  const visitDiagram=(id:string)=>{if(!doc?.diagrams.some(d=>d.id===id))return;setNavigationTrail([]);setFocusRequest(null);setDiagramId(id);setSelectedId(null);setSidebarOpen(false)}
